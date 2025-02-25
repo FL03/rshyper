@@ -5,13 +5,13 @@
 use rshyper::HyperGraph;
 
 fn main() {
-    let mut graph = HyperGraph::new();
+    let mut graph = HyperGraph::<()>::new();
 
     // Add some vertices
-    let v0 = graph.add_vertex();
-    let v1 = graph.add_vertex();
-    let v2 = graph.add_vertex();
-    let v3 = graph.add_vertex();
+    let v0 = graph.add_vertex_default();
+    let v1 = graph.add_vertex_default();
+    let v2 = graph.add_vertex_default();
+    let v3 = graph.add_vertex_default();
 
     // Add some hyperedges
     match graph.add_hyperedge(vec![v0, v1, v2]) {

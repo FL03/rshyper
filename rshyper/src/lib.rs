@@ -10,10 +10,25 @@
 #![crate_type = "lib"]
 
 #[doc(inline)]
-pub use self::{error::*, graph::HyperGraph, types::prelude::*};
+pub use self::{error::*, graph::HyperGraph, traits::prelude::*, types::prelude::*};
 
 pub mod error;
 pub mod graph;
+
+pub mod traits {
+    #[doc(inline)]
+    pub use self::prelude::*;
+
+    pub mod edges;
+    pub mod indexable;
+    pub mod nodes;
+
+    pub(crate) mod prelude {
+        pub use super::edges::*;
+        pub use super::indexable::*;
+        pub use super::nodes::*;
+    }
+}
 
 pub mod types {
     #[doc(inline)]
@@ -29,5 +44,6 @@ pub mod types {
 pub mod prelude {
     pub use crate::error::*;
     pub use crate::graph::HyperGraph;
+    pub use crate::traits::prelude::*;
     pub use crate::types::prelude::*;
 }
