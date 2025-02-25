@@ -1,0 +1,62 @@
+[package]
+name = "rshyper"
+
+authors.workspace = true
+categories.workspace = true
+description.workspace = true
+edition.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+version.workspace = true
+
+[lib]
+bench = true
+crate-type = [ "cdylib", "rlib" ]
+doctest = false
+test = true
+
+[features]
+default = [ "std" ]
+
+full = [
+    "default",
+    "rand",
+    "serde",
+]
+
+# ********* [FF] Dependencies *********
+rand = [
+    "num/rand",
+]
+
+serde = [
+    "dep:serde",
+    "dep:serde_derive",
+]
+
+std = [
+    "num/std",
+    "serde?/std",
+    "thiserror/std",
+]
+
+[build-dependencies]
+
+[dependencies]
+num = { default-features = false, version = "0.4" }
+serde = { optional = true, workspace = true }
+serde_derive = { optional = true, workspace = true }
+thiserror = { workspace = true }
+
+[dev-dependencies]
+
+[package.metadata.docs.rs]
+all-features = true
+rustc-args = [ "--cfg", "docsrs" ]
+
+[[test]]
+name = "default"
+required-features = [  ]

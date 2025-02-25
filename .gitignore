@@ -1,0 +1,162 @@
+# Artifacts
+
+**/.artifacts/data/
+**/.docker/data/
+
+# Language Specific
+
+## Node.js
+**/.DS_STORE
+**/build
+**/debug/
+**/dist/
+**/node_modules
+
+**/*.tsbuildinfo
+
+**/package-lock.json
+**/yarn.lock
+
+### Dependencies
+**/.pnp
+**/.pnp.*
+
+**/.yarn/install-state.gz
+
+### Frameworks
+
+#### Next.js
+**/.next
+**/out
+
+**/next-env.d.ts
+
+### SvelteKit
+**/__sapper__/
+**/.DS_STORE/
+**/.svelte-kit/
+
+### Package Manager
+**/yarn-error.log
+
+## Python
+**/__pycache__/
+**/.pytest_cache/
+**/venv/
+
+**/*.egg
+**/*.egg.*
+
+**/*.egg-info
+
+**/*.pyc
+**/*.pyc.*
+
+**/*.pyo
+**/*.pyo.*
+
+**/*.pyz
+**/*.pyz.*
+
+**/*.pyzw
+**/*.pyzw.*
+
+**/*.whl
+**/*.whl.*
+
+## Rust
+**/target
+
+!**/Cargo.lock
+
+**/*.rs.bk
+**/*.rs.bk.*
+
+# Miscellaneous
+
+## Development
+
+### Configuration
+**/.config/*.config.*
+
+!**/.config/default.config.*
+!**/.config/docker.config.*
+!**/.config/example.config.*
+
+#### dotenv
+**/.env.*
+**/*.env
+**/*.env.*
+
+!**/.env.default*
+!**/*default.env
+
+!**/*.env.example
+!**/*.env.example.*
+
+!**/*.example.env
+!**/*.example.env.*
+
+### IDE
+
+#### Atom
+**/.atom
+
+#### JetBrains
+**/.idea
+
+**/*.iml
+**/*.ipr
+**/*.iws
+
+#### Visual Studio Code
+**/.vscode
+
+### Integrations
+
+#### Supabase
+**/supabase/temp
+
+#### Vercel
+**/.vercel
+
+## Directories
+**/build
+**/debug
+**/dist
+**/release
+
+### testing
+**/coverage
+
+## File Extensions
+**/*.bak
+**/*.bak.*
+
+**/*.bk
+**/*.bk.*
+
+**/*.db
+
+
+
+**/*.log
+**/*.log.*
+
+**/*.pem
+
+**/*.gz
+
+**/*.sqlite
+
+**/*.zip
+
+## Operating Systems
+
+### NixOs
+!**/flake.lock
+
+### Windows
+
+#### Windows Subsystem for Linux (WSL)
+**/*:Zone.identifier

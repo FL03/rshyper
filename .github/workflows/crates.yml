@@ -1,0 +1,38 @@
+name: crates-io
+
+concurrency:
+  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+env:
+  CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+  CARGO_TERM_COLOR: always
+
+on:
+  push:
+    tags: [ v*, "*-nightly" ]
+  repository_dispatch:
+    types: [ crates-io ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: read
+  packages: write
+
+jobs:
+  publish:
+    env:
+      PACKAGE: ${{ github.event.repository.name }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - 
+        name: rustup
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          cache-workspaces: true
+      - 
+        name: publish (${{ env.PACKAGE }})
+        run: cargo publish --all-features -v -p ${{ env.PACKAGE }}

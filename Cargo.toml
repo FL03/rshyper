@@ -1,0 +1,56 @@
+[workspace]
+default-members = [
+    "rshyper"
+]
+
+exclude = [ ]
+
+members = [
+    "rshyper",
+]
+
+resolver = "3"
+
+[workspace.dependencies]
+anyhow = { version = "1" }
+lazy_static = { version = "1" }
+paste = { version = "1" }
+serde = { default-features = false, version = "1" }
+serde_derive = { version = "1" }
+serde_json = { version = "1" }
+smart_default = { version = "0.7" }
+thiserror = { default-features = false, version = "2" }
+
+[workspace.package]
+authors = ["Joe McCain III <jo3mccain@icloud.com>",]
+categories = [ ]
+description = "This crate focuses on hypergraphs"
+edition = "2024"
+homepage = "https://github.com/FL03/rshyper/wiki"
+keywords = [ ]
+license = "Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/FL03/rshyper.git"
+version = "0.0.0"
+
+[profile.dev]
+codegen-units = 256
+debug = true
+debug-assertions = true
+incremental = true
+lto = false
+panic = 'unwind'
+rpath = false
+opt-level = 0
+overflow-checks = true
+
+[profile.release]
+codegen-units = 16
+debug = false
+debug-assertions = false
+incremental = false
+lto = true
+panic = 'abort'
+rpath = false
+opt-level = "z"
+overflow-checks = false
