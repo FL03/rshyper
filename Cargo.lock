@@ -118,7 +118,7 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 
 [[package]]
 name = "rshyper"
-version = "0.0.0"
+version = "0.0.1"
 dependencies = [
  "num",
  "serde",

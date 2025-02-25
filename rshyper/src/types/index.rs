@@ -19,49 +19,65 @@ impl<T> Index<T> {
     pub fn new(index: T) -> Self {
         Index(index)
     }
-
+    /// returns a pointer to the inner value
+    pub const fn as_ptr(&self) -> *const T {
+        core::ptr::from_ref(&self.0)
+    }
+    /// returns a mutable pointer to the inner value
+    pub fn as_mut_ptr(&mut self) -> *mut T {
+        core::ptr::from_mut(&mut self.0)
+    }
+    /// consumes the index returning the inner value
     pub fn into_inner(self) -> T {
         self.0
     }
-
-    pub fn get(&self) -> &T {
+    /// returns an immutable reference to the inner value
+    pub const fn get(&self) -> &T {
         &self.0
     }
-
+    /// returns a mutable reference to the inner value
     pub fn get_mut(&mut self) -> &mut T {
         &mut self.0
     }
-
-    pub fn set(&mut self, index: T) {
-        self.0 = index;
-    }
-
+    /// apply a function to the inner value and returns a new Index wrapping the result
     pub fn map<U, F: FnOnce(T) -> U>(self, f: F) -> Index<U> {
         Index(f(self.0))
     }
-
-    pub fn replace(&mut self, index: T) -> T {
+    /// replaces the inner value with the given one and returns the old value
+    pub const fn replace(&mut self, index: T) -> T {
         core::mem::replace(&mut self.0, index)
     }
-
-    pub fn swap(&mut self, other: &mut Self) {
+    /// set the index to the given value
+    pub fn set(&mut self, index: T) {
+        self.0 = index;
+    }
+    /// swap the values of two indices
+    pub const fn swap(&mut self, other: &mut Self) {
         core::mem::swap(&mut self.0, &mut other.0)
     }
 }
 
-impl<T> core::ops::Neg for Index<T> where T: core::ops::Neg {
-    type Output = Index<<T as core::ops::Neg>::Output>;
-
-    fn neg(self) -> Self::Output {
-        Index(-self.0)
+impl<T> core::convert::AsRef<T> for Index<T> {
+    fn as_ref(&self) -> &T {
+        &self.0
     }
 }
 
-impl<T> core::ops::Not for Index<T> where T: core::ops::Not {
-    type Output = Index<<T as core::ops::Not>::Output>;
+impl<T> core::convert::AsMut<T> for Index<T> {
+    fn as_mut(&mut self) -> &mut T {
+        &mut self.0
+    }
+}
 
-    fn not(self) -> Self::Output {
-        Index(!self.0)
+impl<T> core::borrow::Borrow<T> for Index<T> {
+    fn borrow(&self) -> &T {
+        &self.0
+    }
+}
+
+impl<T> core::borrow::BorrowMut<T> for Index<T> {
+    fn borrow_mut(&mut self) -> &mut T {
+        &mut self.0
     }
 }
 
@@ -79,14 +95,41 @@ impl<T> core::ops::DerefMut for Index<T> {
     }
 }
 
+impl<T> core::ops::Neg for Index<T>
+where
+    T: core::ops::Neg,
+{
+    type Output = Index<<T as core::ops::Neg>::Output>;
 
-impl<T> num::One for Index<T> where T: num::One {
+    fn neg(self) -> Self::Output {
+        Index(-self.0)
+    }
+}
+
+impl<T> core::ops::Not for Index<T>
+where
+    T: core::ops::Not,
+{
+    type Output = Index<<T as core::ops::Not>::Output>;
+
+    fn not(self) -> Self::Output {
+        Index(!self.0)
+    }
+}
+
+impl<T> num::One for Index<T>
+where
+    T: num::One,
+{
     fn one() -> Self {
         Index(T::one())
     }
 }
 
-impl<T> num::Zero for Index<T> where T: num::Zero {
+impl<T> num::Zero for Index<T>
+where
+    T: num::Zero,
+{
     fn zero() -> Self {
         Index(T::zero())
     }
@@ -96,7 +139,10 @@ impl<T> num::Zero for Index<T> where T: num::Zero {
     }
 }
 
-impl<T> num::Num for Index<T> where T: num::Num {
+impl<T> num::Num for Index<T>
+where
+    T: num::Num,
+{
     type FromStrRadixErr = T::FromStrRadixErr;
 
     fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
@@ -129,7 +175,6 @@ macro_rules! impl_bin_op {
         $(impl_bin_op!(@impl $trait::$method);)*
     };
 }
-
 
 macro_rules! impl_assign_op {
     (@impl $trait:ident::$method:ident) => {
@@ -172,13 +217,13 @@ impl_bin_op! {
 }
 
 impl_fmt! {
-    Binary, 
-    Debug, 
-    Display, 
-    LowerExp, 
-    LowerHex, 
-    Octal, 
-    Pointer, 
-    UpperExp, 
+    Binary,
+    Debug,
+    Display,
+    LowerExp,
+    LowerHex,
+    Octal,
+    Pointer,
+    UpperExp,
     UpperHex,
 }

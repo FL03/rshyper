@@ -4,7 +4,7 @@
 */
 //! # rshyper
 //!
-//! This crates works to implement a hypergraph data structure in Rust. A hypergraph is a 
+//! This crates works to implement a hypergraph data structure in Rust. A hypergraph is a
 //! generalization of a graph in which an edge can connect any number of vertices.
 #![crate_name = "rshyper"]
 #![crate_type = "lib"]
