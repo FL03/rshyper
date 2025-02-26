@@ -57,6 +57,40 @@ impl<T> Index<T> {
     }
 }
 
+#[cfg(feature = "rand")]
+impl<T> Index<T>
+where
+    rand_distr::StandardUniform: rand_distr::Distribution<T>,
+{
+    pub fn random() -> Self {
+        Index(rand::random())
+    }
+    pub fn random_in<R: rand::Rng + ?Sized>(rng: &mut R) -> Self {
+        Index(rng.random())
+    }
+}
+
+#[cfg(feature = "rand")]
+impl<T> rand_distr::Distribution<Index<T>> for rand_distr::StandardUniform
+where
+    rand_distr::StandardUniform: rand_distr::Distribution<T>,
+{
+    fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Index<T> {
+        Index(rng.random())
+    }
+}
+
+impl<T> core::iter::Iterator for Index<T>
+where
+    T: for<'a> core::ops::Add<&'a T, Output = T> + num::One,
+{
+    type Item = Index<T>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        Some(Index(T::one() + &self.0))
+    }
+}
+
 impl<T> core::convert::AsRef<T> for Index<T> {
     fn as_ref(&self) -> &T {
         &self.0

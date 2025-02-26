@@ -9,8 +9,8 @@ use std::collections::{HashMap, HashSet};
 /// A hash-based hypergraph implementation
 #[derive(Clone, Debug)]
 pub struct HyperGraph<N = ()> {
-    pub(crate) vertices: HashMap<VertexId, N>,
     pub(crate) hyperedges: HashMap<EdgeId, HashSet<VertexId>>,
+    pub(crate) vertices: HashMap<VertexId, N>,
     pub(crate) next_vertex_id: VertexId,
     pub(crate) next_edge_id: EdgeId,
 }
@@ -27,28 +27,6 @@ where
             next_vertex_id: VertexId::zero(),
             next_edge_id: EdgeId::zero(),
         }
-    }
-    /// insert a new vertex with the given weight and return its ID
-    pub fn add_vertex(&mut self, weight: N) -> VertexId {
-        let vertex_id = self.next_vertex_id;
-        self.vertices.insert(vertex_id, weight);
-        self.next_vertex_id += 1;
-        vertex_id
-    }
-    /// insert a new vertex with the default weight and return its ID
-    pub fn add_vertex_default(&mut self) -> VertexId
-    where
-        N: Default,
-    {
-        self.add_vertex(N::default())
-    }
-    /// check if a vertex with the given id exists
-    pub fn check_vertex(&self, vertex_id: &VertexId) -> bool {
-        self.vertices.contains_key(vertex_id)
-    }
-    /// check if a hyperedge with the given id exists
-    pub fn check_hyperedge(&self, edge_id: &EdgeId) -> bool {
-        self.hyperedges.contains_key(edge_id)
     }
     /// add a new hyperedge with the given vertices and return its ID
     pub fn add_hyperedge(&mut self, vertices: Vec<VertexId>) -> crate::Result<EdgeId> {
@@ -71,24 +49,41 @@ where
         self.next_edge_id += 1;
         Ok(edge_id)
     }
+    /// insert a new vertex with the given weight and return its ID
+    pub fn add_vertex(&mut self, weight: N) -> VertexId {
+        let vertex_id = self.next_vertex_id;
+        self.vertices.insert(vertex_id, weight);
+        self.next_vertex_id += 1;
+        vertex_id
+    }
+    /// insert a new vertex with the default weight and return its ID
+    pub fn add_vertex_default(&mut self) -> VertexId
+    where
+        N: Default,
+    {
+        self.add_vertex(N::default())
+    }
 
-    /// removes the vertex with the given id and all of its associated hyperedges
-    pub fn remove_vertex(&mut self, id: VertexId) -> crate::Result<N> {
-        match self.vertices.remove(&id) {
-            Some(node) => {
-                // Remove all hyperedges containing this vertex
-                self.hyperedges
-                    .retain(|_, vertices| !vertices.contains(&id));
-                return Ok(node);
-            }
-            None => Err(crate::Error::VertexDoesNotExist(id.to_string())),
-        }
+    /// check if a vertex with the given id exists
+    pub fn check_vertex(&self, vertex_id: &VertexId) -> bool {
+        self.vertices.contains_key(vertex_id)
+    }
+    /// check if a hyperedge with the given id exists
+    pub fn check_hyperedge(&self, edge_id: &EdgeId) -> bool {
+        self.hyperedges.contains_key(edge_id)
     }
     /// remove the hyperedge with the given id
     pub fn remove_hyperedge(&mut self, id: EdgeId) -> crate::Result<HashSet<VertexId>> {
         match self.hyperedges.remove(&id) {
             Some(v) => Ok(v),
             None => Err(crate::Error::HyperedgeDoesNotExist(id.to_string())),
+        }
+    }
+    /// returns the weight of a particular vertex
+    pub fn get_vertex_weight(&self, id: VertexId) -> crate::Result<&N> {
+        match self.vertices.get(&id) {
+            Some(weight) => Ok(weight),
+            None => Err(crate::Error::VertexDoesNotExist(id.to_string())),
         }
     }
     /// returns a set of vertices that are in the hyperedge with the given id
@@ -104,6 +99,18 @@ where
             }
         }
         Ok(neighbors)
+    }
+    /// removes the vertex with the given id and all of its associated hyperedges
+    pub fn remove_vertex(&mut self, id: VertexId) -> crate::Result<N> {
+        match self.vertices.remove(&id) {
+            Some(node) => {
+                // Remove all hyperedges containing this vertex
+                self.hyperedges
+                    .retain(|_, vertices| !vertices.contains(&id));
+                return Ok(node);
+            }
+            None => Err(crate::Error::VertexDoesNotExist(id.to_string())),
+        }
     }
     /// returns the degree of a given vertex where the degree is the number of hyperedges that
     /// contain the vertex
