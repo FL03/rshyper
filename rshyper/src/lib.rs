@@ -35,6 +35,7 @@ pub mod types {
     pub use self::prelude::*;
 
     pub mod index;
+    pub mod vertex;
 
     pub(crate) mod prelude {
         pub use super::index::*;

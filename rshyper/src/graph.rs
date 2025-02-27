@@ -12,7 +12,7 @@ use std::collections::{HashMap, HashSet};
 /// A hash-based hypergraph implementation
 #[derive(Clone, Debug)]
 pub struct HyperGraph<N = ()> {
-    pub(crate) hyperedges: HashMap<EdgeId, HashSet<VertexId>>,
+    pub(crate) edges: HashMap<EdgeId, HashSet<VertexId>>,
     pub(crate) vertices: HashMap<VertexId, N>,
     pub(crate) next_vertex_id: VertexId,
     pub(crate) next_edge_id: EdgeId,
@@ -26,7 +26,7 @@ where
     pub fn new() -> Self {
         HyperGraph {
             vertices: HashMap::new(),
-            hyperedges: HashMap::new(),
+            edges: HashMap::new(),
             next_vertex_id: VertexId::zero(),
             next_edge_id: EdgeId::zero(),
         }
@@ -51,7 +51,7 @@ where
             return Err(crate::Error::EmptyHyperedge);
         }
 
-        self.hyperedges.insert(edge_id, vertex_set);
+        self.edges.insert(edge_id, vertex_set);
         self.next_edge_id += 1;
         Ok(edge_id)
     }
@@ -76,12 +76,12 @@ where
     }
     /// check if a hyperedge with the given id exists
     pub fn check_hyperedge(&self, edge_id: &EdgeId) -> bool {
-        self.hyperedges.contains_key(edge_id)
+        self.edges.contains_key(edge_id)
     }
     /// clears all vertices and hyperedges, resetting the hypergraph
     pub fn clear(&mut self) {
         self.vertices.clear();
-        self.hyperedges.clear();
+        self.edges.clear();
         self.next_vertex_id = VertexId::zero();
         self.next_edge_id = EdgeId::zero();
     }
@@ -92,7 +92,7 @@ where
         }
 
         let mut neighbors = HashSet::new();
-        for vertices in self.hyperedges.values() {
+        for vertices in self.edges.values() {
             if vertices.contains(&index) {
                 neighbors.extend(vertices.iter().filter(|&&v| v != index));
             }
@@ -101,14 +101,14 @@ where
     }
     /// retrieves the set of vertices that make up a specific hyperedge
     pub fn get_edge_vertices(&self, Index(index): EdgeId) -> crate::Result<&HashSet<VertexId>> {
-        self.hyperedges
+        self.edges
             .get(&index)
             .ok_or_else(|| crate::Error::HyperedgeDoesNotExist(index.to_string()))
     }
 
     /// returns the size of a given hyperedge (number of vertices in it)
     pub fn edge_cardinality(&self, Index(index): EdgeId) -> crate::Result<usize> {
-        match self.hyperedges.get(&index) {
+        match self.edges.get(&index) {
             Some(vertices) => Ok(vertices.len()),
             None => Err(crate::Error::HyperedgeDoesNotExist(index.to_string())),
         }
@@ -119,7 +119,7 @@ where
             return Err(crate::Error::VertexDoesNotExist(index.to_string()));
         }
         let edges = self
-            .hyperedges
+            .edges
             .iter()
             .filter_map(|(&edge_id, vertices)| {
                 if vertices.contains(&index) {
@@ -146,17 +146,17 @@ where
         if !self.check_hyperedge(&e2) {
             return Err(crate::Error::HyperedgeDoesNotExist(e2.to_string()));
         }
-        let set1 = self.hyperedges.remove(&e1).unwrap();
-        let set2 = self.hyperedges.remove(&e2).unwrap();
+        let set1 = self.edges.remove(&e1).unwrap();
+        let set2 = self.edges.remove(&e2).unwrap();
         let merged: HashSet<VertexId> = set1.union(&set2).cloned().collect();
         let new_edge = self.next_edge_id;
-        self.hyperedges.insert(new_edge, merged);
+        self.edges.insert(new_edge, merged);
         self.next_edge_id += 1;
         Ok(new_edge)
     }
     /// remove the hyperedge with the given id
     pub fn remove_hyperedge(&mut self, Index(index): EdgeId) -> crate::Result<HashSet<VertexId>> {
-        match self.hyperedges.remove(&index) {
+        match self.edges.remove(&index) {
             Some(v) => Ok(v),
             None => Err(crate::Error::HyperedgeDoesNotExist(index.to_string())),
         }
@@ -166,8 +166,7 @@ where
         match self.vertices.remove(&index) {
             Some(node) => {
                 // Remove all hyperedges containing this vertex
-                self.hyperedges
-                    .retain(|_, vertices| !vertices.contains(&index));
+                self.edges.retain(|_, vertices| !vertices.contains(&index));
                 return Ok(node);
             }
             None => Err(crate::Error::VertexDoesNotExist(index.to_string())),
@@ -175,7 +174,7 @@ where
     }
     /// returns the total number of hyperedges in the hypergraph
     pub fn total_edges(&self) -> usize {
-        self.hyperedges.len()
+        self.edges.len()
     }
     /// returns the total number of vertices in the hypergraph
     pub fn total_vertices(&self) -> usize {
@@ -189,7 +188,7 @@ where
         }
 
         let degree = self
-            .hyperedges
+            .edges
             .values()
             .filter(|vertices| vertices.contains(&index))
             .count();
