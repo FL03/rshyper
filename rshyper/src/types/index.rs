@@ -8,7 +8,7 @@ pub type VertexId<T = u32> = Index<T>;
 // Define a type alias for HyperEdge ID
 pub type EdgeId<T = u32> = Index<T>;
 
-#[derive(Clone, Copy, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Default, Eq, Hash, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
     derive(serde_derive::Deserialize, serde_derive::Serialize)
@@ -54,6 +54,15 @@ impl<T> Index<T> {
     /// swap the values of two indices
     pub const fn swap(&mut self, other: &mut Self) {
         core::mem::swap(&mut self.0, &mut other.0)
+    }
+}
+
+impl<T> PartialEq<T> for Index<T>
+where
+    T: PartialEq,
+{
+    fn eq(&self, other: &T) -> bool {
+        &self.0 == other
     }
 }
 
