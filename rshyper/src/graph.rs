@@ -72,20 +72,6 @@ where
     pub fn check_hyperedge(&self, edge_id: &EdgeId) -> bool {
         self.hyperedges.contains_key(edge_id)
     }
-    /// remove the hyperedge with the given id
-    pub fn remove_hyperedge(&mut self, id: EdgeId) -> crate::Result<HashSet<VertexId>> {
-        match self.hyperedges.remove(&id) {
-            Some(v) => Ok(v),
-            None => Err(crate::Error::HyperedgeDoesNotExist(id.to_string())),
-        }
-    }
-    /// returns the weight of a particular vertex
-    pub fn get_vertex_weight(&self, id: VertexId) -> crate::Result<&N> {
-        match self.vertices.get(&id) {
-            Some(weight) => Ok(weight),
-            None => Err(crate::Error::VertexDoesNotExist(id.to_string())),
-        }
-    }
     /// returns a set of vertices that are in the hyperedge with the given id
     pub fn get_neighbors(&self, id: VertexId) -> crate::Result<HashSet<VertexId>> {
         if !self.check_vertex(&id) {
@@ -99,6 +85,54 @@ where
             }
         }
         Ok(neighbors)
+    }
+    /// returns all hyperedges containing a given vertex
+    pub fn get_vertex_edges(&self, id: VertexId) -> crate::Result<Vec<EdgeId>> {
+        if !self.check_vertex(&id) {
+            return Err(crate::Error::VertexDoesNotExist(id.to_string()));
+        }
+        let edges = self
+            .hyperedges
+            .iter()
+            .filter_map(|(edge_id, vertices)| {
+                if vertices.contains(&id) {
+                    Some(*edge_id)
+                } else {
+                    None
+                }
+            })
+            .collect();
+        Ok(edges)
+    }
+    /// returns the weight of a particular vertex
+    pub fn get_vertex_weight(&self, id: VertexId) -> crate::Result<&N> {
+        match self.vertices.get(&id) {
+            Some(weight) => Ok(weight),
+            None => Err(crate::Error::VertexDoesNotExist(id.to_string())),
+        }
+    }
+    /// merges two hyperedges into one (combining their vertices)
+    pub fn merge_hyperedges(&mut self, e1: EdgeId, e2: EdgeId) -> crate::Result<EdgeId> {
+        if !self.check_hyperedge(&e1) {
+            return Err(crate::Error::HyperedgeDoesNotExist(e1.to_string()));
+        }
+        if !self.check_hyperedge(&e2) {
+            return Err(crate::Error::HyperedgeDoesNotExist(e2.to_string()));
+        }
+        let set1 = self.hyperedges.remove(&e1).unwrap();
+        let set2 = self.hyperedges.remove(&e2).unwrap();
+        let merged: HashSet<VertexId> = set1.union(&set2).cloned().collect();
+        let new_edge = self.next_edge_id;
+        self.hyperedges.insert(new_edge, merged);
+        self.next_edge_id += 1;
+        Ok(new_edge)
+    }
+    /// remove the hyperedge with the given id
+    pub fn remove_hyperedge(&mut self, id: EdgeId) -> crate::Result<HashSet<VertexId>> {
+        match self.hyperedges.remove(&id) {
+            Some(v) => Ok(v),
+            None => Err(crate::Error::HyperedgeDoesNotExist(id.to_string())),
+        }
     }
     /// removes the vertex with the given id and all of its associated hyperedges
     pub fn remove_vertex(&mut self, id: VertexId) -> crate::Result<N> {
@@ -125,6 +159,15 @@ where
             .filter(|vertices| vertices.contains(&vid))
             .count();
         Ok(degree)
+    }
+    /// update the weight of a given vertex
+    pub fn update_vertex_weight(&mut self, id: VertexId, new_weight: N) -> crate::Result<()> {
+        if self.check_vertex(&id) {
+            self.vertices.insert(id, new_weight);
+            Ok(())
+        } else {
+            Err(crate::Error::VertexDoesNotExist(id.to_string()))
+        }
     }
 }
 
