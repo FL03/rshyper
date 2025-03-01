@@ -38,7 +38,7 @@ fn main() {
 
     // Remove a vertex
     match graph.remove_vertex(v2) {
-        Ok(()) => println!("Removed vertex {}", v2),
+        Ok(node) => println!("Removed vertex {}", v2),
         Err(e) => println!("Error: {}", e),
     }
 

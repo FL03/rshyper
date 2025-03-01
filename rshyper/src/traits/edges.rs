@@ -2,20 +2,19 @@
     Appellation: edges <module>
     Contrib: @FL03
 */
-use super::{HyperNode, Indexable};
+use super::HyperNode;
 
-pub trait HyperEdge: Indexable {
-    type Node: HyperNode;
-
+pub trait HyperEdge<N, Idx>
+where
+    N: HyperNode<Idx>,
+{
     /// Returns true if the hyperedge contains the given vertex
-    fn contains(&self, vertex: Self::Idx) -> bool;
-    /// Returns the vertices of the hyperedge
-    fn vertices(&self) -> &[Self::Node];
+    fn contains<Q>(&self, vertex: &Q) -> bool
+    where
+        Q: ?Sized,
+        N: core::borrow::Borrow<Q>;
 }
-
-pub trait HashEdge: HyperEdge + core::cmp::Eq + core::hash::Hash {}
 
 /*
  ************* Implementations *************
-*/
-impl<T> HashEdge for T where T: HyperEdge + core::cmp::Eq + core::hash::Hash {}
+ */

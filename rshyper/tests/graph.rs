@@ -59,14 +59,14 @@ fn update_vertex() {
 
     // Check initial weight
     let initial_weight = graph.get_vertex_weight(v0).expect("vertex missing");
-    assert_eq!(*initial_weight, 42);
+    assert_eq!(*initial_weight.weight(), 42);
     // Update the weight
     let res = graph.update_vertex_weight(v0, 100);
     assert!(res.is_ok());
 
     // Check updated weight
     let updated_weight = graph.get_vertex_weight(v0).expect("weight missing");
-    assert_eq!(*updated_weight, 100);
+    assert_eq!(*updated_weight.weight(), 100);
 }
 
 #[test]
