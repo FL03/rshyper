@@ -11,11 +11,23 @@
 #[allow(unused_imports)]
 #[doc(inline)]
 pub use self::{
-    error::*, ops::prelude::*, traits::prelude::*, types::prelude::*, utils::prelude::*, wolfram::*,
+    error::*, models::prelude::*, ops::prelude::*, traits::prelude::*, types::prelude::*, utils::prelude::*,
 };
 
 pub mod error;
-pub mod wolfram;
+
+pub mod models {
+    #[doc(inline)]
+    pub use self::prelude::*;
+
+    pub mod learn;
+    pub mod wolfram;
+    
+    pub(crate) mod prelude {
+        pub use super::learn::*;
+        pub use super::wolfram::*;
+    }
+}
 
 #[allow(unused_imports)]
 pub mod ops {
@@ -60,9 +72,9 @@ pub mod utils {
 #[allow(unused_imports)]
 pub mod prelude {
     pub use crate::error::*;
+    pub use crate::models::prelude::*;
     pub use crate::ops::prelude::*;
     pub use crate::traits::prelude::*;
     pub use crate::types::prelude::*;
     pub use crate::utils::prelude::*;
-    pub use crate::wolfram::*;
 }

@@ -19,7 +19,7 @@ doctest = false
 test = true
 
 [features]
-default = [ "std" ]
+default = [ ]
 
 full = [
     "default",
@@ -28,11 +28,6 @@ full = [
 ]
 
 # ********* [FF] Dependencies *********
-alloc = [
-    "num/alloc",
-    "rshyper/alloc",
-    "serde?/alloc",
-]
 
 rand = [
     "dep:rand",
@@ -51,30 +46,22 @@ rng = [
 serde = [
     "dep:serde",
     "dep:serde_derive",
+    "serde?/derive",
     "rshyper/serde",
 ]
 
-std = [
-    "alloc",
-    "num/std",
-    "rand/std_rng",
-    "rshyper/std",
-    "serde?/std",
-    "strum/std",
-    "thiserror/std",
-]
 
 [build-dependencies]
 
 [dependencies]
-rshyper = { default-features = false, path = "../rshyper", version = "0.0.1" }
+rshyper = { path = "../rshyper", version = "0.0.1" }
 
-num = { default-features = false, version = "0.4" }
-rand = { default-features = false, optional = true, version = "0.9" }
-rand_distr = { default-features = false, optional = true, version = "0.5" }
-serde = { optional = true, workspace = true }
+num = { version = "0.4" }
+rand = { optional = true, version = "0.9" }
+rand_distr = { optional = true, version = "0.5" }
+serde = { features = ["std"], optional = true, workspace = true }
 serde_derive = { optional = true, workspace = true }
-strum = { default-features = false, workspace = true }
+strum = { workspace = true }
 thiserror = { workspace = true }
 
 [package.metadata.docs.rs]
@@ -82,6 +69,10 @@ all-features = true
 rustc-args = [ "--cfg", "docsrs" ]
 
 # ********* examples *********
+[[example]]
+name = "learn"
+required-features = [ "full" ]
+
 [[example]]
 name = "neo"
 required-features = [ "std" ]

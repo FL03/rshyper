@@ -3,10 +3,9 @@
     Contrib: @FL03
 */
 
-use crate::types::{Direction, Transformation, TriadType};
+use crate::types::{Direction, Transformation, TriadClass};
 use crate::utils::pymod;
 use std::collections::HashMap;
-
 
 // Define the structure for our Wolfram UTM with two states and three symbols
 #[derive(Clone, Debug)]
@@ -24,7 +23,7 @@ pub struct WolframUTM {
     pub(crate) alphabet: [usize; 3],
 
     // Current triad type (Major, Minor, Augmented, or Diminished)
-    pub(crate) class: TriadType,
+    pub(crate) class: TriadClass,
 
     // Transition rules: (current_state, current_symbol) -> (new_state, new_symbol, direction)
     pub(crate) transition_rules: HashMap<(usize, usize), (usize, usize, Direction)>,
@@ -47,7 +46,7 @@ impl WolframUTM {
             tape: Vec::new(),
             position: 0,
             alphabet: initial_triad,
-            class: TriadType::Major, // C-Major is our starting point
+            class: TriadClass::Major, // C-Major is our starting point
             transition_rules: ruleset,
             modulus,
         }
@@ -63,11 +62,11 @@ impl WolframUTM {
     }
     /// returns the current class of the alphabet
     #[inline]
-    pub fn class(&self) -> TriadType {
+    pub fn class(&self) -> TriadClass {
         self.class
     }
     #[inline]
-    /// get the octave of the current machine; a modular, positional coordinate for the 
+    /// get the octave of the current machine; a modular, positional coordinate for the
     /// locating the machine in the global structure
     pub fn modulus(&self) -> usize {
         self.modulus
@@ -88,15 +87,15 @@ impl WolframUTM {
     }
 
     // Determine triad type based on the intervals
-    pub fn classify_triad(&self, triad: &[usize; 3]) -> TriadType {
+    pub fn classify_triad(&self, triad: &[usize; 3]) -> TriadClass {
         let interval1 = self.calculate_interval(triad[0], triad[1]);
         let interval2 = self.calculate_interval(triad[1], triad[2]);
 
         match (interval1, interval2) {
-            (4, 3) => TriadType::Major,      // Major third + Minor third
-            (3, 4) => TriadType::Minor,      // Minor third + Major third
-            (4, 4) => TriadType::Augmented,  // Major third + Major third
-            (3, 3) => TriadType::Diminished, // Minor third + Minor third
+            (4, 3) => TriadClass::Major,      // Major third + Minor third
+            (3, 4) => TriadClass::Minor,      // Minor third + Major third
+            (4, 4) => TriadClass::Augmented,  // Major third + Major third
+            (3, 3) => TriadClass::Diminished, // Minor third + Minor third
             _ => panic!("Invalid triad intervals: {} and {}", interval1, interval2),
         }
     }
@@ -113,57 +112,49 @@ impl WolframUTM {
     // Apply the leading transformation (L)
     pub fn apply_leading_transformation(&mut self) {
         match self.class {
-            TriadType::Major => {
+            TriadClass::Major => {
                 // Major to Minor transformation:
                 // - Move root (x) to fifth position and subtract 1
                 // - Result: (y, z, pymod(x-1))
-                let x = self.alphabet[0];
-                let y = self.alphabet[1];
-                let z = self.alphabet[2];
+                let [x, y, z] = self.alphabet;
 
                 // δ_L((x, y, z)) = (y, z, pymod(x-1))
                 let new_triad = [y, z, pymod(x as isize - 1, self.modulus as isize) as usize];
 
                 self.alphabet = new_triad;
-                self.class = TriadType::Minor;
+                self.class = TriadClass::Minor;
             }
-            TriadType::Minor => {
+            TriadClass::Minor => {
                 // Minor to Major transformation:
                 // - Add 1 to the third symbol and move it to front
                 // - Result: (pymod(z+1), x, y)
-                let x = self.alphabet[0];
-                let y = self.alphabet[1];
-                let z = self.alphabet[2];
+                let [x, y, z] = self.alphabet;
 
                 // δ_L(E-minor triad(4, 7, 11)) -> C-Major (11 + 1, 4, 7)
                 let new_triad = [pymod(z as isize + 1, self.modulus as isize) as usize, x, y];
 
                 self.alphabet = new_triad;
-                self.class = TriadType::Major;
+                self.class = TriadClass::Major;
             }
-            TriadType::Augmented => {
+            TriadClass::Augmented => {
                 // Transforming augmented triads is special since they're symmetric
-                let x = self.alphabet[0];
-                let y = self.alphabet[1];
-                let z = self.alphabet[2];
+                let [x, y, z] = self.alphabet;
 
                 // Modify to create a major triad
                 let new_triad = [x, y, pymod(z as isize - 1, self.modulus as isize) as usize];
 
                 self.alphabet = new_triad;
-                self.class = TriadType::Major;
+                self.class = TriadClass::Major;
             }
-            TriadType::Diminished => {
+            TriadClass::Diminished => {
                 // Transforming diminished triads
-                let x = self.alphabet[0];
-                let y = self.alphabet[1];
-                let z = self.alphabet[2];
+                let [x, y, z] = self.alphabet;
 
                 // Modify to create a minor triad
                 let new_triad = [x, y, pymod(z as isize + 1, self.modulus as isize) as usize];
 
                 self.alphabet = new_triad;
-                self.class = TriadType::Minor;
+                self.class = TriadClass::Minor;
             }
         }
 
@@ -180,35 +171,31 @@ impl WolframUTM {
     // Apply the parallel transformation (P)
     pub fn apply_parallel_transformation(&mut self) {
         match self.class {
-            TriadType::Major => {
+            TriadClass::Major => {
                 // Major to parallel minor: lower the middle note by a semitone
-                let x = self.alphabet[0];
-                let y = self.alphabet[1];
-                let z = self.alphabet[2];
+                let [x, y, z] = self.alphabet;
 
                 // C-Major [0, 4, 7] -> C-Minor [0, 3, 7]
                 let new_triad = [x, pymod(y as isize - 1, self.modulus as isize) as usize, z];
 
                 self.alphabet = new_triad;
-                self.class = TriadType::Minor;
+                self.class = TriadClass::Minor;
             }
-            TriadType::Minor => {
+            TriadClass::Minor => {
                 // Minor to parallel major: raise the middle note by a semitone
-                let x = self.alphabet[0];
-                let y = self.alphabet[1];
-                let z = self.alphabet[2];
+                let [x, y, z] = self.alphabet;
 
                 // C-Minor [0, 3, 7] -> C-Major [0, 4, 7]
                 let new_triad = [x, pymod(y as isize + 1, self.modulus as isize) as usize, z];
 
                 self.alphabet = new_triad;
-                self.class = TriadType::Major;
+                self.class = TriadClass::Major;
             }
-            TriadType::Augmented | TriadType::Diminished => {
+            TriadClass::Augmented | TriadClass::Diminished => {
                 // For augmented and diminished, we'll convert to major first
                 let root = self.alphabet[0];
 
-                if self.class == TriadType::Augmented {
+                if self.class == TriadClass::Augmented {
                     self.alphabet = [
                         root,
                         pymod(root as isize + 4, self.modulus as isize) as usize,
@@ -221,7 +208,7 @@ impl WolframUTM {
                         pymod(root as isize + 7, self.modulus as isize) as usize,
                     ];
                 }
-                self.class = TriadType::Major;
+                self.class = TriadClass::Major;
             }
         }
 
@@ -238,7 +225,7 @@ impl WolframUTM {
     // Apply the relative transformation (R)
     pub fn apply_relative_transformation(&mut self) {
         match self.class {
-            TriadType::Major => {
+            TriadClass::Major => {
                 // Major to relative minor: lower the root by a minor third
                 let [x, y, ..] = self.alphabet;
 
@@ -247,26 +234,24 @@ impl WolframUTM {
                 let new_triad = [new_root, x, y];
 
                 self.alphabet = new_triad;
-                self.class = TriadType::Minor;
+                self.class = TriadClass::Minor;
             }
-            TriadType::Minor => {
+            TriadClass::Minor => {
                 // Minor to relative major: raise the fifth by a minor third
-                let x = self.alphabet[0];
-                let y = self.alphabet[1];
-                let z = self.alphabet[2];
+                let [y, z, ..] = self.alphabet;
 
                 // A-Minor [9, 0, 4] -> C-Major [0, 4, 7]
                 let new_fifth = pymod(z as isize + 3, self.modulus as isize) as usize;
                 let new_triad = [y, z, new_fifth];
 
                 self.alphabet = new_triad;
-                self.class = TriadType::Major;
+                self.class = TriadClass::Major;
             }
-            TriadType::Augmented | TriadType::Diminished => {
+            TriadClass::Augmented | TriadClass::Diminished => {
                 // For augmented and diminished, we'll convert to major first
                 let root = self.alphabet[0];
 
-                if self.class == TriadType::Augmented {
+                if self.class == TriadClass::Augmented {
                     self.alphabet = [
                         root,
                         pymod(root as isize + 4, self.modulus as isize) as usize,
@@ -279,7 +264,7 @@ impl WolframUTM {
                         pymod(root as isize + 7, self.modulus as isize) as usize,
                     ];
                 }
-                self.class = TriadType::Major;
+                self.class = TriadClass::Major;
                 // Then apply R transformation
                 self.apply_relative_transformation();
             }
@@ -370,7 +355,7 @@ impl WolframUTM {
 
     // Run the UTM with the given input program
     // Run the UTM with the given input program until it halts
-    pub fn run(&mut self, input: Vec<usize>) -> Vec<(usize, Vec<usize>, [usize; 3], TriadType)> {
+    pub fn run(&mut self, input: Vec<usize>) -> Vec<(usize, Vec<usize>, [usize; 3], TriadClass)> {
         // Initialize the tape with the input
         self.tape = input;
         self.position = 0;
@@ -378,22 +363,12 @@ impl WolframUTM {
         let mut history = Vec::new();
 
         // Record initial state
-        history.push((
-            self.state,
-            self.tape.clone(),
-            self.alphabet,
-            self.class,
-        ));
+        history.push((self.state, self.tape.clone(), self.alphabet, self.class));
 
         // Run until the machine halts (i.e., step() returns false)
         while self.step() {
             // Record each state after a step
-            history.push((
-                self.state,
-                self.tape.clone(),
-                self.alphabet,
-                self.class,
-            ));
+            history.push((self.state, self.tape.clone(), self.alphabet, self.class));
 
             // Optional: Add a safety limit to prevent infinite loops in development
             if history.len() > 10000 {
