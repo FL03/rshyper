@@ -36,7 +36,6 @@ pub enum TriadClass {
     Diminished,
 }
 
-
 /// Enumerates the available transformations in Neo-Riemannian theory
 #[derive(
     Clone,
@@ -65,7 +64,7 @@ pub enum TriadClass {
 pub enum Transformation {
     #[default]
     #[serde(alias = "L", alias = "l")]
-    Leading,  // L: Maps major to minor and vice versa
+    Leading, // L: Maps major to minor and vice versa
     #[serde(alias = "P", alias = "p")]
     Parallel, // P: Maps major to parallel minor and vice versa
     #[serde(alias = "R", alias = "r")]
@@ -110,6 +109,29 @@ impl TriadClass {
             TriadClass::Minor => TriadClass::Major,
             TriadClass::Augmented => TriadClass::Diminished,
             TriadClass::Diminished => TriadClass::Augmented,
+        }
+    }
+}
+
+impl From<usize> for TriadClass {
+    fn from(value: usize) -> Self {
+        match value {
+            0 => TriadClass::Major,
+            1 => TriadClass::Minor,
+            2 => TriadClass::Augmented,
+            3 => TriadClass::Diminished,
+            _ => TriadClass::Major,
+        }
+    }
+}
+
+impl From<usize> for Transformation {
+    fn from(value: usize) -> Self {
+        match value {
+            0 => Transformation::Leading,
+            1 => Transformation::Parallel,
+            2 => Transformation::Relative,
+            _ => Transformation::Leading,
         }
     }
 }

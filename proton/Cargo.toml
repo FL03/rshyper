@@ -55,6 +55,7 @@ serde = [
 
 [dependencies]
 rshyper = { path = "../rshyper", version = "0.0.1" }
+rstm = { git = "https://github.com/FL03/rstm.git", branch = "v0.0.6", version = "0.0.6" }
 
 num = { version = "0.4" }
 rand = { optional = true, version = "0.9" }
@@ -75,11 +76,11 @@ required-features = [ "full" ]
 
 [[example]]
 name = "neo"
-required-features = [ "std" ]
+required-features = [ "default" ]
 
 [[example]]
 name = "wolfram"
-required-features = [ "std" ]
+required-features = [ "default" ]
 
 # ********* tests *********
 
@@ -89,4 +90,4 @@ required-features = [  ]
 
 [[test]]
 name = "wolfram"
-required-features = [ "std" ]
+required-features = [ "default" ]

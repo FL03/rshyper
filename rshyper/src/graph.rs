@@ -28,6 +28,22 @@ where
             next_edge_id: EdgeId::zero(),
         }
     }
+    /// returns an immutable reference to the hyperedges
+    pub const fn edges(&self) -> &HashMap<EdgeId, HashSet<VertexId>> {
+        &self.edges
+    }
+    /// returns a mutable reference to the hyperedges
+    pub fn edges_mut(&mut self) -> &mut HashMap<EdgeId, HashSet<VertexId>> {
+        &mut self.edges
+    }
+    /// returns am immutable reference to the vertices
+    pub const fn vertices(&self) -> &HashMap<VertexId, Node<N>> {
+        &self.vertices
+    }
+    /// returns a mutable reference to the vertices
+    pub fn vertices_mut(&mut self) -> &mut HashMap<VertexId, Node<N>> {
+        &mut self.vertices
+    }
     /// add a new hyperedge with the given vertices and return its ID
     pub fn add_hyperedge<I>(&mut self, vertices: I) -> crate::Result<EdgeId>
     where

@@ -10,7 +10,7 @@ use crate::traits::Weighted;
     feature = "serde",
     derive(serde_derive::Deserialize, serde_derive::Serialize)
 )]
-pub struct Node<T = (), Idx = u32> {
+pub struct Node<T = (), Idx = usize> {
     pub(crate) index: Index<Idx>,
     pub(crate) weight: T,
 }

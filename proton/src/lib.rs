@@ -11,20 +11,27 @@
 #[allow(unused_imports)]
 #[doc(inline)]
 pub use self::{
-    error::*, models::prelude::*, ops::prelude::*, traits::prelude::*, types::prelude::*, utils::prelude::*,
+    error::*, models::prelude::*, ops::prelude::*, topo::prelude::*, traits::prelude::*,
+    types::prelude::*, utils::prelude::*,
 };
 
+#[macro_use]
+pub(crate) mod macros;
+
 pub mod error;
+pub mod topo;
 
 pub mod models {
     #[doc(inline)]
     pub use self::prelude::*;
 
     pub mod learn;
+    pub mod plant;
     pub mod wolfram;
-    
+
     pub(crate) mod prelude {
         pub use super::learn::*;
+        pub use super::plant::*;
         pub use super::wolfram::*;
     }
 }

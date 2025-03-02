@@ -9,6 +9,10 @@ pub type Result<T = ()> = core::result::Result<T, Error>;
 /// The error type for this crate
 #[derive(Clone, Debug, thiserror::Error)]
 pub enum Error {
+    #[error("Graph error: {0}")]
+    GraphError(#[from] rshyper::Error),
+    #[error("Turing error: {0}")]
+    TuringError(#[from] rstm::Error),
     #[error("IO Error: {0}")]
     IOError(String),
     #[error("Parse Error: {0}")]
@@ -16,7 +20,6 @@ pub enum Error {
     #[error("Unknown Error: {0}")]
     Unknown(String),
 }
-
 
 impl From<&str> for Error {
     fn from(s: &str) -> Self {

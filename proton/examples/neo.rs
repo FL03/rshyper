@@ -6,7 +6,7 @@ use std::collections::HashMap;
 */
 #[allow(unused_imports)]
 use rshyper::{HyperGraph, Node};
-use utm::{demonstrate_tonnetz_and_utm, State, Symbol};
+use utm::{State, Symbol, demonstrate_tonnetz_and_utm};
 
 fn main() {
     // Create a hypergraph of &str to keep the example simple
@@ -43,7 +43,7 @@ fn main() {
     demonstrate_tonnetz_and_utm(Vec::from_iter([&Symbol::C, &Symbol::E, &Symbol::G]));
 }
 
-/// leading transformations 
+/// leading transformations
 pub fn leading(root: Symbol, third: Symbol, fifth: Symbol) -> Vec<Symbol> {
     vec![root, third, fifth]
 }
@@ -89,7 +89,6 @@ impl TM {
     pub fn with_rules(self, rules: HashMap<Head, (Head, &'static str)>) -> Self {
         Self { rules, ..self }
     }
-
 
     pub fn tape(&self) -> &[Symbol] {
         &self.tape
@@ -145,7 +144,6 @@ impl<Q, S> MachineFacet<Q, S> {
     pub fn with_alphabet(self, alphabet: [S; 3]) -> Self {
         Self { alphabet, ..self }
     }
-
 }
 
 pub mod utm {
@@ -162,7 +160,7 @@ pub mod utm {
         S1 = 1,
     }
 
-    /// enumerates the natural harmonies represented symbolically using pitch classes 
+    /// enumerates the natural harmonies represented symbolically using pitch classes
     /// that are mapped to a particular integer value
     #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
     #[cfg_attr(
@@ -211,8 +209,6 @@ pub mod utm {
         }
     }
 
-    
-
     impl core::ops::Add for Symbol {
         type Output = i32;
 
@@ -229,34 +225,87 @@ pub mod utm {
         }
     }
 
-
     pub fn sample_rulest() -> std::collections::HashMap<Head, (Head, &'static str)> {
         use State::*;
         use Symbol::*;
         let mut rules = std::collections::HashMap::new();
         rules.insert(
-            Head { state: S0, symbol: A },
-            (Head { state: S1, symbol: B }, "R"),
+            Head {
+                state: S0,
+                symbol: A,
+            },
+            (
+                Head {
+                    state: S1,
+                    symbol: B,
+                },
+                "R",
+            ),
         );
         rules.insert(
-            Head { state: S0, symbol: B },
-            (Head { state: S0, symbol: C }, "L"),
+            Head {
+                state: S0,
+                symbol: B,
+            },
+            (
+                Head {
+                    state: S0,
+                    symbol: C,
+                },
+                "L",
+            ),
         );
         rules.insert(
-            Head { state: S0, symbol: C },
-            (Head { state: S1, symbol: A }, "R"),
+            Head {
+                state: S0,
+                symbol: C,
+            },
+            (
+                Head {
+                    state: S1,
+                    symbol: A,
+                },
+                "R",
+            ),
         );
         rules.insert(
-            Head { state: S1, symbol: A },
-            (Head { state: S0, symbol: C }, "L"),
+            Head {
+                state: S1,
+                symbol: A,
+            },
+            (
+                Head {
+                    state: S0,
+                    symbol: C,
+                },
+                "L",
+            ),
         );
         rules.insert(
-            Head { state: S1, symbol: B },
-            (Head { state: S1, symbol: A }, "R"),
+            Head {
+                state: S1,
+                symbol: B,
+            },
+            (
+                Head {
+                    state: S1,
+                    symbol: A,
+                },
+                "R",
+            ),
         );
         rules.insert(
-            Head { state: S1, symbol: C },
-            (Head { state: S0, symbol: B }, "L"),
+            Head {
+                state: S1,
+                symbol: C,
+            },
+            (
+                Head {
+                    state: S0,
+                    symbol: B,
+                },
+                "L",
+            ),
         );
         rules
     }

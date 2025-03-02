@@ -3,64 +3,57 @@
     Contrib: @FL03
 */
 
-use crate::types::{Direction, Transformation, TriadClass};
 use crate::utils::pymod;
-use std::collections::HashMap;
+use crate::{RuleSet, Transformation, TriadClass};
 
-// Define the structure for our Wolfram UTM with two states and three symbols
+use rstm::{Direction, Head, State, Tail};
+
+/// An implementation of the Wolfram [2, 3] UTM designed to operate on a 12-tone system
 #[derive(Clone, Debug)]
 pub struct WolframUTM {
+    // Current triad (our active alphabet) - using fixed-size array
+    pub(crate) alphabet: [usize; 3],
+    // Current position on the tape
+    pub(crate) position: usize,
+    // Transition rules: (current_state, current_symbol) -> (new_state, new_symbol, direction)
+    pub(crate) ruleset: RuleSet<usize, usize>,
     // Current state (0 or 1)
-    pub(crate) state: usize,
-
+    pub(crate) state: State<usize>,
     // Tape containing the program symbols
     pub(crate) tape: Vec<usize>,
 
-    // Current position on the tape
-    pub(crate) position: usize,
-
-    // Current triad (our active alphabet) - using fixed-size array
-    pub(crate) alphabet: [usize; 3],
-
     // Current triad type (Major, Minor, Augmented, or Diminished)
     pub(crate) class: TriadClass,
-
-    // Transition rules: (current_state, current_symbol) -> (new_state, new_symbol, direction)
-    pub(crate) transition_rules: HashMap<(usize, usize), (usize, usize, Direction)>,
-
-    // Modulus for symbol space (12 for standard musical system)
+    /// a posisitional coordinate mapping the machine to a layer within the global structure
     pub(crate) modulus: usize,
 }
 
 impl WolframUTM {
     // Create a new UTM with a specific program
-    pub fn new(
-        ruleset: HashMap<(usize, usize), (usize, usize, Direction)>,
-        modulus: usize,
-    ) -> Self {
+    pub fn new(ruleset: RuleSet<usize, usize>, modulus: usize) -> Self {
         // Define our initial C-Major triad [0, 4, 7]
         let initial_triad = [0, 4, 7];
 
         WolframUTM {
-            state: 0,
+            state: State(0),
             tape: Vec::new(),
             position: 0,
             alphabet: initial_triad,
             class: TriadClass::Major, // C-Major is our starting point
-            transition_rules: ruleset,
+            ruleset,
             modulus,
         }
     }
-
+    /// returns the alphabet of the machine
     pub const fn alphabet(&self) -> &[usize; 3] {
         &self.alphabet
     }
-    /// get the position of the head on the tape
+    /// returns a copy of the machines current position
     #[inline]
     pub fn position(&self) -> usize {
         self.position
     }
-    /// returns the current class of the alphabet
+    /// returns a copy of the machines current class
     #[inline]
     pub fn class(&self) -> TriadClass {
         self.class
@@ -73,12 +66,27 @@ impl WolframUTM {
     }
 
     #[inline]
-    pub fn state(&self) -> usize {
+    pub fn state(&self) -> State<usize> {
         self.state
     }
 
     pub const fn tape(&self) -> &Vec<usize> {
         &self.tape
+    }
+
+    pub fn set_state(&mut self, State(state): State<usize>) {
+        self.state = State(state);
+    }
+
+    pub fn with_state(self, State(state): State<usize>) -> Self {
+        Self {
+            state: State(state),
+            ..self
+        }
+    }
+
+    pub fn head(&self) -> Head<usize, usize> {
+        Head::new(self.state, self.tape[self.position])
     }
 
     // Calculate interval between two notes in a 12-tone system
@@ -314,11 +322,14 @@ impl WolframUTM {
                 );
             }
         }
-
+        let head = Head::new(self.state, symbol);
         // Find the transition rule for the current state and symbol
-        if let Some(&(new_state, new_symbol, direction)) =
-            self.transition_rules.get(&(self.state, symbol))
-        {
+        if let Some(&tail) = self.ruleset.get(&head) {
+            let Tail {
+                state: new_state,
+                symbol: new_symbol,
+                direction,
+            } = tail;
             // Update the tape
             if self.position >= self.tape.len() {
                 self.tape.resize(self.position + 1, 0);
@@ -355,7 +366,10 @@ impl WolframUTM {
 
     // Run the UTM with the given input program
     // Run the UTM with the given input program until it halts
-    pub fn run(&mut self, input: Vec<usize>) -> Vec<(usize, Vec<usize>, [usize; 3], TriadClass)> {
+    pub fn run(
+        &mut self,
+        input: Vec<usize>,
+    ) -> Vec<(State<usize>, Vec<usize>, [usize; 3], TriadClass)> {
         // Initialize the tape with the input
         self.tape = input;
         self.position = 0;

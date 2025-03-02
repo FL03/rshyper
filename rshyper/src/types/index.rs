@@ -4,16 +4,16 @@
 */
 
 // Define a type alias for Vertex ID (can be any hashable type)
-pub type VertexId<T = u32> = Index<T>;
+pub type VertexId<T = usize> = Index<T>;
 // Define a type alias for HyperEdge ID
-pub type EdgeId<T = u32> = Index<T>;
+pub type EdgeId<T = usize> = Index<T>;
 
 #[derive(Clone, Copy, Default, Eq, Hash, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
     derive(serde_derive::Deserialize, serde_derive::Serialize)
 )]
-pub struct Index<T = u32>(pub T);
+pub struct Index<T = usize>(pub T);
 
 impl<T> Index<T> {
     pub fn new(index: T) -> Self {
