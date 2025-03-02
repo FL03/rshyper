@@ -4,12 +4,12 @@
 */
 
 use crate::utils::pymod;
-use crate::{RuleSet, Transformation, TriadClass};
+use crate::{PyMod, RuleSet, Transformation, TriadClass};
 
 use rstm::{Direction, Head, State, Tail};
 
 /// An implementation of the Wolfram [2, 3] UTM designed to operate on a 12-tone system
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct WolframUTM {
     // Current triad (our active alphabet) - using fixed-size array
     pub(crate) alphabet: [usize; 3],
@@ -30,18 +30,29 @@ pub struct WolframUTM {
 
 impl WolframUTM {
     // Create a new UTM with a specific program
-    pub fn new(ruleset: RuleSet<usize, usize>, modulus: usize) -> Self {
-        // Define our initial C-Major triad [0, 4, 7]
-        let initial_triad = [0, 4, 7];
-
+    pub fn new(alphabet: [usize; 3], State(state): State<usize>) -> Self {
         WolframUTM {
+            alphabet,
+            modulus: 0,
+            position: 0,
+            state: State(state),
+            tape: Vec::new(),
+            ruleset: RuleSet::new(),
+
+            class: TriadClass::Major, // C-Major is our starting point
+        }
+    }
+
+    pub fn from_alphabet(alphabet: [usize; 3]) -> Self {
+        Self {
+            alphabet,
+            modulus: 0,
+            position: 0,
             state: State(0),
             tape: Vec::new(),
-            position: 0,
-            alphabet: initial_triad,
+            ruleset: RuleSet::new(),
+
             class: TriadClass::Major, // C-Major is our starting point
-            ruleset,
-            modulus,
         }
     }
     /// returns the alphabet of the machine
@@ -70,8 +81,36 @@ impl WolframUTM {
         self.state
     }
 
+    pub fn state_mut(&mut self) -> State<&mut usize> {
+        self.state.to_mut()
+    }
+
     pub const fn tape(&self) -> &Vec<usize> {
         &self.tape
+    }
+
+    pub fn set_alphabet(&mut self, alphabet: [usize; 3]) {
+        self.alphabet = alphabet;
+    }
+
+    pub fn with_alphabet(self, alphabet: [usize; 3]) -> Self {
+        Self { alphabet, ..self }
+    }
+
+    pub fn set_modulus(&mut self, modulus: usize) {
+        self.modulus = modulus;
+    }
+
+    pub fn with_modulus(self, modulus: usize) -> Self {
+        Self { modulus, ..self }
+    }
+
+    pub fn set_ruleset(&mut self, ruleset: RuleSet<usize, usize>) {
+        self.ruleset = ruleset;
+    }
+
+    pub fn with_ruleset(self, ruleset: RuleSet<usize, usize>) -> Self {
+        Self { ruleset, ..self }
     }
 
     pub fn set_state(&mut self, State(state): State<usize>) {
@@ -87,205 +126,6 @@ impl WolframUTM {
 
     pub fn head(&self) -> Head<usize, usize> {
         Head::new(self.state, self.tape[self.position])
-    }
-
-    // Calculate interval between two notes in a 12-tone system
-    pub fn calculate_interval(&self, a: usize, b: usize) -> usize {
-        pymod(b as isize - a as isize, self.modulus as isize) as usize
-    }
-
-    // Determine triad type based on the intervals
-    pub fn classify_triad(&self, triad: &[usize; 3]) -> TriadClass {
-        let interval1 = self.calculate_interval(triad[0], triad[1]);
-        let interval2 = self.calculate_interval(triad[1], triad[2]);
-
-        match (interval1, interval2) {
-            (4, 3) => TriadClass::Major,      // Major third + Minor third
-            (3, 4) => TriadClass::Minor,      // Minor third + Major third
-            (4, 4) => TriadClass::Augmented,  // Major third + Major third
-            (3, 3) => TriadClass::Diminished, // Minor third + Minor third
-            _ => panic!("Invalid triad intervals: {} and {}", interval1, interval2),
-        }
-    }
-
-    // Apply a Neo-Riemannian transformation
-    pub fn apply_transformation(&mut self, transformation: Transformation) {
-        match transformation {
-            Transformation::Leading => self.apply_leading_transformation(),
-            Transformation::Parallel => self.apply_parallel_transformation(),
-            Transformation::Relative => self.apply_relative_transformation(),
-        }
-    }
-
-    // Apply the leading transformation (L)
-    pub fn apply_leading_transformation(&mut self) {
-        match self.class {
-            TriadClass::Major => {
-                // Major to Minor transformation:
-                // - Move root (x) to fifth position and subtract 1
-                // - Result: (y, z, pymod(x-1))
-                let [x, y, z] = self.alphabet;
-
-                // δ_L((x, y, z)) = (y, z, pymod(x-1))
-                let new_triad = [y, z, pymod(x as isize - 1, self.modulus as isize) as usize];
-
-                self.alphabet = new_triad;
-                self.class = TriadClass::Minor;
-            }
-            TriadClass::Minor => {
-                // Minor to Major transformation:
-                // - Add 1 to the third symbol and move it to front
-                // - Result: (pymod(z+1), x, y)
-                let [x, y, z] = self.alphabet;
-
-                // δ_L(E-minor triad(4, 7, 11)) -> C-Major (11 + 1, 4, 7)
-                let new_triad = [pymod(z as isize + 1, self.modulus as isize) as usize, x, y];
-
-                self.alphabet = new_triad;
-                self.class = TriadClass::Major;
-            }
-            TriadClass::Augmented => {
-                // Transforming augmented triads is special since they're symmetric
-                let [x, y, z] = self.alphabet;
-
-                // Modify to create a major triad
-                let new_triad = [x, y, pymod(z as isize - 1, self.modulus as isize) as usize];
-
-                self.alphabet = new_triad;
-                self.class = TriadClass::Major;
-            }
-            TriadClass::Diminished => {
-                // Transforming diminished triads
-                let [x, y, z] = self.alphabet;
-
-                // Modify to create a minor triad
-                let new_triad = [x, y, pymod(z as isize + 1, self.modulus as isize) as usize];
-
-                self.alphabet = new_triad;
-                self.class = TriadClass::Minor;
-            }
-        }
-
-        // Verify the new triad classification
-        let computed_type = self.classify_triad(&self.alphabet);
-        if computed_type != self.class {
-            panic!(
-                "Leading transformation resulted in unexpected type: expected {:?}, got {:?}",
-                self.class, computed_type
-            );
-        }
-    }
-
-    // Apply the parallel transformation (P)
-    pub fn apply_parallel_transformation(&mut self) {
-        match self.class {
-            TriadClass::Major => {
-                // Major to parallel minor: lower the middle note by a semitone
-                let [x, y, z] = self.alphabet;
-
-                // C-Major [0, 4, 7] -> C-Minor [0, 3, 7]
-                let new_triad = [x, pymod(y as isize - 1, self.modulus as isize) as usize, z];
-
-                self.alphabet = new_triad;
-                self.class = TriadClass::Minor;
-            }
-            TriadClass::Minor => {
-                // Minor to parallel major: raise the middle note by a semitone
-                let [x, y, z] = self.alphabet;
-
-                // C-Minor [0, 3, 7] -> C-Major [0, 4, 7]
-                let new_triad = [x, pymod(y as isize + 1, self.modulus as isize) as usize, z];
-
-                self.alphabet = new_triad;
-                self.class = TriadClass::Major;
-            }
-            TriadClass::Augmented | TriadClass::Diminished => {
-                // For augmented and diminished, we'll convert to major first
-                let root = self.alphabet[0];
-
-                if self.class == TriadClass::Augmented {
-                    self.alphabet = [
-                        root,
-                        pymod(root as isize + 4, self.modulus as isize) as usize,
-                        pymod(root as isize + 7, self.modulus as isize) as usize,
-                    ];
-                } else {
-                    self.alphabet = [
-                        root,
-                        pymod(root as isize + 4, self.modulus as isize) as usize,
-                        pymod(root as isize + 7, self.modulus as isize) as usize,
-                    ];
-                }
-                self.class = TriadClass::Major;
-            }
-        }
-
-        // Verify the new triad classification
-        let computed_type = self.classify_triad(&self.alphabet);
-        if computed_type != self.class {
-            panic!(
-                "Parallel transformation resulted in unexpected type: expected {:?}, got {:?}",
-                self.class, computed_type
-            );
-        }
-    }
-
-    // Apply the relative transformation (R)
-    pub fn apply_relative_transformation(&mut self) {
-        match self.class {
-            TriadClass::Major => {
-                // Major to relative minor: lower the root by a minor third
-                let [x, y, ..] = self.alphabet;
-
-                // C-Major [0, 4, 7] -> A-Minor [9, 0, 4]
-                let new_root = pymod(x as isize - 3, self.modulus as isize) as usize;
-                let new_triad = [new_root, x, y];
-
-                self.alphabet = new_triad;
-                self.class = TriadClass::Minor;
-            }
-            TriadClass::Minor => {
-                // Minor to relative major: raise the fifth by a minor third
-                let [y, z, ..] = self.alphabet;
-
-                // A-Minor [9, 0, 4] -> C-Major [0, 4, 7]
-                let new_fifth = pymod(z as isize + 3, self.modulus as isize) as usize;
-                let new_triad = [y, z, new_fifth];
-
-                self.alphabet = new_triad;
-                self.class = TriadClass::Major;
-            }
-            TriadClass::Augmented | TriadClass::Diminished => {
-                // For augmented and diminished, we'll convert to major first
-                let root = self.alphabet[0];
-
-                if self.class == TriadClass::Augmented {
-                    self.alphabet = [
-                        root,
-                        pymod(root as isize + 4, self.modulus as isize) as usize,
-                        pymod(root as isize + 7, self.modulus as isize) as usize,
-                    ];
-                } else {
-                    self.alphabet = [
-                        root,
-                        pymod(root as isize + 4, self.modulus as isize) as usize,
-                        pymod(root as isize + 7, self.modulus as isize) as usize,
-                    ];
-                }
-                self.class = TriadClass::Major;
-                // Then apply R transformation
-                self.apply_relative_transformation();
-            }
-        }
-
-        // Verify the new triad classification
-        let computed_type = self.classify_triad(&self.alphabet);
-        if computed_type != self.class {
-            panic!(
-                "Relative transformation resulted in unexpected type: expected {:?}, got {:?}",
-                self.class, computed_type
-            );
-        }
     }
 
     // Check if a symbol is in the current triad
@@ -309,18 +149,7 @@ impl WolframUTM {
 
         // Check if the current symbol is in our current triad context
         if !self.is_valid_symbol(symbol) {
-            // Apply only the Leading transformation (since we're just switching
-            // between C-Major [0,4,7] and E-Minor [4,7,11])
-            self.apply_leading_transformation();
-
-            // Verify the symbol is now accessible
-            if !self.is_valid_symbol(symbol) {
-                // If the symbol is still not valid, it's outside our defined alphabet
-                println!(
-                    "Warning: Symbol {} not in any accessible triad context",
-                    symbol
-                );
-            }
+            panic!("symbol {} not in any accessible triad context", symbol);
         }
         let head = Head::new(self.state, symbol);
         // Find the transition rule for the current state and symbol

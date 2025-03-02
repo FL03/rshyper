@@ -3,8 +3,7 @@
     Contrib: @FL03
 */
 
-use crate::types::{Transformation, TriadClass};
-use rshyper::EdgeId;
+use super::{Transformation, TriadClass};
 use std::collections::{HashMap, HashSet};
 
 /// Represents a topological feature that persists across transformations

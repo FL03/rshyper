@@ -36,55 +36,6 @@ pub enum TriadClass {
     Diminished,
 }
 
-/// Enumerates the available transformations in Neo-Riemannian theory
-#[derive(
-    Clone,
-    Copy,
-    Debug,
-    Default,
-    Eq,
-    Hash,
-    Ord,
-    PartialEq,
-    PartialOrd,
-    strum::AsRefStr,
-    strum::Display,
-    strum::EnumIs,
-    strum::EnumIter,
-    strum::EnumString,
-    strum::VariantArray,
-    strum::VariantNames,
-)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde_derive::Deserialize, serde_derive::Serialize),
-    serde(rename_all = "lowercase")
-)]
-#[strum(serialize_all = "lowercase")]
-pub enum Transformation {
-    #[default]
-    #[serde(alias = "L", alias = "l")]
-    Leading, // L: Maps major to minor and vice versa
-    #[serde(alias = "P", alias = "p")]
-    Parallel, // P: Maps major to parallel minor and vice versa
-    #[serde(alias = "R", alias = "r")]
-    Relative, // R: Maps major to relative minor and vice versa
-}
-
-impl Transformation {
-    pub fn leading() -> Self {
-        Transformation::Leading
-    }
-
-    pub fn parallel() -> Self {
-        Transformation::Parallel
-    }
-
-    pub fn relative() -> Self {
-        Transformation::Relative
-    }
-}
-
 impl TriadClass {
     /// a functional constructor for the major triad type
     pub fn major() -> Self {
@@ -111,6 +62,15 @@ impl TriadClass {
             TriadClass::Diminished => TriadClass::Augmented,
         }
     }
+    /// returns the intervals corresponding to the triad type
+    pub fn intervals(self) -> [usize; 3] {
+        match self {
+            TriadClass::Major => [4, 3, 7],
+            TriadClass::Minor => [3, 4, 7],
+            TriadClass::Augmented => [4, 4, 8],
+            TriadClass::Diminished => [3, 3, 6],
+        }
+    }
 }
 
 impl From<usize> for TriadClass {
@@ -121,17 +81,6 @@ impl From<usize> for TriadClass {
             2 => TriadClass::Augmented,
             3 => TriadClass::Diminished,
             _ => TriadClass::Major,
-        }
-    }
-}
-
-impl From<usize> for Transformation {
-    fn from(value: usize) -> Self {
-        match value {
-            0 => Transformation::Leading,
-            1 => Transformation::Parallel,
-            2 => Transformation::Relative,
-            _ => Transformation::Leading,
         }
     }
 }

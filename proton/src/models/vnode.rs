@@ -1,19 +1,18 @@
 /*
-    Appellation: topological_learning <module>
+    Appellation: vnode <module>
     Contrib: @FL03
 */
 
 use crate::models::WolframUTM;
-use crate::topo::{memory::TopologicalMemory, tonnetz::Tonnetz};
-use crate::types::{Transformation, TriadClass};
+use crate::topo::{Plant, Tonnetz, Transformation, TriadClass, memory::TopologicalMemory};
 use rshyper::EdgeId;
 use rstm::{Direction, Head, State, Tail};
 use std::collections::HashMap;
 
-/// A plant that can learn from topological features
-pub struct TonnetzPlant {
+/// A virtualized workspace responsible for managing its associated plant.
+pub struct VNode {
     /// The underlying UTM
-    pub utm: WolframUTM,
+    pub plant: Plant,
 
     /// Current position in the Tonnetz
     pub position: EdgeId,
@@ -31,10 +30,10 @@ pub struct TonnetzPlant {
     rule_performance: HashMap<Vec<usize>, f64>,
 }
 
-impl TonnetzPlant {
-    pub fn new(utm: WolframUTM, position: EdgeId) -> Self {
-        TonnetzPlant {
-            utm,
+impl VNode {
+    pub fn new(plant: Plant, position: EdgeId) -> Self {
+        VNode {
+            plant,
             position,
             memory: TopologicalMemory::new(),
             learned_rules: HashMap::new(),
@@ -51,12 +50,12 @@ impl TonnetzPlant {
     ) -> crate::Result<()> {
         // Get the current triad data
         let current_triad = tonnetz
-            .triads
+            .plants
             .get(&self.position)
             .ok_or_else(|| rshyper::Error::HyperedgeDoesNotExist(self.position.to_string()))?;
 
         // Apply the transformation to the UTM
-        self.utm.apply_transformation(transform);
+        let plant = self.plant.apply_transform(transform);
 
         // Find the destination triad in the Tonnetz
         let transformations = tonnetz.transformations.get(&self.position).ok_or_else(|| {
@@ -76,15 +75,15 @@ impl TonnetzPlant {
 
         // Record the transformation in memory
         let next_triad = tonnetz
-            .triads
+            .plants
             .get(&*next_position)
             .ok_or_else(|| rshyper::Error::HyperedgeDoesNotExist(next_position.to_string()))?;
 
         self.memory.record_transformation(
-            current_triad.pitches,
+            *current_triad.alphabet(),
             current_triad.class,
             transform,
-            next_triad.pitches,
+            *next_triad.alphabet(),
             next_triad.class,
         );
 
@@ -106,8 +105,8 @@ impl TonnetzPlant {
                 let transform = Transformation::from(feature.content[4]);
 
                 // Create a key representing the state and symbol
-                let current_state = self.utm.state();
-                let current_symbol = self.utm.get_current_symbol();
+                let current_state = self.plant.state();
+                let current_symbol = self.plant.utm.get_current_symbol();
                 let pattern_key = vec![*current_state, current_symbol, feature.content[4]];
 
                 // Define a rule based on this pattern
@@ -125,7 +124,7 @@ impl TonnetzPlant {
 
     /// Apply learned rules to the UTM
     pub fn apply_learned_rules(&mut self) {
-        let head = self.utm.head();
+        let head = self.plant.utm.head();
         let Head { state, symbol } = head;
 
         // Try to find matching rules
@@ -135,7 +134,7 @@ impl TonnetzPlant {
 
             if let Some(&tail) = self.learned_rules.get(&pattern_key) {
                 // Apply the rule
-                self.utm.ruleset.insert(head, tail);
+                self.plant.utm.ruleset.insert(head, tail);
 
                 println!("Applied learned rule: {head} → {tail}");
 

@@ -25,23 +25,24 @@ pub mod models {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    pub mod learn;
-    pub mod plant;
+    pub mod vnode;
     pub mod wolfram;
 
     pub(crate) mod prelude {
-        pub use super::learn::*;
-        pub use super::plant::*;
+        pub use super::vnode::*;
         pub use super::wolfram::*;
     }
 }
 
-#[allow(unused_imports)]
 pub mod ops {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    pub(crate) mod prelude {}
+    pub mod num;
+
+    pub(crate) mod prelude {
+        pub use super::num::*;
+    }
 }
 
 #[allow(unused_imports)]
@@ -56,11 +57,9 @@ pub mod types {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    pub mod music;
     pub mod turing;
 
     pub(crate) mod prelude {
-        pub use super::music::*;
         pub use super::turing::*;
     }
 }
@@ -81,6 +80,7 @@ pub mod prelude {
     pub use crate::error::*;
     pub use crate::models::prelude::*;
     pub use crate::ops::prelude::*;
+    pub use crate::topo::prelude::*;
     pub use crate::traits::prelude::*;
     pub use crate::types::prelude::*;
     pub use crate::utils::prelude::*;

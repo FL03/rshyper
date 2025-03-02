@@ -71,10 +71,6 @@ rustc-args = [ "--cfg", "docsrs" ]
 
 # ********* examples *********
 [[example]]
-name = "learn"
-required-features = [ "full" ]
-
-[[example]]
 name = "neo"
 required-features = [ "default" ]
 

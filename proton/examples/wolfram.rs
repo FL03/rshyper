@@ -20,30 +20,30 @@ fn main() -> Result<()> {
     // Create a simple program using our 4 symbols (0, 4, 7, 11)
     let program = [0, 4, 7, 11, 0, 4, 7, 0, 11, 4, 0, 7];
 
-    // Initialize our UTM with a modulus of 12 for the musical system
-    let mut utm = WolframUTM::new(ruleset.clone(), 12);
+    let mut plant = Plant::new(Triad::from_root(0, TriadClass::Major));
+    plant.set_ruleset(ruleset.clone());
 
-    println!("Initial state: {}", utm.printed());
+    println!("Initial state: {}", plant.printed());
 
     // Run for 100 iterations
-    let history = utm.run(program.to_vec());
+    let history = plant.run(program.to_vec());
 
     // Print the execution history
     for (i, (state, tape, triad, class)) in history.iter().enumerate() {
         println!("Step {i}: State {state}, Tape: {tape:?}, Triad: {class:?}({triad:?})",);
     }
 
-    println!("Final state: {}", utm.printed());
+    println!("Final state: {}", plant.printed());
 
     // Analysis of the run
     println!("\nAnalysis:");
-    println!("- Final tape length: {}", utm.tape().len());
-    println!("- Final position: {}", utm.position());
-    println!("- Final triad: {:?} {:?}", utm.class(), utm.alphabet());
+    println!("- Final tape length: {}", plant.tape().len());
+    println!("- Final position: {}", plant.position());
+    println!("- Final triad: {:?} {:?}", plant.class(), plant.alphabet());
 
     // Count occurrences of each symbol in the final tape
     let mut symbol_counts = HashMap::new();
-    for &symbol in utm.tape() {
+    for &symbol in plant.tape() {
         *symbol_counts.entry(symbol).or_insert(0) += 1;
     }
     println!("- Symbol counts: {:?}", symbol_counts);
@@ -53,25 +53,23 @@ fn main() -> Result<()> {
     println!("- Starting with C-Major triad: [0, 4, 7]");
 
     // Demonstrate a single transformation
-    let mut demo_utm = WolframUTM::new(ruleset, 12);
+    let headspace = Triad::from_root(0, TriadClass::Major);
+    let plant = Plant::new(headspace);
     println!(
         "- Initial triad: {:?} {:?}",
-        demo_utm.class(),
-        demo_utm.alphabet()
+        plant.class(),
+        plant.utm.alphabet()
     );
 
-    demo_utm.apply_leading_transformation();
-    println!(
-        "- After δ_L: {:?} {:?}",
-        demo_utm.class(),
-        demo_utm.alphabet()
-    );
+    let next = plant.apply_transform(Transformation::Leading);
+    println!("- After δ_L: {next:?}");
 
-    demo_utm.apply_leading_transformation();
+    let other = plant.apply_transform(Transformation::Parallel);
+    assert_eq!(other, plant);
     println!(
         "- After δ_L again: {:?} {:?}",
-        demo_utm.class(),
-        demo_utm.alphabet()
+        other.class(),
+        other.alphabet()
     );
     Ok(())
 }
