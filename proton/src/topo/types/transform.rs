@@ -53,7 +53,7 @@ impl Transformation {
     }
 
     /// Apply a transformation to a triad
-    pub fn apply_transform(&self, triad: &Triad) -> Triad {
+    pub fn apply(&self, triad: &Triad) -> Triad {
         use crate::ops::PyMod;
         let &Triad { class, pitches } = triad;
 

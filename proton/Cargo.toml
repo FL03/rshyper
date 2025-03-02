@@ -60,9 +60,9 @@ rstm = { git = "https://github.com/FL03/rstm.git", branch = "v0.0.6", version = 
 num = { version = "0.4" }
 rand = { optional = true, version = "0.9" }
 rand_distr = { optional = true, version = "0.5" }
-serde = { features = ["std"], optional = true, workspace = true }
+serde = { default-features = true, features = ["derive"], optional = true, workspace = true }
 serde_derive = { optional = true, workspace = true }
-strum = { workspace = true }
+strum = { default-features = true, workspace = true }
 thiserror = { workspace = true }
 
 [package.metadata.docs.rs]

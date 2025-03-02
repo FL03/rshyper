@@ -113,19 +113,19 @@ impl Tonnetz {
     /// Determine if there's a single transformation between two triads
     fn get_transformation(triad1: &Triad, triad2: &Triad) -> Option<Transformation> {
         // Leading transformation
-        let leading_result = triad1.apply_transform(Transformation::Leading);
+        let leading_result = triad1.transform(Transformation::Leading);
         if leading_result == *triad2 {
             return Some(Transformation::Leading);
         }
 
         // Parallel transformation
-        let parallel_result = triad1.apply_transform(Transformation::Parallel);
+        let parallel_result = triad1.transform(Transformation::Parallel);
         if parallel_result == *triad2 {
             return Some(Transformation::Parallel);
         }
 
         // Relative transformation
-        let relative_result = triad1.apply_transform(Transformation::Relative);
+        let relative_result = triad1.transform(Transformation::Relative);
         if relative_result == *triad2 {
             return Some(Transformation::Relative);
         }

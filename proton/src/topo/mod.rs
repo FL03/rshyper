@@ -21,10 +21,12 @@ pub mod types {
     pub use self::prelude::*;
 
     pub mod class;
+    pub mod factors;
     pub mod transform;
 
     pub(crate) mod prelude {
         pub use super::class::*;
+        pub use super::factors::*;
         pub use super::transform::*;
     }
 }

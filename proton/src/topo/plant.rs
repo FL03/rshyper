@@ -35,7 +35,7 @@ impl Plant {
     }
 
     pub fn apply_transform(&self, transform: Transformation) -> Self {
-        let triad = self.triad.apply_transform(transform);
+        let triad = self.triad.transform(transform);
         let utm = self.utm.clone().with_alphabet(triad.pitches);
         Plant {
             modulus: self.modulus,
@@ -63,7 +63,7 @@ impl Plant {
                 Transformation::Parallel,
                 Transformation::Relative,
             ] {
-                if i.apply_transform(&self.triad).contains(&symbol) {
+                if i.apply(&self.triad).contains(&symbol) {
                     self.apply_transform(i);
                     break;
                 }
