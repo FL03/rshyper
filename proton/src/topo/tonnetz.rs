@@ -7,7 +7,10 @@ use crate::{Transformation, TriadClass, WolframUTM};
 use rshyper::prelude::{EdgeId, HyperGraph, VertexId};
 use std::collections::HashMap;
 
-/// Represents the global Tonnetz structure with UTMs as "plants"
+/// The tonnetz is a representation of tonal space in-which every facet is a valid triad. 
+/// Here, we use the tonnetz to define the topology of the runtime as well as the cluster. 
+/// Each instance of the runtime orchestrates a _fragment_ of the Tonnetz and glues it to the 
+/// cluster with various networking protocols.
 #[derive(Clone, Debug)]
 pub struct Tonnetz {
     /// The underlying hypergraph structure

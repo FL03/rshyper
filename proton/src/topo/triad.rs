@@ -6,7 +6,11 @@ use crate::{PyMod, Transformation, TriadClass};
 
 use super::Factors;
 
-/// Data associated with a hyperedge (triad) in the Tonnetz
+/// A triad is a particular chord composed of three notes that satify particular intervallic 
+/// constrains with each other. Here, the triad materializes the facet of a hyperedge within a 
+/// cluster of triads persisted in the Tonnetz. The triad is a fundamental entity in the
+/// substrate used to represent the _headspace_ of a plant. Each plant relies on these objects 
+/// to transverse the surface of the tonnetz so that it may gaurantee the completion of a task.
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
