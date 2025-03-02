@@ -1,61 +1,101 @@
-use proton::prelude::{Direction, LearningUTM};
+/*
+    Appellation: learn <example>
+    Contrib: @FL03
+*/
+use proton::models::learn::{Goal, RLearningUTM};
+use std::time::Instant;
 
-fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
-    let mut lutm = LearningUTM::new(12).with_params(0.2, 0.3);
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Initialize a learning UTM with more aggressive learning parameters
+    let mut learner = RLearningUTM::new(12).with_params(0.2, 0.8, 0.4);
     
-    println!("Learning UTM Demonstration");
-    println!("=========================\n");
+    println!("UTM Goal-Based Learning Demonstration");
+    println!("===================================\n");
     
-    // Define some training examples for Wolfram [2,3]
-    // Format: (state, symbol, next_state, direction)
-    let training_examples = vec![
-        // State 0 rules for C-Major triad [0,4,7]
-        (0, 0, 0, Direction::Right),  // If in state 0 and see 0, stay in state 0 and move right
-        (0, 4, 1, Direction::Right),  // If in state 0 and see 4, go to state 1 and move right
-        (0, 7, 0, Direction::Left),   // If in state 0 and see 7, stay in state 0 and move left
-        
-        // State 1 rules for E-Minor triad [4,7,11]
-        (1, 4, 1, Direction::Left),   // If in state 1 and see 4, stay in state 1 and move left
-        (1, 7, 0, Direction::Right),  // If in state 1 and see 7, go to state 0 and move right
-        (1, 11, 1, Direction::Right), // If in state 1 and see 11, stay in state 1 and move right
-        
-        // Rules for symbols requiring transformations
-        (0, 11, 1, Direction::Left),  // Need L transformation to handle 11 in state 0
-        (1, 0, 0, Direction::Right),  // Need L transformation to handle 0 in state 1
-    ];
+    // Define a transformation goal: convert [0,4,7] to [7,4,0]
+    let input = vec![0, 4, 7];
+    let target = vec![7, 4, 0];
+    let goal = Goal::Transform(input.clone(), target.clone());
     
-    println!("Training on {} examples...", training_examples.len());
+    println!("Goal: Transform {:?} into {:?}", input, target);
     
-    // Train the UTM for 50 epochs on these examples
-    lutm.train(training_examples, 50);
+    // Train the UTM on this goal
+    let start = Instant::now();
+    learner.train(goal, 2000);
+    let duration = start.elapsed();
+    println!("Training completed in {:.2?}", duration);
     
-    // Display the learned rules
-    println!("\nLearned Rule Probabilities:");
-    for ((state, symbol), probs) in lutm.rule_probabilities() {
-        println!("State {}, Symbol {}:", state, symbol);
-        let best_rule = probs.iter()
-            .max_by(|a, b| a.1.partial_cmp(b.1).unwrap())
-            .unwrap();
-        let (next_state, next_symbol, dir) = best_rule.0;
-        println!("  → State {}, Write {}, Move {:?} (p={:.2})", 
-                next_state, next_symbol, dir, best_rule.1);
-    }
+    // Print the learned rules
+    learner.print_rules();
     
-    // Create test input
-    let test_input = vec![0, 4, 7, 11, 0, 4, 7, 0];
+    // Test the learned rules
+    println!("\nTesting the learned rules...");
+    learner.set_input(input.clone());
     
-    println!("\nRunning UTM with learned rules on test input: {:?}", test_input);
-    let history = lutm.run(test_input);
+    // Record initial state
+    println!("Initial state:");
+    let (state, tape, position, alphabet, triad_class) = learner.get_state();
+    println!("  State: {}", state);
+    println!("  Tape: {:?}", tape);
+    println!("  Head position: {}", position);
+    println!("  Alphabet: {:?} ({:?})", alphabet, triad_class);
     
+    // Run for a few steps to see what it does
     println!("\nExecution Steps:");
-    for (i, (state, tape, alphabet, class)) in history.iter().enumerate() {
-        println!("Step {}: State {}, Head at position {}", i, state, lutm.utm().position());
+    let history = learner.run(input);
+    
+    for (i, (state, tape, alphabet, triad_class)) in history.iter().enumerate() {
+        println!("Step {}:", i);
+        println!("  State: {}", state);
         println!("  Tape: {:?}", tape);
-        println!("  Alphabet: {:?} ({:?})", alphabet, class);
-        println!("  ------------------------------");
+        println!("  Head position: {}", 
+                 if i < history.len() - 1 { learner.utm.position() } else { learner.utm.position() });
+        println!("  Alphabet: {:?} ({:?})", alphabet, triad_class);
     }
     
-    println!("\nFinal State: {}", lutm.utm().printed());
+    // Check if goal was achieved
+    println!("\nFinal tape: {:?}", learner.utm.tape());
+    if learner.utm.tape() == &target {
+        println!("✓ Goal achieved! The UTM successfully learned to transform the input!");
+    } else {
+        println!("✗ Goal not fully achieved. Further training may be needed.");
+        
+        // Calculate similarity to target
+        let min_len = learner.utm.tape().len().min(target.len());
+        let mut matches = 0;
+        for i in 0..min_len {
+            if learner.utm[i] == target[i] {
+                matches += 1;
+            }
+        }
+        
+        println!("  Similarity to target: {:.0}%", 
+                 100.0 * matches as f64 / target.len() as f64);
+    }
+    
+    // Demonstrate other learning goals
+    println!("\nAdditional Goal Learning Examples:");
+    
+    // Goal 1: Move head to position 2
+    println!("\n1. Teaching UTM to move head to position 2");
+    let mut head_learner = RLearningUTM::new(12).with_params(0.2, 0.8, 0.4);
+    head_learner.train(Goal::HeadPosition(2), 1000);
+    
+    println!("Testing head positioning...");
+    let test_input = vec![0, 4, 7, 11, 0, 4];
+    let head_history = head_learner.run(test_input);
+    println!("Final head position: {}", head_learner.utm.position());
+    println!("Success: {}", head_learner.utm.position() == 2);
+    
+    // Goal 2: Reach state 1
+    println!("\n2. Teaching UTM to reach state 1");
+    let mut state_learner = RLearningUTM::new(12).with_params(0.2, 0.8, 0.4);
+    state_learner.train(Goal::ReachState(1), 1000);
+    
+    println!("Testing state transition...");
+    let state_history = state_learner.run(vec![0, 4, 7]);
+    println!("Final state: {}", state_learner.utm.state());
+    println!("Success: {}", state_learner.utm.state() == 1);
     
     Ok(())
 }

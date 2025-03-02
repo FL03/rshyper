@@ -413,3 +413,11 @@ impl core::fmt::Display for WolframUTM {
         )
     }
 }
+
+impl core::ops::Index<usize> for WolframUTM {
+    type Output = usize;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.tape[index]
+    }
+}

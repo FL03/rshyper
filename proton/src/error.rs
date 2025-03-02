@@ -9,12 +9,29 @@ pub type Result<T = ()> = core::result::Result<T, Error>;
 /// The error type for this crate
 #[derive(Clone, Debug, thiserror::Error)]
 pub enum Error {
-    #[error("Vertex {0} does not exist")]
-    VertexDoesNotExist(String),
-    #[error("Cannot create empty hyperedge")]
-    EmptyHyperedge,
-    #[error("Hyperedge {0} does not exist")]
-    HyperedgeDoesNotExist(String),
-    #[error("Unknown error: {0}")]
+    #[error("IO Error: {0}")]
+    IOError(String),
+    #[error("Parse Error: {0}")]
+    ParseError(String),
+    #[error("Unknown Error: {0}")]
     Unknown(String),
+}
+
+
+impl From<&str> for Error {
+    fn from(s: &str) -> Self {
+        Error::Unknown(s.to_string())
+    }
+}
+
+impl From<String> for Error {
+    fn from(s: String) -> Self {
+        Error::Unknown(s)
+    }
+}
+
+impl From<Box<dyn std::error::Error>> for Error {
+    fn from(e: Box<dyn std::error::Error>) -> Self {
+        Error::Unknown(e.to_string())
+    }
 }
