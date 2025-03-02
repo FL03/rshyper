@@ -9,22 +9,21 @@ use rshyper::{HyperGraph, Node};
 use utm::{demonstrate_tonnetz_and_utm, State, Symbol};
 
 fn main() {
-    use utm::Symbol::*;
     // Create a hypergraph of &str to keep the example simple
     let mut graph = HyperGraph::new();
 
     // Add our "notes" as vertices
-    let v0 = graph.add_vertex(C);
-    let v1 = graph.add_vertex(E);
-    let v2 = graph.add_vertex(G);
+    let v0 = graph.add_vertex(3);
+    let v1 = graph.add_vertex(4);
+    let v2 = graph.add_vertex(7);
 
     // Here we define a hyperedge as a "facet" linking three symbols (a triad)
     let e1 = graph.add_hyperedge(vec![v0, v1, v2]).expect("triad edge");
 
     // In a real system, you could store additional data about states & triad
     let facet_data = MachineFacet {
-        states: (State::S0, State::S1),
-        alphabet: (Symbol::A, Symbol::B, Symbol::C),
+        states: [State::S0, State::S1],
+        alphabet: [3, 4, 7],
     };
     println!("Facet data for hyperedge {e1:?}: {:?}", facet_data);
 
@@ -41,7 +40,27 @@ fn main() {
         .iter()
         .map(|&v| v.weight())
         .collect::<Vec<_>>();
-    demonstrate_tonnetz_and_utm(triad);
+    demonstrate_tonnetz_and_utm(Vec::from_iter([&Symbol::C, &Symbol::E, &Symbol::G]));
+}
+
+/// leading transformations 
+pub fn leading(root: Symbol, third: Symbol, fifth: Symbol) -> Vec<Symbol> {
+    vec![root, third, fifth]
+}
+
+/// A functional implementation of python's `%` operator. The implementation
+/// is unique in its handling of negative values, uniquely preseving the sign
+/// of the _denominator_.
+pub fn pymod<T>(lhs: T, rhs: T) -> T
+where
+    T: Copy + num::Num + PartialOrd,
+{
+    let r = lhs % rhs;
+    if (r < T::zero() && rhs > T::zero()) || (r > T::zero() && rhs < T::zero()) {
+        r + rhs
+    } else {
+        r
+    }
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -101,15 +120,32 @@ impl core::iter::Iterator for TM {
 }
 
 #[derive(Debug)]
-pub struct MachineFacet {
-    pub states: (State, State),
-    pub alphabet: (Symbol, Symbol, Symbol),
+pub struct MachineFacet<Q = State, S = Symbol> {
+    pub states: [Q; 2],
+    pub alphabet: [S; 3],
 }
 
-impl MachineFacet {
-    pub fn new(states: (State, State), alphabet: (Symbol, Symbol, Symbol)) -> Self {
+impl<Q, S> MachineFacet<Q, S> {
+    pub fn new(states: [Q; 2], alphabet: [S; 3]) -> Self {
         Self { states, alphabet }
     }
+
+    pub const fn alphabet(&self) -> &[S; 3] {
+        &self.alphabet
+    }
+
+    pub const fn states(&self) -> &[Q; 2] {
+        &self.states
+    }
+
+    pub fn set_alphabet(&mut self, alphabet: [S; 3]) {
+        self.alphabet = alphabet;
+    }
+
+    pub fn with_alphabet(self, alphabet: [S; 3]) -> Self {
+        Self { alphabet, ..self }
+    }
+
 }
 
 pub mod utm {
@@ -122,11 +158,12 @@ pub mod utm {
     )]
     pub enum State {
         #[default]
-        S0,
-        S1,
+        S0 = 0,
+        S1 = 1,
     }
 
-    // A basic representation of our symbols (three-note triad)
+    /// enumerates the natural harmonies represented symbolically using pitch classes 
+    /// that are mapped to a particular integer value
     #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
     #[cfg_attr(
         feature = "serde",
@@ -134,14 +171,64 @@ pub mod utm {
     )]
     pub enum Symbol {
         #[default]
-        A,
-        B,
-        C,
-        D,
-        E,
-        F,
-        G,
+        C = 0,
+        Cs = 1,
+        D = 2,
+        Ds = 3,
+        E = 4,
+        F = 5,
+        Fs = 6,
+        G = 7,
+        Gs = 8,
+        A = 9,
+        As = 10,
+        B = 11,
     }
+
+    impl From<Symbol> for i32 {
+        fn from(symbol: Symbol) -> Self {
+            symbol as i32
+        }
+    }
+
+    impl From<i32> for Symbol {
+        fn from(value: i32) -> Self {
+            match super::pymod(value, 12) {
+                0 => Symbol::C,
+                1 => Symbol::Cs,
+                2 => Symbol::D,
+                3 => Symbol::Ds,
+                4 => Symbol::E,
+                5 => Symbol::F,
+                6 => Symbol::Fs,
+                7 => Symbol::G,
+                8 => Symbol::Gs,
+                9 => Symbol::A,
+                10 => Symbol::As,
+                11 => Symbol::B,
+                _ => unreachable!("Invalid pitch class"),
+            }
+        }
+    }
+
+    
+
+    impl core::ops::Add for Symbol {
+        type Output = i32;
+
+        fn add(self, rhs: Self) -> Self::Output {
+            super::pymod(self as i32 + rhs as i32, 12)
+        }
+    }
+
+    impl core::ops::Sub for Symbol {
+        type Output = i32;
+
+        fn sub(self, rhs: Self) -> Self::Output {
+            super::pymod(self as i32 - rhs as i32, 12)
+        }
+    }
+
 
     pub fn sample_rulest() -> std::collections::HashMap<Head, (Head, &'static str)> {
         use State::*;

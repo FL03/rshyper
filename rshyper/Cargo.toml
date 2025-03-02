@@ -28,6 +28,11 @@ full = [
 ]
 
 # ********* [FF] Dependencies *********
+alloc = [
+    "num/alloc",
+    "serde?/alloc",
+]
+
 rand = [
     "dep:rand",
     "dep:rand_distr",
@@ -46,9 +51,11 @@ serde = [
 ]
 
 std = [
+    "alloc",
     "num/std",
     "rand/std_rng",
     "serde?/std",
+    "strum/std",
     "thiserror/std",
 ]
 
@@ -60,6 +67,7 @@ rand = { default-features = false, optional = true, version = "0.9" }
 rand_distr = { default-features = false, optional = true, version = "0.5" }
 serde = { optional = true, workspace = true }
 serde_derive = { optional = true, workspace = true }
+strum = { default-features = false, workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
