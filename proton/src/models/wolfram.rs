@@ -2,30 +2,23 @@
     Appellation: wolfram <module>
     Contrib: @FL03
 */
-
-use crate::utils::pymod;
-use crate::{PyMod, RuleSet, Transformation, TriadClass};
+use crate::RuleSet;
 
 use rstm::{Direction, Head, State, Tail};
 
-/// An implementation of the Wolfram [2, 3] UTM designed to operate on a 12-tone system
+/// An implementation of the Wolfram [2, 3] UTM that consideres two states and three symbols
 #[derive(Clone, Debug, PartialEq)]
 pub struct WolframUTM {
-    // Current triad (our active alphabet) - using fixed-size array
+    // the alphabet of the machine
     pub(crate) alphabet: [usize; 3],
-    // Current position on the tape
+    // current position of the head of the machine
     pub(crate) position: usize,
-    // Transition rules: (current_state, current_symbol) -> (new_state, new_symbol, direction)
+    // a set of rules mapping one head to another using some shift
     pub(crate) ruleset: RuleSet<usize, usize>,
-    // Current state (0 or 1)
+    // the current state of the machine
     pub(crate) state: State<usize>,
-    // Tape containing the program symbols
+    // the tape, or memory, of the machine
     pub(crate) tape: Vec<usize>,
-
-    // Current triad type (Major, Minor, Augmented, or Diminished)
-    pub(crate) class: TriadClass,
-    /// a posisitional coordinate mapping the machine to a layer within the global structure
-    pub(crate) modulus: usize,
 }
 
 impl WolframUTM {
@@ -33,26 +26,20 @@ impl WolframUTM {
     pub fn new(alphabet: [usize; 3], State(state): State<usize>) -> Self {
         WolframUTM {
             alphabet,
-            modulus: 0,
             position: 0,
             state: State(state),
             tape: Vec::new(),
             ruleset: RuleSet::new(),
-
-            class: TriadClass::Major, // C-Major is our starting point
         }
     }
-
+    /// create a new instance with the given alphabet and default state
     pub fn from_alphabet(alphabet: [usize; 3]) -> Self {
         Self {
             alphabet,
-            modulus: 0,
             position: 0,
-            state: State(0),
+            state: State::default(),
             tape: Vec::new(),
             ruleset: RuleSet::new(),
-
-            class: TriadClass::Major, // C-Major is our starting point
         }
     }
     /// returns the alphabet of the machine
@@ -64,91 +51,47 @@ impl WolframUTM {
     pub fn position(&self) -> usize {
         self.position
     }
-    /// returns a copy of the machines current class
-    #[inline]
-    pub fn class(&self) -> TriadClass {
-        self.class
-    }
-    #[inline]
-    /// get the octave of the current machine; a modular, positional coordinate for the
-    /// locating the machine in the global structure
-    pub fn modulus(&self) -> usize {
-        self.modulus
-    }
-
+    /// returns a copy of the machine's current state
     #[inline]
     pub fn state(&self) -> State<usize> {
         self.state
     }
-
+    /// returns a mutable reference to the machine's state
     pub fn state_mut(&mut self) -> State<&mut usize> {
         self.state.to_mut()
     }
-
+    /// returns an immutable reference to the tape
     pub const fn tape(&self) -> &Vec<usize> {
         &self.tape
     }
-
-    pub fn set_alphabet(&mut self, alphabet: [usize; 3]) {
-        self.alphabet = alphabet;
+    /// returns a mutable reference to the tape
+    pub fn tape_mut(&mut self) -> &mut Vec<usize> {
+        &mut self.tape
     }
 
-    pub fn with_alphabet(self, alphabet: [usize; 3]) -> Self {
-        Self { alphabet, ..self }
-    }
-
-    pub fn set_modulus(&mut self, modulus: usize) {
-        self.modulus = modulus;
-    }
-
-    pub fn with_modulus(self, modulus: usize) -> Self {
-        Self { modulus, ..self }
-    }
-
-    pub fn set_ruleset(&mut self, ruleset: RuleSet<usize, usize>) {
-        self.ruleset = ruleset;
-    }
-
-    pub fn with_ruleset(self, ruleset: RuleSet<usize, usize>) -> Self {
-        Self { ruleset, ..self }
-    }
-
-    pub fn set_state(&mut self, State(state): State<usize>) {
-        self.state = State(state);
-    }
-
-    pub fn with_state(self, State(state): State<usize>) -> Self {
-        Self {
-            state: State(state),
-            ..self
-        }
-    }
-
+    /// returns the head of the machine
     pub fn head(&self) -> Head<usize, usize> {
-        Head::new(self.state, self.tape[self.position])
+        Head::new(self.state, self.get_current_symbol())
     }
-
-    // Check if a symbol is in the current triad
-    pub fn is_valid_symbol(&self, symbol: usize) -> bool {
+    /// check if a symbol is in the alphabet
+    pub fn contains(&self, symbol: usize) -> bool {
         self.alphabet.contains(&symbol)
     }
-
-    // Get the current symbol under the head
+    /// get the current symbol on the tape
     pub fn get_current_symbol(&self) -> usize {
         if self.position < self.tape.len() {
             self.tape[self.position]
         } else {
             // Default to 0 if we're off the tape
-            0
+            <usize>::default()
         }
     }
-
-    // Step method with deterministic transformations
+    /// execute one step of the machine
     pub fn step(&mut self) -> bool {
         let symbol = self.get_current_symbol();
 
         // Check if the current symbol is in our current triad context
-        if !self.is_valid_symbol(symbol) {
+        if !self.contains(symbol) {
             panic!("symbol {} not in any accessible triad context", symbol);
         }
         let head = Head::new(self.state, symbol);
@@ -193,12 +136,8 @@ impl WolframUTM {
         }
     }
 
-    // Run the UTM with the given input program
-    // Run the UTM with the given input program until it halts
-    pub fn run(
-        &mut self,
-        input: Vec<usize>,
-    ) -> Vec<(State<usize>, Vec<usize>, [usize; 3], TriadClass)> {
+    /// process some input
+    pub fn run(&mut self, input: Vec<usize>) -> Vec<(State<usize>, Vec<usize>, [usize; 3])> {
         // Initialize the tape with the input
         self.tape = input;
         self.position = 0;
@@ -206,12 +145,12 @@ impl WolframUTM {
         let mut history = Vec::new();
 
         // Record initial state
-        history.push((self.state, self.tape.clone(), self.alphabet, self.class));
+        history.push((self.state(), self.tape().clone(), *self.alphabet()));
 
         // Run until the machine halts (i.e., step() returns false)
         while self.step() {
             // Record each state after a step
-            history.push((self.state, self.tape.clone(), self.alphabet, self.class));
+            history.push((self.state(), self.tape().clone(), *self.alphabet()));
 
             // Optional: Add a safety limit to prevent infinite loops in development
             if history.len() > 10000 {
@@ -224,8 +163,8 @@ impl WolframUTM {
 
         history
     }
-    // Convert the machine state to string for visualization
-    pub fn printed(&self) -> String {
+    /// returns a string representation of the machine
+    pub fn pretty_print(&self) -> String {
         let mut result = String::new();
 
         // Print the tape with the current position marked
@@ -239,11 +178,38 @@ impl WolframUTM {
 
         // Add state and triad information
         result.push_str(&format!(
-            " (State: {}, Triad: {:?} {:?})",
-            self.state, self.class, self.alphabet
+            " (State: {}, Alphabet: {:?})",
+            self.state, self.alphabet
         ));
 
         result
+    }
+    /// set the alphabet of the machine
+    pub fn set_alphabet(&mut self, alphabet: [usize; 3]) {
+        self.alphabet = alphabet;
+    }
+    /// set the ruleset of the machine
+    pub fn set_ruleset(&mut self, ruleset: RuleSet<usize, usize>) {
+        self.ruleset = ruleset;
+    }
+    /// set the state of the machine
+    pub fn set_state(&mut self, State(state): State<usize>) {
+        self.state = State(state);
+    }
+    /// consumes this instance to create another with the given alphabet
+    pub fn with_alphabet(self, alphabet: [usize; 3]) -> Self {
+        Self { alphabet, ..self }
+    }
+    /// consumes this instance to create another with the given ruleset
+    pub fn with_ruleset(self, ruleset: RuleSet<usize, usize>) -> Self {
+        Self { ruleset, ..self }
+    }
+    /// consumes this instance to create another with the given state
+    pub fn with_state(self, State(state): State<usize>) -> Self {
+        Self {
+            state: State(state),
+            ..self
+        }
     }
 }
 
@@ -251,8 +217,8 @@ impl core::fmt::Display for WolframUTM {
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         write!(
             f,
-            "Wolfram UTM: State {}, Tape: {:?}, Position: {}, Triad: {:?} {:?}",
-            self.state, self.tape, self.position, self.class, self.alphabet
+            "Wolfram UTM: Alphabet: {:?} State {}, Tape: {:?}, Position: {}",
+            self.alphabet, self.state, self.tape, self.position,
         )
     }
 }

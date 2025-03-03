@@ -3,7 +3,7 @@
     Contrib: @FL03
 */
 
-use crate::topo::{Tonnetz, Transformation};
+use crate::nrt::{LPR, Tonnetz};
 use rshyper::EdgeId;
 use std::collections::{HashMap, HashSet, VecDeque};
 
@@ -11,7 +11,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 #[derive(Debug, Clone)]
 pub struct TransformationChain {
     /// The sequence of transformations to apply
-    pub transforms: Vec<Transformation>,
+    pub transforms: Vec<LPR>,
     /// The sequence of triad IDs visited
     pub path: Vec<EdgeId>,
 }
@@ -38,7 +38,7 @@ impl<'a> MotionPlanner<'a> {
         // Use breadth-first search to find the shortest path
         let mut queue = VecDeque::new();
         let mut visited = HashSet::new();
-        let mut came_from: HashMap<EdgeId, (EdgeId, Transformation)> = HashMap::new();
+        let mut came_from: HashMap<EdgeId, (EdgeId, LPR)> = HashMap::new();
 
         queue.push_back(start);
         visited.insert(start);
@@ -69,7 +69,7 @@ impl<'a> MotionPlanner<'a> {
         &self,
         start: EdgeId,
         goal: EdgeId,
-        came_from: &HashMap<EdgeId, (EdgeId, Transformation)>,
+        came_from: &HashMap<EdgeId, (EdgeId, LPR)>,
     ) -> TransformationChain {
         let mut current = goal;
         let mut path = vec![goal];
@@ -110,7 +110,7 @@ impl<'a> MotionPlanner<'a> {
         for (i, &transform) in path.transforms.iter().enumerate() {
             // Apply the transformation
             let nplant = cplant.apply_transform(transform);
-            utm.set_alphabet(*nplant.alphabet());
+            utm.set_alphabet(*nplant.utm().alphabet());
 
             // Verify we reach the expected triad
             let next_edge = path.path[i + 1];
@@ -124,8 +124,8 @@ impl<'a> MotionPlanner<'a> {
             // (In a full system, we'd update the UTM's current state here)
             println!(
                 "Transformed from {:?} to {:?} using {:?}",
-                cplant.alphabet(),
-                next_triad_data.alphabet(),
+                cplant.utm().alphabet(),
+                next_triad_data.utm().alphabet(),
                 transform
             );
 
@@ -155,7 +155,7 @@ impl<'a> MotionPlanner<'a> {
         // Use breadth-first search to find a triad containing the target symbol
         let mut queue = VecDeque::new();
         let mut visited = HashSet::new();
-        let mut came_from: HashMap<EdgeId, (EdgeId, Transformation)> = HashMap::new();
+        let mut came_from: HashMap<EdgeId, (EdgeId, LPR)> = HashMap::new();
 
         queue.push_back(start_triad);
         visited.insert(start_triad);
@@ -212,10 +212,7 @@ impl<'a> MotionPlanner<'a> {
     }
 
     /// Analyze available transformations from current triad
-    pub fn analyze_transformations(
-        &self,
-        triad_id: EdgeId,
-    ) -> Vec<(Transformation, EdgeId, [usize; 3])> {
+    pub fn analyze_transformations(&self, triad_id: EdgeId) -> Vec<(LPR, EdgeId, [usize; 3])> {
         let mut results = Vec::new();
 
         if let Some(transformations) = self.tonnetz.transformations.get(&triad_id) {
@@ -236,7 +233,7 @@ impl<'a> MotionPlanner<'a> {
         &self,
         start: EdgeId,
         target_symbol: usize,
-    ) -> Vec<(Transformation, EdgeId)> {
+    ) -> Vec<(LPR, EdgeId)> {
         let mut suggestions = Vec::new();
 
         // Get starting triad data
@@ -246,19 +243,15 @@ impl<'a> MotionPlanner<'a> {
         };
 
         // For each transformation type
-        for transform in [
-            Transformation::Leading,
-            Transformation::Parallel,
-            Transformation::Relative,
-        ] {
+        for transform in [LPR::Leading, LPR::Parallel, LPR::Relative] {
             // Calculate what the resulting triad would be
             let next = start_data.apply_transform(transform);
 
             // Check if the result contains our target symbol
             if next.contains(&target_symbol) {
                 // Find the edge ID of this triad if it exists
-                for (&edge_id, triad) in &self.tonnetz.plants {
-                    if triad.alphabet() == next.alphabet() {
+                for (&edge_id, plant) in &self.tonnetz.plants {
+                    if plant.utm().alphabet() == next.utm().alphabet() {
                         suggestions.push((transform, edge_id));
                         break;
                     }
@@ -268,7 +261,7 @@ impl<'a> MotionPlanner<'a> {
                 if !suggestions.iter().any(|(t, _)| t == &transform) {
                     println!(
                         "Suggestion: Create new triad {:?} using {transform:?} transformation",
-                        next.alphabet()
+                        next.utm().alphabet()
                     );
                 }
             }

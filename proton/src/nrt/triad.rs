@@ -2,14 +2,14 @@
     Appellation: traid <module>
     Contrib: @FL03
 */
-use crate::{PyMod, Transformation, TriadClass};
+use crate::{LPR, PyMod, TriadClass};
 
 use super::Factors;
 
-/// A triad is a particular chord composed of three notes that satify particular intervallic 
-/// constrains with each other. Here, the triad materializes the facet of a hyperedge within a 
+/// A triad is a particular chord composed of three notes that satify particular intervallic
+/// constrains with each other. Here, the triad materializes the facet of a hyperedge within a
 /// cluster of triads persisted in the Tonnetz. The triad is a fundamental entity in the
-/// substrate used to represent the _headspace_ of a plant. Each plant relies on these objects 
+/// substrate used to represent the _headspace_ of a plant. Each plant relies on these objects
 /// to transverse the surface of the tonnetz so that it may gaurantee the completion of a task.
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(
@@ -25,6 +25,9 @@ pub struct Triad {
 
 impl Triad {
     pub fn new(pitches: [usize; 3], class: TriadClass) -> Self {
+        if !class.validate(&pitches) {
+            panic!("Invalid triad pitches for class {pitches:?}");
+        }
         Triad { pitches, class }
     }
     /// Create a new triad from a root pitch and class
@@ -36,15 +39,6 @@ impl Triad {
             pitches: [root, third, fifth],
             class,
         }
-    }
-    /// returns true if the pitches within the triad match its classification
-    pub fn is_valid(&self) -> bool {
-        let [a, b, c] = self.class.intervals();
-        let [root, third, fifth] = self.pitches;
-        let x = (third - root).pymod(12);
-        let y = (fifth - third).pymod(12);
-        let z = (fifth - root).pymod(12);
-        x == a && y == b && z == c
     }
     /// returns a copy of the class of the triad
     pub fn class(&self) -> TriadClass {
@@ -66,27 +60,36 @@ impl Triad {
     pub fn fifth(&self) -> usize {
         self[Factors::Fifth]
     }
-    /// Check if the triad contains a given pitch class
+    /// check if the triad contains a given pitch class
     pub fn contains<Q>(&self, pitch: &Q) -> bool
     where
         Q: core::borrow::Borrow<usize>,
     {
         self.pitches().contains(pitch.borrow())
     }
+    /// returns true if the pitches within the triad match its classification
+    pub fn is_valid(&self) -> bool {
+        let [a, b, c] = self.class.intervals();
+        let [root, third, fifth] = self.pitches;
+        let x = (third - root).pymod(12);
+        let y = (fifth - third).pymod(12);
+        let z = (fifth - root).pymod(12);
+        x == a && y == b && z == c
+    }
     /// Apply the leading transformation to the triad
     pub fn leading(&self) -> Self {
-        self.transform(Transformation::Leading)
+        self.transform(LPR::Leading)
     }
     /// Apply the parallel transformation to the triad
     pub fn parallel(&self) -> Self {
-        self.transform(Transformation::Parallel)
+        self.transform(LPR::Parallel)
     }
     /// Apply the relative transformation to the triad
     pub fn relative(&self) -> Self {
-        self.transform(Transformation::Relative)
+        self.transform(LPR::Relative)
     }
     /// Apply a transformation to a triad
-    pub fn transform(&self, transform: Transformation) -> Self {
+    pub fn transform(&self, transform: LPR) -> Self {
         transform.apply(self)
     }
 }

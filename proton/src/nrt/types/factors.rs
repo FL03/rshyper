@@ -4,39 +4,6 @@
 */
 use strum::IntoEnumIterator;
 
-macro_rules! factors {
-    (@impl $vis:vis enum $name:ident) => {
-        #[derive(
-            Clone,
-            Copy,
-            Debug,
-            Eq,
-            Hash,
-            Ord,
-            PartialEq,
-            PartialOrd,
-            strum::AsRefStr,
-            strum::Display,
-            strum::EnumCount,
-            strum::EnumIter,
-            strum::EnumString,
-            strum::VariantNames,
-        )]
-        #[cfg_attr(
-            feature = "serde",
-            derive(serde::Deserialize, serde::Serialize),
-            serde(rename_all = "lowercase")
-        )]
-        #[repr(transparent)]
-        $vis enum $name {}
-
-        impl $name {
-            pub fn index() -> usize {
-                0
-            }
-        }
-    }
-}
 /// A [chord factor](Components) describes the position of a note within a [triad](crate::Triad).
 /// The `root` factor is the first note of the triad, the `third` factor is the
 /// second note of the triad, and the `fifth` factor is the third note of the triad.

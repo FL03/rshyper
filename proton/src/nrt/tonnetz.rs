@@ -2,14 +2,15 @@
     Appellation: tonnetz <module>
     Contrib: @FL03
 */
-use super::{Plant, Triad};
-use crate::{Transformation, TriadClass, WolframUTM};
+use super::{LPR, Triad, TriadClass, utils};
+use crate::models::WolframUTM;
+use crate::plant::Plant;
 use rshyper::prelude::{EdgeId, HyperGraph, VertexId};
 use std::collections::HashMap;
 
-/// The tonnetz is a representation of tonal space in-which every facet is a valid triad. 
-/// Here, we use the tonnetz to define the topology of the runtime as well as the cluster. 
-/// Each instance of the runtime orchestrates a _fragment_ of the Tonnetz and glues it to the 
+/// The tonnetz is a representation of tonal space in-which every facet is a valid triad.
+/// Here, we use the tonnetz to define the topology of the runtime as well as the cluster.
+/// Each instance of the runtime orchestrates a _fragment_ of the Tonnetz and glues it to the
 /// cluster with various networking protocols.
 #[derive(Clone, Debug)]
 pub struct Tonnetz {
@@ -18,7 +19,7 @@ pub struct Tonnetz {
     /// Maps EdgeIds to TriadData for efficient access
     pub plants: HashMap<EdgeId, Plant>,
     /// Tracks adjacency between triads via transformations
-    pub transformations: HashMap<EdgeId, HashMap<Transformation, EdgeId>>,
+    pub transformations: HashMap<EdgeId, HashMap<LPR, EdgeId>>,
 }
 
 impl Tonnetz {
@@ -81,7 +82,7 @@ impl Tonnetz {
                     if let Some(plant2) = self.plants.get(&edge2) {
                         // Check if there's a transformation from triad1 to triad2
                         if let Some(transform) =
-                            Self::get_transformation(&plant1.triad, &plant2.triad)
+                            utils::get_transformation(&plant1.triad, &plant2.triad)
                         {
                             self.transformations
                                 .get_mut(&edge1)
@@ -93,9 +94,8 @@ impl Tonnetz {
             }
         }
     }
-
     /// Deploy a UTM to a specific triad
-    pub fn deploy_utm(&mut self, edge_id: EdgeId, utm: WolframUTM) -> crate::Result<()> {
+    pub fn set_edge_machine(&mut self, edge_id: EdgeId, utm: WolframUTM) -> crate::Result<()> {
         if let Some(plant) = self.plants.get_mut(&edge_id) {
             plant.utm = utm;
             Ok(())
@@ -111,28 +111,5 @@ impl Tonnetz {
             .iter()
             .find(|(_, node)| *node.weight() == pitch)
             .map(|(id, _)| *id)
-    }
-
-    /// Determine if there's a single transformation between two triads
-    fn get_transformation(triad1: &Triad, triad2: &Triad) -> Option<Transformation> {
-        // Leading transformation
-        let leading_result = triad1.transform(Transformation::Leading);
-        if leading_result == *triad2 {
-            return Some(Transformation::Leading);
-        }
-
-        // Parallel transformation
-        let parallel_result = triad1.transform(Transformation::Parallel);
-        if parallel_result == *triad2 {
-            return Some(Transformation::Parallel);
-        }
-
-        // Relative transformation
-        let relative_result = triad1.transform(Transformation::Relative);
-        if relative_result == *triad2 {
-            return Some(Transformation::Relative);
-        }
-
-        None
     }
 }

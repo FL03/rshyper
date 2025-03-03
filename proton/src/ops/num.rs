@@ -11,6 +11,12 @@ pub trait PyMod<Rhs> {
     fn pymod(self, rhs: Rhs) -> Self::Output;
 }
 
+pub trait PitchMod {
+    type Output;
+
+    fn pmod(self) -> Self::Output;
+}
+
 impl<A, B, C> PyMod<B> for A
 where
     A: core::ops::Rem<B, Output = C>,
@@ -26,5 +32,16 @@ where
         } else {
             r
         }
+    }
+}
+
+impl<A> PitchMod for A
+where
+    A: PyMod<A> + num::FromPrimitive,
+{
+    type Output = A::Output;
+
+    fn pmod(self) -> Self::Output {
+        self.pymod(A::from_usize(12).unwrap())
     }
 }

@@ -71,6 +71,27 @@ impl TriadClass {
             TriadClass::Diminished => [3, 3, 6],
         }
     }
+    /// returns the interval from the root to the third chord factor; defined by the class
+    pub fn root_to_third(self) -> usize {
+        self.intervals()[0]
+    }
+    /// returns the interval from the third to the fifth chord factor; defined by the class
+    pub fn third_to_fifth(self) -> usize {
+        self.intervals()[1]
+    }
+    /// returns the interval from the root to the fifth chord factor; defined by the class
+    pub fn root_to_fifth(self) -> usize {
+        self.intervals()[2]
+    }
+    /// validate a chord's composition satisfies the requirements of the current class
+    pub fn validate(&self, notes: &[usize; 3]) -> bool {
+        use crate::ops::PitchMod;
+        let [a, b, c] = self.intervals();
+        let r = notes[0] as isize;
+        let t = notes[1] as isize;
+        let f = notes[2] as isize;
+        (t - r).pmod() as usize == a && (f - t).pmod() as usize == b && (f - r).pmod() as usize == c
+    }
 }
 
 impl From<usize> for TriadClass {

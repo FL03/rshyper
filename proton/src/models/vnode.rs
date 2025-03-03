@@ -2,14 +2,15 @@
     Appellation: vnode <module>
     Contrib: @FL03
 */
-
-use crate::models::WolframUTM;
-use crate::topo::{Plant, Tonnetz, Transformation, TriadClass, memory::TopologicalMemory};
+use crate::mem::TopologicalMemory;
+use crate::nrt::{LPR, Tonnetz, TriadClass};
+use crate::plant::Plant;
 use rshyper::EdgeId;
 use rstm::{Direction, Head, State, Tail};
 use std::collections::HashMap;
 
 /// A virtualized workspace responsible for managing its associated plant.
+#[derive(Clone, Debug)]
 pub struct VNode {
     /// The underlying UTM
     pub plant: Plant,
@@ -43,25 +44,21 @@ impl VNode {
     }
 
     /// Move the plant to a new position via a transformation
-    pub fn apply_transformation(
-        &mut self,
-        transform: Transformation,
-        tonnetz: &Tonnetz,
-    ) -> crate::Result<()> {
+    pub fn apply_transformation(&mut self, transform: LPR, tonnetz: &Tonnetz) -> crate::Result<()> {
         // Get the current triad data
-        let current_triad = tonnetz
+        let cplant = tonnetz
             .plants
             .get(&self.position)
             .ok_or_else(|| rshyper::Error::HyperedgeDoesNotExist(self.position.to_string()))?;
 
-        // Apply the transformation to the UTM
-        let plant = self.plant.apply_transform(transform);
+        // Apply the transformation to the plant
+        let nplant = self.plant.apply_transform(transform);
 
-        // Find the destination triad in the Tonnetz
+        // find the destination triad in the Tonnetz
         let transformations = tonnetz.transformations.get(&self.position).ok_or_else(|| {
             crate::Error::Unknown("No transformations available for this triad".into())
         })?;
-
+        // get the next position
         let next_position = transformations.get(&transform).ok_or_else(|| {
             crate::Error::Unknown(format!(
                 "Transformation {:?} not valid from this triad",
@@ -80,11 +77,11 @@ impl VNode {
             .ok_or_else(|| rshyper::Error::HyperedgeDoesNotExist(next_position.to_string()))?;
 
         self.memory.record_transformation(
-            *current_triad.alphabet(),
-            current_triad.class,
+            *cplant.alphabet(),
+            cplant.class(),
             transform,
             *next_triad.alphabet(),
-            next_triad.class,
+            next_triad.class(),
         );
 
         self.memory.advance_time();
@@ -93,7 +90,7 @@ impl VNode {
     }
 
     /// Learn rules from topological features
-    pub fn learn_from_topology(&mut self, tonnetz: &Tonnetz) {
+    pub fn learn_from_topology(&mut self, _tonnetz: &Tonnetz) {
         // Get active features as potential rule templates
         let active_features = self.memory.find_active_features();
 
@@ -102,7 +99,7 @@ impl VNode {
                 // Extract the transformation pattern from the feature
                 let triad = [feature.content[0], feature.content[1], feature.content[2]];
                 let class = TriadClass::from(feature.content[3]);
-                let transform = Transformation::from(feature.content[4]);
+                let transform = LPR::from(feature.content[4]);
 
                 // Create a key representing the state and symbol
                 let current_state = self.plant.state();

@@ -2,10 +2,10 @@
     Appellation: wolfram <example>
     Contrib: @FL03
 */
-use proton::prelude::*;
+use proton::{LPR, Plant, Triad, TriadClass};
 use std::collections::HashMap;
 
-fn main() -> Result<()> {
+fn main() -> proton::Result<()> {
     let ruleset = proton::ruleset! {
         (0, 0) => (Right, 0, 4),
         (0, 4) => (Right, 1, 7),
@@ -23,7 +23,7 @@ fn main() -> Result<()> {
     let mut plant = Plant::new(Triad::from_root(0, TriadClass::Major));
     plant.set_ruleset(ruleset.clone());
 
-    println!("Initial state: {}", plant.printed());
+    println!("Initial state: {}", plant.utm().pretty_print());
 
     // Run for 100 iterations
     let history = plant.run(program.to_vec());
@@ -33,7 +33,7 @@ fn main() -> Result<()> {
         println!("Step {i}: State {state}, Tape: {tape:?}, Triad: {class:?}({triad:?})",);
     }
 
-    println!("Final state: {}", plant.printed());
+    println!("Final state: {}", plant.utm().pretty_print());
 
     // Analysis of the run
     println!("\nAnalysis:");
@@ -55,16 +55,12 @@ fn main() -> Result<()> {
     // Demonstrate a single transformation
     let headspace = Triad::from_root(0, TriadClass::Major);
     let plant = Plant::new(headspace);
-    println!(
-        "- Initial triad: {:?} {:?}",
-        plant.class(),
-        plant.utm.alphabet()
-    );
+    println!("- Initial plant: {plant:?}",);
 
-    let next = plant.apply_transform(Transformation::Leading);
+    let next = plant.apply_transform(LPR::Leading);
     println!("- After δ_L: {next:?}");
 
-    let other = plant.apply_transform(Transformation::Parallel);
+    let other = plant.apply_transform(LPR::Parallel);
     assert_eq!(other, plant);
     println!(
         "- After δ_L again: {:?} {:?}",

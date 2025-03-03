@@ -2,8 +2,8 @@
     Appellation: neo <module>
     Contrib: @FL03
 */
+use proton::nrt::motion::MotionPlanner;
 use proton::prelude::*;
-use proton::topo::motion::MotionPlanner;
 use rstm::State;
 
 fn main() -> proton::Result {
@@ -30,8 +30,8 @@ fn main() -> proton::Result {
 
     // Add some common triads to the Tonnetz
     let c_major = tonnetz.add_triad([0, 4, 7], TriadClass::Major)?; // C Major
-    let a_minor = tonnetz.add_triad([9, 0, 4], TriadClass::Minor)?; // A Minor
-    let e_minor = tonnetz.add_triad([4, 7, 11], TriadClass::Minor)?; // E Minor
+    let _a_minor = tonnetz.add_triad([9, 0, 4], TriadClass::Minor)?; // A Minor
+    let _e_minor = tonnetz.add_triad([4, 7, 11], TriadClass::Minor)?; // E Minor
     let g_major = tonnetz.add_triad([7, 11, 2], TriadClass::Major)?; // G Major
 
     // Compute transformations between triads
@@ -44,12 +44,10 @@ fn main() -> proton::Result {
     println!("- G Major (7,11,2)\n");
 
     // Create a UTM for our first plant
-    let utm = WolframUTM::new([0, 4, 7], State(0))
-        .with_ruleset(ruleset)
-        .with_modulus(12);
+    let utm = WolframUTM::new([0, 4, 7], State(0)).with_ruleset(ruleset);
 
     // Deploy the UTM to C Major triad
-    tonnetz.deploy_utm(c_major, utm.clone())?;
+    tonnetz.set_edge_machine(c_major, utm.clone())?;
 
     println!("Deployed UTM to C Major triad\n");
 
@@ -104,11 +102,7 @@ fn main() -> proton::Result {
         let c_major_triad = tonnetz.plants.get(&c_major).unwrap();
 
         // Try each transformation and see what would result
-        for transform in [
-            Transformation::Leading,
-            Transformation::Parallel,
-            Transformation::Relative,
-        ] {
+        for transform in [LPR::Leading, LPR::Parallel, LPR::Relative] {
             let triad = c_major_triad.apply_transform(transform);
             println!("- Applying {transform:?} would create: {triad:?}");
             if triad.contains(&2) {

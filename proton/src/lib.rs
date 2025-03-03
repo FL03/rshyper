@@ -1,6 +1,6 @@
 /*
     Appellation: rshyper <library>
-    Contrib: Joe McCain III <jo3mccain@icloud.com>
+    Contrib: FL03 <jo3mccain@icloud.com>
 */
 //! # proton-substrate
 //!
@@ -11,7 +11,7 @@
 #[allow(unused_imports)]
 #[doc(inline)]
 pub use self::{
-    error::*, models::prelude::*, ops::prelude::*, topo::prelude::*, traits::prelude::*,
+    error::*, nrt::prelude::*, ops::prelude::*, plant::Plant, traits::prelude::*,
     types::prelude::*, utils::prelude::*,
 };
 
@@ -19,7 +19,9 @@ pub use self::{
 pub(crate) mod macros;
 
 pub mod error;
-pub mod topo;
+pub mod mem;
+pub mod nrt;
+pub mod plant;
 
 pub mod models {
     #[doc(inline)]
@@ -78,9 +80,11 @@ pub mod utils {
 #[allow(unused_imports)]
 pub mod prelude {
     pub use crate::error::*;
+    pub use crate::mem::prelude::*;
     pub use crate::models::prelude::*;
+    pub use crate::nrt::prelude::*;
     pub use crate::ops::prelude::*;
-    pub use crate::topo::prelude::*;
+    pub use crate::plant::Plant;
     pub use crate::traits::prelude::*;
     pub use crate::types::prelude::*;
     pub use crate::utils::prelude::*;

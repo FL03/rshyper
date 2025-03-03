@@ -3,42 +3,43 @@
     Contrib: @FL03
 */
 
-use super::{Transformation, TriadClass};
+use crate::{LPR, TriadClass};
 use std::collections::{HashMap, HashSet};
 
 /// Represents a topological feature that persists across transformations
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde_derive::Deserialize, serde_derive::Serialize)
+)]
 pub struct PersistentFeature {
     /// Unique identifier for the feature
     pub id: usize,
-
     /// The birth time of this feature (when it was created)
     pub birth: usize,
-
     /// The death time of this feature (when it disappeared), None if still active
     pub death: Option<usize>,
-
     /// The dimension of this feature (0 = point, 1 = edge, etc.)
     pub dimension: usize,
-
     /// Associated content with this feature
     pub content: Vec<usize>,
 }
 
 /// Memory system based on persistent homology
+#[derive(Clone, Debug, PartialEq)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde_derive::Deserialize, serde_derive::Serialize)
+)]
 pub struct TopologicalMemory {
     /// Collection of persistent features
     pub features: Vec<PersistentFeature>,
-
     /// Current time counter
     pub time: usize,
-
     /// Features indexed by dimension for quick access
     dimension_index: HashMap<usize, HashSet<usize>>,
-
     /// Features indexed by content
     content_index: HashMap<Vec<usize>, HashSet<usize>>,
-
     /// Next feature ID
     next_id: usize,
 }
@@ -133,7 +134,7 @@ impl TopologicalMemory {
         &mut self,
         triad: [usize; 3],
         class: TriadClass,
-        transform: Transformation,
+        transform: LPR,
         result_triad: [usize; 3],
         result_class: TriadClass,
     ) -> usize {

@@ -57,6 +57,7 @@ serde = [
 rshyper = { path = "../rshyper", version = "0.0.1" }
 rstm = { git = "https://github.com/FL03/rstm.git", branch = "v0.0.6", version = "0.0.6" }
 
+itertools = { version = "0.14" }
 num = { version = "0.4" }
 rand = { optional = true, version = "0.9" }
 rand_distr = { optional = true, version = "0.5" }
@@ -71,11 +72,11 @@ rustc-args = [ "--cfg", "docsrs" ]
 
 # ********* examples *********
 [[example]]
-name = "neo"
+name = "motion"
 required-features = [ "default" ]
 
 [[example]]
-name = "wolfram"
+name = "plant"
 required-features = [ "default" ]
 
 # ********* tests *********

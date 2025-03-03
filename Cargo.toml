@@ -24,7 +24,7 @@ strum = { default-features = false, features = ["derive"], version = "0.27" }
 thiserror = { default-features = false, version = "2" }
 
 [workspace.package]
-authors = ["Joe McCain III <jo3mccain@icloud.com>",]
+authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)", "Scattered-Systems <support@scsys.io> (https://github.com/scattered-systems)"]
 categories = [ ]
 description = "This crate focuses on hypergraphs"
 edition = "2024"
