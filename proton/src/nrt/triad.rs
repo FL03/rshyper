@@ -162,3 +162,33 @@ impl core::ops::MulAssign<LPR> for Triad {
         *self = rhs.apply(self);
     }
 }
+
+impl core::iter::IntoIterator for Triad {
+    type Item = usize;
+
+    type IntoIter = core::array::IntoIter<Self::Item, 3>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.notes.into_iter()
+    }
+}
+
+impl<'a> core::iter::IntoIterator for &'a Triad {
+    type Item = &'a usize;
+
+    type IntoIter = core::slice::Iter<'a, usize>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.notes.iter()
+    }
+}
+
+impl<'a> core::iter::IntoIterator for &'a mut Triad {
+    type Item = &'a mut usize;
+
+    type IntoIter = core::slice::IterMut<'a, usize>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.notes.iter_mut()
+    }
+}
