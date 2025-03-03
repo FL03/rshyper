@@ -20,15 +20,15 @@ pub struct Triad {
     /// The type of triad (Major, Minor, Augmented, Diminished)
     pub(crate) class: TriadClass,
     /// The pitch classes forming this triad
-    pub(crate) pitches: [usize; 3],
+    pub(crate) notes: [usize; 3],
 }
 
 impl Triad {
-    pub fn new(pitches: [usize; 3], class: TriadClass) -> Self {
-        if !class.validate(&pitches) {
-            panic!("Invalid triad pitches for class {pitches:?}");
+    pub fn new(notes: [usize; 3], class: TriadClass) -> Self {
+        if !class.validate(&notes) {
+            panic!("Invalid triad pitches for class {notes:?}");
         }
-        Triad { pitches, class }
+        Triad { notes, class }
     }
     /// Create a new triad from a root pitch and class
     pub fn from_root(root: usize, class: TriadClass) -> Self {
@@ -36,7 +36,7 @@ impl Triad {
         let third = (root + a).pymod(12);
         let fifth = (root + c).pymod(12);
         Triad {
-            pitches: [root, third, fifth],
+            notes: [root, third, fifth],
             class,
         }
     }
@@ -44,9 +44,13 @@ impl Triad {
     pub fn class(&self) -> TriadClass {
         self.class
     }
-    /// returns an immutable reference to the pitches of the triad
-    pub const fn pitches(&self) -> &[usize; 3] {
-        &self.pitches
+    /// returns an immutable reference to the notes of the triad
+    pub const fn notes(&self) -> &[usize; 3] {
+        &self.notes
+    }
+    /// returns a mutable reference to the notes of the triad
+    pub fn notes_mut(&mut self) -> &mut [usize; 3] {
+        &mut self.notes
     }
     /// returns a copy of the root pitch of the triad
     pub fn root(&self) -> usize {
@@ -65,16 +69,11 @@ impl Triad {
     where
         Q: core::borrow::Borrow<usize>,
     {
-        self.pitches().contains(pitch.borrow())
+        self.notes().contains(pitch.borrow())
     }
     /// returns true if the pitches within the triad match its classification
     pub fn is_valid(&self) -> bool {
-        let [a, b, c] = self.class.intervals();
-        let [root, third, fifth] = self.pitches;
-        let x = (third - root).pymod(12);
-        let y = (fifth - third).pymod(12);
-        let z = (fifth - root).pymod(12);
-        x == a && y == b && z == c
+        self.class().validate(self.notes())
     }
     /// Apply the leading transformation to the triad
     pub fn leading(&self) -> Self {
@@ -98,20 +97,46 @@ impl Default for Triad {
     fn default() -> Self {
         Triad {
             class: TriadClass::Major,
-            pitches: [0, 4, 7],
+            notes: [0, 4, 7],
         }
+    }
+}
+
+impl core::convert::AsRef<[usize; 3]> for Triad {
+    fn as_ref(&self) -> &[usize; 3] {
+        &self.notes
+    }
+}
+
+impl core::convert::AsMut<[usize; 3]> for Triad {
+    fn as_mut(&mut self) -> &mut [usize; 3] {
+        &mut self.notes
     }
 }
 
 impl core::ops::Index<Factors> for Triad {
     type Output = usize;
     fn index(&self, index: Factors) -> &Self::Output {
-        &self.pitches[index as usize]
+        &self.notes[index as usize]
     }
 }
 
 impl core::ops::IndexMut<Factors> for Triad {
     fn index_mut(&mut self, index: Factors) -> &mut Self::Output {
-        &mut self.pitches[index as usize]
+        &mut self.notes[index as usize]
+    }
+}
+
+impl core::ops::Mul<LPR> for Triad {
+    type Output = Self;
+
+    fn mul(self, rhs: LPR) -> Self::Output {
+        rhs.apply(&self)
+    }
+}
+
+impl core::ops::MulAssign<LPR> for Triad {
+    fn mul_assign(&mut self, rhs: LPR) {
+        *self = rhs.apply(self);
     }
 }

@@ -2,28 +2,36 @@
     Appellation: wolfram <module>
     Contrib: @FL03
 */
-use crate::RuleSet;
+use crate::{RuleSet, Symbolic};
 
 use rstm::{Direction, Head, State, Tail};
 
 /// An implementation of the Wolfram [2, 3] UTM that consideres two states and three symbols
 #[derive(Clone, Debug, PartialEq)]
-pub struct WolframUTM {
+pub struct WolframUTM<Q = usize, S = usize>
+where
+    Q: Eq + core::hash::Hash,
+    S: Symbolic,
+{
     // the alphabet of the machine
-    pub(crate) alphabet: [usize; 3],
+    pub(crate) alphabet: [S; 3],
     // current position of the head of the machine
     pub(crate) position: usize,
     // a set of rules mapping one head to another using some shift
-    pub(crate) ruleset: RuleSet<usize, usize>,
+    pub(crate) ruleset: RuleSet<Q, S>,
     // the current state of the machine
-    pub(crate) state: State<usize>,
+    pub(crate) state: State<Q>,
     // the tape, or memory, of the machine
-    pub(crate) tape: Vec<usize>,
+    pub(crate) tape: Vec<S>,
 }
 
-impl WolframUTM {
+impl<Q, S> WolframUTM<Q, S>
+where
+    Q: Eq + core::hash::Hash,
+    S: Symbolic,
+{
     // Create a new UTM with a specific program
-    pub fn new(alphabet: [usize; 3], State(state): State<usize>) -> Self {
+    pub fn new(alphabet: [S; 3], State(state): State<Q>) -> Self {
         WolframUTM {
             alphabet,
             position: 0,
@@ -33,7 +41,10 @@ impl WolframUTM {
         }
     }
     /// create a new instance with the given alphabet and default state
-    pub fn from_alphabet(alphabet: [usize; 3]) -> Self {
+    pub fn from_alphabet(alphabet: [S; 3]) -> Self
+    where
+        Q: Default,
+    {
         Self {
             alphabet,
             position: 0,
@@ -43,7 +54,7 @@ impl WolframUTM {
         }
     }
     /// returns the alphabet of the machine
-    pub const fn alphabet(&self) -> &[usize; 3] {
+    pub const fn alphabet(&self) -> &[S; 3] {
         &self.alphabet
     }
     /// returns a copy of the machines current position
@@ -51,60 +62,77 @@ impl WolframUTM {
     pub fn position(&self) -> usize {
         self.position
     }
+    /// returns a reference to the machine's ruleset
+    pub const fn ruleset(&self) -> &RuleSet<Q, S> {
+        &self.ruleset
+    }
+    /// returns a mutable reference to the machine's ruleset
+    pub fn ruleset_mut(&mut self) -> &mut RuleSet<Q, S> {
+        &mut self.ruleset
+    }
     /// returns a copy of the machine's current state
     #[inline]
-    pub fn state(&self) -> State<usize> {
-        self.state
+    pub fn state(&self) -> State<&Q> {
+        self.state.to_ref()
     }
     /// returns a mutable reference to the machine's state
-    pub fn state_mut(&mut self) -> State<&mut usize> {
+    pub fn state_mut(&mut self) -> State<&mut Q> {
         self.state.to_mut()
     }
     /// returns an immutable reference to the tape
-    pub const fn tape(&self) -> &Vec<usize> {
+    pub const fn tape(&self) -> &Vec<S> {
         &self.tape
     }
     /// returns a mutable reference to the tape
-    pub fn tape_mut(&mut self) -> &mut Vec<usize> {
+    pub fn tape_mut(&mut self) -> &mut Vec<S> {
         &mut self.tape
     }
 
     /// returns the head of the machine
-    pub fn head(&self) -> Head<usize, usize> {
-        Head::new(self.state, self.get_current_symbol())
+    pub fn head(&self) -> Head<&Q, &S> {
+        Head::new(self.state(), &self.tape[self.position])
     }
     /// check if a symbol is in the alphabet
-    pub fn contains(&self, symbol: usize) -> bool {
-        self.alphabet.contains(&symbol)
+    pub fn contains(&self, symbol: &S) -> bool {
+        self.alphabet.contains(symbol)
     }
     /// get the current symbol on the tape
-    pub fn get_current_symbol(&self) -> usize {
-        if self.position < self.tape.len() {
-            self.tape[self.position]
-        } else {
-            // Default to 0 if we're off the tape
-            <usize>::default()
-        }
+    pub fn get_current_symbol(&self) -> Option<&S> {
+        self.tape.get(self.position)
+    }
+    /// get the tail for the current head
+    pub fn get_tail(&self) -> Option<&Tail<Q, S>>
+    where
+        Q: Clone,
+    {
+        self.ruleset.get(&self.head().cloned())
+    }
+    /// get the tail for a given head
+    pub fn get_tail_for(&self, head: Head<Q, S>) -> &Tail<Q, S> {
+        &self.ruleset[&head]
     }
     /// execute one step of the machine
-    pub fn step(&mut self) -> bool {
-        let symbol = self.get_current_symbol();
+    pub fn step(&mut self) -> bool
+    where
+        Q: Clone,
+    {
+        let symbol = self.get_current_symbol().cloned().unwrap_or_default();
 
         // Check if the current symbol is in our current triad context
-        if !self.contains(symbol) {
+        if !self.contains(&symbol) {
             panic!("symbol {} not in any accessible triad context", symbol);
         }
-        let head = Head::new(self.state, symbol);
+        let head = Head::new(self.state.clone(), symbol);
         // Find the transition rule for the current state and symbol
-        if let Some(&tail) = self.ruleset.get(&head) {
+        if let Some(tail) = self.ruleset.get(&head) {
             let Tail {
                 state: new_state,
                 symbol: new_symbol,
                 direction,
-            } = tail;
+            } = tail.clone();
             // Update the tape
             if self.position >= self.tape.len() {
-                self.tape.resize(self.position + 1, 0);
+                self.tape.resize(self.position + 1, S::default());
             }
             self.tape[self.position] = new_symbol;
 
@@ -117,13 +145,13 @@ impl WolframUTM {
                     if self.position > 0 {
                         self.position -= 1;
                     } else {
-                        self.tape.insert(0, 0);
+                        self.tape.insert(0, S::default());
                     }
                 }
                 Direction::Right => {
                     self.position += 1;
                     if self.position >= self.tape.len() {
-                        self.tape.push(0);
+                        self.tape.push(S::default());
                     }
                 }
                 Direction::Stay => {}
@@ -136,6 +164,36 @@ impl WolframUTM {
         }
     }
 
+    /// set the alphabet of the machine
+    pub fn set_alphabet(&mut self, alphabet: [S; 3]) {
+        self.alphabet = alphabet;
+    }
+    /// set the ruleset of the machine
+    pub fn set_ruleset(&mut self, ruleset: RuleSet<Q, S>) {
+        self.ruleset = ruleset;
+    }
+    /// set the state of the machine
+    pub fn set_state(&mut self, State(state): State<Q>) {
+        self.state = State(state);
+    }
+    /// consumes this instance to create another with the given alphabet
+    pub fn with_alphabet(self, alphabet: [S; 3]) -> Self {
+        Self { alphabet, ..self }
+    }
+    /// consumes this instance to create another with the given ruleset
+    pub fn with_ruleset(self, ruleset: RuleSet<Q, S>) -> Self {
+        Self { ruleset, ..self }
+    }
+    /// consumes this instance to create another with the given state
+    pub fn with_state(self, State(state): State<Q>) -> Self {
+        Self {
+            state: State(state),
+            ..self
+        }
+    }
+}
+
+impl WolframUTM {
     /// process some input
     pub fn run(&mut self, input: Vec<usize>) -> Vec<(State<usize>, Vec<usize>, [usize; 3])> {
         // Initialize the tape with the input
@@ -145,12 +203,12 @@ impl WolframUTM {
         let mut history = Vec::new();
 
         // Record initial state
-        history.push((self.state(), self.tape().clone(), *self.alphabet()));
+        history.push((self.state().cloned(), self.tape().clone(), *self.alphabet()));
 
         // Run until the machine halts (i.e., step() returns false)
         while self.step() {
             // Record each state after a step
-            history.push((self.state(), self.tape().clone(), *self.alphabet()));
+            history.push((self.state().cloned(), self.tape().clone(), *self.alphabet()));
 
             // Optional: Add a safety limit to prevent infinite loops in development
             if history.len() > 10000 {
@@ -178,38 +236,11 @@ impl WolframUTM {
 
         // Add state and triad information
         result.push_str(&format!(
-            " (State: {}, Alphabet: {:?})",
+            " (State: {:?}, Alphabet: {:?})",
             self.state, self.alphabet
         ));
 
         result
-    }
-    /// set the alphabet of the machine
-    pub fn set_alphabet(&mut self, alphabet: [usize; 3]) {
-        self.alphabet = alphabet;
-    }
-    /// set the ruleset of the machine
-    pub fn set_ruleset(&mut self, ruleset: RuleSet<usize, usize>) {
-        self.ruleset = ruleset;
-    }
-    /// set the state of the machine
-    pub fn set_state(&mut self, State(state): State<usize>) {
-        self.state = State(state);
-    }
-    /// consumes this instance to create another with the given alphabet
-    pub fn with_alphabet(self, alphabet: [usize; 3]) -> Self {
-        Self { alphabet, ..self }
-    }
-    /// consumes this instance to create another with the given ruleset
-    pub fn with_ruleset(self, ruleset: RuleSet<usize, usize>) -> Self {
-        Self { ruleset, ..self }
-    }
-    /// consumes this instance to create another with the given state
-    pub fn with_state(self, State(state): State<usize>) -> Self {
-        Self {
-            state: State(state),
-            ..self
-        }
     }
 }
 
@@ -223,10 +254,26 @@ impl core::fmt::Display for WolframUTM {
     }
 }
 
-impl core::ops::Index<usize> for WolframUTM {
-    type Output = usize;
+impl<Q, S> core::ops::Index<usize> for WolframUTM<Q, S>
+where
+    Q: Eq + core::hash::Hash,
+    S: Symbolic,
+{
+    type Output = S;
 
     fn index(&self, index: usize) -> &Self::Output {
         &self.tape[index]
+    }
+}
+
+impl<Q, S> core::ops::Index<Head<Q, S>> for WolframUTM<Q, S>
+where
+    Q: Eq + core::hash::Hash,
+    S: Symbolic,
+{
+    type Output = Tail<Q, S>;
+
+    fn index(&self, index: Head<Q, S>) -> &Self::Output {
+        &self.ruleset[&index]
     }
 }

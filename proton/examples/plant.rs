@@ -57,10 +57,10 @@ fn main() -> proton::Result<()> {
     let plant = Plant::new(headspace);
     println!("- Initial plant: {plant:?}",);
 
-    let next = plant.apply_transform(LPR::Leading);
+    let next = plant.transform(LPR::Leading);
     println!("- After δ_L: {next:?}");
 
-    let other = plant.apply_transform(LPR::Parallel);
+    let other = plant.transform(LPR::Parallel);
     assert_eq!(other, plant);
     println!(
         "- After δ_L again: {:?} {:?}",

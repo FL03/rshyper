@@ -52,7 +52,7 @@ impl VNode {
             .ok_or_else(|| rshyper::Error::HyperedgeDoesNotExist(self.position.to_string()))?;
 
         // Apply the transformation to the plant
-        let nplant = self.plant.apply_transform(transform);
+        let nplant = self.plant.transform(transform);
 
         // find the destination triad in the Tonnetz
         let transformations = tonnetz.transformations.get(&self.position).ok_or_else(|| {
@@ -102,15 +102,15 @@ impl VNode {
                 let transform = LPR::from(feature.content[4]);
 
                 // Create a key representing the state and symbol
-                let current_state = self.plant.state();
-                let current_symbol = self.plant.utm.get_current_symbol();
-                let pattern_key = vec![*current_state, current_symbol, feature.content[4]];
+                let chead = self.plant.utm().head().copied();
+                let Head { state, symbol } = chead;
+                let pattern_key = vec![*state, symbol, feature.content[4]];
 
                 // Define a rule based on this pattern
                 let rule = Tail::new(
-                    Direction::default(),     // Default direction
-                    State(1) - current_state, // Switch state
-                    feature.content[5],       // Use first note of result triad
+                    Direction::default(), // Default direction
+                    State(1) - state,     // Switch state
+                    feature.content[5],   // Use first note of result triad
                 );
 
                 // Store the rule
@@ -121,7 +121,7 @@ impl VNode {
 
     /// Apply learned rules to the UTM
     pub fn apply_learned_rules(&mut self) {
-        let head = self.plant.utm.head();
+        let head = self.plant.utm.head().copied();
         let Head { state, symbol } = head;
 
         // Try to find matching rules

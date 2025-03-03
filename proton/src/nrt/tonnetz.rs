@@ -12,6 +12,8 @@ use std::collections::HashMap;
 /// Here, we use the tonnetz to define the topology of the runtime as well as the cluster.
 /// Each instance of the runtime orchestrates a _fragment_ of the Tonnetz and glues it to the
 /// cluster with various networking protocols.
+///
+/// Every hyperedge within the tonnetz is considered to be a triad
 #[derive(Clone, Debug)]
 pub struct Tonnetz {
     /// The underlying hypergraph structure

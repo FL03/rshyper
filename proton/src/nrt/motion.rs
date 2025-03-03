@@ -109,7 +109,7 @@ impl<'a> MotionPlanner<'a> {
         // Execute each transformation in sequence
         for (i, &transform) in path.transforms.iter().enumerate() {
             // Apply the transformation
-            let nplant = cplant.apply_transform(transform);
+            let nplant = cplant.transform(transform);
             utm.set_alphabet(*nplant.utm().alphabet());
 
             // Verify we reach the expected triad
@@ -245,7 +245,7 @@ impl<'a> MotionPlanner<'a> {
         // For each transformation type
         for transform in [LPR::Leading, LPR::Parallel, LPR::Relative] {
             // Calculate what the resulting triad would be
-            let next = start_data.apply_transform(transform);
+            let next = start_data.transform(transform);
 
             // Check if the result contains our target symbol
             if next.contains(&target_symbol) {

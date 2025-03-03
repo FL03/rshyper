@@ -18,7 +18,7 @@ pub struct Plant {
 
 impl Plant {
     pub fn new(triad: Triad) -> Self {
-        let utm = WolframUTM::new(triad.pitches, State(0));
+        let utm = WolframUTM::new(triad.notes, State(0));
         Plant {
             modulus: 0,
             triad,
@@ -28,12 +28,16 @@ impl Plant {
     /// returns the alphabet of the plant's headspace
     #[inline]
     pub const fn alphabet(&self) -> &[usize; 3] {
-        &self.triad.pitches
+        &self.triad.notes
     }
     /// returns the class of the plant's headspace
     #[inline]
     pub fn class(&self) -> TriadClass {
         self.triad.class()
+    }
+    /// returns a copy of the plant's current head
+    pub fn head(&self) -> rstm::Head<usize, usize> {
+        self.utm().head().copied()
     }
     /// returns a copy to the plant's current modulus; the modulus is used to identify the
     /// _layer_ it is associated with
@@ -41,7 +45,6 @@ impl Plant {
     pub fn modulus(&self) -> usize {
         self.modulus
     }
-
     /// returns the current position of the plant's UTM
     #[inline]
     pub fn position(&self) -> usize {
@@ -50,7 +53,7 @@ impl Plant {
     /// returns a copy of the plant's current state
     #[inline]
     pub fn state(&self) -> State<usize> {
-        self.utm().state()
+        self.utm().state().copied()
     }
     /// returns a mutable reference to the plant's state
     #[inline]
@@ -69,7 +72,7 @@ impl Plant {
     }
     #[inline]
     /// returns an immutable reference to the plant's headspace; aka the triad.
-    pub const fn traid(&self) -> &Triad {
+    pub const fn triad(&self) -> &Triad {
         &self.triad
     }
     #[inline]
@@ -102,9 +105,10 @@ impl Plant {
     pub fn set_utm(&mut self, utm: WolframUTM) {
         self.utm = utm;
     }
+    /// consumes this instance to create another with the given class
     pub fn with_class(self, class: TriadClass) -> Self {
         Plant {
-            triad: Triad::new(self.triad.pitches, class),
+            triad: Triad::new(self.triad.notes, class),
             ..self
         }
     }
@@ -127,16 +131,6 @@ impl Plant {
     pub fn with_utm(self, utm: WolframUTM) -> Self {
         Plant { utm, ..self }
     }
-    /// applies the given transformation to the plant's headapce, modifying the utm accordingly
-    pub fn apply_transform(&self, transform: LPR) -> Self {
-        let triad = self.triad.transform(transform);
-        let utm = self.utm.clone().with_alphabet(triad.pitches);
-        Plant {
-            modulus: self.modulus,
-            triad,
-            utm,
-        }
-    }
     /// checks if the given symbol is currently considered by the plant's headspace
     pub fn contains<Q>(&self, pitch: &Q) -> bool
     where
@@ -144,24 +138,43 @@ impl Plant {
     {
         self.triad.contains(pitch)
     }
+    ///
+    pub fn is_valid(&self) -> bool {
+        self.triad().is_valid()
+    }
+    /// applies the given transformation to the plant's headapce, modifying the utm accordingly
+    pub fn transform(&self, transform: LPR) -> Self {
+        let triad = self.triad().transform(transform);
+        let utm = self.utm.clone().with_alphabet(triad.notes);
+        Plant {
+            modulus: self.modulus,
+            triad,
+            utm,
+        }
+    }
 
+    pub fn transform_inplace(&mut self, transform: LPR) {
+        let triad = self.triad().transform(transform);
+        self.utm_mut().set_alphabet(*triad.notes());
+        self.set_triad(triad);
+    }
     ///
     pub fn step(&mut self) -> bool {
         let position = self.position();
-        let head = self.utm().head();
+        let head = self.head();
 
         // verify that the current symbol is within the plant's headspace
         if !self.contains(&head.symbol) {
             // todo: implement a more sophisticated motion planning algorithm
             for i in [LPR::Leading, LPR::Parallel, LPR::Relative] {
                 if i.apply(&self.triad).contains(&head.symbol) {
-                    self.apply_transform(i);
+                    self.transform_inplace(i);
                     break;
                 }
             }
         }
         // Find the transition rule for the current state and symbol
-        if let Some(&tail) = self.utm.ruleset.get(&head) {
+        if let Some(&tail) = self.utm().ruleset().get(&head) {
             let Tail {
                 state: new_state,
                 symbol: new_symbol,

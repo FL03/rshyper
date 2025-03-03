@@ -38,6 +38,7 @@ use crate::nrt::{Triad, TriadClass};
     PartialOrd,
     strum::AsRefStr,
     strum::Display,
+    strum::EnumCount,
     strum::EnumIs,
     strum::EnumIter,
     strum::EnumString,
@@ -78,7 +79,7 @@ impl LPR {
     pub fn apply(&self, triad: &Triad) -> Triad {
         use crate::ops::PitchMod;
 
-        let [x, y, z] = triad.pitches;
+        let [x, y, z] = triad.notes;
         match triad.class() {
             TriadClass::Major => match self {
                 LPR::Leading => {
@@ -101,13 +102,25 @@ impl LPR {
     }
 }
 
+impl From<char> for LPR {
+    fn from(value: char) -> Self {
+        match value.to_ascii_lowercase() {
+            'l' => LPR::Leading,
+            'p' => LPR::Parallel,
+            'r' => LPR::Relative,
+            _ => panic!("Invalid LPR transformation; character must be 'L', 'P', or 'R'"),
+        }
+    }
+}
+
 impl From<usize> for LPR {
     fn from(value: usize) -> Self {
-        match value {
+        use strum::EnumCount;
+        match value % Self::COUNT {
             0 => LPR::Leading,
             1 => LPR::Parallel,
             2 => LPR::Relative,
-            _ => LPR::Leading,
+            _ => unreachable!(),
         }
     }
 }

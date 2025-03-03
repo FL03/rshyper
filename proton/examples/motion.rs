@@ -103,7 +103,7 @@ fn main() -> proton::Result {
 
         // Try each transformation and see what would result
         for transform in [LPR::Leading, LPR::Parallel, LPR::Relative] {
-            let triad = c_major_triad.apply_transform(transform);
+            let triad = c_major_triad.transform(transform);
             println!("- Applying {transform:?} would create: {triad:?}");
             if triad.contains(&2) {
                 println!("  This would include pitch class 2 (D)!");

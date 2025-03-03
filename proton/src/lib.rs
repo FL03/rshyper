@@ -47,12 +47,15 @@ pub mod ops {
     }
 }
 
-#[allow(unused_imports)]
 pub mod traits {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    pub(crate) mod prelude {}
+    pub mod symbolic;
+
+    pub(crate) mod prelude {
+        pub use super::symbolic::*;
+    }
 }
 
 pub mod types {
