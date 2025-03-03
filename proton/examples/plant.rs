@@ -7,14 +7,14 @@ use std::collections::HashMap;
 
 fn main() -> proton::Result<()> {
     let ruleset = proton::ruleset! {
-        (0, 0) => (Right, 0, 4),
-        (0, 4) => (Right, 1, 7),
-        (0, 7) => (Left, 0, 0),
-        (1, 0) => (Left, 1, 7),
-        (1, 4) => (Left, 0, 11),
-        (1, 7) => (Right, 1, 4),
-        (0, 11) => (Left, 1, 7),
-        (1, 11) => (Right, 0, 0)
+        (0, 0) -> Right(0, 4),
+        (0, 4) -> Right(1, 7),
+        (0, 7) -> Left(0, 0),
+        (1, 0) -> Left(1, 7),
+        (1, 4) -> Left(0, 11),
+        (1, 7) -> Right(1, 4),
+        (0, 11) -> Left(1, 7),
+        (1, 11) -> Right(0, 0)
     };
 
     // Create a simple program using our 4 symbols (0, 4, 7, 11)
