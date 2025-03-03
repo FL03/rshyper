@@ -17,7 +17,17 @@ pub use self::{
 pub mod error;
 pub mod graph;
 
-#[allow(unused_imports)]
+pub mod algo {
+    #[doc(inline)]
+    pub use self::prelude::*;
+
+    pub mod bft;
+
+    pub(crate) mod prelude {
+        pub use super::bft::*;
+    }
+}
+
 pub mod ops {
     #[doc(inline)]
     pub use self::prelude::*;

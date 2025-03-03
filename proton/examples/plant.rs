@@ -2,7 +2,7 @@
     Appellation: wolfram <example>
     Contrib: @FL03
 */
-use proton::{LPR, Plant, Triad, TriadClass};
+use proton::{LPR, Plant, Triad};
 use std::collections::HashMap;
 
 fn main() -> proton::Result<()> {
@@ -20,7 +20,7 @@ fn main() -> proton::Result<()> {
     // Create a simple program using our 4 symbols (0, 4, 7, 11)
     let program = [0, 4, 7, 11, 0, 4, 7, 0, 11, 4, 0, 7];
 
-    let mut plant = Plant::new(Triad::from_root(0, TriadClass::Major));
+    let mut plant = Plant::new(Triad::major(0));
     plant.set_ruleset(ruleset.clone());
 
     println!("Initial state: {}", plant.utm().pretty_print());
@@ -53,7 +53,7 @@ fn main() -> proton::Result<()> {
     println!("- Starting with C-Major triad: [0, 4, 7]");
 
     // Demonstrate a single transformation
-    let headspace = Triad::from_root(0, TriadClass::Major);
+    let headspace = Triad::major(0);
     let plant = Plant::new(headspace);
     println!("- Initial plant: {plant:?}",);
 

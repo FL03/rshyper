@@ -40,6 +40,22 @@ impl Triad {
             class,
         }
     }
+    /// creates a new augmented triad from the given root
+    pub fn augmented(root: usize) -> Self {
+        Self::from_root(root, TriadClass::Augmented)
+    }
+    /// creates a new diminished triad from the given root
+    pub fn diminished(root: usize) -> Self {
+        Self::from_root(root, TriadClass::Diminished)
+    }
+    /// Create a new major triad from the given root
+    pub fn major(root: usize) -> Self {
+        Self::from_root(root, TriadClass::Major)
+    }
+    /// creates a new minor triad from the given root
+    pub fn minor(root: usize) -> Self {
+        Self::from_root(root, TriadClass::Minor)
+    }
     /// returns a copy of the class of the triad
     pub fn class(&self) -> TriadClass {
         self.class

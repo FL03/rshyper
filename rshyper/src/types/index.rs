@@ -8,15 +8,17 @@ pub type VertexId<T = usize> = Index<T>;
 // Define a type alias for HyperEdge ID
 pub type EdgeId<T = usize> = Index<T>;
 
+pub type Idx = usize;
+
 #[derive(Clone, Copy, Default, Eq, Hash, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
     derive(serde_derive::Deserialize, serde_derive::Serialize)
 )]
-pub struct Index<T = usize>(pub T);
+pub struct Index<T = Idx>(pub T);
 
 impl<T> Index<T> {
-    pub fn new(index: T) -> Self {
+    pub fn from_value(index: T) -> Self {
         Index(index)
     }
     /// returns a pointer to the inner value
@@ -63,6 +65,14 @@ where
 {
     fn eq(&self, other: &T) -> bool {
         &self.0 == other
+    }
+}
+
+impl Index<usize> {
+    pub fn new() -> Self {
+        use core::sync::atomic::{AtomicUsize, Ordering::Relaxed};
+        static COUNTER: AtomicUsize = AtomicUsize::new(1);
+        Self(COUNTER.fetch_add(1, Relaxed))
     }
 }
 
