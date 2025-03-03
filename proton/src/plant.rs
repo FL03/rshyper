@@ -142,9 +142,11 @@ impl Plant {
     pub fn is_valid(&self) -> bool {
         self.triad().is_valid()
     }
-    /// applies the given transformation to the plant's headapce, modifying the utm accordingly
+    /// applies the given transformation to the plant's headspace, modifying the utm accordingly
     pub fn transform(&self, transform: LPR) -> Self {
+        // transform the triad
         let triad = self.triad().transform(transform);
+        // update the utm's alphabet
         let utm = self.utm.clone().with_alphabet(triad.notes);
         Plant {
             modulus: self.modulus,
@@ -152,13 +154,13 @@ impl Plant {
             utm,
         }
     }
-
+    /// mutably applies the given transformation to the plant's headspace, modifying the utm
     pub fn transform_inplace(&mut self, transform: LPR) {
         let triad = self.triad().transform(transform);
         self.utm_mut().set_alphabet(*triad.notes());
         self.set_triad(triad);
     }
-    ///
+    /// execute a single step of the plant's UTM, returning true if the step was successful
     pub fn step(&mut self) -> bool {
         let position = self.position();
         let head = self.head();
@@ -214,7 +216,7 @@ impl Plant {
         }
     }
 
-    // Run the UTM with the given input program until it halts
+    /// execute the given program on the plant, returning the history of states and tapes
     pub fn run(
         &mut self,
         input: Vec<usize>,
@@ -241,12 +243,9 @@ impl Plant {
                 self.tape().clone(),
             ));
 
-            // Optional: Add a safety limit to prevent infinite loops in development
+            // prevent infinite loops
             if history.len() > usize::MAX {
-                println!(
-                    "Warning: Machine reached 10,000 steps without halting. Stopping execution."
-                );
-                break;
+                return Err(crate::Error::InfiniteLoop);
             }
         }
 
