@@ -87,9 +87,9 @@ where
     pub fn tape_mut(&mut self) -> &mut Vec<S> {
         &mut self.tape
     }
-
     /// returns the head of the machine
     pub fn head(&self) -> Head<&Q, &S> {
+        // self.get_current_symbol().cloned().unwrap_or_default()
         Head::new(self.state(), &self.tape[self.position])
     }
     /// check if a symbol is in the alphabet
@@ -110,6 +110,38 @@ where
     /// get the tail for a given head
     pub fn get_tail_for(&self, head: Head<Q, S>) -> &Tail<Q, S> {
         &self.ruleset[&head]
+    }
+    /// process some input
+    pub fn run(&mut self, input: Vec<S>) -> crate::Result<Vec<(State<Q>, [S; 3], Vec<S>)>>
+    where
+        Q: Clone,
+    {
+        // Initialize the tape with the input
+        self.tape = input;
+        self.position = 0;
+
+        let mut history = vec![(
+            self.state().cloned(),
+            self.alphabet().clone(),
+            self.tape().clone(),
+        )];
+
+        // Run until the machine halts (i.e., step() returns false)
+        while self.step() {
+            // Record each state after a step
+            history.push((
+                self.state().cloned(),
+                self.alphabet().clone(),
+                self.tape().clone(),
+            ));
+
+            // Optional: Add a safety limit to prevent infinite loops in development
+            if history.len() > usize::MAX {
+                return Err(crate::Error::InfiniteLoop);
+            }
+        }
+
+        Ok(history)
     }
     /// execute one step of the machine
     pub fn step(&mut self) -> bool
@@ -163,7 +195,6 @@ where
             false
         }
     }
-
     /// set the alphabet of the machine
     pub fn set_alphabet(&mut self, alphabet: [S; 3]) {
         self.alphabet = alphabet;
@@ -194,33 +225,6 @@ where
 }
 
 impl WolframUTM {
-    /// process some input
-    pub fn run(&mut self, input: Vec<usize>) -> Vec<(State<usize>, Vec<usize>, [usize; 3])> {
-        // Initialize the tape with the input
-        self.tape = input;
-        self.position = 0;
-
-        let mut history = Vec::new();
-
-        // Record initial state
-        history.push((self.state().cloned(), self.tape().clone(), *self.alphabet()));
-
-        // Run until the machine halts (i.e., step() returns false)
-        while self.step() {
-            // Record each state after a step
-            history.push((self.state().cloned(), self.tape().clone(), *self.alphabet()));
-
-            // Optional: Add a safety limit to prevent infinite loops in development
-            if history.len() > 10000 {
-                println!(
-                    "Warning: Machine reached 10,000 steps without halting. Stopping execution."
-                );
-                break;
-            }
-        }
-
-        history
-    }
     /// returns a string representation of the machine
     pub fn pretty_print(&self) -> String {
         let mut result = String::new();
@@ -236,7 +240,7 @@ impl WolframUTM {
 
         // Add state and triad information
         result.push_str(&format!(
-            " (State: {:?}, Alphabet: {:?})",
+            "(State: {:?}, Alphabet: {:?})",
             self.state, self.alphabet
         ));
 
@@ -244,12 +248,18 @@ impl WolframUTM {
     }
 }
 
-impl core::fmt::Display for WolframUTM {
+impl<Q, S> core::fmt::Display for WolframUTM<Q, S>
+where
+    Q: Eq + core::fmt::Debug + core::hash::Hash,
+    S: Symbolic,
+{
     fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
         write!(
             f,
-            "Wolfram UTM: Alphabet: {:?} State {}, Tape: {:?}, Position: {}",
-            self.alphabet, self.state, self.tape, self.position,
+            "{head:?} @ {pos}: {tape:?}",
+            head = self.head(),
+            pos = self.position(),
+            tape = self.tape()
         )
     }
 }

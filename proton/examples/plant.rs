@@ -23,14 +23,14 @@ fn main() -> proton::Result<()> {
     let mut plant = Plant::new(Triad::major(0));
     plant.set_ruleset(ruleset.clone());
 
-    println!("Initial state: {}", plant.utm().pretty_print());
+    println!("Initial configuration: {}", plant.utm().pretty_print());
 
     // Run for 100 iterations
-    let history = plant.run(program.to_vec());
+    let history = plant.run(program.to_vec())?;
 
     // Print the execution history
-    for (i, (state, tape, triad, class)) in history.iter().enumerate() {
-        println!("Step {i}: State {state}, Tape: {tape:?}, Triad: {class:?}({triad:?})",);
+    for (i, (triad, state, tape)) in history.iter().enumerate() {
+        println!("Step {i}: Triad: {triad} State {state}, {tape:?}",);
     }
 
     println!("Final state: {}", plant.utm().pretty_print());

@@ -218,7 +218,7 @@ impl Plant {
     pub fn run(
         &mut self,
         input: Vec<usize>,
-    ) -> Vec<(State<usize>, Vec<usize>, [usize; 3], TriadClass)> {
+    ) -> crate::Result<Vec<(Triad, State<usize>, Vec<usize>)>> {
         // Initialize the tape with the input
         self.utm.tape = input;
         self.utm.position = 0;
@@ -227,24 +227,22 @@ impl Plant {
 
         // Record initial state
         history.push((
+            *self.triad(),
             self.state(),
             self.tape().clone(),
-            *self.alphabet(),
-            self.class(),
         ));
 
         // Run until the machine halts (i.e., step() returns false)
         while self.step() {
             // Record each state after a step
             history.push((
+                *self.triad(),
                 self.state(),
                 self.tape().clone(),
-                *self.alphabet(),
-                self.class(),
             ));
 
             // Optional: Add a safety limit to prevent infinite loops in development
-            if history.len() > 10000 {
+            if history.len() > usize::MAX {
                 println!(
                     "Warning: Machine reached 10,000 steps without halting. Stopping execution."
                 );
@@ -252,6 +250,6 @@ impl Plant {
             }
         }
 
-        history
+        Ok(history)
     }
 }

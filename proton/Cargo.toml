@@ -19,7 +19,7 @@ doctest = false
 test = true
 
 [features]
-default = [ ]
+default = [  ]
 
 full = [
     "default",
@@ -46,10 +46,15 @@ rng = [
 serde = [
     "dep:serde",
     "dep:serde_derive",
-    "serde?/derive",
     "rshyper/serde",
+    "serde?/derive",
 ]
 
+tracing = [
+    "dep:tracing",
+    "rshyper/tracing",
+    "tracing?/attributes",
+]
 
 [build-dependencies]
 
@@ -61,10 +66,14 @@ itertools = { version = "0.14" }
 num = { version = "0.4" }
 rand = { optional = true, version = "0.9" }
 rand_distr = { optional = true, version = "0.5" }
-serde = { default-features = true, features = ["derive"], optional = true, workspace = true }
+serde = { default-features = true, optional = true, workspace = true }
 serde_derive = { optional = true, workspace = true }
 strum = { default-features = true, workspace = true }
 thiserror = { workspace = true }
+tracing = { default-features = true, optional = true, workspace = true }
+
+[dev-dependencies]
+tracing-subscriber = { default-features = true, features = [ "env-filter", "fmt" ], workspace = true }
 
 [package.metadata.docs.rs]
 all-features = true

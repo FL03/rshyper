@@ -25,6 +25,7 @@ full = [
     "default",
     "rand",
     "serde",
+    "tracing",
 ]
 
 # ********* [FF] Dependencies *********
@@ -50,12 +51,19 @@ serde = [
     "dep:serde_derive",
 ]
 
+tracing = [
+    "dep:tracing",
+    "tracing?/attributes",
+]
+
+# ********* [FF] Environments *********
 std = [
     "alloc",
     "num/std",
     "rand/std_rng",
     "serde?/std",
     "strum/std",
+    "tracing?/std",
     "thiserror/std",
 ]
 
@@ -69,6 +77,8 @@ serde = { optional = true, workspace = true }
 serde_derive = { optional = true, workspace = true }
 strum = { default-features = false, workspace = true }
 thiserror = { workspace = true }
+
+tracing = { default-features = false, optional = true, workspace = true }
 
 [dev-dependencies]
 

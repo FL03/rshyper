@@ -13,6 +13,12 @@ pub enum Error {
     GraphError(#[from] rshyper::Error),
     #[error("Turing error: {0}")]
     TuringError(#[from] rstm::Error),
+    #[error("Invalid State: {0}")]
+    InvalidState(String),
+    #[error("Invalid Symbol: {0}")]
+    InvalidSymbol(String),
+    #[error("Infinite loop detected")]
+    InfiniteLoop,
     #[error("IO Error: {0}")]
     IOError(String),
     #[error("Parse Error: {0}")]

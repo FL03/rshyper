@@ -22,6 +22,8 @@ serde_json = { version = "1" }
 smart_default = { version = "0.7" }
 strum = { default-features = false, features = ["derive"], version = "0.27" }
 thiserror = { default-features = false, version = "2" }
+tracing = { default-features = false, version = "0.1" }
+tracing-subscriber = { default-features = false, version = "0.3" }
 
 [workspace.package]
 authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)", "Scattered-Systems <support@scsys.io> (https://github.com/scattered-systems)"]

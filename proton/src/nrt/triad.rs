@@ -118,6 +118,12 @@ impl Default for Triad {
     }
 }
 
+impl core::fmt::Display for Triad {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        write!(f, "{}({:?})", self.class, self.notes)
+    }
+}
+
 impl core::convert::AsRef<[usize; 3]> for Triad {
     fn as_ref(&self) -> &[usize; 3] {
         &self.notes
