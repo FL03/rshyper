@@ -49,6 +49,7 @@ rng = [
 serde = [
     "dep:serde",
     "dep:serde_derive",
+    "serde?/derive",
 ]
 
 tracing = [
