@@ -7,7 +7,6 @@ exclude = [ ]
 
 members = [
     "rshyper",
-    "proton"
 ]
 
 resolver = "3"
