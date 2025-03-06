@@ -231,6 +231,21 @@ where
             Err(crate::Error::VertexDoesNotExist(index.to_string()))
         }
     }
+    /// search the hypergraph using the A* algorithm with the given heuristic function
+    pub fn astar<F>(&self, heuristic: F) -> crate::algo::AStarSearch<'_, N, F>
+    where
+        F: Fn(VertexId, VertexId) -> f64,
+    {
+        crate::algo::AStarSearch::new(self, heuristic)
+    }
+    /// search the hypergraph using the breadth-first traversal algorithm
+    pub fn bft(&self) -> crate::algo::BreadthFirstTraversal<'_, N> {
+        crate::algo::BreadthFirstTraversal::new(self)
+    }
+    /// search the hypergraph using the depth-first traversal algorithm
+    pub fn dft(&self) -> crate::algo::DepthFirstTraversal<'_, N> {
+        crate::algo::DepthFirstTraversal::new(self)
+    }
 }
 
 impl HyperGraph<()> {
