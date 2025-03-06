@@ -21,10 +21,10 @@ pub mod algo {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    pub mod bft;
+    pub mod search;
 
     pub(crate) mod prelude {
-        pub use super::bft::*;
+        pub use super::search::*;
     }
 }
 
@@ -32,9 +32,11 @@ pub mod ops {
     #[doc(inline)]
     pub use self::prelude::*;
 
+    pub mod search;
     pub mod transform;
 
     pub(crate) mod prelude {
+        pub use super::search::*;
         pub use super::transform::*;
     }
 }
