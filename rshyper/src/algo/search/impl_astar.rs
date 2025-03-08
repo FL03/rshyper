@@ -141,14 +141,14 @@ where
                     let tentative_g_score = self.g_score[&current] + 1.0;
 
                     // Check if this path is better than any previous path
-                    let is_better_path = !self.g_score.contains_key(&neighbor) ||
-                                         tentative_g_score < self.g_score[&neighbor];
+                    let is_better_path = !self.g_score.contains_key(&neighbor)
+                        || tentative_g_score < self.g_score[&neighbor];
 
                     if is_better_path {
                         // Update path info
                         self.came_from.insert(neighbor, current);
                         self.g_score.insert(neighbor, tentative_g_score);
-                        
+
                         // Update f_score (g_score + heuristic)
                         let f_score = tentative_g_score + (self.heuristic)(neighbor, goal);
                         self.f_score.insert(neighbor, f_score);
