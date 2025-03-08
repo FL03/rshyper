@@ -49,6 +49,8 @@ rng = [
 serde = [
     "dep:serde",
     "dep:serde_derive",
+    "num/serde",
+    "rand?/serde",
     "serde?/derive",
 ]
 
@@ -60,8 +62,9 @@ tracing = [
 # ********* [FF] Environments *********
 std = [
     "alloc",
+    "anyhow/std",
     "num/std",
-    "rand/std_rng",
+    "rand?/std",
     "serde?/std",
     "strum/std",
     "tracing?/std",
@@ -71,6 +74,7 @@ std = [
 [build-dependencies]
 
 [dependencies]
+anyhow = { default-features = false, version = "1" }
 num = { default-features = false, version = "0.4" }
 rand = { default-features = false, optional = true, version = "0.9" }
 rand_distr = { default-features = false, optional = true, version = "0.5" }

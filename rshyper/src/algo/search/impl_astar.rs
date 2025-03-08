@@ -4,7 +4,7 @@
 */
 
 use super::AStarSearch;
-use crate::{Error, HyperGraph, HyperGraphSearch, Result, VertexId};
+use crate::{Error, HyperGraph, Result, Search, VertexId};
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::hash::Hash;
@@ -33,13 +33,14 @@ impl PartialOrd for PriorityNode {
     }
 }
 
-impl<'a, N, F> AStarSearch<'a, N, F>
+impl<'a, N, E, F> AStarSearch<'a, N, E, F>
 where
+    E: core::cmp::Eq + core::hash::Hash,
     N: Eq + Hash,
     F: Fn(VertexId, VertexId) -> f64,
 {
     /// Create a new A* search instance with the given heuristic function
-    pub fn new(graph: &'a HyperGraph<N>, heuristic: F) -> Self {
+    pub fn new(graph: &'a HyperGraph<N, E>, heuristic: F) -> Self {
         Self {
             graph,
             open_set: HashSet::new(),
@@ -64,10 +65,10 @@ where
     pub fn find_path(&mut self, start: VertexId, goal: VertexId) -> Result<Vec<VertexId>> {
         // Check if both vertices exist
         if !self.graph.check_vertex(&start) {
-            return Err(Error::VertexDoesNotExist(start.to_string()));
+            return Err(Error::VertexDoesNotExist(start));
         }
         if !self.graph.check_vertex(&goal) {
-            return Err(Error::VertexDoesNotExist(goal.to_string()));
+            return Err(Error::VertexDoesNotExist(goal));
         }
 
         // Reset state
@@ -175,8 +176,9 @@ where
     }
 }
 
-impl<'a, N, F> HyperGraphSearch<N> for AStarSearch<'a, N, F>
+impl<'a, N, E, F> Search<N> for AStarSearch<'a, N, E, F>
 where
+    E: core::cmp::Eq + core::hash::Hash,
     N: Eq + Hash,
     F: Fn(VertexId, VertexId) -> f64,
 {
@@ -187,7 +189,7 @@ where
         self.reset();
 
         if !self.graph.check_vertex(&start) {
-            return Err(Error::VertexDoesNotExist(start.to_string()));
+            return Err(Error::VertexDoesNotExist(start));
         }
 
         // Using the vertex with the largest ID as a pseudo-goal

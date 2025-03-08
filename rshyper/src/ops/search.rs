@@ -6,7 +6,7 @@ use crate::VertexId;
 use std::collections::HashSet;
 
 /// A trait defining a search algorithm for a hypergraph
-pub trait HyperGraphSearch<N> {
+pub trait Search<N> {
     /// Execute the search algorithm starting from the given vertex
     fn search(&mut self, start: VertexId) -> crate::Result<Vec<VertexId>>;
 

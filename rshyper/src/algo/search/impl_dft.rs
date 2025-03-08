@@ -4,16 +4,17 @@
 */
 
 use super::DepthFirstTraversal;
-use crate::{Error, HyperGraph, HyperGraphSearch, Result, VertexId};
+use crate::{Error, HyperGraph, Result, Search, VertexId};
 use std::collections::HashSet;
 use std::hash::Hash;
 
-impl<'a, N> DepthFirstTraversal<'a, N>
+impl<'a, N, E> DepthFirstTraversal<'a, N, E>
 where
+    E: Eq + Hash,
     N: Eq + Hash,
 {
     /// Create a new DepthFirstTraversal instance
-    pub fn new(graph: &'a HyperGraph<N>) -> Self {
+    pub(crate) fn new(graph: &'a HyperGraph<N, E>) -> Self {
         Self {
             graph,
             stack: Vec::new(),
@@ -28,8 +29,9 @@ where
     }
 }
 
-impl<'a, N> HyperGraphSearch<N> for DepthFirstTraversal<'a, N>
+impl<'a, N, E> Search<N> for DepthFirstTraversal<'a, N, E>
 where
+    E: Eq + Hash,
     N: Eq + Hash,
 {
     fn search(&mut self, start: VertexId) -> Result<Vec<VertexId>> {
@@ -38,7 +40,7 @@ where
 
         // Check if starting vertex exists
         if !self.graph.check_vertex(&start) {
-            return Err(Error::VertexDoesNotExist(start.to_string()));
+            return Err(Error::VertexDoesNotExist(start));
         }
 
         // Add start vertex to stack and mark as visited

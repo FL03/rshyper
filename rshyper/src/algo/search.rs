@@ -11,18 +11,18 @@ use crate::{HyperGraph, VertexId};
 use std::collections::{HashSet, VecDeque};
 
 /// Breadth-First Traversal algorithm for hypergraphs
-pub struct BreadthFirstTraversal<'a, N> {
-    pub(crate) graph: &'a HyperGraph<N>,
+pub struct BreadthFirstTraversal<'a, N, E> {
+    pub(crate) graph: &'a HyperGraph<N, E>,
     pub(crate) queue: VecDeque<VertexId>,
     pub(crate) visited: HashSet<VertexId>,
 }
 
 /// A* Search algorithm for hypergraphs
-pub struct AStarSearch<'a, N, F>
+pub struct AStarSearch<'a, N, E, F>
 where
     F: Fn(VertexId, VertexId) -> f64,
 {
-    pub(crate) graph: &'a HyperGraph<N>,
+    pub(crate) graph: &'a HyperGraph<N, E>,
     pub(crate) open_set: HashSet<VertexId>,
     pub(crate) closed_set: HashSet<VertexId>,
     pub(crate) came_from: std::collections::HashMap<VertexId, VertexId>,
@@ -32,8 +32,8 @@ where
 }
 
 /// Depth-First Traversal algorithm for hypergraphs
-pub struct DepthFirstTraversal<'a, N> {
-    pub(crate) graph: &'a HyperGraph<N>,
+pub struct DepthFirstTraversal<'a, N, E> {
+    pub(crate) graph: &'a HyperGraph<N, E>,
     pub(crate) stack: Vec<VertexId>,
     pub(crate) visited: HashSet<VertexId>,
 }

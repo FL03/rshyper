@@ -2,28 +2,32 @@
     Appellation: graph <module>
     Contrib: @FL03
 */
+use crate::traits::IntoIndex;
 use crate::types::{EdgeId, Index, Node, VertexId};
 use num::Zero;
 use std::collections::{HashMap, HashSet};
 
 /// A hash-based hypergraph implementation
 #[derive(Clone, Debug)]
-pub struct HyperGraph<N = ()> {
+pub struct HyperGraph<N = (), E = ()> {
     pub(crate) edges: HashMap<EdgeId, HashSet<VertexId>>,
+    pub(crate) facets: HashMap<EdgeId, E>,
     pub(crate) vertices: HashMap<VertexId, Node<N>>,
     pub(crate) next_vertex_id: VertexId,
     pub(crate) next_edge_id: EdgeId,
 }
 
-impl<N> HyperGraph<N>
+impl<N, E> HyperGraph<N, E>
 where
+    E: core::cmp::Eq + core::hash::Hash,
     N: core::cmp::Eq + core::hash::Hash,
 {
     /// initialize a new hypergraph
     pub fn new() -> Self {
         HyperGraph {
-            vertices: HashMap::new(),
+            facets: HashMap::new(),
             edges: HashMap::new(),
+            vertices: HashMap::new(),
             next_vertex_id: VertexId::zero(),
             next_edge_id: EdgeId::zero(),
         }
@@ -35,6 +39,15 @@ where
     /// returns a mutable reference to the hyperedges
     pub fn edges_mut(&mut self) -> &mut HashMap<EdgeId, HashSet<VertexId>> {
         &mut self.edges
+    }
+    /// returns an immutable reference to the facets of the hypergraph; here, a facet is a
+    /// hyperedge with an associated weight
+    pub const fn facets(&self) -> &HashMap<EdgeId, E> {
+        &self.facets
+    }
+    /// returns a mutable reference to the facets of the hypergraph
+    pub fn facets_mut(&mut self) -> &mut HashMap<EdgeId, E> {
+        &mut self.facets
     }
     /// returns am immutable reference to the vertices
     pub const fn vertices(&self) -> &HashMap<VertexId, Node<N>> {
@@ -52,7 +65,7 @@ where
         // Verify all vertices exist
         for vertex in vertices.clone().into_iter() {
             if !self.check_vertex(&vertex) {
-                return Err(crate::Error::VertexDoesNotExist(vertex.to_string()));
+                return Err(crate::Error::VertexDoesNotExist(vertex));
             }
         }
 
@@ -67,6 +80,13 @@ where
         self.edges.insert(edge_id, vertex_set);
         self.next_edge_id += 1;
         Ok(edge_id)
+    }
+    pub fn add_facet(&mut self, edge_id: EdgeId, facet: E) -> crate::Result<()> {
+        if !self.check_hyperedge(&edge_id) {
+            return Err(crate::Error::HyperedgeDoesNotExist(edge_id));
+        }
+        self.facets.insert(edge_id, facet);
+        Ok(())
     }
     /// insert a new vertex with the given weight and return its ID
     pub fn add_vertex(&mut self, weight: N) -> VertexId {
@@ -102,7 +122,7 @@ where
     /// returns a set of vertices that are in the hyperedge with the given id
     pub fn get_neighbors(&self, Index(index): VertexId) -> crate::Result<HashSet<VertexId>> {
         if !self.check_vertex(&Index(index)) {
-            return Err(crate::Error::VertexDoesNotExist(index.to_string()));
+            return Err(crate::Error::VertexDoesNotExist(index.into_index()));
         }
 
         let mut neighbors = HashSet::new();
@@ -117,9 +137,9 @@ where
     pub fn get_edge_vertices(&self, Index(index): EdgeId) -> crate::Result<&HashSet<VertexId>> {
         self.edges
             .get(&index)
-            .ok_or_else(|| crate::Error::HyperedgeDoesNotExist(index.to_string()))
+            .ok_or_else(|| crate::Error::HyperedgeDoesNotExist(index.into_index()))
     }
-
+    /// retrieves the set of nodes composing the given edge
     pub fn get_edge_nodes(&self, Index(index): EdgeId) -> crate::Result<Vec<&Node<N>>> {
         let vertices = self.get_edge_vertices(Index(index))?;
         let nodes = vertices
@@ -128,18 +148,17 @@ where
             .collect::<Vec<_>>();
         Ok(nodes)
     }
-
     /// returns the size of a given hyperedge (number of vertices in it)
-    pub fn edge_cardinality(&self, Index(index): EdgeId) -> crate::Result<usize> {
+    pub fn edge_cardinality(&self, index: EdgeId) -> crate::Result<usize> {
         match self.edges.get(&index) {
             Some(vertices) => Ok(vertices.len()),
-            None => Err(crate::Error::HyperedgeDoesNotExist(index.to_string())),
+            None => Err(crate::Error::HyperedgeDoesNotExist(index)),
         }
     }
     /// returns all hyperedges containing a given vertex
     pub fn get_vertex_edges(&self, Index(index): VertexId) -> crate::Result<Vec<EdgeId>> {
         if !self.check_vertex(&Index(index)) {
-            return Err(crate::Error::VertexDoesNotExist(index.to_string()));
+            return Err(crate::Error::VertexDoesNotExist(index.into_index()));
         }
         let edges = self
             .edges
@@ -158,16 +177,16 @@ where
     pub fn get_vertex_weight(&self, Index(index): VertexId) -> crate::Result<&Node<N>> {
         match self.vertices.get(&Index(index)) {
             Some(weight) => Ok(weight),
-            None => Err(crate::Error::VertexDoesNotExist(index.to_string())),
+            None => Err(crate::Error::VertexDoesNotExist(index.into_index())),
         }
     }
     /// merges two hyperedges into one (combining their vertices)
     pub fn merge_hyperedges(&mut self, e1: EdgeId, e2: EdgeId) -> crate::Result<EdgeId> {
         if !self.check_hyperedge(&e1) {
-            return Err(crate::Error::HyperedgeDoesNotExist(e1.to_string()));
+            return Err(crate::Error::HyperedgeDoesNotExist(e1));
         }
         if !self.check_hyperedge(&e2) {
-            return Err(crate::Error::HyperedgeDoesNotExist(e2.to_string()));
+            return Err(crate::Error::HyperedgeDoesNotExist(e2));
         }
         let set1 = self.edges.remove(&e1).unwrap();
         let set2 = self.edges.remove(&e2).unwrap();
@@ -181,7 +200,7 @@ where
     pub fn remove_hyperedge(&mut self, Index(index): EdgeId) -> crate::Result<HashSet<VertexId>> {
         match self.edges.remove(&index) {
             Some(v) => Ok(v),
-            None => Err(crate::Error::HyperedgeDoesNotExist(index.to_string())),
+            None => Err(crate::Error::HyperedgeDoesNotExist(index.into_index())),
         }
     }
     /// removes the vertex with the given id and all of its associated hyperedges
@@ -192,7 +211,7 @@ where
                 self.edges.retain(|_, vertices| !vertices.contains(&index));
                 return Ok(node);
             }
-            None => Err(crate::Error::VertexDoesNotExist(index.to_string())),
+            None => Err(crate::Error::VertexDoesNotExist(index.into_index())),
         }
     }
     /// returns the total number of hyperedges in the hypergraph
@@ -207,7 +226,7 @@ where
     /// contain the vertex
     pub fn vertex_degree(&self, Index(index): VertexId) -> crate::Result<usize> {
         if !self.check_vertex(&Index(index)) {
-            return Err(crate::Error::VertexDoesNotExist(index.to_string()));
+            return Err(crate::Error::VertexDoesNotExist(index.into_index()));
         }
 
         let degree = self
@@ -228,22 +247,22 @@ where
                 .insert(Index(index), Node::new(Index(index), new_weight));
             Ok(())
         } else {
-            Err(crate::Error::VertexDoesNotExist(index.to_string()))
+            Err(crate::Error::VertexDoesNotExist(index.into_index()))
         }
     }
     /// search the hypergraph using the A* algorithm with the given heuristic function
-    pub fn astar<F>(&self, heuristic: F) -> crate::algo::AStarSearch<'_, N, F>
+    pub fn astar<F>(&self, heuristic: F) -> crate::algo::AStarSearch<'_, N, E, F>
     where
         F: Fn(VertexId, VertexId) -> f64,
     {
         crate::algo::AStarSearch::new(self, heuristic)
     }
     /// search the hypergraph using the breadth-first traversal algorithm
-    pub fn bft(&self) -> crate::algo::BreadthFirstTraversal<'_, N> {
+    pub fn bft(&self) -> crate::algo::BreadthFirstTraversal<'_, N, E> {
         crate::algo::BreadthFirstTraversal::new(self)
     }
     /// search the hypergraph using the depth-first traversal algorithm
-    pub fn dft(&self) -> crate::algo::DepthFirstTraversal<'_, N> {
+    pub fn dft(&self) -> crate::algo::DepthFirstTraversal<'_, N, E> {
         crate::algo::DepthFirstTraversal::new(self)
     }
 }

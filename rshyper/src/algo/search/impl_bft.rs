@@ -4,16 +4,17 @@
 */
 
 use super::BreadthFirstTraversal;
-use crate::{Error, HyperGraph, HyperGraphSearch, Result, VertexId};
+use crate::{Error, HyperGraph, Result, Search, VertexId};
 use std::collections::{HashSet, VecDeque};
 use std::hash::Hash;
 
-impl<'a, N> BreadthFirstTraversal<'a, N>
+impl<'a, N, E> BreadthFirstTraversal<'a, N, E>
 where
+    E: Eq + Hash,
     N: Eq + Hash,
 {
     /// Create a new BreadthFirstTraversal instance
-    pub fn new(graph: &'a HyperGraph<N>) -> Self {
+    pub(crate) fn new(graph: &'a HyperGraph<N, E>) -> Self {
         Self {
             graph,
             queue: VecDeque::new(),
@@ -28,8 +29,9 @@ where
     }
 }
 
-impl<'a, N> HyperGraphSearch<N> for BreadthFirstTraversal<'a, N>
+impl<'a, N, E> Search<N> for BreadthFirstTraversal<'a, N, E>
 where
+    E: Eq + Hash,
     N: Eq + Hash,
 {
     fn search(&mut self, start: VertexId) -> Result<Vec<VertexId>> {
@@ -38,7 +40,7 @@ where
 
         // Check if starting vertex exists
         if !self.graph.check_vertex(&start) {
-            return Err(Error::VertexDoesNotExist(start.to_string()));
+            return Err(Error::VertexDoesNotExist(start));
         }
 
         // Add start vertex to queue and mark as visited

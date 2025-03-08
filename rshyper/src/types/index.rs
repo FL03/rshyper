@@ -30,6 +30,7 @@ impl<T> Index<T> {
         core::ptr::from_mut(&mut self.0)
     }
     /// consumes the index returning the inner value
+    #[inline]
     pub fn into_inner(self) -> T {
         self.0
     }
@@ -56,6 +57,12 @@ impl<T> Index<T> {
     /// swap the values of two indices
     pub const fn swap(&mut self, other: &mut Self) {
         core::mem::swap(&mut self.0, &mut other.0)
+    }
+}
+
+impl<T> From<T> for Index<T> {
+    fn from(index: T) -> Self {
+        Index(index)
     }
 }
 

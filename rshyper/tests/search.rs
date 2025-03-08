@@ -2,7 +2,7 @@
     Appellation: search <test>
     Contrib: @FL03
 */
-use rshyper::{HyperGraph, HyperGraphSearch, VertexId, algo::search::*};
+use rshyper::{HyperGraph, Search, VertexId};
 
 #[test]
 fn test_breadth_first_traversal() {
@@ -23,7 +23,7 @@ fn test_breadth_first_traversal() {
     let _e2 = graph.add_hyperedge(vec![v1, v3]).unwrap();
     let _e3 = graph.add_hyperedge(vec![v2, v4]).unwrap();
 
-    let mut bft = BreadthFirstTraversal::new(&graph);
+    let mut bft = graph.bft();
     let path = bft.search(v0).unwrap();
 
     // Verify traversal order - should be breadth-first
@@ -59,7 +59,7 @@ fn test_bft_cyclic_graph() {
     let _e3 = graph.add_hyperedge(vec![v2, v3]).unwrap();
     let _e4 = graph.add_hyperedge(vec![v3, v0]).unwrap();
 
-    let mut bft = BreadthFirstTraversal::new(&graph);
+    let mut bft = graph.bft();
     let path = bft.search(v0).unwrap();
 
     // BFT should visit each vertex exactly once
@@ -88,7 +88,7 @@ fn test_bft_disconnected_graph() {
     let _e1 = graph.add_hyperedge(vec![v0, v1]).unwrap();
     let _e2 = graph.add_hyperedge(vec![v2, v3]).unwrap();
 
-    let mut bft = BreadthFirstTraversal::new(&graph);
+    let mut bft = graph.bft();
     let path = bft.search(v0).unwrap();
 
     // BFT should only visit connected vertices (v0 and v1)
@@ -117,7 +117,7 @@ fn test_bft_hyperedge_with_multiple_vertices() {
     // Single hyperedge connecting all vertices
     let _e1 = graph.add_hyperedge(vec![v0, v1, v2, v3, v4]).unwrap();
 
-    let mut bft = BreadthFirstTraversal::new(&graph);
+    let mut bft = graph.bft();
     let path = bft.search(v0).unwrap();
 
     // All vertices should be in the path and at the same level
@@ -148,7 +148,7 @@ fn test_depth_first_traversal() {
     let _e2 = graph.add_hyperedge(vec![v1, v2]).unwrap();
     let _e3 = graph.add_hyperedge(vec![v2, v3]).unwrap();
 
-    let mut dft = DepthFirstTraversal::new(&graph);
+    let mut dft = graph.dft();
     let path = dft.search(v0).unwrap();
 
     // Verify traversal follows depth-first pattern
@@ -185,7 +185,7 @@ fn test_dft_branching_graph() {
     let _e3 = graph.add_hyperedge(vec![v0, v3]).unwrap();
     let _e4 = graph.add_hyperedge(vec![v2, v4]).unwrap();
 
-    let mut dft = DepthFirstTraversal::new(&graph);
+    let mut dft = graph.dft();
     let path = dft.search(v0).unwrap();
 
     // Should visit all vertices
@@ -218,7 +218,7 @@ fn test_dft_cyclic_graph() {
     let _e3 = graph.add_hyperedge(vec![v2, v3]).unwrap();
     let _e4 = graph.add_hyperedge(vec![v3, v0]).unwrap();
 
-    let mut dft = DepthFirstTraversal::new(&graph);
+    let mut dft = graph.dft();
     let path = dft.search(v0).unwrap();
 
     // Each vertex should be visited exactly once
@@ -245,7 +245,7 @@ fn test_dft_isolated_vertex() {
 
     let _e1 = graph.add_hyperedge(vec![v0, v1]).unwrap();
 
-    let mut dft = DepthFirstTraversal::new(&graph);
+    let mut dft = graph.dft();
     let path = dft.search(v0).unwrap();
 
     // Should only visit connected vertices
@@ -288,7 +288,7 @@ fn test_astar_search() {
     // Simple Euclidean distance heuristic (not used in this test)
     let heuristic = |_: VertexId, _: VertexId| -> f64 { 0.0 };
 
-    let mut astar = AStarSearch::new(&graph, heuristic);
+    let mut astar = graph.astar(heuristic);
     let path = astar.find_path(v0, v3).unwrap();
 
     // A* should find the shortest path (v0 -> v1 -> v3)
@@ -356,7 +356,7 @@ fn test_astar_with_heuristic() {
     };
 
     // Find path from v0 to v8 (diagonal corners)
-    let mut astar = AStarSearch::new(&graph, heuristic);
+    let mut astar = graph.astar(heuristic);
     let path = astar.find_path(v0, v8).unwrap();
 
     // Shortest path should have 5 vertices (one of several equivalent paths)
@@ -400,7 +400,7 @@ fn test_astar_disconnected() {
     // Simple heuristic
     let heuristic = |_: VertexId, _: VertexId| -> f64 { 0.0 };
 
-    let mut astar = AStarSearch::new(&graph, heuristic);
+    let mut astar = graph.astar(heuristic);
 
     // Try to find path between disconnected vertices
     let result = astar.find_path(v0, v3);
@@ -446,7 +446,7 @@ fn test_astar_complex_paths() {
     // Simple heuristic
     let heuristic = |_: VertexId, _: VertexId| -> f64 { 0.0 };
 
-    let mut astar = AStarSearch::new(&graph, heuristic);
+    let mut astar = graph.astar(heuristic);
     let path = astar.find_path(v0, v3).unwrap();
 
     // A* should find one of the shortest paths (all are length 4)

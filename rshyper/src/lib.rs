@@ -9,6 +9,9 @@
 #![crate_name = "rshyper"]
 #![crate_type = "lib"]
 
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 #[doc(inline)]
 pub use self::{
     error::*, graph::HyperGraph, ops::prelude::*, traits::prelude::*, types::prelude::*,
