@@ -74,35 +74,39 @@ where
         // Reset state
         self.reset();
 
-        // Initialize the g_score map with infinity for all nodes
-        // (except the start node which has g_score of 0)
+        // Initialize g_score for start node (0) and infinity for all other nodes
         self.g_score.insert(start, 0.0);
 
-        // Initialize the f_score with the heuristic for the start node
+        // Initialize f_score for start node (heuristic only since g=0)
         let start_f_score = (self.heuristic)(start, goal);
         self.f_score.insert(start, start_f_score);
 
         // Add start node to the open set
         self.open_set.insert(start);
 
-        // Initialize priority queue with the start node
+        // Create a priority queue and add the start node
         let mut priority_queue = BinaryHeap::new();
         priority_queue.push(PriorityNode {
             vertex: start,
             priority: -(start_f_score as i64),
         });
 
-        while !self.open_set.is_empty() {
-            // Get the node with lowest f_score from the priority queue
+        // Track processed nodes to avoid duplicate processing
+        let mut processed = HashSet::new();
+
+        while !priority_queue.is_empty() {
+            // Get node with lowest f_score
             let current = match priority_queue.pop() {
                 Some(node) => node.vertex,
-                None => break, // No path exists
+                None => break, // Should never happen if priority queue is not empty
             };
 
-            // Skip if this node is no longer in the open set
-            if !self.open_set.contains(&current) {
+            // Skip if we've already processed this vertex with a better path
+            // or it's no longer in the open set
+            if processed.contains(&current) || !self.open_set.contains(&current) {
                 continue;
             }
+            processed.insert(current);
 
             // If we've reached the goal, construct and return the path
             if current == goal {
@@ -113,42 +117,53 @@ where
             self.open_set.remove(&current);
             self.closed_set.insert(current);
 
-            // Process all neighbors through hyperedges
-            let edges = self.graph.get_vertex_edges(current)?;
+            // Get all hyperedges containing the current vertex
+            let edges = match self.graph.get_vertex_edges(current) {
+                Ok(edges) => edges,
+                Err(e) => return Err(e),
+            };
 
             for edge_id in edges {
-                let vertices = self.graph.get_edge_vertices(edge_id)?;
+                // Get all vertices in this hyperedge
+                let vertices = match self.graph.get_edge_vertices(edge_id) {
+                    Ok(verts) => verts,
+                    Err(e) => return Err(e),
+                };
 
+                // Process each vertex in this hyperedge
                 for &neighbor in vertices {
-                    // Skip if this is the current vertex or already in closed set
+                    // Skip if this is the current vertex or already evaluated
                     if neighbor == current || self.closed_set.contains(&neighbor) {
                         continue;
                     }
 
-                    // Calculate tentative g_score (cost to reach neighbor through current)
-                    // For a hypergraph, we're using cost 1 for direct connections
+                    // Cost to reach neighbor through current vertex
                     let tentative_g_score = self.g_score[&current] + 1.0;
 
-                    // If this neighbor is new or we found a better path to it
-                    if !self.g_score.contains_key(&neighbor)
-                        || tentative_g_score < self.g_score[&neighbor]
-                    {
-                        // Record this path
+                    // Check if this path is better than any previous path
+                    let is_better_path = !self.g_score.contains_key(&neighbor) ||
+                                         tentative_g_score < self.g_score[&neighbor];
+
+                    if is_better_path {
+                        // Update path info
                         self.came_from.insert(neighbor, current);
                         self.g_score.insert(neighbor, tentative_g_score);
-
-                        // Calculate f_score = g_score + heuristic
+                        
+                        // Update f_score (g_score + heuristic)
                         let f_score = tentative_g_score + (self.heuristic)(neighbor, goal);
                         self.f_score.insert(neighbor, f_score);
 
-                        // Add to open set if it's not there yet
+                        // Add to open set if not already there
                         if !self.open_set.contains(&neighbor) {
                             self.open_set.insert(neighbor);
-                            priority_queue.push(PriorityNode {
-                                vertex: neighbor,
-                                priority: -(f_score as i64),
-                            });
                         }
+
+                        // Always add to priority queue with new f_score
+                        // (The duplicate check above ensures we don't process unnecessarily)
+                        priority_queue.push(PriorityNode {
+                            vertex: neighbor,
+                            priority: -(f_score as i64),
+                        });
                     }
                 }
             }
