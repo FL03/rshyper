@@ -67,7 +67,7 @@
 ## Rust
 **/target
 
-!**/Cargo.lock
+# !**/Cargo.lock
 
 **/*.rs.bk
 **/*.rs.bk.*
