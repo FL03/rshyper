@@ -21,18 +21,37 @@ permissions:
   packages: write
 
 jobs:
-  publish:
-    env:
-      PACKAGE: ${{ github.event.repository.name }}
+  # features:
+  #   strategy:
+  #     max-parallel: 1
+  #     fail-fast: false
+  #     matrix:
+  #       feature: [ "core" ]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - 
+  #       name: rustup
+  #       uses: actions-rust-lang/setup-rust-toolchain@v1
+  #     - 
+  #       name: cache
+  #       uses: Swatinem/rust-cache@v2
+  #     - 
+  #       name: publish (${{ matrix.feature }})
+  #       run: cargo publish --all-features -v -p rshyper-${{ matrix.feature }}
+  root:
+    # needs: [features]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - 
+        name: checkout
+        uses: actions/checkout@v4
       - 
         name: rustup
         uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          cache-workspaces: true
       - 
-        name: publish (${{ env.PACKAGE }})
-        run: cargo publish --all-features -v -p ${{ env.PACKAGE }}
+        name: cache
+        uses: Swatinem/rust-cache@v2
+      - 
+        name: publish
+        run: cargo publish --all-features -v -p rshyper

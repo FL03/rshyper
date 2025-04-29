@@ -23,6 +23,7 @@ default = [ "std" ]
 
 full = [
     "default",
+    "json",
     "rand",
     "serde",
     "tracing",
@@ -34,6 +35,10 @@ alloc = [
     "serde?/alloc",
 ]
 
+anyhow = ["dep:anyhow"]
+
+json = ["dep:serde_json", "alloc"]
+
 rand = [
     "dep:rand",
     "dep:rand_distr",
@@ -42,8 +47,9 @@ rand = [
 ]
 
 rng = [
-    "rand/small_rng",
-    "rand/thread_rng",
+    "dep:getrandom",
+    "rand?/small_rng",
+    "rand?/thread_rng",
 ]
 
 serde = [
@@ -54,15 +60,12 @@ serde = [
     "serde?/derive",
 ]
 
-tracing = [
-    "dep:tracing",
-    "tracing?/attributes",
-]
+tracing = ["dep:tracing"]
 
 # ********* [FF] Environments *********
 std = [
     "alloc",
-    "anyhow/std",
+    "anyhow?/std",
     "num/std",
     "rand?/std",
     "serde?/std",
@@ -74,22 +77,34 @@ std = [
 [build-dependencies]
 
 [dependencies]
-anyhow = { default-features = false, version = "1" }
-num = { default-features = false, version = "0.4" }
-rand = { default-features = false, optional = true, version = "0.9" }
-rand_distr = { default-features = false, optional = true, version = "0.5" }
+num = { workspace = true }
+num-traits = { workspace = true }
 serde = { optional = true, workspace = true }
 serde_derive = { optional = true, workspace = true }
-strum = { default-features = false, workspace = true }
+serde_json = { optional = true, workspace = true }
+strum = { workspace = true }
+# errors
+anyhow = { optional = true, workspace = true }
 thiserror = { workspace = true }
-
-tracing = { default-features = false, optional = true, workspace = true }
+# randomization
+getrandom = { optional = true, workspace = true }
+rand = { optional = true, workspace = true }
+rand_distr = { optional = true, workspace = true }
+# logging
+tracing = { optional = true, workspace = true }
 
 [dev-dependencies]
+criterion = { workspace = true }
 
 [package.metadata.docs.rs]
 all-features = true
 rustc-args = [ "--cfg", "docsrs" ]
+
+# benches
+[[bench]]
+name = "default"
+harness = false
+required-features = ["std"]
 
 # ********* examples *********
 [[example]]

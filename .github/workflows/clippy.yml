@@ -22,18 +22,26 @@ jobs:
   clippy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - 
+        name: checkout
+        uses: actions/checkout@v4
       -
-        name: setup rust-toolchain
+        name: setup rustup
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
+          cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           cache-workspaces: true
           components: clippy, rustfmt
+      - 
+        name: cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: "${{ github.ref_name }}"
       - 
         name: setup cargo
         run: cargo install clippy-sarif sarif-fmt
       - 
-        name: Run rust-clippy
+        name: clippy
         run:
           cargo clippy
           --all-features

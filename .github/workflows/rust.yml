@@ -22,41 +22,33 @@ permissions: write-all
 jobs:
   workspace:
     strategy:
+      fail-fast: false
       matrix:
-        platform: [ ubuntu-latest ]
-        target: [ x86_64-unknown-linux-gnu ]
-        toolchain: [ stable, nightly ]
-    runs-on: ${{ matrix.platform }}
+        os:  [ ubuntu-latest ] # [ ubuntu-latest, macos-latest, windows-latest ]
+        target: [ x86_64-unknown-linux-gnu, ]
+        toolchain: [ stable, nightly, ]
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
       - 
-        name: rustup
+        name: checkout
+        uses: actions/checkout@v4
+      - 
+        name: setup rustup
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           cache-workspaces: true
           target: ${{ matrix.target }}
           toolchain: ${{ matrix.toolchain }}
       - 
+        name: cache
+        uses: Swatinem/rust-cache@v2
+      - 
         name: build
-        run: cargo build --all-features -r -v --workspace
+        run: cargo build -r -v --workspace --features full --target ${{ matrix.target }}
       - 
         name: test
-        run: cargo test --all-features -r -v --workspace
+        run: cargo test -r -v --workspace --features full --target ${{ matrix.target }}
       - 
         name: bench
-        if: matrix.toolchain == 'nightly'
-        run: cargo bench -F full -v --workspace
-      - 
-        name: cache
-        uses: actions/cache@v4
-        with:
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          restore-keys: |
-            ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-            ${{ runner.os }}-cargo-
-            ${{ runner.os }}-
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+        run: cargo bench -v --workspace --features full

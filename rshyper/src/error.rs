@@ -16,12 +16,17 @@ pub enum Error {
     HyperedgeDoesNotExist(EdgeId),
     #[error("Vertex {0} does not exist")]
     VertexDoesNotExist(VertexId),
+    #[cfg(feature = "alloc")]
     #[error(transparent)]
-    Other(#[from] Box<dyn std::error::Error + Send + Sync>),
+    Boxed(#[from] alloc::boxed::Box<dyn core::error::Error + 'static + Send + Sync>),
+    #[error(transparent)]
+    Other(#[from] anyhow::Error),
+    #[cfg(feature = "alloc")]
     #[error("Unknown error: {0}")]
-    Unknown(String),
+    Unknown(alloc::string::String),
 }
 
+#[cfg(feature = "alloc")]
 impl From<&str> for Error {
     fn from(s: &str) -> Self {
         Error::Unknown(s.to_string())
