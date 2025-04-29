@@ -44,11 +44,11 @@ jobs:
         uses: Swatinem/rust-cache@v2
       - 
         name: build
-        run: cargo build -r -v --workspace --features full --target ${{ matrix.target }}
+        run: cargo build -r --workspace -F full --target ${{ matrix.target }}
       - 
         name: test
-        run: cargo test -r -v --workspace --features full --target ${{ matrix.target }}
+        run: cargo test -r --workspace -F full --target ${{ matrix.target }}
       - 
         name: bench
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-        run: cargo bench -v --workspace --features full
+        run: cargo bench -v --workspace -F full

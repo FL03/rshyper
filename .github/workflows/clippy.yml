@@ -9,6 +9,7 @@ on:
     branches: [ main, master ]
     types: [ opened, reopened, closed ]
   release:
+    types: [ created ]
   repository_dispatch:
     types: [ clippy ]
   workflow_dispatch:
