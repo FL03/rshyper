@@ -33,6 +33,7 @@ full = [
 alloc = [
     "num/alloc",
     "serde?/alloc",
+    "serde_json?/alloc",
 ]
 
 anyhow = ["dep:anyhow"]
