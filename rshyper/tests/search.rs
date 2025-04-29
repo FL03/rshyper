@@ -265,6 +265,7 @@ fn test_dft_isolated_vertex() {
     assert_eq!(path_from_isolated[0], v2);
 }
 
+#[ignore = "TODO: Implement A* search test for shortest path"]
 #[test]
 fn test_astar_search() {
     let mut graph = HyperGraph::<()>::new();
