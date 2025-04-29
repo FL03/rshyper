@@ -20,10 +20,12 @@ pub use self::{
 pub mod error;
 pub mod graph;
 
+#[allow(unused_macros)]
 pub mod algo {
     #[doc(inline)]
     pub use self::prelude::*;
 
+    // #[cfg(feature = "std")]
     pub mod search;
 
     pub(crate) mod prelude {
