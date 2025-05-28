@@ -1,38 +1,52 @@
 name: crates-io
 
-concurrency:
+concurrency:   
   cancel-in-progress: false
   group: ${{ github.workflow }}-${{ github.ref }}
 
 env:
-  CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
   CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  RUSTC_VERSION: 1.86.0
 
 on:
-  push:
-    tags: [ v*, "*-nightly" ]
+  release:
+    types: [ published ]
   repository_dispatch:
     types: [ crates-io ]
   workflow_dispatch:
+    inputs:
+      publish:
+        default: true
+        description: 'Publish the crate(s) to crates.io?'
+        type: boolean
 
-permissions:
-  contents: read
-  deployments: read
-  packages: write
+
 
 jobs:
-  publish:
+  crates-io:
+    if: github.event.release == 'published' || inputs.publish
+    permissions:
+      contents: read
+      deployments: write
     env:
-      PACKAGE: ${{ github.event.repository.name }}
+      CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        package:  [ rshyper ]
     steps:
-      - uses: actions/checkout@v4
       - 
-        name: rustup
+        name: Checkout
+        uses: actions/checkout@v4
+      - 
+        name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           cache-workspaces: true
       - 
-        name: publish (${{ env.PACKAGE }})
-        run: cargo publish --all-features -v -p ${{ env.PACKAGE }}
+        name: Publish (${{ matrix.package }})
+        run: cargo publish --locked --package ${{ matrix.package }}
