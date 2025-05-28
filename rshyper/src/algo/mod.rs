@@ -12,12 +12,15 @@ pub mod search;
 
 pub(crate) mod prelude {
     #[doc(inline)]
-    pub use super::HyperGraphAlgo;
+    pub use super::RawGraphAlgorithm;
     #[cfg(feature = "std")]
     #[doc(inline)]
     pub use super::search::*;
 }
 
-pub trait HyperGraphAlgo<N, E> {
+/// this trait is used to denote an algorithmic operator that can be applied to a hypergraph.
+pub trait RawGraphAlgorithm<N, E> {
     type Graph<N2, E2>;
+
+    private!();
 }

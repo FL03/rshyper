@@ -21,7 +21,7 @@ pub(crate) mod macros {
 
 #[cfg(feature = "hash")]
 #[doc(inline)]
-pub use self::hash::HashGraph;
+pub use self::hash_graph::HashGraph;
 #[doc(inline)]
 pub use self::{
     error::{Error, Result},
@@ -33,7 +33,7 @@ pub use self::{
 pub mod algo;
 pub mod error;
 #[cfg(feature = "hash")]
-pub mod hash;
+pub mod hash_graph;
 
 pub mod ops {
     #[doc(inline)]
@@ -55,7 +55,7 @@ pub mod traits {
     pub use self::prelude::*;
 
     pub mod edges;
-    pub mod hgraph;
+    pub mod hyper_graph;
     pub mod indexable;
     pub mod nodes;
 
@@ -63,7 +63,7 @@ pub mod traits {
         #[doc(inline)]
         pub use super::edges::*;
         #[doc(inline)]
-        pub use super::hgraph::*;
+        pub use super::hyper_graph::*;
         #[doc(inline)]
         pub use super::indexable::*;
         #[doc(inline)]
@@ -92,7 +92,7 @@ pub mod prelude {
     pub use crate::algo::prelude::*;
     #[cfg(feature = "hash")]
     #[doc(no_inline)]
-    pub use crate::hash::prelude::*;
+    pub use crate::hash_graph::prelude::*;
     #[doc(no_inline)]
     pub use crate::ops::prelude::*;
     #[doc(no_inline)]
