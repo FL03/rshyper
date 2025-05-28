@@ -336,8 +336,8 @@ macro_rules! impl_fmt {
 
 macro_rules! impl_bin_op {
     (@impl $trait:ident::$method:ident) => {
-        impl<K, A, B, C> core::ops::$trait<Index<B, K>> for Index<A, K> 
-        where 
+        impl<K, A, B, C> core::ops::$trait<Index<B, K>> for Index<A, K>
+        where
             A: core::ops::$trait<B, Output = C>,
             K: IndexKind,
         {
@@ -356,10 +356,10 @@ macro_rules! impl_bin_op {
 
 macro_rules! impl_assign_op {
     (@impl $trait:ident::$method:ident) => {
-        impl<K, A, B> core::ops::$trait<B> for Index<A, K> 
-        where 
+        impl<K, A, B> core::ops::$trait<B> for Index<A, K>
+        where
             A: core::ops::$trait<B>,
-            K: IndexKind, 
+            K: IndexKind,
         {
             fn $method(&mut self, rhs: B) {
                 core::ops::$trait::$method(&mut self.value, rhs)

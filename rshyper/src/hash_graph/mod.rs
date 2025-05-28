@@ -15,9 +15,9 @@ pub(crate) mod impls {
 
 pub(crate) mod prelude {
     #[doc(inline)]
-    pub use super::graph::*;
-    #[doc(inline)]
     pub use super::HashNode;
+    #[doc(inline)]
+    pub use super::graph::*;
 }
 
 use crate::HyperNode;

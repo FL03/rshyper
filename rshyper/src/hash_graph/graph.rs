@@ -239,14 +239,9 @@ where
         Ok(degree)
     }
     /// update the weight of a given vertex
-    pub fn update_vertex_weight(
-        &mut self,
-        index: VertexId,
-        new_weight: N,
-    ) -> crate::Result<()> {
+    pub fn update_vertex_weight(&mut self, index: VertexId, new_weight: N) -> crate::Result<()> {
         if self.check_vertex(&index) {
-            self.vertices
-                .insert(index, Node::new(index, new_weight));
+            self.vertices.insert(index, Node::new(index, new_weight));
             Ok(())
         } else {
             Err(crate::Error::VertexDoesNotExist(index))

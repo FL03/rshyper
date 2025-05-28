@@ -54,18 +54,18 @@ pub mod traits {
     #[doc(inline)]
     pub use self::prelude::*;
 
+    pub mod convert;
     pub mod edges;
     pub mod hyper_graph;
-    pub mod indexable;
     pub mod nodes;
 
     pub(crate) mod prelude {
         #[doc(inline)]
+        pub use super::convert::*;
+        #[doc(inline)]
         pub use super::edges::*;
         #[doc(inline)]
         pub use super::hyper_graph::*;
-        #[doc(inline)]
-        pub use super::indexable::*;
         #[doc(inline)]
         pub use super::nodes::*;
     }

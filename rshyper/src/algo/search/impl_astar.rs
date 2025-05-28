@@ -4,8 +4,8 @@
 */
 
 use super::AStarSearch;
-use crate::{Error, Result, Search, VertexId};
 use crate::hash_graph::HashGraph;
+use crate::{Error, Result, Search, VertexId};
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::hash::Hash;
