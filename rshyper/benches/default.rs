@@ -1,5 +1,5 @@
 /*
-    Appellation: default <module>
+    Appellation: default <bench>
     Contrib: @FL03
 */
 use criterion::{BatchSize, BenchmarkId, Criterion, criterion_group, criterion_main};

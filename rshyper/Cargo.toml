@@ -52,7 +52,10 @@ criterion = { workspace = true }
 lazy_static = { workspace = true }
 
 [features]
-default = [ "std" ]
+default = [ 
+    "hash", 
+    "std",
+]
 
 full = [
     "default",
@@ -61,6 +64,10 @@ full = [
     "rand",
     "serde",
     "tracing",
+]
+
+hash = [
+    "std"
 ]
 
 # ************* [FF:Environments] *************
@@ -131,8 +138,8 @@ required-features = [ "std" ]
 
 # ************* [Examples] *************
 [[example]]
-name = "graph"
-required-features = [ "std" ]
+name = "hash_graph"
+required-features = [ "hash" ]
 
 # ************* [Tests] *************
 [[test]]
@@ -140,5 +147,9 @@ name = "default"
 required-features = [  ]
 
 [[test]]
-name = "graph"
-required-features = [ "std" ]
+name = "hash_graph"
+required-features = [ "hash" ]
+
+[[test]]
+name = "search"
+required-features = [ "hash" ]

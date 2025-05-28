@@ -4,7 +4,7 @@
 */
 
 use super::DepthFirstTraversal;
-use crate::{Error, HyperGraph, Result, Search, VertexId};
+use crate::{Error, HashGraph, Result, Search, VertexId};
 use std::collections::HashSet;
 use std::hash::Hash;
 
@@ -14,7 +14,7 @@ where
     N: Eq + Hash,
 {
     /// Create a new DepthFirstTraversal instance
-    pub(crate) fn new(graph: &'a HyperGraph<N, E>) -> Self {
+    pub(crate) fn new(graph: &'a HashGraph<N, E>) -> Self {
         Self {
             graph,
             stack: Vec::new(),

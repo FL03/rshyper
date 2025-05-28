@@ -2,11 +2,11 @@
     Appellation: search <test>
     Contrib: @FL03
 */
-use rshyper::{HyperGraph, Search, VertexId};
+use rshyper::{HashGraph, Search, VertexId};
 
 #[test]
 fn test_breadth_first_traversal() {
-    let mut graph = HyperGraph::<()>::new();
+    let mut graph = HashGraph::<()>::new();
 
     // Create a simple hypergraph
     // 0 -- 1 -- 3
@@ -42,7 +42,7 @@ fn test_breadth_first_traversal() {
 
 #[test]
 fn test_bft_cyclic_graph() {
-    let mut graph = HyperGraph::<()>::new();
+    let mut graph = HashGraph::<()>::new();
 
     // Create a cyclic hypergraph
     // 0 -- 1 -- 2
@@ -75,7 +75,7 @@ fn test_bft_cyclic_graph() {
 
 #[test]
 fn test_bft_disconnected_graph() {
-    let mut graph = HyperGraph::<()>::new();
+    let mut graph = HashGraph::<()>::new();
 
     // Create a disconnected hypergraph
     // 0 -- 1    2 -- 3
@@ -104,7 +104,7 @@ fn test_bft_disconnected_graph() {
 
 #[test]
 fn test_bft_hyperedge_with_multiple_vertices() {
-    let mut graph = HyperGraph::<()>::new();
+    let mut graph = HashGraph::<()>::new();
 
     // Create a hypergraph with a large hyperedge
     // connecting multiple vertices
@@ -136,7 +136,7 @@ fn test_bft_hyperedge_with_multiple_vertices() {
 
 #[test]
 fn test_depth_first_traversal() {
-    let mut graph = HyperGraph::<()>::new();
+    let mut graph = HashGraph::<()>::new();
 
     // Create a simple hypergraph
     let v0 = graph.add_vertex_default();
@@ -165,7 +165,7 @@ fn test_depth_first_traversal() {
 
 #[test]
 fn test_dft_branching_graph() {
-    let mut graph = HyperGraph::<()>::new();
+    let mut graph = HashGraph::<()>::new();
 
     // Create a branching hypergraph
     //      1
@@ -201,7 +201,7 @@ fn test_dft_branching_graph() {
 
 #[test]
 fn test_dft_cyclic_graph() {
-    let mut graph = HyperGraph::<()>::new();
+    let mut graph = HashGraph::<()>::new();
 
     // Create a cyclic graph
     // 0 -- 1 -- 2
@@ -234,7 +234,7 @@ fn test_dft_cyclic_graph() {
 
 #[test]
 fn test_dft_isolated_vertex() {
-    let mut graph = HyperGraph::<()>::new();
+    let mut graph = HashGraph::<()>::new();
 
     // Create a graph with an isolated vertex
     // 0 -- 1    2
@@ -267,7 +267,7 @@ fn test_dft_isolated_vertex() {
 
 #[test]
 fn test_astar_search() {
-    let mut graph = HyperGraph::<()>::new();
+    let mut graph = HashGraph::<()>::new();
 
     // Create a simple hypergraph
     let v0 = graph.add_vertex_default();
@@ -300,7 +300,7 @@ fn test_astar_search() {
 
 #[test]
 fn test_astar_with_heuristic() {
-    let mut graph = HyperGraph::<()>::new();
+    let mut graph = HashGraph::<()>::new();
 
     // Create a simple grid-like graph
     // 0 -- 1 -- 2
@@ -384,7 +384,7 @@ fn test_astar_with_heuristic() {
 
 #[test]
 fn test_astar_disconnected() {
-    let mut graph = HyperGraph::<()>::new();
+    let mut graph = HashGraph::<()>::new();
 
     // Create two disconnected components
     // 0 -- 1    2 -- 3
@@ -411,7 +411,7 @@ fn test_astar_disconnected() {
 
 #[test]
 fn test_astar_complex_paths() {
-    let mut graph = HyperGraph::<()>::new();
+    let mut graph = HashGraph::<()>::new();
 
     // Create a graph with multiple paths of different lengths
     // 0 -- 1 -- 2 -- 3

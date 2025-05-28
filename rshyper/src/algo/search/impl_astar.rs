@@ -4,7 +4,7 @@
 */
 
 use super::AStarSearch;
-use crate::{Error, HyperGraph, Result, Search, VertexId};
+use crate::{Error, HashGraph, Result, Search, VertexId};
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::hash::Hash;
@@ -40,7 +40,7 @@ where
     F: Fn(VertexId, VertexId) -> f64,
 {
     /// Create a new A* search instance with the given heuristic function
-    pub fn new(graph: &'a HyperGraph<N, E>, heuristic: F) -> Self {
+    pub fn new(graph: &'a HashGraph<N, E>, heuristic: F) -> Self {
         Self {
             graph,
             open_set: HashSet::new(),

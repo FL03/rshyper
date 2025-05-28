@@ -7,9 +7,12 @@ use crate::types::{EdgeId, Index, Node, VertexId};
 use num::Zero;
 use std::collections::{HashMap, HashSet};
 
+#[deprecated(since = "v0.0.3", note = "use `HashGraph` instead")]
+pub type HyperGraph<N = (), E = ()> = HashGraph<N, E>;
 /// A hash-based hypergraph implementation
 #[derive(Clone, Debug)]
-pub struct HyperGraph<N = (), E = ()> {
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+pub struct HashGraph<N = (), E = ()> {
     pub(crate) edges: HashMap<EdgeId, HashSet<VertexId>>,
     pub(crate) facets: HashMap<EdgeId, E>,
     pub(crate) vertices: HashMap<VertexId, Node<N>>,
@@ -17,14 +20,14 @@ pub struct HyperGraph<N = (), E = ()> {
     pub(crate) next_edge_id: EdgeId,
 }
 
-impl<N, E> HyperGraph<N, E>
+impl<N, E> HashGraph<N, E>
 where
     E: core::cmp::Eq + core::hash::Hash,
     N: core::cmp::Eq + core::hash::Hash,
 {
     /// initialize a new hypergraph
     pub fn new() -> Self {
-        HyperGraph {
+        HashGraph {
             facets: HashMap::new(),
             edges: HashMap::new(),
             vertices: HashMap::new(),
@@ -267,13 +270,13 @@ where
     }
 }
 
-impl HyperGraph<()> {
+impl HashGraph<()> {
     pub fn add_vertex_empty(&mut self) -> VertexId {
         self.add_vertex(())
     }
 }
 
-impl<N> Default for HyperGraph<N>
+impl<N> Default for HashGraph<N>
 where
     N: core::cmp::Eq + core::hash::Hash,
 {

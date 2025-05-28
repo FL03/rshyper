@@ -2,10 +2,10 @@
     Appellation: graph <module>
     Contrib: @FL03
 */
-use rshyper::HyperGraph;
+use rshyper::HashGraph;
 
 fn main() -> rshyper::Result<()> {
-    let mut graph = HyperGraph::<()>::new();
+    let mut graph = HashGraph::<()>::new();
 
     // Add some vertices
     let v0 = graph.add_vertex_default();

@@ -2,13 +2,13 @@
     Appellation: graph <module>
     Contrib: @FL03
 */
-use rshyper::{HyperGraph, Index};
+use rshyper::{HashGraph, Index};
 
 #[test]
 fn test_hypergraph() {
     use std::collections::HashSet;
 
-    let mut graph = HyperGraph::<usize>::new();
+    let mut graph = HashGraph::<usize>::new();
 
     // Add some vertices
     let v0 = graph.add_vertex_default();
@@ -35,7 +35,7 @@ fn test_hypergraph() {
 
 #[test]
 fn merge_hyperedge() {
-    let mut graph = HyperGraph::<usize>::new();
+    let mut graph = HashGraph::<usize>::new();
     let v0 = graph.add_vertex(10);
     let v1 = graph.add_vertex(20);
     let v2 = graph.add_vertex(30);
@@ -54,7 +54,7 @@ fn merge_hyperedge() {
 
 #[test]
 fn update_vertex() {
-    let mut graph = HyperGraph::<usize>::new();
+    let mut graph = HashGraph::<usize>::new();
     let v0 = graph.add_vertex(42);
 
     // Check initial weight
@@ -71,7 +71,7 @@ fn update_vertex() {
 
 #[test]
 fn remove_hyperedge() {
-    let mut graph = HyperGraph::<usize>::new();
+    let mut graph = HashGraph::<usize>::new();
     let v0 = graph.add_vertex(10);
     let v1 = graph.add_vertex(20);
     let v2 = graph.add_vertex(30);

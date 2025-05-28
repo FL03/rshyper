@@ -4,7 +4,7 @@
 */
 
 use super::BreadthFirstTraversal;
-use crate::{Error, HyperGraph, Result, Search, VertexId};
+use crate::{Error, HashGraph, Result, Search, VertexId};
 use std::collections::{HashSet, VecDeque};
 use std::hash::Hash;
 
@@ -14,7 +14,7 @@ where
     N: Eq + Hash,
 {
     /// Create a new BreadthFirstTraversal instance
-    pub(crate) fn new(graph: &'a HyperGraph<N, E>) -> Self {
+    pub(crate) fn new(graph: &'a HashGraph<N, E>) -> Self {
         Self {
             graph,
             queue: VecDeque::new(),

@@ -19,29 +19,21 @@ pub(crate) mod macros {
     pub mod seal;
 }
 
+#[cfg(feature = "hash")]
+#[doc(inline)]
+pub use self::hash::HashGraph;
 #[doc(inline)]
 pub use self::{
     error::{Error, Result},
-    hash::HyperGraph,
     ops::prelude::*,
     traits::prelude::*,
     types::prelude::*,
 };
 
+pub mod algo;
 pub mod error;
+#[cfg(feature = "hash")]
 pub mod hash;
-
-pub mod algo {
-    #[doc(inline)]
-    pub use self::prelude::*;
-
-    pub mod search;
-
-    pub(crate) mod prelude {
-        #[doc(inline)]
-        pub use super::search::*;
-    }
-}
 
 pub mod ops {
     #[doc(inline)]
@@ -95,9 +87,10 @@ pub mod types {
 pub mod prelude {
     #[doc(no_inline)]
     pub use crate::error::*;
-    
+
     #[doc(no_inline)]
     pub use crate::algo::prelude::*;
+    #[cfg(feature = "hash")]
     #[doc(no_inline)]
     pub use crate::hash::prelude::*;
     #[doc(no_inline)]
