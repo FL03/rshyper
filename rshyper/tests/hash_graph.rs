@@ -5,7 +5,7 @@
 use rshyper::{HashGraph, Index};
 
 #[test]
-fn test_hypergraph() {
+fn test_hypergraph() -> rshyper::Result<()> {
     use std::collections::HashSet;
 
     let mut graph = HashGraph::<usize>::new();
@@ -23,14 +23,17 @@ fn test_hypergraph() {
     assert!(e2.is_ok());
 
     // Get neighbors of vertex v1
-    let exp = HashSet::from_iter([Index(2), Index(3), Index(0)]);
-    assert_eq!(graph.get_neighbors(v1).expect("neighbors"), exp);
+    let neighbors = graph.get_neighbors(v1)?;
+    let exp = [2, 3, 0usize].iter().copied().map(|i| Index::from_value(i));
+    assert_eq!(neighbors, HashSet::from_iter(exp));
 
     // Get degree of vertex v1
-    assert_eq!(graph.vertex_degree(v1).expect("degree"), 2);
+    let deg = graph.vertex_degree(v1)?;
+    assert_eq!(deg, 2);
 
     // Remove a vertex
     assert!(graph.remove_vertex(v2).is_ok());
+    Ok(())
 }
 
 #[test]

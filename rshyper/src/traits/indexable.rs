@@ -2,35 +2,19 @@
     Appellation: indexable <module>
     Contrib: @FL03
 */
-use crate::Index;
+use crate::{Index, IndexKind};
 
 pub trait IntoIndex<Idx> {
-    fn into_index(self) -> Index<Idx>;
+    type Kind: IndexKind;
+
+    fn into_index(self) -> Index<Idx, Self::Kind>;
 }
 
 /// A trait denoting objects that may be identified by an index.
 pub trait Indexable<Idx> {
-    fn index(&self) -> &Index<Idx>;
+    type Kind: IndexKind;
+
+    fn index(&self) -> &Index<Idx, Self::Kind>;
 }
 
-/*
- ************* Implementations *************
- */
 
-impl<Idx, T> IntoIndex<Idx> for T
-where
-    T: Into<Index<Idx>>,
-{
-    fn into_index(self) -> Index<Idx> {
-        self.into()
-    }
-}
-
-impl<T, Idx> Indexable<Idx> for T
-where
-    T: core::borrow::Borrow<Index<Idx>>,
-{
-    fn index(&self) -> &Index<Idx> {
-        self.borrow()
-    }
-}

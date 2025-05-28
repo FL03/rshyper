@@ -2,21 +2,21 @@
     Appellation: node <module>
     Contrib: @FL03
 */
-use crate::Index;
 use crate::traits::Weighted;
+use crate::types::VertexId;
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde_derive::Deserialize, serde_derive::Serialize)
+    derive(serde::Deserialize, serde::Serialize)
 )]
 pub struct Node<T = (), Idx = usize> {
-    pub(crate) index: Index<Idx>,
+    pub(crate) index: VertexId<Idx>,
     pub(crate) weight: T,
 }
 
 impl<T, Idx> Node<T, Idx> {
-    pub fn new(index: Index<Idx>, weight: T) -> Self {
+    pub fn new(index: VertexId<Idx>, weight: T) -> Self {
         Self { index, weight }
     }
     /// returns a pointer to the inner value
@@ -29,7 +29,7 @@ impl<T, Idx> Node<T, Idx> {
         core::ptr::from_mut(&mut self.weight)
     }
 
-    pub const fn index(&self) -> &Index<Idx> {
+    pub const fn index(&self) -> &VertexId<Idx> {
         &self.index
     }
 
@@ -74,8 +74,8 @@ impl<T, Idx> core::convert::AsMut<T> for Node<T, Idx> {
     }
 }
 
-impl<T, Idx> core::borrow::Borrow<Index<Idx>> for Node<T, Idx> {
-    fn borrow(&self) -> &Index<Idx> {
+impl<T, Idx> core::borrow::Borrow<VertexId<Idx>> for Node<T, Idx> {
+    fn borrow(&self) -> &VertexId<Idx> {
         &self.index
     }
 }

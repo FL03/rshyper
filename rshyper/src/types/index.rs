@@ -4,229 +4,347 @@
 */
 
 // Define a type alias for Vertex ID (can be any hashable type)
-pub type VertexId<T = usize> = Index<T>;
+pub type VertexId<T = usize> = Index<T, VertexIndex>;
 // Define a type alias for HyperEdge ID
-pub type EdgeId<T = usize> = Index<T>;
+pub type EdgeId<T = usize> = Index<T, EdgeIndex>;
 
 pub type Idx = usize;
 
-#[derive(Clone, Copy, Default, Eq, Hash, PartialEq, Ord, PartialOrd)]
+use core::marker::PhantomData;
+
+pub trait IndexKind: Eq + core::hash::Hash {
+    private!();
+}
+
+macro_rules! impl_index_kind {
+    ($($kind:ident),* $(,)?) => {
+        $(
+            impl_index_kind!(@impl $kind);
+        )*
+    };
+    (@impl $kind:ident) => {
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Ord, PartialOrd)]
+        #[cfg_attr(
+            feature = "serde",
+            derive(serde_derive::Deserialize, serde_derive::Serialize)
+        )]
+        pub enum $kind {}
+
+        impl IndexKind for $kind {
+            seal!();
+        }
+    }
+}
+
+impl_index_kind! {
+    EdgeIndex,
+    VertexIndex,
+}
+
+#[derive(Clone, Copy, Eq, Hash, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
     derive(serde_derive::Deserialize, serde_derive::Serialize)
 )]
-pub struct Index<T = Idx>(pub T);
+pub struct Index<Idx, K>
+where
+    K: IndexKind,
+{
+    pub(crate) value: Idx,
+    pub(crate) _type: PhantomData<K>,
+}
 
-impl<T> Index<T> {
+impl<T, K> Index<T, K>
+where
+    K: IndexKind,
+{
     pub fn from_value(index: T) -> Self {
-        Index(index)
+        Self {
+            value: index,
+            _type: PhantomData::<K>,
+        }
     }
     /// returns a pointer to the inner value
     pub const fn as_ptr(&self) -> *const T {
-        core::ptr::from_ref(&self.0)
+        core::ptr::from_ref(&self.value)
     }
     /// returns a mutable pointer to the inner value
     pub fn as_mut_ptr(&mut self) -> *mut T {
-        core::ptr::from_mut(&mut self.0)
+        core::ptr::from_mut(&mut self.value)
     }
     /// consumes the index returning the inner value
     #[inline]
     pub fn into_inner(self) -> T {
-        self.0
+        self.value
     }
     /// returns an immutable reference to the inner value
     pub const fn get(&self) -> &T {
-        &self.0
+        &self.value
     }
     /// returns a mutable reference to the inner value
     pub fn get_mut(&mut self) -> &mut T {
-        &mut self.0
+        &mut self.value
     }
     /// apply a function to the inner value and returns a new Index wrapping the result
-    pub fn map<U, F: FnOnce(T) -> U>(self, f: F) -> Index<U> {
-        Index(f(self.0))
+    pub fn map<U, F: FnOnce(T) -> U>(self, f: F) -> Index<U, K> {
+        Index {
+            value: f(self.value),
+            _type: PhantomData::<K>,
+        }
     }
-    /// replaces the inner value with the given one and returns the old value
+    /// [`replace`](core::mem::replace) and return the old value after replacing it with the
+    /// given value
     pub const fn replace(&mut self, index: T) -> T {
-        core::mem::replace(&mut self.0, index)
+        core::mem::replace(&mut self.value, index)
     }
     /// set the index to the given value
-    pub fn set(&mut self, index: T) {
-        self.0 = index;
+    pub fn set(&mut self, value: T) -> &mut Self {
+        self.value = value;
+        self
     }
-    /// swap the values of two indices
+    /// consumes the current index to create another with the given value
+    pub fn with<U>(self, value: U) -> Index<U, K> {
+        Index {
+            value,
+            _type: PhantomData::<K>,
+        }
+    }
+    /// [`swap`](core::mem::swap) the values of two indices
     pub const fn swap(&mut self, other: &mut Self) {
-        core::mem::swap(&mut self.0, &mut other.0)
+        core::mem::swap(&mut self.value, &mut other.value)
     }
 }
 
-impl<T> From<T> for Index<T> {
-    fn from(index: T) -> Self {
-        Index(index)
-    }
-}
-
-impl<T> PartialEq<T> for Index<T>
+impl<T, K> From<T> for Index<T, K>
 where
+    K: IndexKind,
+{
+    fn from(index: T) -> Self {
+        Self::from_value(index)
+    }
+}
+
+impl<T, K> PartialEq<T> for Index<T, K>
+where
+    K: IndexKind,
     T: PartialEq,
 {
     fn eq(&self, other: &T) -> bool {
-        &self.0 == other
+        &self.value == other
     }
 }
 
-impl Index<usize> {
-    pub fn new() -> Self {
+impl<T> EdgeId<T> {
+    pub fn vertex(value: T) -> Self {
+        Self::from_value(value)
+    }
+}
+
+impl<T> VertexId<T> {
+    pub fn vertex(value: T) -> Self {
+        Self::from_value(value)
+    }
+}
+
+impl<K: IndexKind> Index<usize, K> {
+    pub fn atomic() -> Self {
         use core::sync::atomic::{AtomicUsize, Ordering::Relaxed};
         static COUNTER: AtomicUsize = AtomicUsize::new(1);
-        Self(COUNTER.fetch_add(1, Relaxed))
+        Self::from_value(COUNTER.fetch_add(1, Relaxed))
+    }
+}
+
+impl<T, K> Default for Index<T, K>
+where
+    K: IndexKind,
+    T: Default,
+{
+    fn default() -> Self {
+        Self::from_value(T::default())
     }
 }
 
 #[cfg(feature = "rand")]
-impl<T> Index<T>
+impl<T, K> Index<T, K>
 where
+    K: IndexKind,
     rand_distr::StandardUniform: rand_distr::Distribution<T>,
 {
     pub fn random() -> Self {
-        Index(rand::random())
+        Self::from_value(rand::random())
     }
+
     pub fn random_in<R: rand::Rng + ?Sized>(rng: &mut R) -> Self {
-        Index(rng.random())
+        Self::from_value(rng.random())
     }
 }
 
 #[cfg(feature = "rand")]
-impl<T> rand_distr::Distribution<Index<T>> for rand_distr::StandardUniform
+impl<T, K> rand_distr::Distribution<Index<T, K>> for rand_distr::StandardUniform
 where
+    K: IndexKind,
     rand_distr::StandardUniform: rand_distr::Distribution<T>,
 {
-    fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Index<T> {
-        Index(rng.random())
+    fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Index<T, K> {
+        Index::from_value(rng.random())
     }
 }
 
-impl<T> core::iter::Iterator for Index<T>
+impl<T, K> core::iter::Iterator for Index<T, K>
 where
+    K: IndexKind,
     T: for<'a> core::ops::Add<&'a T, Output = T> + num::One,
 {
-    type Item = Index<T>;
+    type Item = Index<T, K>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        Some(Index(T::one() + &self.0))
+        Some(Index::from_value(T::one() + &self.value))
     }
 }
 
-impl<T> core::convert::AsRef<T> for Index<T> {
+impl<T, K> core::convert::AsRef<T> for Index<T, K>
+where
+    K: IndexKind,
+{
     fn as_ref(&self) -> &T {
-        &self.0
+        self.get()
     }
 }
 
-impl<T> core::convert::AsMut<T> for Index<T> {
+impl<T, K> core::convert::AsMut<T> for Index<T, K>
+where
+    K: IndexKind,
+{
     fn as_mut(&mut self) -> &mut T {
-        &mut self.0
+        self.get_mut()
     }
 }
 
-impl<T> core::borrow::Borrow<T> for Index<T> {
+impl<T, K> core::borrow::Borrow<T> for Index<T, K>
+where
+    K: IndexKind,
+{
     fn borrow(&self) -> &T {
-        &self.0
+        self.get()
     }
 }
-
-impl<T> core::borrow::BorrowMut<T> for Index<T> {
+impl<T, K> core::borrow::BorrowMut<T> for Index<T, K>
+where
+    K: IndexKind,
+{
     fn borrow_mut(&mut self) -> &mut T {
-        &mut self.0
+        self.get_mut()
     }
 }
 
-impl<T> core::ops::Deref for Index<T> {
+impl<T, K> core::ops::Not for Index<T, K>
+where
+    K: IndexKind,
+    T: core::ops::Not<Output = T>,
+{
+    type Output = Index<T, K>;
+
+    fn not(self) -> Self::Output {
+        self.map(|value| !value)
+    }
+}
+
+impl<T, K> core::ops::Neg for Index<T, K>
+where
+    K: IndexKind,
+    T: core::ops::Neg<Output = T>,
+{
+    type Output = Index<T, K>;
+
+    fn neg(self) -> Self::Output {
+        self.map(|value| -value)
+    }
+}
+
+impl<T, K> core::ops::Deref for Index<T, K>
+where
+    K: IndexKind,
+{
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        &self.0
+        &self.value
     }
 }
 
-impl<T> core::ops::DerefMut for Index<T> {
+impl<T, K> core::ops::DerefMut for Index<T, K>
+where
+    K: IndexKind,
+{
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
+        &mut self.value
     }
 }
 
-impl<T> core::ops::Neg for Index<T>
+impl<T, K> num_traits::One for Index<T, K>
 where
-    T: core::ops::Neg,
-{
-    type Output = Index<<T as core::ops::Neg>::Output>;
-
-    fn neg(self) -> Self::Output {
-        Index(-self.0)
-    }
-}
-
-impl<T> core::ops::Not for Index<T>
-where
-    T: core::ops::Not,
-{
-    type Output = Index<<T as core::ops::Not>::Output>;
-
-    fn not(self) -> Self::Output {
-        Index(!self.0)
-    }
-}
-
-impl<T> num::One for Index<T>
-where
-    T: num::One,
+    K: IndexKind,
+    T: num_traits::One,
 {
     fn one() -> Self {
-        Index(T::one())
+        Self::from_value(T::one())
     }
 }
 
-impl<T> num::Zero for Index<T>
+impl<T, K> num_traits::Zero for Index<T, K>
 where
-    T: num::Zero,
+    K: IndexKind,
+    T: num_traits::Zero,
 {
     fn zero() -> Self {
-        Index(T::zero())
+        Self::from_value(T::zero())
     }
 
     fn is_zero(&self) -> bool {
-        self.0.is_zero()
+        self.value.is_zero()
     }
 }
 
-impl<T> num::Num for Index<T>
+impl<T, K> num::Num for Index<T, K>
 where
+    K: IndexKind,
     T: num::Num,
 {
     type FromStrRadixErr = T::FromStrRadixErr;
 
     fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
-        T::from_str_radix(str, radix).map(Index)
+        T::from_str_radix(str, radix).map(Index::from_value)
     }
 }
 
 macro_rules! impl_fmt {
     ($($trait:ident),* $(,)?) => {
-        $(impl<T: core::fmt::$trait> core::fmt::$trait for Index<T> {
-            fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
-                core::fmt::$trait::fmt(&self.0, f)
+        $(impl_fmt!(@impl $trait);)*
+    };
+    (@impl $trait:ident) => {
+        impl<T, K> ::core::fmt::$trait for Index<T, K>
+        where
+            K: IndexKind,
+            T: ::core::fmt::$trait,
+        {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+                ::core::fmt::$trait::fmt(&self.value, f)
             }
-        })*
+        }
     };
 }
 
 macro_rules! impl_bin_op {
     (@impl $trait:ident::$method:ident) => {
-        impl<A, B, C> core::ops::$trait<Index<B>> for Index<A> where A: core::ops::$trait<B, Output = C>{
-            type Output = Index<C>;
+        impl<K, A, B, C> core::ops::$trait<Index<B, K>> for Index<A, K> 
+        where 
+            A: core::ops::$trait<B, Output = C>,
+            K: IndexKind,
+        {
+            type Output = Index<C, K>;
 
-            fn $method(self, rhs: Index<B>) -> Self::Output {
-                Index(core::ops::$trait::$method(self.0, rhs.0))
+            fn $method(self, rhs: Index<B, K>) -> Self::Output {
+                Index::from_value(core::ops::$trait::$method(self.value, rhs.value))
             }
         }
     };
@@ -238,9 +356,13 @@ macro_rules! impl_bin_op {
 
 macro_rules! impl_assign_op {
     (@impl $trait:ident::$method:ident) => {
-        impl<A, B> core::ops::$trait<B> for Index<A> where A: core::ops::$trait<B> {
+        impl<K, A, B> core::ops::$trait<B> for Index<A, K> 
+        where 
+            A: core::ops::$trait<B>,
+            K: IndexKind, 
+        {
             fn $method(&mut self, rhs: B) {
-                core::ops::$trait::$method(&mut self.0, rhs)
+                core::ops::$trait::$method(&mut self.value, rhs)
             }
         }
     };
