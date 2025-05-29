@@ -18,9 +18,8 @@ impl<P> PriorityNode<P> {
     pub fn new(vertex: VertexId, priority: P) -> Self {
         Self { vertex, priority }
     }
-
     /// Get the vertex ID of the node
-    pub fn vertex(&self) -> VertexId {
+    pub const fn vertex(&self) -> VertexId {
         self.vertex
     }
     /// returns an immutable reference to the priority of the node

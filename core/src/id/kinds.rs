@@ -10,19 +10,42 @@ pub trait IndexKind:
     private!();
 }
 
-macro_rules! impl_index_kind {
-    ($($kind:ident),* $(,)?) => {
+macro_rules! impl_type_kind {
+    ($($vis:vis $i:ident $kind:ident),* $(,)?) => {
         $(
-            impl_index_kind!(@impl $kind);
+            impl_type_kind!(@impl $vis $i $kind);
         )*
     };
-    (@impl $kind:ident) => {
+    (@impl $vis:vis enum $kind:ident) => {
         #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Ord, PartialOrd)]
         #[cfg_attr(
             feature = "serde",
-            derive(serde_derive::Deserialize, serde_derive::Serialize)
+            derive(serde_derive::Deserialize, serde_derive::Serialize),
         )]
-        pub enum $kind {}
+        #[repr(transparent)]
+        pub enum $kind {};
+
+        impl IndexKind for $kind {
+            seal!();
+        }
+
+        impl ::core::fmt::Display for $kind {
+            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+                // stringify the ident of the kind
+                let tag = stringify!($kind);
+                // write the tag in lowercase
+                write!(f, "{}", tag.to_lowercase())
+            }
+        }
+    };
+    (@impl $vis:vis struct $kind:ident) => {
+        #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Ord, PartialOrd)]
+        #[cfg_attr(
+            feature = "serde",
+            derive(serde_derive::Deserialize, serde_derive::Serialize),
+        )]
+        #[repr(transparent)]
+        pub struct $kind;
 
         impl IndexKind for $kind {
             seal!();
@@ -39,7 +62,7 @@ macro_rules! impl_index_kind {
     }
 }
 
-impl_index_kind! {
-    EdgeIndex,
-    VertexIndex,
+impl_type_kind! {
+    pub struct EdgeIndex,
+    pub struct VertexIndex,
 }

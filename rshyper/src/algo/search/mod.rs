@@ -3,7 +3,9 @@
     authors: @FL03
 */
 #[doc(inline)]
-pub use self::prelude::*;
+pub use self::{
+    astar::AStarSearch, breadth_first::BreadthFirstTraversal, depth_first::DepthFirstTraversal,
+};
 
 pub mod astar;
 pub mod breadth_first;
@@ -11,11 +13,11 @@ pub mod depth_first;
 
 pub(crate) mod prelude {
     #[doc(inline)]
-    pub use super::astar::AStarSearch;
+    pub use super::astar::*;
     #[doc(inline)]
-    pub use super::breadth_first::BreadthFirstTraversal;
+    pub use super::breadth_first::*;
     #[doc(inline)]
-    pub use super::depth_first::DepthFirstTraversal;
+    pub use super::depth_first::*;
 
     #[doc(inline)]
     pub use super::Search;

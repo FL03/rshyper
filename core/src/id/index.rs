@@ -1,8 +1,8 @@
 /*
-    Appellation: index <types>
+    Appellation: index <module>
     Contrib: @FL03
 */
-use super::{EdgeIndex, IndexKind, VertexIndex};
+use super::IndexKind;
 use core::marker::PhantomData;
 
 #[derive(Clone, Copy, Eq, Hash, PartialEq, Ord, PartialOrd)]
@@ -118,6 +118,54 @@ where
     }
 }
 
+impl<T, K> AsRef<T> for Index<T, K>
+where
+    K: IndexKind,
+{
+    fn as_ref(&self) -> &T {
+        &self.value
+    }
+}
+
+impl<T, K> AsMut<T> for Index<T, K>
+where
+    K: IndexKind,
+{
+    fn as_mut(&mut self) -> &mut T {
+        &mut self.value
+    }
+}
+
+impl<T, K> core::borrow::Borrow<T> for Index<T, K>
+where
+    K: IndexKind,
+{
+    fn borrow(&self) -> &T {
+        &self.value
+    }
+}
+impl<T, K> core::borrow::BorrowMut<T> for Index<T, K>
+where
+    K: IndexKind,
+{
+    fn borrow_mut(&mut self) -> &mut T {
+        &mut self.value
+    }
+}
+
+impl<T, K> Default for Index<T, K>
+where
+    K: IndexKind,
+    T: Default,
+{
+    fn default() -> Self {
+        Self {
+            value: T::default(),
+            _type: core::marker::PhantomData::<K>,
+        }
+    }
+}
+
 impl<T, K> From<T> for Index<T, K>
 where
     K: IndexKind,
@@ -137,62 +185,6 @@ where
     }
 }
 
-impl<T> Index<T, EdgeIndex> {
-    pub fn vertex(value: T) -> Self {
-        Self::from_value(value)
-    }
-}
-
-impl<T> Index<T, VertexIndex> {
-    pub fn vertex(value: T) -> Self {
-        Self::from_value(value)
-    }
-}
-
-impl<K: IndexKind> Index<usize, K> {
-    pub fn atomic() -> Self {
-        use core::sync::atomic::{AtomicUsize, Ordering::Relaxed};
-        static COUNTER: AtomicUsize = AtomicUsize::new(1);
-        Self::from_value(COUNTER.fetch_add(1, Relaxed))
-    }
-}
-
-impl<T, K> Default for Index<T, K>
-where
-    K: IndexKind,
-    T: Default,
-{
-    fn default() -> Self {
-        Self::from_value(T::default())
-    }
-}
-
-#[cfg(feature = "rand")]
-impl<T, K> Index<T, K>
-where
-    K: IndexKind,
-    rand_distr::StandardUniform: rand_distr::Distribution<T>,
-{
-    pub fn random() -> Self {
-        Self::from_value(rand::random())
-    }
-
-    pub fn random_in<R: rand::Rng + ?Sized>(rng: &mut R) -> Self {
-        Self::from_value(rng.random())
-    }
-}
-
-#[cfg(feature = "rand")]
-impl<T, K> rand_distr::Distribution<Index<T, K>> for rand_distr::StandardUniform
-where
-    K: IndexKind,
-    rand_distr::StandardUniform: rand_distr::Distribution<T>,
-{
-    fn sample<R: rand::Rng + ?Sized>(&self, rng: &mut R) -> Index<T, K> {
-        Index::from_value(rng.random())
-    }
-}
-
 impl<T, K> core::iter::Iterator for Index<T, K>
 where
     K: IndexKind,
@@ -202,121 +194,6 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         Some(Index::from_value(T::one() + &self.value))
-    }
-}
-
-impl<T, K> core::convert::AsRef<T> for Index<T, K>
-where
-    K: IndexKind,
-{
-    fn as_ref(&self) -> &T {
-        self.get()
-    }
-}
-
-impl<T, K> core::convert::AsMut<T> for Index<T, K>
-where
-    K: IndexKind,
-{
-    fn as_mut(&mut self) -> &mut T {
-        self.get_mut()
-    }
-}
-
-impl<T, K> core::borrow::Borrow<T> for Index<T, K>
-where
-    K: IndexKind,
-{
-    fn borrow(&self) -> &T {
-        self.get()
-    }
-}
-impl<T, K> core::borrow::BorrowMut<T> for Index<T, K>
-where
-    K: IndexKind,
-{
-    fn borrow_mut(&mut self) -> &mut T {
-        self.get_mut()
-    }
-}
-
-impl<T, K> core::ops::Not for Index<T, K>
-where
-    K: IndexKind,
-    T: core::ops::Not<Output = T>,
-{
-    type Output = Index<T, K>;
-
-    fn not(self) -> Self::Output {
-        self.map(|value| !value)
-    }
-}
-
-impl<T, K> core::ops::Neg for Index<T, K>
-where
-    K: IndexKind,
-    T: core::ops::Neg<Output = T>,
-{
-    type Output = Index<T, K>;
-
-    fn neg(self) -> Self::Output {
-        self.map(|value| -value)
-    }
-}
-
-impl<T, K> core::ops::Deref for Index<T, K>
-where
-    K: IndexKind,
-{
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        &self.value
-    }
-}
-
-impl<T, K> core::ops::DerefMut for Index<T, K>
-where
-    K: IndexKind,
-{
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.value
-    }
-}
-
-impl<T, K> num_traits::One for Index<T, K>
-where
-    K: IndexKind,
-    T: num_traits::One,
-{
-    fn one() -> Self {
-        Self::from_value(T::one())
-    }
-}
-
-impl<T, K> num_traits::Zero for Index<T, K>
-where
-    K: IndexKind,
-    T: num_traits::Zero,
-{
-    fn zero() -> Self {
-        Self::from_value(T::zero())
-    }
-
-    fn is_zero(&self) -> bool {
-        self.value.is_zero()
-    }
-}
-
-impl<T, K> num::Num for Index<T, K>
-where
-    K: IndexKind + Eq,
-    T: num::Num,
-{
-    type FromStrRadixErr = T::FromStrRadixErr;
-
-    fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
-        T::from_str_radix(str, radix).map(Index::from_value)
     }
 }
 
@@ -335,70 +212,6 @@ macro_rules! impl_fmt {
             }
         }
     };
-}
-
-macro_rules! impl_bin_op {
-    (@impl $trait:ident::$method:ident) => {
-        impl<K, A, B, C> core::ops::$trait<Index<B, K>> for Index<A, K>
-        where
-            A: core::ops::$trait<B, Output = C>,
-            K: IndexKind,
-        {
-            type Output = Index<C, K>;
-
-            fn $method(self, rhs: Index<B, K>) -> Self::Output {
-                Index::from_value(core::ops::$trait::$method(self.value, rhs.value))
-            }
-        }
-    };
-
-    ($($trait:ident::$method:ident),* $(,)?) => {
-        $(impl_bin_op!(@impl $trait::$method);)*
-    };
-}
-
-macro_rules! impl_assign_op {
-    (@impl $trait:ident::$method:ident) => {
-        impl<K, A, B> core::ops::$trait<B> for Index<A, K>
-        where
-            A: core::ops::$trait<B>,
-            K: IndexKind,
-        {
-            fn $method(&mut self, rhs: B) {
-                core::ops::$trait::$method(&mut self.value, rhs)
-            }
-        }
-    };
-
-    ($($trait:ident::$method:ident),* $(,)?) => {
-        $(impl_assign_op!(@impl $trait::$method);)*
-    };
-}
-
-impl_assign_op! {
-    AddAssign::add_assign,
-    SubAssign::sub_assign,
-    MulAssign::mul_assign,
-    DivAssign::div_assign,
-    RemAssign::rem_assign,
-    BitAndAssign::bitand_assign,
-    BitOrAssign::bitor_assign,
-    BitXorAssign::bitxor_assign,
-    ShlAssign::shl_assign,
-    ShrAssign::shr_assign,
-}
-
-impl_bin_op! {
-    Add::add,
-    Sub::sub,
-    Mul::mul,
-    Div::div,
-    Rem::rem,
-    BitAnd::bitand,
-    BitOr::bitor,
-    BitXor::bitxor,
-    Shl::shl,
-    Shr::shr,
 }
 
 impl_fmt! {

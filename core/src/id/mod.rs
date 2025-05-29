@@ -13,6 +13,14 @@ pub use self::{
 pub mod index;
 pub mod kinds;
 
+#[doc(hidden)]
+mod impls {
+    pub mod impl_ops;
+    #[cfg(feature = "rand")]
+    pub mod impl_rand;
+    pub mod impl_repr;
+}
+
 pub(crate) mod prelude {
     #[doc(inline)]
     pub use super::index::*;
@@ -22,9 +30,10 @@ pub(crate) mod prelude {
     pub use super::{EdgeId, Idx, VertexId};
 }
 
-/// a type alias for an [`Index`] whose _kind_ is [`VertexIndex`]
-pub type VertexId<T = usize> = Index<T, VertexIndex>;
-/// a type alias for an [`Index`] whose _kind_ is [`EdgeIndex`]
-pub type EdgeId<T = usize> = Index<T, EdgeIndex>;
-/// a type index defining the default _type_ for indices throughout the crate
+/// a type alias for a [`usize`] used to define the default index type throughout the crate.
 pub type Idx = usize;
+
+/// a type alias for an [`Index`] whose _kind_ is [`EdgeIndex`]
+pub type EdgeId<T = Idx> = Index<T, EdgeIndex>;
+/// a type alias for an [`Index`] whose _kind_ is [`VertexIndex`]
+pub type VertexId<T = Idx> = Index<T, VertexIndex>;

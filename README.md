@@ -10,6 +10,24 @@ _**Warning: The library is currently in the early stages of development and is n
 
 `rshyper` is a Rust library designed to provide a hypergraph implementation with a focus on performance and flexibility. It is built to handle complex relationships between data points efficiently, making it suitable for various applications in graph theory, data analysis, and more.
 
+## Background
+
+Before diving in to the technical side of things, let's start by defining several terms commonly used in the definition and implementation of hypergraphs.
+
+- **edge**: an edge is a connection between two or more vertices.
+- **facet**: a facet materializes a hyperedge by associating some weight with the edge.
+- **node**: a node is a complete _vertex_ in that it is considered to be weighted.
+- **vertex**: a vertex can be understood as a _point_ in space that is used to define edges within a hypergraph.
+
+### Hypergraphs
+
+#### Definition
+
+Formally, a hypergraph is defined as a pair $H = (V, E)$ where:
+
+- $V$ is a set of vertices (or nodes).
+- $E$ is a set of hyperedges, where each hyperedge is a subset of $V$ that can contain one or more vertices.
+
 ## Features
 
 - [x] `hash` - A hash-based hypergraph implementation.

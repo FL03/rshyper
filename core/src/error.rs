@@ -16,6 +16,8 @@ pub type Result<T = ()> = core::result::Result<T, Error>;
 /// The error type for this crate
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    #[error("Invalid index")]
+    InvalidIndex,
     #[error("Cannot create empty hyperedge")]
     EmptyHyperedge,
     #[error("Hyperedge {0} does not exist")]
