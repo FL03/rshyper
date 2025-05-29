@@ -20,7 +20,6 @@ impl<T, S, Idx> Edge<T, S, Idx> {
     pub fn new(id: EdgeId<Idx>, nodes: S, weight: T) -> Self {
         Self { id, nodes, weight }
     }
-
     /// creates a new edge with the given id and default weight
     pub fn from_id(id: EdgeId<Idx>, nodes: S) -> Self
     where
@@ -32,7 +31,6 @@ impl<T, S, Idx> Edge<T, S, Idx> {
             weight: T::default(),
         }
     }
-
     /// creates a new instance from the given value
     pub fn from_weight(weight: T, nodes: S) -> Self
     where
@@ -44,7 +42,6 @@ impl<T, S, Idx> Edge<T, S, Idx> {
             weight,
         }
     }
-
     /// consumes the current instance to create another with the given id.
     pub fn with_id<I2>(self, id: EdgeId<I2>) -> Edge<T, S, I2> {
         Edge {
@@ -53,7 +50,6 @@ impl<T, S, Idx> Edge<T, S, Idx> {
             weight: self.weight,
         }
     }
-
     /// consumes the current instance to create another with the given weight.
     pub fn with_weight<U>(self, weight: U) -> Edge<U, S, Idx> {
         Edge {
