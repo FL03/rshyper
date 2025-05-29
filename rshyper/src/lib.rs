@@ -29,9 +29,17 @@
 //!
 //! ***
 //! 
-
 #[cfg(feature = "alloc")]
 extern crate alloc;
+
+#[doc(inline)]
+pub use self::{algo::prelude::*, ops::prelude::*};
+#[cfg(feature = "alloc")]
+pub use self::binary_graph::BinaryGraph;
+#[cfg(feature = "hash")]
+#[doc(inline)]
+pub use self::hash_graph::HashGraph;
+
 /// this module implements the core functionality of the `rshyper` crate
 #[doc(inline)]
 pub use rshyper_core::*;
@@ -43,13 +51,9 @@ pub(crate) mod macros {
     pub mod seal;
 }
 
-#[cfg(feature = "hash")]
-#[doc(inline)]
-pub use self::hash_graph::HashGraph;
-#[doc(inline)]
-pub use self::{algo::prelude::*, ops::prelude::*};
-
 pub mod algo;
+#[cfg(feature = "alloc")]
+pub mod binary_graph;
 #[cfg(feature = "hash")]
 pub mod hash_graph;
 
@@ -71,6 +75,9 @@ pub mod prelude {
 
     #[doc(no_inline)]
     pub use crate::algo::prelude::*;
+    #[cfg(feature = "alloc")]
+    #[doc(no_inline)]
+    pub use crate::binary_graph::prelude::*;
     #[cfg(feature = "hash")]
     #[doc(no_inline)]
     pub use crate::hash_graph::prelude::*;
