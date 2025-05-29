@@ -2,7 +2,7 @@
     Appellation: graph <module>
     Contrib: @FL03
 */
-use rshyper_core::{EdgeId, Node, VertexId};
+use rshyper_core::{EdgeId, Node, VertexId, id::Position};
 use std::collections::{HashMap, HashSet};
 
 /// A hash-based hypergraph implementation
@@ -17,6 +17,7 @@ pub struct HashGraph<N = (), E = ()> {
     pub(crate) connections: HashMap<EdgeId, HashSet<VertexId>>,
     pub(crate) facets: HashMap<EdgeId, E>,
     pub(crate) vertices: HashMap<VertexId, Node<N>>,
+    pub(crate) position: Position,
 }
 
 impl<N, E> HashGraph<N, E>
@@ -30,6 +31,7 @@ where
             facets: HashMap::new(),
             connections: HashMap::new(),
             vertices: HashMap::new(),
+            position: Position::zero(),
         }
     }
     /// returns an immutable reference to the hyperedges
@@ -49,25 +51,25 @@ where
     pub const fn facets_mut(&mut self) -> &mut HashMap<EdgeId, E> {
         &mut self.facets
     }
-    /// returns am immutable reference to the vertices
-    pub const fn vertices(&self) -> &HashMap<VertexId, Node<N>> {
+    /// returns am immutable reference to the nodes
+    pub const fn nodes(&self) -> &HashMap<VertexId, Node<N>> {
         &self.vertices
     }
-    /// returns a mutable reference to the vertices
-    pub const fn vertices_mut(&mut self) -> &mut HashMap<VertexId, Node<N>> {
+    /// returns a mutable reference to the nodes of the hypergraph
+    pub const fn nodes_mut(&mut self) -> &mut HashMap<VertexId, Node<N>> {
         &mut self.vertices
     }
-    /// returns the total number of hyperedges in the hypergraph
-    pub fn total_edges(&self) -> usize {
-        self.connections().len()
+    /// returns a copy of the current position of the hypergraph
+    pub const fn position(&self) -> Position {
+        self.position
     }
-    /// returns the total number of vertices in the hypergraph
-    pub fn total_vertices(&self) -> usize {
-        self.vertices().len()
+    /// returns a mutable reference to the current position of the hypergraph
+    pub fn position_mut(&mut self) -> &mut Position {
+        &mut self.position
     }
     /// clears all vertices and hyperedges, resetting the hypergraph
     pub fn clear(&mut self) {
-        self.vertices_mut().clear();
+        self.nodes_mut().clear();
         self.connections_mut().clear();
     }
     /// check if a hyperedge with the given id exists
@@ -76,10 +78,26 @@ where
     }
     /// check if a vertex with the given id exists
     pub fn contains_node(&self, index: &VertexId) -> bool {
-        self.vertices().contains_key(index)
+        self.nodes().contains_key(index)
     }
-    /// returns the size of a given hyperedge (number of vertices in it)
-    pub fn get_edge_cardinality(&self, index: &EdgeId) -> crate::Result<usize> {
+    /// get the next edge index and updates the current position
+    pub fn next_edge_id(&mut self) -> EdgeId {
+        self.position_mut().next_edge().unwrap()
+    }
+    /// returns the next vertex index and updates the current position
+    pub fn next_vertex_id(&mut self) -> VertexId {
+        self.position_mut().next_vertex().unwrap()
+    }
+    /// returns the total number of hyperedges in the hypergraph
+    pub fn total_edges(&self) -> usize {
+        self.connections().len()
+    }
+    /// returns the total number of vertices in the hypergraph
+    pub fn total_vertices(&self) -> usize {
+        self.nodes().len()
+    }
+    /// returns the size, or order, of a particular hyperedge
+    pub fn get_edge_order(&self, index: &EdgeId) -> crate::Result<usize> {
         self.connections()
             .get(index)
             .map(|vertices| vertices.len())
@@ -146,14 +164,14 @@ where
     }
     /// returns the weight of a particular vertex
     pub fn get_vertex_weight(&self, index: VertexId) -> crate::Result<&Node<N>> {
-        self.vertices()
+        self.nodes()
             .get(&index)
             .ok_or(crate::Error::VertexDoesNotExist(index))
     }
 
     /// returns a mutable reference to the weight of a vertex
     pub fn get_vertex_weight_mut(&mut self, index: VertexId) -> crate::Result<&mut Node<N>> {
-        self.vertices_mut()
+        self.nodes_mut()
             .get_mut(&index)
             .ok_or(crate::Error::VertexDoesNotExist(index))
     }
@@ -169,7 +187,7 @@ where
             }
         }
         // fetch the next edge index
-        let eid = EdgeId::atomic();
+        let eid = self.next_edge_id();
         // collect the vertices into a HashSet to ensure uniqueness
         let vset = vertices.into_iter().collect::<HashSet<_>>();
         // handle the case where the edge has no associated vertices
@@ -189,19 +207,22 @@ where
         let _prev = self.facets_mut().insert(edge_id, facet);
         Ok(())
     }
-    /// insert a new vertex with the given weight and return its ID
-    pub fn insert_vertex(&mut self, weight: N) -> VertexId {
-        let vertex_id = VertexId::atomic();
-        self.vertices_mut()
-            .insert(vertex_id, Node::new(vertex_id, weight));
-        vertex_id
+    /// insert a new node with the given weight and return its index
+    pub fn insert_node(&mut self, weight: N) -> VertexId {
+        // generate a new vertex ID
+        let idx = self.next_vertex_id();
+        // initialize a new node with the given weight & index
+        let node = Node::new(idx, weight);
+        // insert the new node into the vertices map
+        self.nodes_mut().insert(idx, node);
+        idx
     }
     /// insert a new vertex with the default weight and return its ID
     pub fn insert_vertex_default(&mut self) -> VertexId
     where
         N: Default,
     {
-        self.insert_vertex(N::default())
+        self.insert_node(N::default())
     }
     /// merges two hyperedges into one (combining their vertices)
     pub fn merge_edges(&mut self, e1: EdgeId, e2: EdgeId) -> crate::Result<EdgeId> {
@@ -216,7 +237,7 @@ where
             .remove(&e2)
             .ok_or(HyperedgeDoesNotExist(e2))?;
         let merged: HashSet<VertexId> = set1.union(&set2).cloned().collect();
-        let new_edge = EdgeId::atomic();
+        let new_edge = self.next_edge_id();
         self.connections_mut().insert(new_edge, merged);
         Ok(new_edge)
     }
@@ -243,7 +264,7 @@ where
     }
     /// removes the vertex with the given id and all of its associated hyperedges
     pub fn remove_vertex(&mut self, index: VertexId) -> crate::Result<Node<N>> {
-        self.vertices_mut()
+        self.nodes_mut()
             .remove(&index)
             .map(|node| {
                 // Remove all hyperedges containing this vertex
@@ -258,7 +279,7 @@ where
     where
         N: Clone,
     {
-        self.vertices_mut()
+        self.nodes_mut()
             .get_mut(&index)
             .map(|node| {
                 node.set_weight(weight.clone());
@@ -312,28 +333,14 @@ where
     }
     #[deprecated(since = "v0.0.3", note = "use `insert_vertex` instead")]
     pub fn add_vertex(&mut self, weight: N) -> VertexId {
-        self.insert_vertex(weight)
+        self.insert_node(weight)
     }
     #[deprecated(since = "v0.0.3", note = "use `insert_vertex_default` instead")]
     pub fn add_vertex_default(&mut self) -> VertexId
     where
         N: Default,
     {
-        self.insert_vertex(N::default())
-    }
-    #[deprecated(
-        since = "v0.0.4",
-        note = "use the creation routines provided by the `EdgeId` instead to ensure uniqueness"
-    )]
-    pub fn next_edge_id(&self) -> EdgeId {
-        EdgeId::atomic()
-    }
-    #[deprecated(
-        since = "v0.0.4",
-        note = "use the creation routines provided by the `VertexId` instead to ensure uniqueness"
-    )]
-    pub fn next_vertex_id(&self) -> VertexId {
-        VertexId::atomic()
+        self.insert_node(N::default())
     }
     #[deprecated(
         since = "v0.0.4",
@@ -346,7 +353,7 @@ where
 
 impl HashGraph<()> {
     pub fn insert_empty_node(&mut self) -> VertexId {
-        self.insert_vertex(())
+        self.insert_node(())
     }
 }
 
@@ -357,11 +364,11 @@ where
 {
     /// insert [`Some`] vertex with weight `T` and return its ID
     pub fn insert_some_node(&mut self, weight: T) -> VertexId {
-        self.insert_vertex(Some(weight))
+        self.insert_node(Some(weight))
     }
 
     pub fn insert_empty_node(&mut self) -> VertexId {
-        self.insert_vertex(None)
+        self.insert_node(None)
     }
 }
 

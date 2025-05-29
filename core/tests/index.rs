@@ -8,10 +8,13 @@ use rshyper::id::{EdgeId, Index, VertexId, VertexIndex};
 
 #[test]
 fn test_edge_id() -> rshyper::Result<()> {
-    let mut edge_id = EdgeId::from_value(1);
-    assert_eq!(edge_id.get(), &1);
-    let next_edge_id = edge_id.next().ok_or(Error::InvalidIndex)?;
-    assert_eq!(next_edge_id.get(), &2);
+    let mut edge_id = EdgeId::<usize>::default();
+    let e0 = edge_id.step()?;
+    let e1 = edge_id.step()?;
+    let e2 = edge_id.step()?;
+    assert_eq!(e0.get(), &0);
+    assert_eq!(e1.get(), &1);
+    assert_eq!(e2.get(), &2);
     Ok(())
 }
 

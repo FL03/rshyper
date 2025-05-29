@@ -16,6 +16,8 @@ pub type Result<T = ()> = core::result::Result<T, Error>;
 /// The error type for this crate
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    #[error("Index is out of bounds")]
+    IndexOutOfBounds,
     #[error("Invalid index")]
     InvalidIndex,
     #[error("Cannot create empty hyperedge")]

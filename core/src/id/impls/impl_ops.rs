@@ -4,6 +4,26 @@
 */
 use crate::id::{Index, IndexKind};
 
+impl<T, K> Index<T, K>
+where
+    K: IndexKind,
+{
+    /// creates a new index with a value of [`one`](num_traits::One)
+    pub fn one() -> Self
+    where
+        T: num_traits::One,
+    {
+        Self::from_value(T::one())
+    }
+    /// creates a new index with a value of [`zero`](num_traits::Zero)
+    pub fn zero() -> Self
+    where
+        T: num_traits::Zero,
+    {
+        Self::from_value(T::zero())
+    }
+}
+
 impl<T, K> core::ops::Deref for Index<T, K>
 where
     K: IndexKind,

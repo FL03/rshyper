@@ -112,9 +112,28 @@ where
     #[inline]
     pub fn inc_inplace(&mut self)
     where
-        T: core::ops::AddAssign + num_traits::One,
+        T: Copy + core::ops::AddAssign + num_traits::One,
     {
         self.value += T::one();
+    }
+    /// increments the current index and returns the previous instance of the index.
+    ///
+    /// ```rust
+    ///     use rshyper_core::EdgeId;
+    ///     let mut edge_id = EdgeId::<usize>::default();
+    ///     let e0 = edge_id.step()?;
+    ///     let e1 = edge_id.step()?;
+    ///     let e2 = edge_id.step()?;
+    ///     assert_eq!(e0.get(), &0);
+    ///     assert_eq!(e1.get(), &1);
+    ///     assert_eq!(e2.get(), &2);
+    /// ```
+    #[inline]
+    pub fn step(&mut self) -> crate::Result<Self>
+    where
+        T: Copy + core::ops::Add<T, Output = T> + num_traits::One,
+    {
+        self.next().ok_or(crate::Error::InvalidIndex)
     }
 }
 
@@ -188,12 +207,17 @@ where
 impl<T, K> core::iter::Iterator for Index<T, K>
 where
     K: IndexKind,
-    T: for<'a> core::ops::Add<&'a T, Output = T> + num::One,
+    T: Copy + core::ops::Add<T, Output = T> + num_traits::One,
 {
     type Item = Index<T, K>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        Some(Index::from_value(T::one() + &self.value))
+        // compute the next value
+        let next = self.value + T::one();
+        // replace the current value with the next one
+        let prev = core::mem::replace(&mut self.value, next);
+        // return the previous instance
+        Some(Self::from_value(prev))
     }
 }
 

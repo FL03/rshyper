@@ -2,7 +2,7 @@
     Appellation: graph <module>
     Contrib: @FL03
 */
-use rshyper::{HashGraph, VertexId};
+use rshyper::HashGraph;
 
 #[test]
 fn test_hypergraph() -> rshyper::Result<()> {
@@ -23,11 +23,8 @@ fn test_hypergraph() -> rshyper::Result<()> {
 
     // Get neighbors of vertex v1
     let neighbors = graph.neighbors(v1)?;
-    let exp = [2, 3, 0usize]
-        .iter()
-        .copied()
-        .map(|i| VertexId::from_value(i));
-    assert_eq!(neighbors, HashSet::from_iter(exp));
+    let exp = HashSet::from_iter([v0, v2, v3]);
+    assert_eq!(neighbors, exp);
 
     // verify the degree of vertex v1
     assert_eq!(graph.get_vertex_degree(v1)?, 2);
@@ -40,9 +37,9 @@ fn test_hypergraph() -> rshyper::Result<()> {
 #[test]
 fn merge_hyperedge() -> rshyper::Result<()> {
     let mut graph = HashGraph::<usize>::new();
-    let v0 = graph.insert_vertex(10);
-    let v1 = graph.insert_vertex(20);
-    let v2 = graph.insert_vertex(30);
+    let v0 = graph.insert_node(10);
+    let v1 = graph.insert_node(20);
+    let v2 = graph.insert_node(30);
 
     let e1 = graph.insert_edge(vec![v0, v1])?;
     let e2 = graph.insert_edge(vec![v1, v2])?;
@@ -58,7 +55,7 @@ fn merge_hyperedge() -> rshyper::Result<()> {
 #[test]
 fn update_vertex() -> rshyper::Result<()> {
     let mut graph = HashGraph::<usize>::new();
-    let v0 = graph.insert_vertex(42);
+    let v0 = graph.insert_node(42);
 
     // Check initial weight
     let initial_weight = graph.get_vertex_weight(v0)?;
@@ -75,9 +72,9 @@ fn update_vertex() -> rshyper::Result<()> {
 #[test]
 fn remove_hyperedge() -> rshyper::Result<()> {
     let mut graph = HashGraph::<usize>::new();
-    let v0 = graph.insert_vertex(10);
-    let v1 = graph.insert_vertex(20);
-    let v2 = graph.insert_vertex(30);
+    let v0 = graph.insert_node(10);
+    let v1 = graph.insert_node(20);
+    let v2 = graph.insert_node(30);
 
     let e1 = graph.insert_edge(vec![v0, v1])?;
     let e2 = graph.insert_edge(vec![v1, v2])?;

@@ -3,7 +3,7 @@
     Contrib: @FL03
 */
 use alloc::collections::{BTreeMap, BTreeSet};
-use rshyper_core::{EdgeId, Node, VertexId};
+use rshyper_core::{EdgeId, Node, VertexId, id::Position};
 
 /// a b-tree based hypergraph implementation
 #[derive(Clone, Debug)]
@@ -12,6 +12,7 @@ pub struct BinaryGraph<N, E> {
     pub(crate) connections: BTreeMap<EdgeId, BTreeSet<VertexId>>,
     pub(crate) facets: BTreeMap<EdgeId, E>,
     pub(crate) nodes: BTreeMap<VertexId, Node<N>>,
+    pub(crate) position: Position<usize>,
 }
 
 impl<N, E> BinaryGraph<N, E> {
@@ -21,6 +22,7 @@ impl<N, E> BinaryGraph<N, E> {
             connections: BTreeMap::new(),
             facets: BTreeMap::new(),
             nodes: BTreeMap::new(),
+            position: Position::default(),
         }
     }
     /// returns an immutable reference to the connections map
@@ -47,6 +49,14 @@ impl<N, E> BinaryGraph<N, E> {
     pub const fn nodes_mut(&mut self) -> &mut BTreeMap<VertexId, Node<N>> {
         &mut self.nodes
     }
+
+    pub const fn position(&self) -> Position {
+        self.position
+    }
+
+    pub fn position_mut(&mut self) -> &mut Position {
+        &mut self.position
+    }
     /// Returns the number of edges in the graph
     pub fn count_edges(&self) -> usize {
         self.connections.len()
@@ -55,27 +65,18 @@ impl<N, E> BinaryGraph<N, E> {
     pub fn count_vertices(&self) -> usize {
         self.nodes.len()
     }
+    /// get the next edge index and updates the current position
+    pub fn next_edge_id(&mut self) -> EdgeId {
+        self.position_mut().next_edge().unwrap()
+    }
+    /// returns the next vertex index and updates the current position
+    pub fn next_vertex_id(&mut self) -> VertexId {
+        self.position_mut().next_vertex().unwrap()
+    }
 }
 
 impl<N, E> Default for BinaryGraph<N, E> {
     fn default() -> Self {
         Self::new()
-    }
-}
-
-impl<N, E> BinaryGraph<N, E> {
-    #[deprecated(
-        since = "v0.0.4",
-        note = "use the creation routines provided by the `EdgeId` instead to ensure uniqueness"
-    )]
-    pub fn next_edge_id(&self) -> EdgeId {
-        EdgeId::atomic()
-    }
-    #[deprecated(
-        since = "v0.0.4",
-        note = "use the creation routines provided by the `VertexId` instead to ensure uniqueness"
-    )]
-    pub fn next_vertex_id(&self) -> VertexId {
-        VertexId::atomic()
     }
 }

@@ -8,10 +8,12 @@
 pub use self::{
     index::Index,
     kinds::{EdgeIndex, IndexKind, VertexIndex},
+    position::Position,
 };
 
 pub mod index;
 pub mod kinds;
+pub mod position;
 
 #[doc(hidden)]
 mod impls {
@@ -26,6 +28,8 @@ pub(crate) mod prelude {
     pub use super::index::*;
     #[doc(inline)]
     pub use super::kinds::*;
+    #[doc(inline)]
+    pub use super::position::*;
     #[doc(inline)]
     pub use super::{EdgeId, Idx, VertexId};
 }

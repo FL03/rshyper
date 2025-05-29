@@ -202,7 +202,7 @@ where
 
         // Using the vertex with the largest ID as a pseudo-goal
         // This is a hack to make A* behave more like a general search
-        let max_vertex_id = match self.graph.vertices().keys().max() {
+        let max_vertex_id = match self.graph.nodes().keys().max() {
             Some(&id) => id,
             None => return Ok(vec![]),
         };
