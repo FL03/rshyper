@@ -13,7 +13,7 @@ pub type HyperGraph<N = (), E = ()> = HashGraph<N, E>;
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct HashGraph<N = (), E = ()> {
-    pub(crate) edges: HashMap<EdgeId, HashSet<VertexId>>,
+    pub(crate) connections: HashMap<EdgeId, HashSet<VertexId>>,
     pub(crate) facets: HashMap<EdgeId, E>,
     pub(crate) vertices: HashMap<VertexId, Node<N>>,
     pub(crate) next_vertex_id: VertexId,
@@ -29,26 +29,26 @@ where
     pub fn new() -> Self {
         HashGraph {
             facets: HashMap::new(),
-            edges: HashMap::new(),
+            connections: HashMap::new(),
             vertices: HashMap::new(),
             next_vertex_id: VertexId::zero(),
             next_edge_id: EdgeId::zero(),
         }
     }
     /// returns an immutable reference to the hyperedges
-    pub const fn edges(&self) -> &HashMap<EdgeId, HashSet<VertexId>> {
-        &self.edges
+    pub const fn connections(&self) -> &HashMap<EdgeId, HashSet<VertexId>> {
+        &self.connections
     }
     /// returns a mutable reference to the hyperedges
-    pub const fn edges_mut(&mut self) -> &mut HashMap<EdgeId, HashSet<VertexId>> {
-        &mut self.edges
+    pub const fn conections_mut(&mut self) -> &mut HashMap<EdgeId, HashSet<VertexId>> {
+        &mut self.connections
     }
     /// returns an immutable reference to the facets of the hypergraph; here, a facet is a
     /// hyperedge with an associated weight
     pub const fn facets(&self) -> &HashMap<EdgeId, E> {
         &self.facets
     }
-    /// returns a mutable reference to the facets of the hypergraph
+    /// returns a mutable reference to the edges, or facets, of the hypergraph
     pub const fn facets_mut(&mut self) -> &mut HashMap<EdgeId, E> {
         &mut self.facets
     }
@@ -70,7 +70,7 @@ where
     }
     /// returns the total number of hyperedges in the hypergraph
     pub fn total_edges(&self) -> usize {
-        self.edges().len()
+        self.connections().len()
     }
     /// returns the total number of vertices in the hypergraph
     pub fn total_vertices(&self) -> usize {
@@ -78,7 +78,7 @@ where
     }
     /// check if a hyperedge with the given id exists
     pub fn check_edge(&self, edge_id: &EdgeId) -> bool {
-        self.edges().contains_key(edge_id)
+        self.connections().contains_key(edge_id)
     }
     /// check if a vertex with the given id exists
     pub fn check_vertex(&self, index: &VertexId) -> bool {
@@ -87,13 +87,13 @@ where
     /// clears all vertices and hyperedges, resetting the hypergraph
     pub fn clear(&mut self) {
         self.vertices_mut().clear();
-        self.edges_mut().clear();
+        self.conections_mut().clear();
         self.next_vertex_id = VertexId::zero();
         self.next_edge_id = EdgeId::zero();
     }
     /// returns the size of a given hyperedge (number of vertices in it)
     pub fn edge_cardinality(&self, index: EdgeId) -> crate::Result<usize> {
-        match self.edges().get(&index) {
+        match self.connections().get(&index) {
             Some(vertices) => Ok(vertices.len()),
             None => Err(crate::Error::HyperedgeDoesNotExist(index)),
         }
@@ -118,7 +118,7 @@ where
             return Err(crate::Error::EmptyHyperedge);
         }
         // insert the new hyperedge into the adjacency map
-        self.edges_mut().insert(eid, vset);
+        self.conections_mut().insert(eid, vset);
         self.next_edge_id += 1;
         Ok(eid)
     }
@@ -151,18 +151,24 @@ where
         if !self.check_vertex(&index) {
             return Err(crate::Error::VertexDoesNotExist(index));
         }
-
+        // initialize an empty set to hold the neighbors
         let mut neighbors = HashSet::new();
-        for vertices in self.edges.values() {
+        // iterate through all the connections
+        self.connections().values().for_each(|vertices| {
             if vertices.contains(&index) {
                 neighbors.extend(vertices.iter().filter(|&&v| v != index));
             }
-        }
+        });
         Ok(neighbors)
+    }
+    pub fn get_edge(&self, index: EdgeId) -> crate::Result<&E> {
+        self.facets()
+            .get(&index)
+            .ok_or_else(|| crate::Error::HyperedgeDoesNotExist(index))
     }
     /// retrieves the set of vertices that make up a specific hyperedge
     pub fn get_edge_vertices(&self, index: EdgeId) -> crate::Result<&HashSet<VertexId>> {
-        self.edges
+        self.connections()
             .get(&index)
             .ok_or_else(|| crate::Error::HyperedgeDoesNotExist(index))
     }
@@ -182,7 +188,7 @@ where
             return Err(crate::Error::VertexDoesNotExist(index));
         }
         let edges = self
-            .edges()
+            .connections()
             .iter()
             .filter_map(|(&edge_id, vertices)| {
                 if vertices.contains(&index) {
@@ -202,7 +208,7 @@ where
         }
 
         let degree = self
-            .edges()
+            .connections()
             .values()
             .filter(|vertices| vertices.contains(&index))
             .count();
@@ -223,17 +229,17 @@ where
         if !self.check_edge(&e2) {
             return Err(crate::Error::HyperedgeDoesNotExist(e2));
         }
-        let set1 = self.edges_mut().remove(&e1).unwrap();
-        let set2 = self.edges_mut().remove(&e2).unwrap();
+        let set1 = self.conections_mut().remove(&e1).unwrap();
+        let set2 = self.conections_mut().remove(&e2).unwrap();
         let merged: HashSet<VertexId> = set1.union(&set2).cloned().collect();
         let new_edge = self.next_edge_id;
-        self.edges_mut().insert(new_edge, merged);
+        self.conections_mut().insert(new_edge, merged);
         self.next_edge_id += 1;
         Ok(new_edge)
     }
     /// remove the hyperedge with the given id
     pub fn remove_edge(&mut self, index: EdgeId) -> crate::Result<HashSet<VertexId>> {
-        self.edges_mut()
+        self.conections_mut()
             .remove(&index)
             .ok_or(crate::Error::HyperedgeDoesNotExist(index))
     }
@@ -243,7 +249,7 @@ where
             .remove(&index)
             .map(|node| {
                 // Remove all hyperedges containing this vertex
-                self.edges.retain(|_, vertices| !vertices.contains(&index));
+                self.connections.retain(|_, vertices| !vertices.contains(&index));
                 node
             })
             .ok_or(crate::Error::VertexDoesNotExist(index))
