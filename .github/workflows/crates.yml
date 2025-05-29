@@ -21,11 +21,8 @@ on:
         description: 'Publish the crate(s) to crates.io?'
         type: boolean
 
-
-
 jobs:
-  crates-io:
-    if: github.event.release == 'published' || github.event.action == 'workflow_dispatch' && github.event.inputs.publish == 'true'
+  publish:
     permissions:
       contents: read
       deployments: write
