@@ -20,9 +20,14 @@ pub(crate) mod prelude {
     pub use super::graph::HashGraph;
 }
 
-use crate::HyperNode;
-/// Extends the base [HyperNode] trait with the [core::cmp::Eq] and [core::hash::Hash] traits
-/// for use with hash-related structures.
-pub trait HashNode<Idx>: HyperNode<Idx> + core::cmp::Eq + core::hash::Hash {}
+#[doc(hidden)]
+#[deprecated(since = "v0.0.3", note = "renamed to `HashGraph`")]
+pub type HyperGraph<N = (), E = ()> = HashGraph<N, E>;
 
-impl<T, Idx> HashNode<Idx> for T where T: HyperNode<Idx> + core::cmp::Eq + core::hash::Hash {}
+use rshyper_core::HyperNode;
+
+/// Extends the base [HyperNode] trait with the [`Eq`] and [`Hash`](core::hash::Hash) traits
+/// for use with hash-related structures.
+pub trait HashNode<Idx>: HyperNode<Idx> + Eq + core::hash::Hash {}
+
+impl<T, Idx> HashNode<Idx> for T where T: HyperNode<Idx> + Eq + core::hash::Hash {}

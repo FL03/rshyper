@@ -2,6 +2,9 @@
     Appellation: error <module>
     Contrib: @FL03
 */
+//! this module implements the [`Error`] type for the [`rshyper`](https://docs.rs/rshyper)
+//! crate.
+
 #[cfg(feature = "alloc")]
 use alloc::{boxed::Box, string::String};
 
@@ -13,6 +16,10 @@ pub type Result<T = ()> = core::result::Result<T, Error>;
 /// The error type for this crate
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    #[error("Index is out of bounds")]
+    IndexOutOfBounds,
+    #[error("Invalid index")]
+    InvalidIndex,
     #[error("Cannot create empty hyperedge")]
     EmptyHyperedge,
     #[error("Hyperedge {0} does not exist")]

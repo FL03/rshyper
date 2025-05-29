@@ -1,16 +1,48 @@
 /*
-    Appellation: rshyper <library>
-    Contrib: Joe McCain III <jo3mccain@icloud.com>
+    appellation: rshyper <library>
+    authors: @FL03
 */
-//! # rshyper
-//!
-//! This crates works to implement a hypergraph data structure in Rust. A hypergraph is a
-//! generalization of a graph in which an edge can connect any number of vertices.
 #![crate_name = "rshyper"]
 #![crate_type = "lib"]
-
+//! # rshyper
+//!
+//! Welcome to the `rshyper` crate - a Rust library for hypergraphs.
+//!
+//! ## Background
+//!
+//! Before diving in to the technical side of things, let's start by defining several terms
+//! commonly used in the definition and implementation of hypergraphs.
+//!
+//! - `edge`: an edge is a connection between two or more vertices.
+//! - `facet`: a facet materializes a hyperedge by associating some weight with the edge.
+//! - `node`: a node is a complete _vertex_ in that it is considered to be weighted.
+//! - `vertex`: a vertex is an _unweighted_ node defining a point within the hypergraph.
+//!
+//! ### Hypergraphs
+//!
+//! A hypergraph is an abstraction of a graph that allows edges to connect any number of
+//! vertices. This flexible data-strcture is highly mathematical, yet, extremely useful in
+//! many applications such as database design, network analysis, combinatorial optimization,
+//! modeling topological spaces, and more.
+//!
+//! _**definition.**_ Formally, a hypergraph is defined as a pair $\( H = (V, E) \)$ where:
+//!
+//! ***
+//!
 #[cfg(feature = "alloc")]
 extern crate alloc;
+
+#[cfg(feature = "alloc")]
+pub use self::binary_graph::BinaryGraph;
+#[cfg(feature = "hash")]
+#[doc(inline)]
+pub use self::hash_graph::HashGraph;
+#[doc(inline)]
+pub use self::{algo::prelude::*, ops::prelude::*};
+
+/// this module implements the core functionality of the `rshyper` crate
+#[doc(inline)]
+pub use rshyper_core::*;
 
 #[doc(hidden)]
 #[macro_use]
@@ -19,19 +51,9 @@ pub(crate) mod macros {
     pub mod seal;
 }
 
-#[cfg(feature = "hash")]
-#[doc(inline)]
-pub use self::hash_graph::HashGraph;
-#[doc(inline)]
-pub use self::{
-    error::{Error, Result},
-    ops::prelude::*,
-    traits::prelude::*,
-    types::prelude::*,
-};
-
 pub mod algo;
-pub mod error;
+#[cfg(feature = "alloc")]
+pub mod binary_graph;
 #[cfg(feature = "hash")]
 pub mod hash_graph;
 
@@ -39,64 +61,26 @@ pub mod ops {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    pub mod search;
     pub mod transform;
 
     pub(crate) mod prelude {
-        #[doc(inline)]
-        pub use super::search::*;
         #[doc(inline)]
         pub use super::transform::*;
     }
 }
 
-pub mod traits {
-    #[doc(inline)]
-    pub use self::prelude::*;
-
-    pub mod convert;
-    pub mod edges;
-    pub mod hyper_graph;
-    pub mod nodes;
-
-    pub(crate) mod prelude {
-        #[doc(inline)]
-        pub use super::convert::*;
-        #[doc(inline)]
-        pub use super::edges::*;
-        #[doc(inline)]
-        pub use super::hyper_graph::*;
-        #[doc(inline)]
-        pub use super::nodes::*;
-    }
-}
-
-pub mod types {
-    #[doc(inline)]
-    pub use self::prelude::*;
-
-    pub mod index;
-    pub mod node;
-
-    pub(crate) mod prelude {
-        pub use super::index::*;
-        pub use super::node::*;
-    }
-}
-
 pub mod prelude {
     #[doc(no_inline)]
-    pub use crate::error::*;
+    pub use rshyper_core::prelude::*;
 
     #[doc(no_inline)]
     pub use crate::algo::prelude::*;
+    #[cfg(feature = "alloc")]
+    #[doc(no_inline)]
+    pub use crate::binary_graph::prelude::*;
     #[cfg(feature = "hash")]
     #[doc(no_inline)]
     pub use crate::hash_graph::prelude::*;
     #[doc(no_inline)]
     pub use crate::ops::prelude::*;
-    #[doc(no_inline)]
-    pub use crate::traits::prelude::*;
-    #[doc(no_inline)]
-    pub use crate::types::prelude::*;
 }

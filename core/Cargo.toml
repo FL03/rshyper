@@ -1,6 +1,6 @@
 [package]
 build = "build.rs"
-name = "rshyper"
+name = "rshyper-core"
 
 authors.workspace = true
 categories.workspace = true
@@ -15,7 +15,7 @@ rust-version.workspace = true
 version.workspace = true
 
 [lib]
-bench = true
+bench = false
 crate-type = [ "cdylib", "rlib" ]
 doc = true
 doctest = false
@@ -27,7 +27,6 @@ features = ["full"]
 rustc-args = [ "--cfg", "docsrs" ]
 
 [dependencies]
-rshyper-core = { workspace = true }
 # custom
 scsys = { workspace = true }
 # error handling
@@ -51,12 +50,11 @@ strum = { workspace = true }
 tracing = { optional = true, workspace = true }
 
 [dev-dependencies]
-criterion = { workspace = true }
 lazy_static = { workspace = true }
+
 
 [features]
 default = [ 
-    "hash", 
     "std",
 ]
 
@@ -69,11 +67,6 @@ full = [
     "tracing",
 ]
 
-# ************* [FF:Flags] *************
-hash = [
-    "std"
-]
-
 # ************* [FF:Environments] *************
 std = [
     "alloc",
@@ -81,7 +74,6 @@ std = [
     "num/std",
     "num-traits/std",
     "rand?/std",
-    "rshyper-core/std",
     "scsys/std",
     "serde?/std",
     "strum/std",
@@ -92,13 +84,11 @@ std = [
 wasm = [
     "alloc",
     "getrandom?/wasm_js",
-    "rshyper-core/wasm",
     "scsys/wasm",
 ]
 # ************* [FF:Dependencies] *************
 alloc = [
     "num/alloc",
-    "rshyper-core/alloc",
     "scsys/alloc",
     "serde?/alloc",
     "serde_json?/alloc",
@@ -106,14 +96,12 @@ alloc = [
 
 anyhow = [
     "dep:anyhow",
-    "rshyper-core/anyhow",
 ]
 
 json = [
     "alloc",
     "serde",
     "serde_json",
-    "rshyper-core/json",
     "scsys/json",
 ]
 
@@ -122,7 +110,6 @@ rand = [
     "dep:rand_distr",
     "num/rand",
     "rng",
-    "rshyper-core/rand",
     "scsys/rand",
 ]
 
@@ -130,7 +117,6 @@ rng = [
     "dep:getrandom",
     "rand/small_rng",
     "rand/thread_rng",
-    "rshyper-core/rng",
     "scsys/rng",
 ]
 
@@ -139,43 +125,20 @@ serde = [
     "dep:serde_derive",
     "num/serde",
     "rand?/serde",
-    "rshyper-core/serde",
     "scsys/serde",
     "serde?/derive",
 ]
 
-serde_json = [
-    "dep:serde_json",
-    "rshyper-core/serde_json",
-]
+serde_json = ["dep:serde_json"]
 
 tracing = [
     "dep:tracing",
     "tracing?/attributes",
-    "rshyper-core/tracing",
     "scsys/tracing",
 ]
-
-# ************* [Benchmarks] *************
-[[bench]]
-harness = false
-name = "default"
-required-features = [ "std" ]
-
-# ************* [Examples] *************
-[[example]]
-name = "hash_graph"
-required-features = [ "hash" ]
 
 # ************* [Tests] *************
 [[test]]
 name = "default"
 required-features = [  ]
 
-[[test]]
-name = "hash_graph"
-required-features = [ "hash" ]
-
-[[test]]
-name = "search"
-required-features = [ "hash" ]

@@ -2,42 +2,34 @@
     Appellation: impl_astar <module>
     Contrib: @FL03
 */
+#[doc(inline)]
+pub use self::priority_node::PriorityNode;
 
-use super::AStarSearch;
+pub(crate) mod priority_node;
+
+use super::Search;
 use crate::hash_graph::HashGraph;
-use crate::{Error, Result, Search, VertexId};
-use std::cmp::Ordering;
+use crate::{Error, Result, VertexId};
 use std::collections::{BinaryHeap, HashMap, HashSet};
-use std::hash::Hash;
 
-// Priority queue node for A* algorithm
-#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde_derive::Deserialize, serde_derive::Serialize)
-)]
-struct PriorityNode {
-    vertex: VertexId,
-    priority: i64, // Negative f_score for min-heap behavior
-}
-
-impl Ord for PriorityNode {
-    fn cmp(&self, other: &Self) -> Ordering {
-        // Reverse ordering to create a min-heap (lowest f_score has highest priority)
-        other.priority.cmp(&self.priority)
-    }
-}
-
-impl PartialOrd for PriorityNode {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
+/// A* Search algorithm for hypergraphs
+pub struct AStarSearch<'a, N, E, F>
+where
+    F: Fn(VertexId, VertexId) -> f64,
+{
+    pub(crate) graph: &'a HashGraph<N, E>,
+    pub(crate) open_set: HashSet<VertexId>,
+    pub(crate) closed_set: HashSet<VertexId>,
+    pub(crate) came_from: HashMap<VertexId, VertexId>,
+    pub(crate) g_score: HashMap<VertexId, f64>,
+    pub(crate) f_score: HashMap<VertexId, f64>,
+    pub(crate) heuristic: F,
 }
 
 impl<'a, N, E, F> AStarSearch<'a, N, E, F>
 where
-    E: core::cmp::Eq + core::hash::Hash,
-    N: Eq + Hash,
+    E: Eq + core::hash::Hash,
+    N: Eq + core::hash::Hash,
     F: Fn(VertexId, VertexId) -> f64,
 {
     /// Create a new A* search instance with the given heuristic function
@@ -65,10 +57,10 @@ where
     /// Find the shortest path between start and goal vertices
     pub fn find_path(&mut self, start: VertexId, goal: VertexId) -> Result<Vec<VertexId>> {
         // Check if both vertices exist
-        if !self.graph.check_vertex(&start) {
+        if !self.graph.contains_node(&start) {
             return Err(Error::VertexDoesNotExist(start));
         }
-        if !self.graph.check_vertex(&goal) {
+        if !self.graph.contains_node(&goal) {
             return Err(Error::VertexDoesNotExist(goal));
         }
 
@@ -126,7 +118,7 @@ where
 
             for edge_id in edges {
                 // Get all vertices in this hyperedge
-                let vertices = match self.graph.get_edge_vertices(edge_id) {
+                let vertices = match self.graph.get_vertices_for_edge(edge_id) {
                     Ok(verts) => verts,
                     Err(e) => return Err(e),
                 };
@@ -194,8 +186,8 @@ where
 
 impl<'a, N, E, F> Search<N> for AStarSearch<'a, N, E, F>
 where
-    E: core::cmp::Eq + core::hash::Hash,
-    N: Eq + Hash,
+    E: Eq + core::hash::Hash,
+    N: Eq + core::hash::Hash,
     F: Fn(VertexId, VertexId) -> f64,
 {
     fn search(&mut self, start: VertexId) -> Result<Vec<VertexId>> {
@@ -204,13 +196,13 @@ where
         // all reachable vertices ordered by their distance from start
         self.reset();
 
-        if !self.graph.check_vertex(&start) {
+        if !self.graph.contains_node(&start) {
             return Err(Error::VertexDoesNotExist(start));
         }
 
         // Using the vertex with the largest ID as a pseudo-goal
         // This is a hack to make A* behave more like a general search
-        let max_vertex_id = match self.graph.vertices().keys().max() {
+        let max_vertex_id = match self.graph.nodes().keys().max() {
             Some(&id) => id,
             None => return Ok(vec![]),
         };

@@ -4,9 +4,9 @@
 
 Checkout the current and supported packages below:
 
-| Supported |  Version  |
-|-----------|-----------|
-|  0.0.0    | <=0.0.0   |
+|  Version  |     Supported?     |
+|-----------|--------------------|
+| <=0.0.4   | :white_check_mark: |
 
 ## Reporting a Vulnerability
 
