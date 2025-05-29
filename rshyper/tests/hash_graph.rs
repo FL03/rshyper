@@ -41,11 +41,11 @@ fn merge_hyperedge() -> rshyper::Result<()> {
     let v1 = graph.insert_vertex(20);
     let v2 = graph.insert_vertex(30);
 
-    let e1 = graph.insert_edge(vec![v0, v1]).expect("edge e1");
-    let e2 = graph.insert_edge(vec![v1, v2]).expect("edge e2");
+    let e1 = graph.insert_edge(vec![v0, v1])?;
+    let e2 = graph.insert_edge(vec![v1, v2])?;
 
-    let merged = graph.merge_edges(e1, e2).expect("merge");
-    let hyperedge = graph.remove_edge(merged).expect("merged hyperedge missing");
+    let merged = graph.merge_edges(e1, e2)?;
+    let hyperedge = graph.remove_edge(merged)?;
     assert!(hyperedge.contains(&v0));
     assert!(hyperedge.contains(&v1));
     assert!(hyperedge.contains(&v2));
