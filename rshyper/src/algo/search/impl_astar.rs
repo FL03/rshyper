@@ -119,7 +119,7 @@ where
             self.closed_set.insert(current);
 
             // Get all hyperedges containing the current vertex
-            let edges = match self.graph.get_vertex_edges(current) {
+            let edges = match self.graph.get_edges_with_vertex(current) {
                 Ok(edges) => edges,
                 Err(e) => return Err(e),
             };

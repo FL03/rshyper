@@ -66,6 +66,7 @@ full = [
     "tracing",
 ]
 
+# ************* [FF:Flags] *************
 hash = [
     "std"
 ]

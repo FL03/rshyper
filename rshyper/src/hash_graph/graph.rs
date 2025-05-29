@@ -6,7 +6,8 @@ use crate::types::{EdgeId, Node, VertexId};
 use num_traits::Zero;
 use std::collections::{HashMap, HashSet};
 
-#[deprecated(since = "v0.0.3", note = "use `HashGraph` instead")]
+#[doc(hidden)]
+#[deprecated(since = "v0.0.3", note = "renamed to `HashGraph`")]
 pub type HyperGraph<N = (), E = ()> = HashGraph<N, E>;
 /// A hash-based hypergraph implementation
 #[derive(Clone, Debug)]
@@ -21,8 +22,8 @@ pub struct HashGraph<N = (), E = ()> {
 
 impl<N, E> HashGraph<N, E>
 where
-    E: core::cmp::Eq + core::hash::Hash,
-    N: core::cmp::Eq + core::hash::Hash,
+    E: Eq + core::hash::Hash,
+    N: Eq + core::hash::Hash,
 {
     /// initialize a new hypergraph
     pub fn new() -> Self {
@@ -39,7 +40,7 @@ where
         &self.edges
     }
     /// returns a mutable reference to the hyperedges
-    pub fn edges_mut(&mut self) -> &mut HashMap<EdgeId, HashSet<VertexId>> {
+    pub const fn edges_mut(&mut self) -> &mut HashMap<EdgeId, HashSet<VertexId>> {
         &mut self.edges
     }
     /// returns an immutable reference to the facets of the hypergraph; here, a facet is a
@@ -48,7 +49,7 @@ where
         &self.facets
     }
     /// returns a mutable reference to the facets of the hypergraph
-    pub fn facets_mut(&mut self) -> &mut HashMap<EdgeId, E> {
+    pub const fn facets_mut(&mut self) -> &mut HashMap<EdgeId, E> {
         &mut self.facets
     }
     /// returns am immutable reference to the vertices
@@ -56,15 +57,15 @@ where
         &self.vertices
     }
     /// returns a mutable reference to the vertices
-    pub fn vertices_mut(&mut self) -> &mut HashMap<VertexId, Node<N>> {
+    pub const fn vertices_mut(&mut self) -> &mut HashMap<VertexId, Node<N>> {
         &mut self.vertices
     }
     /// returns the next vertex ID
-    pub fn next_vertex_id(&self) -> VertexId {
+    pub const fn next_vertex_id(&self) -> VertexId {
         self.next_vertex_id
     }
     /// returns the next edge ID
-    pub fn next_edge_id(&self) -> EdgeId {
+    pub const fn next_edge_id(&self) -> EdgeId {
         self.next_edge_id
     }
     /// returns the total number of hyperedges in the hypergraph
@@ -75,34 +76,56 @@ where
     pub fn total_vertices(&self) -> usize {
         self.vertices().len()
     }
+    /// check if a hyperedge with the given id exists
+    pub fn check_edge(&self, edge_id: &EdgeId) -> bool {
+        self.edges().contains_key(edge_id)
+    }
+    /// check if a vertex with the given id exists
+    pub fn check_vertex(&self, index: &VertexId) -> bool {
+        self.vertices().contains_key(index)
+    }
+    /// clears all vertices and hyperedges, resetting the hypergraph
+    pub fn clear(&mut self) {
+        self.vertices_mut().clear();
+        self.edges_mut().clear();
+        self.next_vertex_id = VertexId::zero();
+        self.next_edge_id = EdgeId::zero();
+    }
+    /// returns the size of a given hyperedge (number of vertices in it)
+    pub fn edge_cardinality(&self, index: EdgeId) -> crate::Result<usize> {
+        match self.edges().get(&index) {
+            Some(vertices) => Ok(vertices.len()),
+            None => Err(crate::Error::HyperedgeDoesNotExist(index)),
+        }
+    }
     /// add a new hyperedge with the given vertices and return its ID
     pub fn insert_edge<I>(&mut self, vertices: I) -> crate::Result<EdgeId>
     where
         I: Clone + IntoIterator<Item = VertexId>,
     {
         // Verify all vertices exist
-        for vertex in vertices.clone().into_iter() {
-            if !self.check_vertex(&vertex) {
-                return Err(crate::Error::VertexDoesNotExist(vertex));
+        for v in vertices.clone().into_iter() {
+            if !self.check_vertex(&v) {
+                return Err(crate::Error::VertexDoesNotExist(v));
             }
         }
-
-        let edge_id = self.next_edge_id();
-        let vertex_set: HashSet<VertexId> = vertices.into_iter().collect();
-
-        // Don't allow empty hyperedges
-        if vertex_set.is_empty() {
+        // fetch the next edge index
+        let eid = self.next_edge_id();
+        // collect the vertices into a HashSet to ensure uniqueness
+        let vset = vertices.into_iter().collect::<HashSet<_>>();
+        // handle the case where the edge has no associated vertices
+        if vset.is_empty() {
             return Err(crate::Error::EmptyHyperedge);
         }
-
-        self.edges.insert(edge_id, vertex_set);
+        // insert the new hyperedge into the adjacency map
+        self.edges_mut().insert(eid, vset);
         self.next_edge_id += 1;
-        Ok(edge_id)
+        Ok(eid)
     }
     /// insert a new facet (hyperedge with an associated weight) into the hypergraph;
     /// if the facet, or hyperedge, already exists, it will be replaced and returned
     pub fn insert_facet(&mut self, edge_id: EdgeId, facet: E) -> crate::Result<()> {
-        if !self.check_hyperedge(&edge_id) {
+        if !self.check_edge(&edge_id) {
             return Err(crate::Error::HyperedgeDoesNotExist(edge_id));
         }
         let _prev = self.facets_mut().insert(edge_id, facet);
@@ -154,12 +177,12 @@ where
         Ok(nodes)
     }
     /// returns all hyperedges containing a given vertex
-    pub fn get_vertex_edges(&self, index: VertexId) -> crate::Result<Vec<EdgeId>> {
+    pub fn get_edges_with_vertex(&self, index: VertexId) -> crate::Result<Vec<EdgeId>> {
         if !self.check_vertex(&index) {
             return Err(crate::Error::VertexDoesNotExist(index));
         }
         let edges = self
-            .edges
+            .edges()
             .iter()
             .filter_map(|(&edge_id, vertices)| {
                 if vertices.contains(&index) {
@@ -171,6 +194,20 @@ where
             .collect();
         Ok(edges)
     }
+    /// returns the degree of a given vertex where the degree is the number of hyperedges that
+    /// contain the vertex
+    pub fn get_vertex_degree(&self, index: VertexId) -> crate::Result<usize> {
+        if !self.check_vertex(&index) {
+            return Err(crate::Error::VertexDoesNotExist(index));
+        }
+
+        let degree = self
+            .edges()
+            .values()
+            .filter(|vertices| vertices.contains(&index))
+            .count();
+        Ok(degree)
+    }
     /// returns the weight of a particular vertex
     pub fn get_vertex_weight(&self, index: VertexId) -> crate::Result<&Node<N>> {
         match self.vertices.get(&index) {
@@ -178,34 +215,12 @@ where
             None => Err(crate::Error::VertexDoesNotExist(index)),
         }
     }
-    /// check if a vertex with the given id exists
-    pub fn check_vertex(&self, index: &VertexId) -> bool {
-        self.vertices.contains_key(index)
-    }
-    /// check if a hyperedge with the given id exists
-    pub fn check_hyperedge(&self, edge_id: &EdgeId) -> bool {
-        self.edges.contains_key(edge_id)
-    }
-    /// clears all vertices and hyperedges, resetting the hypergraph
-    pub fn clear(&mut self) {
-        self.vertices_mut().clear();
-        self.edges_mut().clear();
-        self.next_vertex_id = VertexId::zero();
-        self.next_edge_id = EdgeId::zero();
-    }
-    /// returns the size of a given hyperedge (number of vertices in it)
-    pub fn edge_cardinality(&self, index: EdgeId) -> crate::Result<usize> {
-        match self.edges.get(&index) {
-            Some(vertices) => Ok(vertices.len()),
-            None => Err(crate::Error::HyperedgeDoesNotExist(index)),
-        }
-    }
     /// merges two hyperedges into one (combining their vertices)
-    pub fn merge_hyperedges(&mut self, e1: EdgeId, e2: EdgeId) -> crate::Result<EdgeId> {
-        if !self.check_hyperedge(&e1) {
+    pub fn merge_edges(&mut self, e1: EdgeId, e2: EdgeId) -> crate::Result<EdgeId> {
+        if !self.check_edge(&e1) {
             return Err(crate::Error::HyperedgeDoesNotExist(e1));
         }
-        if !self.check_hyperedge(&e2) {
+        if !self.check_edge(&e2) {
             return Err(crate::Error::HyperedgeDoesNotExist(e2));
         }
         let set1 = self.edges_mut().remove(&e1).unwrap();
@@ -233,28 +248,15 @@ where
             })
             .ok_or(crate::Error::VertexDoesNotExist(index))
     }
-    /// returns the degree of a given vertex where the degree is the number of hyperedges that
-    /// contain the vertex
-    pub fn vertex_degree(&self, index: VertexId) -> crate::Result<usize> {
-        if !self.check_vertex(&index) {
-            return Err(crate::Error::VertexDoesNotExist(index));
-        }
-
-        let degree = self
-            .edges()
-            .values()
-            .filter(|vertices| vertices.contains(&index))
-            .count();
-        Ok(degree)
-    }
     /// update the weight of a given vertex
-    pub fn update_vertex_weight(&mut self, index: VertexId, new_weight: N) -> crate::Result<()> {
-        if self.check_vertex(&index) {
-            self.vertices_mut().insert(index, Node::new(index, new_weight));
-            Ok(())
-        } else {
-            Err(crate::Error::VertexDoesNotExist(index))
-        }
+    pub fn set_vertex_weight(&mut self, index: VertexId, weight: N) -> crate::Result<()>
+    where
+        N: Clone,
+    {
+        self.vertices_mut()
+            .get_mut(&index)
+            .map(|node| node.set_weight(weight.clone()))
+            .ok_or(crate::Error::VertexDoesNotExist(index))
     }
     /// search the hypergraph using the A* algorithm with the given heuristic function
     pub fn astar<F>(&self, heuristic: F) -> crate::algo::AStarSearch<'_, N, E, F>
@@ -278,6 +280,10 @@ where
     N: Eq + core::hash::Hash,
     E: Eq + core::hash::Hash,
 {
+    #[deprecated(since = "v0.0.3", note = "use `merge_edges` instead")]
+    pub fn merge_hyperedges(&mut self, e1: EdgeId, e2: EdgeId) -> crate::Result<EdgeId> {
+        self.merge_edges(e1, e2)
+    }
     #[deprecated(since = "v0.0.3", note = "use `remove_edge` instead")]
     pub fn remove_hyperedge(&mut self, index: EdgeId) -> crate::Result<HashSet<VertexId>> {
         self.remove_edge(index)

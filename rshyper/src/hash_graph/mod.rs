@@ -17,7 +17,7 @@ pub(crate) mod prelude {
     #[doc(inline)]
     pub use super::HashNode;
     #[doc(inline)]
-    pub use super::graph::*;
+    pub use super::graph::HashGraph;
 }
 
 use crate::HyperNode;

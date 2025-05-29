@@ -28,7 +28,7 @@ fn test_hypergraph() -> rshyper::Result<()> {
     assert_eq!(neighbors, HashSet::from_iter(exp));
 
     // verify the degree of vertex v1
-    assert_eq!(graph.vertex_degree(v1)?, 2);
+    assert_eq!(graph.get_vertex_degree(v1)?, 2);
     // remove vertex v1
     let _ = graph.remove_vertex(v2)?;
     assert!(!graph.check_vertex(&v2));
@@ -45,7 +45,7 @@ fn merge_hyperedge() -> rshyper::Result<()> {
     let e1 = graph.insert_edge(vec![v0, v1]).expect("edge e1");
     let e2 = graph.insert_edge(vec![v1, v2]).expect("edge e2");
 
-    let merged = graph.merge_hyperedges(e1, e2).expect("merge");
+    let merged = graph.merge_edges(e1, e2).expect("merge");
     let hyperedge = graph.remove_edge(merged).expect("merged hyperedge missing");
     assert!(hyperedge.contains(&v0));
     assert!(hyperedge.contains(&v1));
@@ -62,7 +62,7 @@ fn update_vertex() -> rshyper::Result<()> {
     let initial_weight = graph.get_vertex_weight(v0)?;
     assert_eq!(initial_weight.weight(), &42);
     // Update the weight
-    let _ = graph.update_vertex_weight(v0, 100)?;
+    let _ = graph.set_vertex_weight(v0, 100)?;
     // Check updated weight
     let updated_weight = graph.get_vertex_weight(v0)?;
     assert_eq!(updated_weight.weight(), &100);
@@ -86,8 +86,8 @@ fn remove_hyperedge() -> rshyper::Result<()> {
     assert!(removed_edge.contains(&v1));
 
     // Check that the removed edge is no longer in the graph
-    assert!(!graph.check_hyperedge(&e1));
-    assert!(graph.check_hyperedge(&e2));
+    assert!(!graph.check_edge(&e1));
+    assert!(graph.check_edge(&e2));
 
     Ok(())
 }
