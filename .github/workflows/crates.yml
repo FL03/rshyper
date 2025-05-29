@@ -25,7 +25,7 @@ on:
 
 jobs:
   crates-io:
-    if: github.event.release == 'published' || inputs.publish
+    if: github.event.release == 'published' || github.event.action == 'workflow_dispatch' && github.event.inputs.publish == 'true'
     permissions:
       contents: read
       deployments: write
