@@ -17,11 +17,11 @@ authors = [
     "FL03 <jo3mccain@icloud.com> (https://github.com/FL03)", 
     "Scattered-Systems <support@scsys.io> (https://github.com/scattered-systems)"
 ]
-categories = [ ]
+categories = ["data-structures"]
 description = "This crate focuses on hypergraphs"
 edition = "2024"
 homepage = "https://github.com/FL03/rshyper/wiki"
-keywords = [ "scsys", "hypergraph", "data-structures", "graph", "network", "algorithm", "rust" ]
+keywords = [ "hypergraph", "graph", "topology" ]
 license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/FL03/rshyper.git"
