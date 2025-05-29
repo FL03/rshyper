@@ -1,7 +1,26 @@
 /*
-    Appellation: search <module>
-    Contrib: @FL03
+    appellation: search <module>
+    authors: @FL03
 */
+#[doc(inline)]
+pub use self::prelude::*;
+
+pub mod astar;
+pub mod breadth_first;
+pub mod depth_first;
+
+pub(crate) mod prelude {
+    #[doc(inline)]
+    pub use super::astar::AStarSearch;
+    #[doc(inline)]
+    pub use super::breadth_first::BreadthFirstTraversal;
+    #[doc(inline)]
+    pub use super::depth_first::DepthFirstTraversal;
+
+    #[doc(inline)]
+    pub use super::Search;
+}
+
 use crate::VertexId;
 use std::collections::HashSet;
 

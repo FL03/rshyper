@@ -4,7 +4,6 @@
 */
 use crate::{EdgeId, VertexId};
 
-
 pub trait RawNode {
     type Idx;
 

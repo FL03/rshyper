@@ -24,7 +24,7 @@ pub(crate) mod prelude {
 #[deprecated(since = "v0.0.3", note = "renamed to `HashGraph`")]
 pub type HyperGraph<N = (), E = ()> = HashGraph<N, E>;
 
-use crate::HyperNode;
+use rshyper_core::HyperNode;
 
 /// Extends the base [HyperNode] trait with the [`Eq`] and [`Hash`](core::hash::Hash) traits
 /// for use with hash-related structures.

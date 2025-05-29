@@ -2,16 +2,20 @@
     Appellation: bft <module>
     Contrib: @FL03
 */
-
-use super::BreadthFirstTraversal;
 use crate::{Error, HashGraph, Result, Search, VertexId};
 use std::collections::{HashSet, VecDeque};
-use std::hash::Hash;
+
+/// Breadth-First Traversal algorithm for hypergraphs
+pub struct BreadthFirstTraversal<'a, N, E> {
+    pub(crate) graph: &'a HashGraph<N, E>,
+    pub(crate) queue: VecDeque<VertexId>,
+    pub(crate) visited: HashSet<VertexId>,
+}
 
 impl<'a, N, E> BreadthFirstTraversal<'a, N, E>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
+    E: Eq + core::hash::Hash,
+    N: Eq + core::hash::Hash,
 {
     /// Create a new BreadthFirstTraversal instance
     pub(crate) fn new(graph: &'a HashGraph<N, E>) -> Self {
@@ -31,8 +35,8 @@ where
 
 impl<'a, N, E> Search<N> for BreadthFirstTraversal<'a, N, E>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
+    E: Eq + core::hash::Hash,
+    N: Eq + core::hash::Hash,
 {
     fn search(&mut self, start: VertexId) -> Result<Vec<VertexId>> {
         // Reset state

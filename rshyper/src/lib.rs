@@ -36,37 +36,19 @@ pub(crate) mod macros {
 #[doc(inline)]
 pub use self::hash_graph::HashGraph;
 #[doc(inline)]
-pub use self::{cmp::prelude::*, ops::prelude::*};
+pub use self::{algo::prelude::*, ops::prelude::*};
 
 pub mod algo;
 #[cfg(feature = "hash")]
 pub mod hash_graph;
 
-pub mod cmp {
-    #[doc(inline)]
-    pub use self::prelude::*;
-
-    pub mod edge;
-    pub mod node;
-
-    pub(crate) mod prelude {
-        #[doc(inline)]
-        pub use super::edge::*;
-        #[doc(inline)]
-        pub use super::node::*;
-    }
-}
-
 pub mod ops {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    pub mod search;
     pub mod transform;
 
     pub(crate) mod prelude {
-        #[doc(inline)]
-        pub use super::search::*;
         #[doc(inline)]
         pub use super::transform::*;
     }
@@ -78,8 +60,6 @@ pub mod prelude {
 
     #[doc(no_inline)]
     pub use crate::algo::prelude::*;
-    #[doc(no_inline)]
-    pub use crate::cmp::prelude::*;
     #[cfg(feature = "hash")]
     #[doc(no_inline)]
     pub use crate::hash_graph::prelude::*;

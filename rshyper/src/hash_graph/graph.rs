@@ -2,8 +2,8 @@
     Appellation: graph <module>
     Contrib: @FL03
 */
-use crate::{EdgeId, Node, VertexId};
 use num_traits::Zero;
+use rshyper_core::{EdgeId, Node, VertexId};
 use std::collections::{HashMap, HashSet};
 
 /// A hash-based hypergraph implementation

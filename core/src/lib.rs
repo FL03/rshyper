@@ -17,15 +17,22 @@ pub(crate) mod macros {
 
 #[doc(inline)]
 pub use self::{
+    edge::Edge,
     error::{Error, Result},
-    id::{EdgeId, VertexId},
-    traits::prelude::*, 
+    id::{EdgeId, Index, VertexId},
+    node::Node,
+    traits::prelude::*,
     types::prelude::*,
 };
 
+pub mod edge;
 pub mod error;
+/// this module defines the [`Index`] type and its associated types for representing indices in
+/// a hypergraph.
 pub mod id;
-
+pub mod node;
+/// this module contains various traits used throughout to establish common interfaces and
+/// behaviors
 pub mod traits {
     #[doc(inline)]
     pub use self::prelude::*;
@@ -34,6 +41,7 @@ pub mod traits {
     pub mod convert;
     pub mod hyper_graph;
     pub mod nodes;
+    pub mod tags;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -44,10 +52,12 @@ pub mod traits {
         pub use super::hyper_graph::*;
         #[doc(inline)]
         pub use super::nodes::*;
+        #[doc(inline)]
+        pub use super::tags::*;
     }
 }
-
 pub mod types {
+    //! this module contains various types
     #[doc(inline)]
     pub use self::prelude::*;
 
@@ -65,8 +75,13 @@ pub mod types {
 pub mod prelude {
     #[doc(no_inline)]
     pub use crate::error::*;
+
+    #[doc(no_inline)]
+    pub use crate::edge::prelude::*;
     #[doc(no_inline)]
     pub use crate::id::prelude::*;
+    #[doc(no_inline)]
+    pub use crate::node::prelude::*;
     #[doc(no_inline)]
     pub use crate::traits::prelude::*;
     #[doc(no_inline)]

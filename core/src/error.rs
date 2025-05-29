@@ -2,6 +2,9 @@
     Appellation: error <module>
     Contrib: @FL03
 */
+//! this module implements the [`Error`] type for the [`rshyper`](https://docs.rs/rshyper)
+//! crate.
+
 #[cfg(feature = "alloc")]
 use alloc::{boxed::Box, string::String};
 

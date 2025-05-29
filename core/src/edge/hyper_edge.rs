@@ -4,10 +4,6 @@
 */
 use crate::EdgeId;
 
-
-#[cfg(feature = "std")]
-pub type HashEdge<T, Idx = usize> = Edge<T, std::collections::HashSet<crate::VertexId<Idx>>, Idx>;
-
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
@@ -19,7 +15,6 @@ pub struct Edge<T, S, Idx = usize> {
     pub nodes: S,
     pub weight: T,
 }
-
 
 impl<T, S, Idx> Edge<T, S, Idx> {
     pub fn new(id: EdgeId<Idx>, nodes: S, weight: T) -> Self {

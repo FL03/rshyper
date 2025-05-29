@@ -98,7 +98,6 @@ impl<T, Idx> Node<T, Idx> {
     }
 }
 
-
 impl<T, Idx> AsRef<T> for Node<T, Idx> {
     fn as_ref(&self) -> &T {
         &self.weight

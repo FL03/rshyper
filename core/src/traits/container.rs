@@ -10,7 +10,7 @@ pub trait KeyValue {
 
 pub trait RawData {
     type Item;
-    
+
     fn as_ptr(&self) -> *const Self::Item;
 
     fn as_mut_ptr(&mut self) -> *mut Self::Item;

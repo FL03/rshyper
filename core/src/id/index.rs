@@ -5,7 +5,6 @@
 use super::{EdgeIndex, IndexKind, VertexIndex};
 use core::marker::PhantomData;
 
-
 #[derive(Clone, Copy, Eq, Hash, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct Index<Idx, K>
@@ -44,10 +43,11 @@ where
         &self.value
     }
     /// returns a mutable reference to the inner value
-    pub fn get_mut(&mut self) -> &mut T {
+    pub const fn get_mut(&mut self) -> &mut T {
         &mut self.value
     }
     /// apply a function to the inner value and returns a new Index wrapping the result
+    #[inline]
     pub fn map<U, F: FnOnce(T) -> U>(self, f: F) -> Index<U, K> {
         Index {
             value: f(self.value),
@@ -69,6 +69,7 @@ where
         core::mem::swap(&mut self.value, &mut other.value)
     }
     /// [`take`](core::mem::take) the value and replace it with the default value
+    #[inline]
     pub fn take(&mut self) -> T
     where
         T: Default,
@@ -81,6 +82,39 @@ where
             value,
             _type: PhantomData::<K>,
         }
+    }
+    /// decrements the index value by [one](num_traits::One) and returns a new instance
+    pub fn dec(self) -> Self
+    where
+        T: core::ops::Sub<Output = T> + num_traits::One,
+    {
+        let value = self.value - T::one();
+        Self { value, ..self }
+    }
+    /// mutably decrements the index value by [one](num_traits::One)
+    #[inline]
+    pub fn dec_inplace(&mut self)
+    where
+        T: core::ops::SubAssign + num_traits::One,
+    {
+        self.value -= T::one();
+    }
+    /// increments the index value by [one](num_traits::One) and consumes the current instance
+    /// to create another with the new value.
+    pub fn inc(self) -> Self
+    where
+        T: core::ops::Add<Output = T> + num_traits::One,
+    {
+        let value = self.value + T::one();
+        Self { value, ..self }
+    }
+    /// mutably increments the index value by [one](num_traits::One)
+    #[inline]
+    pub fn inc_inplace(&mut self)
+    where
+        T: core::ops::AddAssign + num_traits::One,
+    {
+        self.value += T::one();
     }
 }
 
@@ -276,7 +310,7 @@ where
 
 impl<T, K> num::Num for Index<T, K>
 where
-    K: IndexKind,
+    K: IndexKind + Eq,
     T: num::Num,
 {
     type FromStrRadixErr = T::FromStrRadixErr;

@@ -15,7 +15,7 @@ pub(crate) mod prelude {
     pub use super::RawGraphAlgorithm;
     #[cfg(feature = "std")]
     #[doc(inline)]
-    pub use super::search::*;
+    pub use super::search::prelude::*;
 }
 
 /// this trait is used to denote an algorithmic operator that can be applied to a hypergraph.

@@ -2,16 +2,20 @@
     Appellation: dft <module>
     Contrib: @FL03
 */
-
-use super::DepthFirstTraversal;
 use crate::{Error, HashGraph, Result, Search, VertexId};
 use std::collections::HashSet;
-use std::hash::Hash;
+
+/// Depth-First Traversal algorithm for hypergraphs
+pub struct DepthFirstTraversal<'a, N, E> {
+    pub(crate) graph: &'a HashGraph<N, E>,
+    pub(crate) stack: Vec<VertexId>,
+    pub(crate) visited: HashSet<VertexId>,
+}
 
 impl<'a, N, E> DepthFirstTraversal<'a, N, E>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
+    E: Eq + core::hash::Hash,
+    N: Eq + core::hash::Hash,
 {
     /// Create a new DepthFirstTraversal instance
     pub(crate) fn new(graph: &'a HashGraph<N, E>) -> Self {
@@ -31,8 +35,8 @@ where
 
 impl<'a, N, E> Search<N> for DepthFirstTraversal<'a, N, E>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
+    E: Eq + core::hash::Hash,
+    N: Eq + core::hash::Hash,
 {
     fn search(&mut self, start: VertexId) -> Result<Vec<VertexId>> {
         // Reset state
