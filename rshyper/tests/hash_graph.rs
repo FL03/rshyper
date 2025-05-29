@@ -17,10 +17,9 @@ fn test_hypergraph() -> rshyper::Result<()> {
     let v3 = graph.insert_vertex_default();
 
     // Add some hyperedges
-    let e1 = graph.insert_edge([v0, v1, v2]);
-    let e2 = graph.insert_edge(vec![v1, v2, v3]);
-    assert!(e1.is_ok());
-    assert!(e2.is_ok());
+    let e1 = graph.insert_edge([v0, v1, v2])?;
+    let e2 = graph.insert_edge(vec![v1, v2, v3])?;
+    assert_ne!(e1, e2);
 
     // Get neighbors of vertex v1
     let neighbors = graph.get_neighbors(v1)?;
