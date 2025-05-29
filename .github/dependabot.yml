@@ -2,14 +2,24 @@ version: 2
 
 updates:
   - package-ecosystem: cargo
+    directories:  
+      - /
+      - rshyper
+    schedule:
+      interval: monthly
+  - package-ecosystem: devcontainers
     directory: /
+    schedule:
+      interval: monthly
+  - package-ecosystem: docker
+    directories: [ .docker, / ]
+    schedule:
+      interval: monthly
+  - package-ecosystem: docker-compose
+    directories: [ .docker ]
     schedule:
       interval: monthly
   - package-ecosystem: github-actions
     directory: /
-    schedule:
-      interval: monthly
-  - package-ecosystem: cargo
-    directory: /rshyper
     schedule:
       interval: monthly

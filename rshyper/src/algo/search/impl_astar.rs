@@ -4,7 +4,8 @@
 */
 
 use super::AStarSearch;
-use crate::{Error, HyperGraph, Result, Search, VertexId};
+use crate::hash_graph::HashGraph;
+use crate::{Error, Result, Search, VertexId};
 use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::hash::Hash;
@@ -40,7 +41,7 @@ where
     F: Fn(VertexId, VertexId) -> f64,
 {
     /// Create a new A* search instance with the given heuristic function
-    pub fn new(graph: &'a HyperGraph<N, E>, heuristic: F) -> Self {
+    pub fn new(graph: &'a HashGraph<N, E>, heuristic: F) -> Self {
         Self {
             graph,
             open_set: HashSet::new(),
@@ -118,7 +119,7 @@ where
             self.closed_set.insert(current);
 
             // Get all hyperedges containing the current vertex
-            let edges = match self.graph.get_vertex_edges(current) {
+            let edges = match self.graph.get_edges_with_vertex(current) {
                 Ok(edges) => edges,
                 Err(e) => return Err(e),
             };

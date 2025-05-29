@@ -3,15 +3,16 @@
     Contrib: FL03 <jo3mccain@icloud.com>
 */
 
-fn add<A, B, C>(a: A, b: B) -> C
-where
-    A: core::ops::Add<B, Output = C>,
-{
-    a + b
-}
-
 #[test]
-fn compiles() {
-    assert_eq!(add(10, 10), 20);
-    assert_ne!(add(1, 1), 3);
+fn lib_compiles() {
+    /// a generic function for adding two numbers
+    fn adder<A, B>(a: A, b: B) -> A::Output
+    where
+        A: core::ops::Add<B>,
+    {
+        a + b
+    }
+    //
+    assert_eq!(adder(10, 10), 20);
+    assert_ne!(adder(1.0, 1.0), 3.0);
 }

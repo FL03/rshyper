@@ -1,21 +1,18 @@
 # rshyper
 
-[![crates.io](https://img.shields.io/crates/v/rshyper.svg)](https://crates.io/crates/rshyper)
-[![docs.rs](https://docs.rs/rshyper/badge.svg)](https://docs.rs/rshyper)
-[![license](https://img.shields.io/crates/l/rshyper.svg)](https://crates.io/crates/rshyper)
-
-[![clippy](https://github.com//rshyper/actions/workflows/clippy.yml/badge.svg)](https://github.com//rshyper/actions/workflows/clippy.yml)
-[![rust](https://github.com//rshyper/actions/workflows/rust.yml/badge.svg)](https://github.com//rshyper/actions/workflows/rust.yml)
+[![crates.io](https://img.shields.io/crates/v/rshyper?style=for-the-badge&logo=rust)](https://crates.io/crates/rshyper)
+[![docs.rs](https://img.shields.io/docsrs/rshyper?style=for-the-badge&logo=docs.rs)](https://docs.rs/rshyper)
+[![GitHub License](https://img.shields.io/github/license/FL03/rshyper?style=for-the-badge&logo=github)](https://github.com/FL03/rshyper/blob/main/LICENSE)
 
 ***
 
-_**The library is currently in the early stages of development and is not yet ready for production use.**_
+_**Warning: The library is currently in the early stages of development and is not yet ready for production use.**_
 
-This crate focuses on hypergraphs
+`rshyper` is a Rust library designed to provide a hypergraph implementation with a focus on performance and flexibility. It is built to handle complex relationships between data points efficiently, making it suitable for various applications in graph theory, data analysis, and more.
 
 ## Features
 
-- [x] Feature 1
+- [x] `hash` - A hash-based hypergraph implementation.
 
 ## Getting Started
 
@@ -47,21 +44,35 @@ Add this to your `Cargo.toml`:
 ```toml
 [dependencies.rshyper]
 features = []
-version = "0.1.0"
+version = "0.0.x"
 ```
 
 ### Examples
 
-#### _Basic Usage_
+#### _Example #1:_ Basic Usage
 
 ```rust
     extern crate rshyper;
 
-    fn main() -> Result<(), Box<dyn std::error::Error>> {
-        tracing_subscriber::fmt::init();
-        tracing::info!("Welcome to {name}", name = rshyper);
+    fn main() -> anyhow::Result<()> {
+        let mut graph = HashGraph::<()>::new();
 
+        // Add some vertices
+        let v0 = graph.add_vertex_default();
+        let v1 = graph.add_vertex_default();
+        let v2 = graph.add_vertex_default();
+        let v3 = graph.add_vertex_default();
 
+        // add hyperedges
+        let e1 = graph.add_hyperedge(vec![v0, v1, v2])?;
+        let e2 = graph.add_hyperedge(vec![v1, v2, v3])?;
+        // Get neighbors of vertex v1
+        let neighbors = graph.get_neighbors(v1)?;
+        // Get degree of vertex v1
+        let degree = graph.vertex_degree(v1)?;
+        // Remove a vertex
+        graph.remove_vertex(v2)?;
+        println!("\n****** Final Graph State ******\n{state:?}", state = graph);
         Ok(())
     }
 ```

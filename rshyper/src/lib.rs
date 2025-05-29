@@ -12,24 +12,28 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
+#[doc(hidden)]
+#[macro_use]
+pub(crate) mod macros {
+    #[macro_use]
+    pub mod seal;
+}
+
+#[cfg(feature = "hash")]
+#[doc(inline)]
+pub use self::hash_graph::HashGraph;
 #[doc(inline)]
 pub use self::{
-    error::*, graph::HyperGraph, ops::prelude::*, traits::prelude::*, types::prelude::*,
+    error::{Error, Result},
+    ops::prelude::*,
+    traits::prelude::*,
+    types::prelude::*,
 };
 
+pub mod algo;
 pub mod error;
-pub mod graph;
-
-pub mod algo {
-    #[doc(inline)]
-    pub use self::prelude::*;
-
-    pub mod search;
-
-    pub(crate) mod prelude {
-        pub use super::search::*;
-    }
-}
+#[cfg(feature = "hash")]
+pub mod hash_graph;
 
 pub mod ops {
     #[doc(inline)]
@@ -39,7 +43,9 @@ pub mod ops {
     pub mod transform;
 
     pub(crate) mod prelude {
+        #[doc(inline)]
         pub use super::search::*;
+        #[doc(inline)]
         pub use super::transform::*;
     }
 }
@@ -48,13 +54,19 @@ pub mod traits {
     #[doc(inline)]
     pub use self::prelude::*;
 
+    pub mod convert;
     pub mod edges;
-    pub mod indexable;
+    pub mod hyper_graph;
     pub mod nodes;
 
     pub(crate) mod prelude {
+        #[doc(inline)]
+        pub use super::convert::*;
+        #[doc(inline)]
         pub use super::edges::*;
-        pub use super::indexable::*;
+        #[doc(inline)]
+        pub use super::hyper_graph::*;
+        #[doc(inline)]
         pub use super::nodes::*;
     }
 }
@@ -73,8 +85,18 @@ pub mod types {
 }
 
 pub mod prelude {
+    #[doc(no_inline)]
     pub use crate::error::*;
-    pub use crate::graph::HyperGraph;
+
+    #[doc(no_inline)]
+    pub use crate::algo::prelude::*;
+    #[cfg(feature = "hash")]
+    #[doc(no_inline)]
+    pub use crate::hash_graph::prelude::*;
+    #[doc(no_inline)]
+    pub use crate::ops::prelude::*;
+    #[doc(no_inline)]
     pub use crate::traits::prelude::*;
+    #[doc(no_inline)]
     pub use crate::types::prelude::*;
 }

@@ -2,15 +2,12 @@
     Appellation: nodes <module>
     Contrib: @FL03
 */
+use crate::VertexId;
 
 /// A trait denoting a node within the hypergraph.
 pub trait HyperNode<Idx> {
-    fn index(&self) -> &crate::Index<Idx>;
+    fn index(&self) -> &VertexId<Idx>;
 }
-
-/// Extends the base [HyperNode] trait with the [core::cmp::Eq] and [core::hash::Hash] traits
-/// for use with hash-related structures.
-pub trait HashNode<Idx>: HyperNode<Idx> + core::cmp::Eq + core::hash::Hash {}
 
 pub trait Weighted<Idx>: HyperNode<Idx> {
     type Data;
@@ -23,10 +20,9 @@ pub trait Weighted<Idx>: HyperNode<Idx> {
 */
 impl<T, Idx> HyperNode<Idx> for T
 where
-    T: crate::Indexable<Idx>,
+    T: core::borrow::Borrow<VertexId<Idx>>,
 {
-    fn index(&self) -> &crate::Index<Idx> {
-        self.index()
+    fn index(&self) -> &VertexId<Idx> {
+        self.borrow()
     }
 }
-impl<T, Idx> HashNode<Idx> for T where T: HyperNode<Idx> + core::cmp::Eq + core::hash::Hash {}

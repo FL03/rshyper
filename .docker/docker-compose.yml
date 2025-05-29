@@ -1,0 +1,41 @@
+version: '4.0'
+services: 
+  workspace:
+    container_name: workspace
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    volumes:
+      - workspace:/workspace
+      - rust:/root/.cargo/registry
+    command: >
+      sh -c "cargo build --release && cargo test --release && cargo run --release"
+    environment:
+      CARGO_TERM_COLOR: always
+      RUST_BACKTRACE: 1
+      RUSTC_VERSION: 1.86.0
+volumes:
+  workspace:
+    driver: local
+    driver_opts:
+      type: none
+      device: ..
+      o: bind
+  rust:
+    driver: local
+    driver_opts:
+      type: none
+      device: /root/.cargo/registry
+      o: bind
+networks:
+  default:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.bridge_name: "rshyper_default"
+      com.docker.network.bridge.host_binding_ipv4: "0.0.0.0"
+  backend:
+    driver: bridge
+    external: true
+  frontend:
+    driver: bridge
+    external: true

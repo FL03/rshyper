@@ -1,4 +1,5 @@
 [package]
+build = "build.rs"
 name = "rshyper"
 
 authors.workspace = true
@@ -10,28 +11,96 @@ keywords.workspace = true
 license.workspace = true
 readme.workspace = true
 repository.workspace = true
+rust-version.workspace = true
 version.workspace = true
 
 [lib]
 bench = true
 crate-type = [ "cdylib", "rlib" ]
+doc = true
 doctest = false
 test = true
 
+[package.metadata.docs.rs]
+all-features = false
+features = ["full"]
+rustc-args = [ "--cfg", "docsrs" ]
+
+[dependencies]
+# error handling
+anyhow = { optional = true, workspace = true }
+thiserror = { workspace = true }
+# math
+num = { workspace = true }
+num-traits = { workspace = true }
+# random
+getrandom = { optional = true, workspace = true }
+rand = { optional = true, workspace = true }
+rand_distr = { optional = true, workspace = true }
+serde = { optional = true, workspace = true }
+serde_derive = { optional = true, workspace = true }
+serde_json = { optional = true, workspace = true }
+# macros
+paste = { workspace = true }
+smart-default = { workspace = true }
+strum = { workspace = true }
+# logging
+tracing = { optional = true, workspace = true }
+
+[dev-dependencies]
+criterion = { workspace = true }
+lazy_static = { workspace = true }
+
 [features]
-default = [ "std" ]
+default = [ 
+    "hash", 
+    "std",
+]
 
 full = [
     "default",
+    "anyhow",
+    "json",
     "rand",
     "serde",
     "tracing",
 ]
 
-# ********* [FF] Dependencies *********
+# ************* [FF:Flags] *************
+hash = [
+    "std"
+]
+
+# ************* [FF:Environments] *************
+std = [
+    "alloc",
+    "anyhow?/std",
+    "num/std",
+    "num-traits/std",
+    "rand?/std",
+    "serde?/std",
+    "strum/std",
+    "tracing?/std",
+    "thiserror/std",
+]
+
+wasm = [
+    "alloc",
+    "getrandom?/wasm_js",
+]
+# ************* [FF:Dependencies] *************
 alloc = [
     "num/alloc",
     "serde?/alloc",
+    "serde_json?/alloc",
+]
+
+anyhow = ["dep:anyhow"]
+
+json = [
+    "alloc",
+    "serde",
+    "serde_json",
 ]
 
 rand = [
@@ -42,6 +111,7 @@ rand = [
 ]
 
 rng = [
+    "dep:getrandom",
     "rand/small_rng",
     "rand/thread_rng",
 ]
@@ -54,54 +124,33 @@ serde = [
     "serde?/derive",
 ]
 
+serde_json = ["dep:serde_json"]
+
 tracing = [
     "dep:tracing",
     "tracing?/attributes",
 ]
 
-# ********* [FF] Environments *********
-std = [
-    "alloc",
-    "anyhow/std",
-    "num/std",
-    "rand?/std",
-    "serde?/std",
-    "strum/std",
-    "tracing?/std",
-    "thiserror/std",
-]
-
-[build-dependencies]
-
-[dependencies]
-anyhow = { default-features = false, version = "1" }
-num = { default-features = false, version = "0.4" }
-rand = { default-features = false, optional = true, version = "0.9" }
-rand_distr = { default-features = false, optional = true, version = "0.5" }
-serde = { optional = true, workspace = true }
-serde_derive = { optional = true, workspace = true }
-strum = { default-features = false, workspace = true }
-thiserror = { workspace = true }
-
-tracing = { default-features = false, optional = true, workspace = true }
-
-[dev-dependencies]
-
-[package.metadata.docs.rs]
-all-features = true
-rustc-args = [ "--cfg", "docsrs" ]
-
-# ********* examples *********
-[[example]]
-name = "graph"
+# ************* [Benchmarks] *************
+[[bench]]
+harness = false
+name = "default"
 required-features = [ "std" ]
 
-# ********* tests *********
+# ************* [Examples] *************
+[[example]]
+name = "hash_graph"
+required-features = [ "hash" ]
 
+# ************* [Tests] *************
 [[test]]
 name = "default"
 required-features = [  ]
 
 [[test]]
-name = "graph"
-required-features = [ "std" ]
+name = "hash_graph"
+required-features = [ "hash" ]
+
+[[test]]
+name = "search"
+required-features = [ "hash" ]

@@ -2,6 +2,9 @@
     Appellation: error <module>
     Contrib: @FL03
 */
+#[cfg(feature = "alloc")]
+use alloc::{boxed::Box, string::String};
+
 use crate::{EdgeId, VertexId};
 
 /// A type alias for a [Result] with the crate-specific error type [Error]
@@ -13,22 +16,32 @@ pub enum Error {
     #[error("Cannot create empty hyperedge")]
     EmptyHyperedge,
     #[error("Hyperedge {0} does not exist")]
-    HyperedgeDoesNotExist(EdgeId),
+    HyperedgeDoesNotExist(EdgeId<usize>),
     #[error("Vertex {0} does not exist")]
-    VertexDoesNotExist(VertexId),
+    VertexDoesNotExist(VertexId<usize>),
+    #[cfg(feature = "anyhow")]
     #[error(transparent)]
-    Other(#[from] Box<dyn std::error::Error + Send + Sync>),
+    AnyError(#[from] anyhow::Error),
+    #[cfg(feature = "serde_json")]
+    #[error(transparent)]
+    JsonError(#[from] serde_json::Error),
+    #[cfg(feature = "alloc")]
+    #[error(transparent)]
+    Other(#[from] Box<dyn core::error::Error + Send + Sync + 'static>),
+    #[cfg(feature = "alloc")]
     #[error("Unknown error: {0}")]
     Unknown(String),
 }
 
+#[cfg(feature = "alloc")]
 impl From<&str> for Error {
     fn from(s: &str) -> Self {
-        Error::Unknown(s.to_string())
+        Error::Unknown(String::from(s))
     }
 }
+
 #[cfg(feature = "alloc")]
-impl From<alloc::string::String> for Error {
+impl From<String> for Error {
     fn from(s: String) -> Self {
         Error::Unknown(s)
     }

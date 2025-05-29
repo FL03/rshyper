@@ -4,7 +4,7 @@
 */
 
 use super::BreadthFirstTraversal;
-use crate::{Error, HyperGraph, Result, Search, VertexId};
+use crate::{Error, HashGraph, Result, Search, VertexId};
 use std::collections::{HashSet, VecDeque};
 use std::hash::Hash;
 
@@ -14,7 +14,7 @@ where
     N: Eq + Hash,
 {
     /// Create a new BreadthFirstTraversal instance
-    pub(crate) fn new(graph: &'a HyperGraph<N, E>) -> Self {
+    pub(crate) fn new(graph: &'a HashGraph<N, E>) -> Self {
         Self {
             graph,
             queue: VecDeque::new(),
@@ -55,7 +55,7 @@ where
             path.push(current);
 
             // Get all hyperedges containing the current vertex
-            let edges = self.graph.get_vertex_edges(current)?;
+            let edges = self.graph.get_edges_with_vertex(current)?;
 
             // For each hyperedge, visit all vertices that haven't been visited yet
             for edge_id in edges {

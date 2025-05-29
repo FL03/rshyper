@@ -11,19 +11,6 @@ members = [
 
 resolver = "3"
 
-[workspace.dependencies]
-anyhow = { version = "1" }
-lazy_static = { version = "1" }
-paste = { version = "1" }
-serde = { default-features = false, version = "1" }
-serde_derive = { version = "1" }
-serde_json = { version = "1" }
-smart_default = { version = "0.7" }
-strum = { default-features = false, features = ["derive"], version = "0.27" }
-thiserror = { default-features = false, version = "2" }
-tracing = { default-features = false, version = "0.1" }
-tracing-subscriber = { default-features = false, version = "0.3" }
-
 [workspace.package]
 authors = ["FL03 <jo3mccain@icloud.com> (https://github.com/FL03)", "Scattered-Systems <support@scsys.io> (https://github.com/scattered-systems)"]
 categories = [ ]
@@ -34,17 +21,48 @@ keywords = [ ]
 license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/FL03/rshyper.git"
-version = "0.0.2"
+rust-version = "1.85.0"
+version = "0.0.3"
+
+[workspace.dependencies]
+# local
+rshyper = { default-features = false, path = "rshyper", version = "0.0.3" }
+# custom
+scsys = { default-features = false, features = ["derive"], version = "0.2.7" }
+# benchmarking
+criterion = { version = "0.6" }
+# error-handling
+anyhow = { default-features = false, version = "1" }
+thiserror = { default-features = false, version = "2" }
+# numbers
+num = { default-features = false, version = "0.4" }
+num-traits = { default-features = false, version = "0.2" }
+# randomization
+getrandom = { default-features = false, version = "0.3" }
+rand = { default-features = false, version = "0.9" }
+rand_distr = { default-features = false, version = "0.5" }
+# data & serialization
+serde = { default-features = false, features = ["derive"], version = "1" }
+serde_derive = { version = "1" }
+serde_json = { version = "1" }
+# macros
+lazy_static = { version = "1" }
+paste = { version = "1" }
+smart-default = { version = "0.7" }
+strum = { default-features = false, features = ["derive"], version = "0.27" }
+# logging
+tracing = { default-features = false, features = ["attributes"], version = "0.1" }
+tracing-subscriber = { default-features = false, features = ["fmt"], version = "0.3" }
 
 [profile.dev]
 codegen-units = 256
 debug = true
 debug-assertions = true
 incremental = true
-lto = false
+lto = 'thin'
 panic = 'unwind'
-rpath = false
-opt-level = 0
+rpath = true
+opt-level = 3
 overflow-checks = true
 
 [profile.release]
