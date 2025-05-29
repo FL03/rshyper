@@ -98,54 +98,6 @@ where
             None => Err(crate::Error::HyperedgeDoesNotExist(index)),
         }
     }
-    /// add a new hyperedge with the given vertices and return its ID
-    pub fn insert_edge<I>(&mut self, vertices: I) -> crate::Result<EdgeId>
-    where
-        I: Clone + IntoIterator<Item = VertexId>,
-    {
-        // Verify all vertices exist
-        for v in vertices.clone().into_iter() {
-            if !self.check_vertex(&v) {
-                return Err(crate::Error::VertexDoesNotExist(v));
-            }
-        }
-        // fetch the next edge index
-        let eid = self.next_edge_id();
-        // collect the vertices into a HashSet to ensure uniqueness
-        let vset = vertices.into_iter().collect::<HashSet<_>>();
-        // handle the case where the edge has no associated vertices
-        if vset.is_empty() {
-            return Err(crate::Error::EmptyHyperedge);
-        }
-        // insert the new hyperedge into the adjacency map
-        self.connections_mut().insert(eid, vset);
-        self.next_edge_id += 1;
-        Ok(eid)
-    }
-    /// insert a new facet (hyperedge with an associated weight) into the hypergraph;
-    /// if the facet, or hyperedge, already exists, it will be replaced and returned
-    pub fn insert_facet(&mut self, edge_id: EdgeId, facet: E) -> crate::Result<()> {
-        if !self.check_edge(&edge_id) {
-            return Err(crate::Error::HyperedgeDoesNotExist(edge_id));
-        }
-        let _prev = self.facets_mut().insert(edge_id, facet);
-        Ok(())
-    }
-    /// insert a new vertex with the given weight and return its ID
-    pub fn insert_vertex(&mut self, weight: N) -> VertexId {
-        let vertex_id = self.next_vertex_id();
-        self.vertices_mut()
-            .insert(vertex_id, Node::new(vertex_id, weight));
-        self.next_vertex_id += 1;
-        vertex_id
-    }
-    /// insert a new vertex with the default weight and return its ID
-    pub fn insert_vertex_default(&mut self) -> VertexId
-    where
-        N: Default,
-    {
-        self.insert_vertex(N::default())
-    }
     /// returns a set of vertices that are in the hyperedge with the given id
     pub fn get_neighbors(&self, index: VertexId) -> crate::Result<HashSet<VertexId>> {
         if !self.check_vertex(&index) {
@@ -161,9 +113,16 @@ where
         });
         Ok(neighbors)
     }
-    pub fn get_edge(&self, index: EdgeId) -> crate::Result<&E> {
+    /// retrieves a reference to the facet (hyperedge with an associated weight)
+    pub fn get_facet(&self, index: EdgeId) -> crate::Result<&E> {
         self.facets()
             .get(&index)
+            .ok_or_else(|| crate::Error::HyperedgeDoesNotExist(index))
+    }
+    /// retrieves a mutable reference to the facet (hyperedge with an associated weight)
+    pub fn get_facet_mut(&mut self, index: EdgeId) -> crate::Result<&mut E> {
+        self.facets_mut()
+            .get_mut(&index)
             .ok_or_else(|| crate::Error::HyperedgeDoesNotExist(index))
     }
     /// retrieves the set of vertices that make up a specific hyperedge
@@ -216,21 +175,77 @@ where
     }
     /// returns the weight of a particular vertex
     pub fn get_vertex_weight(&self, index: VertexId) -> crate::Result<&Node<N>> {
-        match self.vertices.get(&index) {
-            Some(weight) => Ok(weight),
-            None => Err(crate::Error::VertexDoesNotExist(index)),
+        self.vertices()
+            .get(&index)
+            .ok_or(crate::Error::VertexDoesNotExist(index))
+    }
+
+    /// returns a mutable reference to the weight of a vertex
+    pub fn get_vertex_weight_mut(&mut self, index: VertexId) -> crate::Result<&mut Node<N>> {
+        self.vertices_mut()
+            .get_mut(&index)
+            .ok_or(crate::Error::VertexDoesNotExist(index))
+    }
+    /// add a new hyperedge with the given vertices and return its ID
+    pub fn insert_edge<I>(&mut self, vertices: I) -> crate::Result<EdgeId>
+    where
+        I: Clone + IntoIterator<Item = VertexId>,
+    {
+        // Verify all vertices exist
+        for v in vertices.clone().into_iter() {
+            if !self.check_vertex(&v) {
+                return Err(crate::Error::VertexDoesNotExist(v));
+            }
         }
+        // fetch the next edge index
+        let eid = self.next_edge_id();
+        // collect the vertices into a HashSet to ensure uniqueness
+        let vset = vertices.into_iter().collect::<HashSet<_>>();
+        // handle the case where the edge has no associated vertices
+        if vset.is_empty() {
+            return Err(crate::Error::EmptyHyperedge);
+        }
+        // insert the new hyperedge into the adjacency map
+        self.connections_mut().insert(eid, vset);
+        self.next_edge_id += 1;
+        Ok(eid)
+    }
+    /// insert a new facet (hyperedge with an associated weight) into the hypergraph;
+    /// if the facet, or hyperedge, already exists, it will be replaced and returned
+    pub fn insert_facet(&mut self, edge_id: EdgeId, facet: E) -> crate::Result<()> {
+        if !self.check_edge(&edge_id) {
+            return Err(crate::Error::HyperedgeDoesNotExist(edge_id));
+        }
+        let _prev = self.facets_mut().insert(edge_id, facet);
+        Ok(())
+    }
+    /// insert a new vertex with the given weight and return its ID
+    pub fn insert_vertex(&mut self, weight: N) -> VertexId {
+        let vertex_id = self.next_vertex_id();
+        self.vertices_mut()
+            .insert(vertex_id, Node::new(vertex_id, weight));
+        self.next_vertex_id += 1;
+        vertex_id
+    }
+    /// insert a new vertex with the default weight and return its ID
+    pub fn insert_vertex_default(&mut self) -> VertexId
+    where
+        N: Default,
+    {
+        self.insert_vertex(N::default())
     }
     /// merges two hyperedges into one (combining their vertices)
     pub fn merge_edges(&mut self, e1: EdgeId, e2: EdgeId) -> crate::Result<EdgeId> {
-        if !self.check_edge(&e1) {
-            return Err(crate::Error::HyperedgeDoesNotExist(e1));
-        }
-        if !self.check_edge(&e2) {
-            return Err(crate::Error::HyperedgeDoesNotExist(e2));
-        }
-        let set1 = self.connections_mut().remove(&e1).unwrap();
-        let set2 = self.connections_mut().remove(&e2).unwrap();
+        use crate::Error::HyperedgeDoesNotExist;
+
+        let set1 = self
+            .connections_mut()
+            .remove(&e1)
+            .ok_or(HyperedgeDoesNotExist(e1))?;
+        let set2 = self
+            .connections_mut()
+            .remove(&e2)
+            .ok_or(HyperedgeDoesNotExist(e2))?;
         let merged: HashSet<VertexId> = set1.union(&set2).cloned().collect();
         let new_edge = self.next_edge_id;
         self.connections_mut().insert(new_edge, merged);
@@ -249,7 +264,8 @@ where
             .remove(&index)
             .map(|node| {
                 // Remove all hyperedges containing this vertex
-                self.connections.retain(|_, vertices| !vertices.contains(&index));
+                self.connections_mut()
+                    .retain(|_, vertices| !vertices.contains(&index));
                 node
             })
             .ok_or(crate::Error::VertexDoesNotExist(index))
