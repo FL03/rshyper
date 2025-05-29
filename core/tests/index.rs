@@ -3,7 +3,6 @@
     authors: @FL03
 */
 extern crate rshyper_core as rshyper;
-use rshyper::Error;
 use rshyper::id::{EdgeId, Index, VertexId, VertexIndex};
 
 #[test]
