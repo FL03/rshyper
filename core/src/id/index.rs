@@ -2,44 +2,9 @@
     Appellation: index <types>
     Contrib: @FL03
 */
-
-// Define a type alias for Vertex ID (can be any hashable type)
-pub type VertexId<T = usize> = Index<T, VertexIndex>;
-// Define a type alias for HyperEdge ID
-pub type EdgeId<T = usize> = Index<T, EdgeIndex>;
-
-pub type Idx = usize;
-
+use super::{EdgeIndex, IndexKind, VertexIndex};
 use core::marker::PhantomData;
 
-pub trait IndexKind: Eq + core::hash::Hash {
-    private!();
-}
-
-macro_rules! impl_index_kind {
-    ($($kind:ident),* $(,)?) => {
-        $(
-            impl_index_kind!(@impl $kind);
-        )*
-    };
-    (@impl $kind:ident) => {
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Ord, PartialOrd)]
-        #[cfg_attr(
-            feature = "serde",
-            derive(serde_derive::Deserialize, serde_derive::Serialize)
-        )]
-        pub enum $kind {}
-
-        impl IndexKind for $kind {
-            seal!();
-        }
-    }
-}
-
-impl_index_kind! {
-    EdgeIndex,
-    VertexIndex,
-}
 
 #[derive(Clone, Copy, Eq, Hash, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -138,13 +103,13 @@ where
     }
 }
 
-impl<T> EdgeId<T> {
+impl<T> Index<T, EdgeIndex> {
     pub fn vertex(value: T) -> Self {
         Self::from_value(value)
     }
 }
 
-impl<T> VertexId<T> {
+impl<T> Index<T, VertexIndex> {
     pub fn vertex(value: T) -> Self {
         Self::from_value(value)
     }

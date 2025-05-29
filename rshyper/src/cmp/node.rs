@@ -2,8 +2,7 @@
     Appellation: node <module>
     Contrib: @FL03
 */
-use crate::traits::Weighted;
-use crate::types::VertexId;
+use crate::{VertexId, Weighted};
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(
@@ -99,13 +98,6 @@ impl<T, Idx> Node<T, Idx> {
     }
 }
 
-impl<T, Idx> Weighted<Idx> for Node<T, Idx> {
-    type Data = T;
-
-    fn weight(&self) -> &Self::Data {
-        &self.weight
-    }
-}
 
 impl<T, Idx> AsRef<T> for Node<T, Idx> {
     fn as_ref(&self) -> &T {
@@ -137,5 +129,13 @@ where
             self.index(),
             self.weight()
         )
+    }
+}
+
+impl<T, Idx> Weighted<Idx> for Node<T, Idx> {
+    type Data = T;
+
+    fn weight(&self) -> &Self::Data {
+        &self.weight
     }
 }

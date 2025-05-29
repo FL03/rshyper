@@ -2,7 +2,7 @@
     Appellation: graph <module>
     Contrib: @FL03
 */
-use rshyper::{HashGraph, Index};
+use rshyper::{HashGraph, VertexId};
 
 #[test]
 fn test_hypergraph() -> rshyper::Result<()> {
@@ -23,7 +23,7 @@ fn test_hypergraph() -> rshyper::Result<()> {
 
     // Get neighbors of vertex v1
     let neighbors = graph.get_neighbors(v1)?;
-    let exp = [2, 3, 0usize].iter().copied().map(|i| Index::from_value(i));
+    let exp = [2, 3, 0usize].iter().copied().map(|i| VertexId::from_value(i));
     assert_eq!(neighbors, HashSet::from_iter(exp));
 
     // verify the degree of vertex v1

@@ -5,6 +5,7 @@ updates:
     directories:  
       - /
       - rshyper
+      - core
     schedule:
       interval: monthly
   - package-ecosystem: devcontainers

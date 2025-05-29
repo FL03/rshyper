@@ -6,7 +6,8 @@ default-members = [
 exclude = [ ]
 
 members = [
-    "rshyper",
+    "rshyper", 
+    "core",
 ]
 
 resolver = "3"
@@ -30,6 +31,7 @@ version = "0.0.4"
 [workspace.dependencies]
 # local
 rshyper = { default-features = false, path = "rshyper", version = "0.0.4" }
+rshyper-core = { default-features = false, path = "core", version = "0.0.4" }
 # custom
 scsys = { default-features = false, features = ["derive"], version = "0.2.7" }
 # benchmarking

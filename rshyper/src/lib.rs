@@ -21,6 +21,9 @@
 //!
 #[cfg(feature = "alloc")]
 extern crate alloc;
+/// this module implements the core functionality of the `rshyper` crate
+#[doc(inline)]
+pub use rshyper_core::*;
 
 #[doc(hidden)]
 #[macro_use]
@@ -33,16 +36,9 @@ pub(crate) mod macros {
 #[doc(inline)]
 pub use self::hash_graph::HashGraph;
 #[doc(inline)]
-pub use self::{
-    cmp::prelude::*,
-    error::{Error, Result},
-    ops::prelude::*,
-    traits::prelude::*,
-    types::prelude::*,
-};
+pub use self::{cmp::prelude::*, ops::prelude::*};
 
 pub mod algo;
-pub mod error;
 #[cfg(feature = "hash")]
 pub mod hash_graph;
 
@@ -76,45 +72,9 @@ pub mod ops {
     }
 }
 
-pub mod traits {
-    #[doc(inline)]
-    pub use self::prelude::*;
-
-    pub mod convert;
-    pub mod hyper_graph;
-    pub mod nodes;
-
-    pub(crate) mod prelude {
-        #[doc(inline)]
-        pub use super::convert::*;
-        #[doc(inline)]
-        pub use super::hyper_graph::*;
-        #[doc(inline)]
-        pub use super::nodes::*;
-    }
-}
-
-pub mod types {
-    #[doc(inline)]
-    pub use self::prelude::*;
-
-    pub mod graph_kind;
-    pub mod index;
-    pub mod weight;
-
-    pub(crate) mod prelude {
-        #[doc(inline)]
-        pub use super::graph_kind::*;
-        #[doc(inline)]
-        pub use super::index::*;
-        #[doc(inline)]
-        pub use super::weight::*;
-    }
-}
-
 pub mod prelude {
     #[doc(no_inline)]
-    pub use crate::error::*;
+    pub use rshyper_core::prelude::*;
 
     #[doc(no_inline)]
     pub use crate::algo::prelude::*;
@@ -125,8 +85,4 @@ pub mod prelude {
     pub use crate::hash_graph::prelude::*;
     #[doc(no_inline)]
     pub use crate::ops::prelude::*;
-    #[doc(no_inline)]
-    pub use crate::traits::prelude::*;
-    #[doc(no_inline)]
-    pub use crate::types::prelude::*;
 }
