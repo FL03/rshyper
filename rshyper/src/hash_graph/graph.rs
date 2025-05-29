@@ -2,7 +2,6 @@
     Appellation: graph <module>
     Contrib: @FL03
 */
-use num_traits::Zero;
 use rshyper_core::{EdgeId, Node, VertexId};
 use std::collections::{HashMap, HashSet};
 
@@ -18,8 +17,6 @@ pub struct HashGraph<N = (), E = ()> {
     pub(crate) connections: HashMap<EdgeId, HashSet<VertexId>>,
     pub(crate) facets: HashMap<EdgeId, E>,
     pub(crate) vertices: HashMap<VertexId, Node<N>>,
-    pub(crate) next_vertex_id: VertexId,
-    pub(crate) next_edge_id: EdgeId,
 }
 
 impl<N, E> HashGraph<N, E>
@@ -33,8 +30,6 @@ where
             facets: HashMap::new(),
             connections: HashMap::new(),
             vertices: HashMap::new(),
-            next_vertex_id: VertexId::zero(),
-            next_edge_id: EdgeId::zero(),
         }
     }
     /// returns an immutable reference to the hyperedges
@@ -62,14 +57,6 @@ where
     pub const fn vertices_mut(&mut self) -> &mut HashMap<VertexId, Node<N>> {
         &mut self.vertices
     }
-    /// returns the next vertex ID
-    pub const fn next_vertex_id(&self) -> VertexId {
-        self.next_vertex_id
-    }
-    /// returns the next edge ID
-    pub const fn next_edge_id(&self) -> EdgeId {
-        self.next_edge_id
-    }
     /// returns the total number of hyperedges in the hypergraph
     pub fn total_edges(&self) -> usize {
         self.connections().len()
@@ -82,8 +69,6 @@ where
     pub fn clear(&mut self) {
         self.vertices_mut().clear();
         self.connections_mut().clear();
-        self.next_vertex_id = VertexId::zero();
-        self.next_edge_id = EdgeId::zero();
     }
     /// check if a hyperedge with the given id exists
     pub fn contains_edge(&self, index: &EdgeId) -> bool {
@@ -99,48 +84,6 @@ where
             .get(index)
             .map(|vertices| vertices.len())
             .ok_or(crate::Error::HyperedgeDoesNotExist(*index))
-    }
-    /// returns a set of vertices that are in the hyperedge with the given id
-    pub fn get_neighbors(&self, index: VertexId) -> crate::Result<HashSet<VertexId>> {
-        if !self.contains_node(&index) {
-            return Err(crate::Error::VertexDoesNotExist(index));
-        }
-        // initialize an empty set to hold the neighbors
-        let mut neighbors = HashSet::new();
-        // iterate through all the connections
-        self.connections().values().for_each(|vertices| {
-            if vertices.contains(&index) {
-                neighbors.extend(vertices.iter().filter(|&&v| v != index));
-            }
-        });
-        Ok(neighbors)
-    }
-    /// retrieves a reference to the facet (hyperedge with an associated weight)
-    pub fn get_facet(&self, index: EdgeId) -> crate::Result<&E> {
-        self.facets()
-            .get(&index)
-            .ok_or_else(|| crate::Error::HyperedgeDoesNotExist(index))
-    }
-    /// retrieves a mutable reference to the facet (hyperedge with an associated weight)
-    pub fn get_facet_mut(&mut self, index: EdgeId) -> crate::Result<&mut E> {
-        self.facets_mut()
-            .get_mut(&index)
-            .ok_or_else(|| crate::Error::HyperedgeDoesNotExist(index))
-    }
-    /// returns the set of vertices composing the given edge
-    pub fn get_edge_vertices(&self, index: EdgeId) -> crate::Result<&HashSet<VertexId>> {
-        self.connections()
-            .get(&index)
-            .ok_or_else(|| crate::Error::HyperedgeDoesNotExist(index))
-    }
-    /// retrieves the set of nodes composing the given edge
-    pub fn get_edge_nodes(&self, index: EdgeId) -> crate::Result<Vec<&Node<N>>> {
-        let vertices = self.get_edge_vertices(index)?;
-        let nodes = vertices
-            .iter()
-            .map(|v| self.get_vertex_weight(*v).expect("vertex not found"))
-            .collect::<Vec<_>>();
-        Ok(nodes)
     }
     /// returns all hyperedges containing a given vertex
     pub fn get_edges_with_vertex(&self, index: VertexId) -> crate::Result<Vec<EdgeId>> {
@@ -159,6 +102,33 @@ where
             })
             .collect();
         Ok(edges)
+    }
+    /// retrieves a reference to the facet (hyperedge with an associated weight)
+    pub fn get_facet(&self, index: EdgeId) -> crate::Result<&E> {
+        self.facets()
+            .get(&index)
+            .ok_or_else(|| crate::Error::HyperedgeDoesNotExist(index))
+    }
+    /// retrieves a mutable reference to the facet (hyperedge with an associated weight)
+    pub fn get_facet_mut(&mut self, index: EdgeId) -> crate::Result<&mut E> {
+        self.facets_mut()
+            .get_mut(&index)
+            .ok_or_else(|| crate::Error::HyperedgeDoesNotExist(index))
+    }
+    /// retrieves the set of nodes composing the given edge
+    pub fn get_nodes_for_edge(&self, index: EdgeId) -> crate::Result<Vec<&Node<N>>> {
+        let vertices = self.get_vertices_for_edge(index)?;
+        let nodes = vertices
+            .iter()
+            .map(|v| self.get_vertex_weight(*v).expect("vertex not found"))
+            .collect::<Vec<_>>();
+        Ok(nodes)
+    }
+    /// returns the set of vertices composing the given edge
+    pub fn get_vertices_for_edge(&self, index: EdgeId) -> crate::Result<&HashSet<VertexId>> {
+        self.connections()
+            .get(&index)
+            .ok_or_else(|| crate::Error::HyperedgeDoesNotExist(index))
     }
     /// returns the degree of a given vertex where the degree is the number of hyperedges that
     /// contain the vertex
@@ -199,7 +169,7 @@ where
             }
         }
         // fetch the next edge index
-        let eid = self.next_edge_id();
+        let eid = EdgeId::atomic();
         // collect the vertices into a HashSet to ensure uniqueness
         let vset = vertices.into_iter().collect::<HashSet<_>>();
         // handle the case where the edge has no associated vertices
@@ -208,7 +178,6 @@ where
         }
         // insert the new hyperedge into the adjacency map
         self.connections_mut().insert(eid, vset);
-        self.next_edge_id += 1;
         Ok(eid)
     }
     /// insert a new facet (hyperedge with an associated weight) into the hypergraph;
@@ -222,10 +191,9 @@ where
     }
     /// insert a new vertex with the given weight and return its ID
     pub fn insert_vertex(&mut self, weight: N) -> VertexId {
-        let vertex_id = self.next_vertex_id();
+        let vertex_id = VertexId::atomic();
         self.vertices_mut()
             .insert(vertex_id, Node::new(vertex_id, weight));
-        self.next_vertex_id += 1;
         vertex_id
     }
     /// insert a new vertex with the default weight and return its ID
@@ -248,10 +216,24 @@ where
             .remove(&e2)
             .ok_or(HyperedgeDoesNotExist(e2))?;
         let merged: HashSet<VertexId> = set1.union(&set2).cloned().collect();
-        let new_edge = self.next_edge_id;
+        let new_edge = EdgeId::atomic();
         self.connections_mut().insert(new_edge, merged);
-        self.next_edge_id += 1;
         Ok(new_edge)
+    }
+    /// returns a set of vertices that are in the hyperedge with the given id
+    pub fn neighbors(&self, index: VertexId) -> crate::Result<HashSet<VertexId>> {
+        if !self.contains_node(&index) {
+            return Err(crate::Error::VertexDoesNotExist(index));
+        }
+        // initialize an empty set to hold the neighbors
+        let mut neighbors = HashSet::new();
+        // iterate through all the connections
+        self.connections().values().for_each(|vertices| {
+            if vertices.contains(&index) {
+                neighbors.extend(vertices.iter().filter(|&&v| v != index));
+            }
+        });
+        Ok(neighbors)
     }
     /// remove the hyperedge with the given id
     pub fn remove_edge(&mut self, index: EdgeId) -> crate::Result<HashSet<VertexId>> {
@@ -338,6 +320,27 @@ where
         N: Default,
     {
         self.insert_vertex(N::default())
+    }
+    #[deprecated(
+        since = "v0.0.4",
+        note = "use the creation routines provided by the `EdgeId` instead to ensure uniqueness"
+    )]
+    pub fn next_edge_id(&self) -> EdgeId {
+        EdgeId::atomic()
+    }
+    #[deprecated(
+        since = "v0.0.4",
+        note = "use the creation routines provided by the `VertexId` instead to ensure uniqueness"
+    )]
+    pub fn next_vertex_id(&self) -> VertexId {
+        VertexId::atomic()
+    }
+    #[deprecated(
+        since = "v0.0.4",
+        note = "use `neighbors` instead to get the neighbors of a vertex"
+    )]
+    pub fn get_neighbors(&self, index: VertexId) -> crate::Result<HashSet<VertexId>> {
+        self.neighbors(index)
     }
 }
 

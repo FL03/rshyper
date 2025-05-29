@@ -22,7 +22,7 @@ fn test_hypergraph() -> rshyper::Result<()> {
     assert_ne!(e1, e2);
 
     // Get neighbors of vertex v1
-    let neighbors = graph.get_neighbors(v1)?;
+    let neighbors = graph.neighbors(v1)?;
     let exp = [2, 3, 0usize]
         .iter()
         .copied()

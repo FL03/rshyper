@@ -9,15 +9,15 @@
 //! Welcome to the `rshyper` crate - a Rust library for hypergraphs.
 //!
 //! ## Background
-//! 
-//! Before diving in to the technical side of things, let's start by defining several terms 
+//!
+//! Before diving in to the technical side of things, let's start by defining several terms
 //! commonly used in the definition and implementation of hypergraphs.
-//! 
+//!
 //! - `edge`: an edge is a connection between two or more vertices.
 //! - `facet`: a facet materializes a hyperedge by associating some weight with the edge.
 //! - `node`: a node is a complete _vertex_ in that it is considered to be weighted.
 //! - `vertex`: a vertex is an _unweighted_ node defining a point within the hypergraph.
-//! 
+//!
 //! ### Hypergraphs
 //!
 //! A hypergraph is an abstraction of a graph that allows edges to connect any number of
@@ -28,17 +28,17 @@
 //! _**definition.**_ Formally, a hypergraph is defined as a pair $\( H = (V, E) \)$ where:
 //!
 //! ***
-//! 
+//!
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-#[doc(inline)]
-pub use self::{algo::prelude::*, ops::prelude::*};
 #[cfg(feature = "alloc")]
 pub use self::binary_graph::BinaryGraph;
 #[cfg(feature = "hash")]
 #[doc(inline)]
 pub use self::hash_graph::HashGraph;
+#[doc(inline)]
+pub use self::{algo::prelude::*, ops::prelude::*};
 
 /// this module implements the core functionality of the `rshyper` crate
 #[doc(inline)]

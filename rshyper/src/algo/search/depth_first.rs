@@ -63,7 +63,7 @@ where
 
             // For each hyperedge, visit all vertices that haven't been visited yet
             for edge_id in edges {
-                let vertices = self.graph.get_edge_vertices(edge_id)?;
+                let vertices = self.graph.get_vertices_for_edge(edge_id)?;
 
                 // Add vertices in reverse order to maintain expected DFS behavior
                 let mut new_vertices: Vec<_> = vertices

@@ -21,7 +21,7 @@ fn main() -> rshyper::Result<()> {
     println!("Added hyperedge {e2}: {:?}", [v1, v2, v3]);
 
     // Get neighbors of vertex v1
-    let neighbors = graph.get_neighbors(v1)?;
+    let neighbors = graph.neighbors(v1)?;
     println!("Neighbors of {}: {:?}", v1, neighbors);
 
     // Get degree of vertex v1

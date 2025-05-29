@@ -118,7 +118,7 @@ where
 
             for edge_id in edges {
                 // Get all vertices in this hyperedge
-                let vertices = match self.graph.get_edge_vertices(edge_id) {
+                let vertices = match self.graph.get_vertices_for_edge(edge_id) {
                     Ok(verts) => verts,
                     Err(e) => return Err(e),
                 };

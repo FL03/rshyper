@@ -11,9 +11,7 @@ use rshyper_core::{EdgeId, Node, VertexId};
 pub struct BinaryGraph<N, E> {
     pub(crate) connections: BTreeMap<EdgeId, BTreeSet<VertexId>>,
     pub(crate) facets: BTreeMap<EdgeId, E>,
-    pub(crate) vertices: BTreeMap<VertexId, Node<N>>,
-    pub(crate) next_vertex_id: VertexId,
-    pub(crate) next_edge_id: EdgeId,
+    pub(crate) nodes: BTreeMap<VertexId, Node<N>>,
 }
 
 impl<N, E> BinaryGraph<N, E> {
@@ -22,47 +20,62 @@ impl<N, E> BinaryGraph<N, E> {
         Self {
             connections: BTreeMap::new(),
             facets: BTreeMap::new(),
-            vertices: BTreeMap::new(),
-            next_vertex_id: VertexId::atomic(),
-            next_edge_id: EdgeId::atomic(),
+            nodes: BTreeMap::new(),
         }
     }
-
+    /// returns an immutable reference to the connections map
     pub const fn connections(&self) -> &BTreeMap<EdgeId, BTreeSet<VertexId>> {
         &self.connections
     }
-
+    /// returns a mutable reference to the connections map
     pub const fn connections_mut(&mut self) -> &mut BTreeMap<EdgeId, BTreeSet<VertexId>> {
         &mut self.connections
     }
-
+    /// returns an immutable reference to the facets map
     pub const fn facets(&self) -> &BTreeMap<EdgeId, E> {
         &self.facets
     }
-
+    /// returns a mutable reference to the facets map
     pub const fn facets_mut(&mut self) -> &mut BTreeMap<EdgeId, E> {
         &mut self.facets
     }
-
-    pub const fn vertices(&self) -> &BTreeMap<VertexId, Node<N>> {
-        &self.vertices
+    /// returns an immutable reference to the nodes of the hypergraph
+    pub const fn nodes(&self) -> &BTreeMap<VertexId, Node<N>> {
+        &self.nodes
     }
-
-    pub const fn vertices_mut(&mut self) -> &mut BTreeMap<VertexId, Node<N>> {
-        &mut self.vertices
+    /// returns a mutable reference to the nodes of the hypergraph
+    pub const fn nodes_mut(&mut self) -> &mut BTreeMap<VertexId, Node<N>> {
+        &mut self.nodes
     }
-
-    pub const fn next_vertex_id(&self) -> VertexId {
-        self.next_vertex_id
-    }
-
-    /// Returns the number of vertices in the graph
-    pub fn vertex_count(&self) -> usize {
-        self.vertices.len()
-    }
-
     /// Returns the number of edges in the graph
-    pub fn edge_count(&self) -> usize {
+    pub fn count_edges(&self) -> usize {
         self.connections.len()
+    }
+    /// Returns the number of vertices in the graph
+    pub fn count_vertices(&self) -> usize {
+        self.nodes.len()
+    }
+}
+
+impl<N, E> Default for BinaryGraph<N, E> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<N, E> BinaryGraph<N, E> {
+    #[deprecated(
+        since = "v0.0.4",
+        note = "use the creation routines provided by the `EdgeId` instead to ensure uniqueness"
+    )]
+    pub fn next_edge_id(&self) -> EdgeId {
+        EdgeId::atomic()
+    }
+    #[deprecated(
+        since = "v0.0.4",
+        note = "use the creation routines provided by the `VertexId` instead to ensure uniqueness"
+    )]
+    pub fn next_vertex_id(&self) -> VertexId {
+        VertexId::atomic()
     }
 }
