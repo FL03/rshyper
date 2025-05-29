@@ -1,14 +1,24 @@
 /*
-    Appellation: rshyper <library>
-    Contrib: Joe McCain III <jo3mccain@icloud.com>
+    appellation: rshyper <library>
+    authors: @FL03
 */
-//! # rshyper
-//!
-//! This crates works to implement a hypergraph data structure in Rust. A hypergraph is a
-//! generalization of a graph in which an edge can connect any number of vertices.
 #![crate_name = "rshyper"]
 #![crate_type = "lib"]
-
+//! # rshyper
+//! 
+//! Welcome to the `rshyper` crate - a Rust library for hypergraphs.
+//!
+//! 
+//! ## The Hypergraph
+//! 
+//! A hypergraph is an abstraction of a graph that allows edges to connect any number of 
+//! vertices. This flexible data-strcture is highly mathematical, yet, extremely useful in 
+//! many applications such as database design, network analysis, combinatorial optimization, 
+//! modeling topological spaces, and more.
+//! 
+//! _**definition.**_ A hypergraph is defined to be...
+//! 
+//! 
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
@@ -79,7 +89,9 @@ pub mod types {
     pub mod node;
 
     pub(crate) mod prelude {
+        #[doc(inline)]
         pub use super::index::*;
+        #[doc(inline)]
         pub use super::node::*;
     }
 }

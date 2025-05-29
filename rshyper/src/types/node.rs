@@ -20,38 +20,82 @@ impl<T, Idx> Node<T, Idx> {
     pub fn new(index: VertexId<Idx>, weight: T) -> Self {
         Self { index, weight }
     }
+    /// creates a new node with the given index and default weight
+    pub fn from_index(index: VertexId<Idx>) -> Self
+    where
+        T: Default,
+    {
+        Self {
+            index,
+            weight: T::default(),
+        }
+    }
+    /// creates a new instance from the given value
+    pub fn from_weight(weight: T) -> Self
+    where
+        Idx: Default,
+    {
+        Self {
+            index: VertexId::default(),
+            weight,
+        }
+    }
+    /// consumes the current instance to create another with the given index.
+    pub fn with_index<I2>(self, index: VertexId<I2>) -> Node<T, I2> {
+        Node {
+            index,
+            weight: self.weight,
+        }
+    }
+    /// consumes the current instance to create another with the given weight.
+    pub fn with_weight<U>(self, weight: U) -> Node<U, Idx> {
+        Node {
+            index: self.index,
+            weight,
+        }
+    }
     /// returns a pointer to the inner value
     pub const fn as_ptr(&self) -> *const T {
         core::ptr::from_ref(&self.weight)
     }
-
     /// returns a mutable pointer to the inner value
     pub fn as_mut_ptr(&mut self) -> *mut T {
         core::ptr::from_mut(&mut self.weight)
     }
-
+    /// returns an immutable reference to the node index
     pub const fn index(&self) -> &VertexId<Idx> {
         &self.index
     }
-
+    /// returns an immutable reference to the node weight
     pub const fn weight(&self) -> &T {
         &self.weight
     }
-
-    pub fn weight_mut(&mut self) -> &mut T {
+    /// returns a mutable reference to the node weight
+    pub const fn weight_mut(&mut self) -> &mut T {
         &mut self.weight
     }
-
-    pub fn set_weight(&mut self, weight: T) {
+    /// update the weight and return a mutable reference to the current instance.
+    pub fn set_weight(&mut self, weight: T) -> &mut Self {
         self.weight = weight;
+        self
     }
-
+    /// [`replace`](core::mem::replace) the weight of the current instance with the given weight,
+    /// returning the previous weight.
     pub fn replace_weight(&mut self, weight: T) -> T {
         core::mem::replace(&mut self.weight, weight)
     }
-
+    /// [`swap`](core::mem::swap) the weight of the current instance with the weight of
+    /// another instance.
     pub fn swap_weight(&mut self, other: &mut Self) {
-        core::mem::swap(&mut self.weight, &mut other.weight);
+        core::mem::swap(&mut self.weight, other.weight_mut())
+    }
+    /// consumes the current instance and applies the given function onto the weight,
+    /// returning a new instance with the same index and the resulting weight.
+    pub fn map<U, F: FnOnce(T) -> U>(self, f: F) -> Node<U, Idx> {
+        Node {
+            index: self.index,
+            weight: f(self.weight),
+        }
     }
 }
 
@@ -63,13 +107,13 @@ impl<T, Idx> Weighted<Idx> for Node<T, Idx> {
     }
 }
 
-impl<T, Idx> core::convert::AsRef<T> for Node<T, Idx> {
+impl<T, Idx> AsRef<T> for Node<T, Idx> {
     fn as_ref(&self) -> &T {
         &self.weight
     }
 }
 
-impl<T, Idx> core::convert::AsMut<T> for Node<T, Idx> {
+impl<T, Idx> AsMut<T> for Node<T, Idx> {
     fn as_mut(&mut self) -> &mut T {
         &mut self.weight
     }
@@ -78,5 +122,15 @@ impl<T, Idx> core::convert::AsMut<T> for Node<T, Idx> {
 impl<T, Idx> core::borrow::Borrow<VertexId<Idx>> for Node<T, Idx> {
     fn borrow(&self) -> &VertexId<Idx> {
         &self.index
+    }
+}
+
+impl<T, Idx> core::fmt::Display for Node<T, Idx>
+where
+    Idx: core::fmt::Display,
+    T: core::fmt::Display,
+{
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{{ index: {}, weight: {} }}", self.index(), self.weight())
     }
 }
