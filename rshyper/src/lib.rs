@@ -5,20 +5,20 @@
 #![crate_name = "rshyper"]
 #![crate_type = "lib"]
 //! # rshyper
-//! 
+//!
 //! Welcome to the `rshyper` crate - a Rust library for hypergraphs.
 //!
-//! 
+//!
 //! ## The Hypergraph
-//! 
-//! A hypergraph is an abstraction of a graph that allows edges to connect any number of 
-//! vertices. This flexible data-strcture is highly mathematical, yet, extremely useful in 
-//! many applications such as database design, network analysis, combinatorial optimization, 
+//!
+//! A hypergraph is an abstraction of a graph that allows edges to connect any number of
+//! vertices. This flexible data-strcture is highly mathematical, yet, extremely useful in
+//! many applications such as database design, network analysis, combinatorial optimization,
 //! modeling topological spaces, and more.
-//! 
+//!
 //! _**definition.**_ A hypergraph is defined to be...
-//! 
-//! 
+//!
+//!
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
@@ -34,6 +34,7 @@ pub(crate) mod macros {
 pub use self::hash_graph::HashGraph;
 #[doc(inline)]
 pub use self::{
+    cmp::prelude::*,
     error::{Error, Result},
     ops::prelude::*,
     traits::prelude::*,
@@ -44,6 +45,21 @@ pub mod algo;
 pub mod error;
 #[cfg(feature = "hash")]
 pub mod hash_graph;
+
+pub mod cmp {
+    #[doc(inline)]
+    pub use self::prelude::*;
+
+    pub mod edge;
+    pub mod node;
+
+    pub(crate) mod prelude {
+        #[doc(inline)]
+        pub use super::edge::*;
+        #[doc(inline)]
+        pub use super::node::*;
+    }
+}
 
 pub mod ops {
     #[doc(inline)]
@@ -65,15 +81,12 @@ pub mod traits {
     pub use self::prelude::*;
 
     pub mod convert;
-    pub mod edges;
     pub mod hyper_graph;
     pub mod nodes;
 
     pub(crate) mod prelude {
         #[doc(inline)]
         pub use super::convert::*;
-        #[doc(inline)]
-        pub use super::edges::*;
         #[doc(inline)]
         pub use super::hyper_graph::*;
         #[doc(inline)]
@@ -85,14 +98,17 @@ pub mod types {
     #[doc(inline)]
     pub use self::prelude::*;
 
+    pub mod graph_kind;
     pub mod index;
-    pub mod node;
+    pub mod weight;
 
     pub(crate) mod prelude {
         #[doc(inline)]
+        pub use super::graph_kind::*;
+        #[doc(inline)]
         pub use super::index::*;
         #[doc(inline)]
-        pub use super::node::*;
+        pub use super::weight::*;
     }
 }
 
@@ -102,6 +118,8 @@ pub mod prelude {
 
     #[doc(no_inline)]
     pub use crate::algo::prelude::*;
+    #[doc(no_inline)]
+    pub use crate::cmp::prelude::*;
     #[cfg(feature = "hash")]
     #[doc(no_inline)]
     pub use crate::hash_graph::prelude::*;

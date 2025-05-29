@@ -42,10 +42,7 @@ impl_index_kind! {
 }
 
 #[derive(Clone, Copy, Eq, Hash, PartialEq, Ord, PartialOrd)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Deserialize, serde::Serialize)
-)]
+#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct Index<Idx, K>
 where
     K: IndexKind,

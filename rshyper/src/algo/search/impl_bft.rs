@@ -39,7 +39,7 @@ where
         self.reset();
 
         // Check if starting vertex exists
-        if !self.graph.check_vertex(&start) {
+        if !self.graph.contains_node(&start) {
             return Err(Error::VertexDoesNotExist(start));
         }
 

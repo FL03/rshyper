@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use crate::hash_graph::graph::HashGraph;
-use crate::{Node, EdgeId, VertexId};
+use crate::{EdgeId, Node, VertexId};
 
 impl<N, E> core::ops::Index<EdgeId> for HashGraph<N, E>
 where

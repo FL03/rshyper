@@ -30,7 +30,7 @@ fn test_hypergraph() -> rshyper::Result<()> {
     assert_eq!(graph.get_vertex_degree(v1)?, 2);
     // remove vertex v1
     let _ = graph.remove_vertex(v2)?;
-    assert!(!graph.check_vertex(&v2));
+    assert!(!graph.contains_node(&v2));
     Ok(())
 }
 
@@ -85,8 +85,8 @@ fn remove_hyperedge() -> rshyper::Result<()> {
     assert!(removed_edge.contains(&v1));
 
     // Check that the removed edge is no longer in the graph
-    assert!(!graph.check_edge(&e1));
-    assert!(graph.check_edge(&e2));
+    assert!(!graph.contains_edge(&e1));
+    assert!(graph.contains_edge(&e2));
 
     Ok(())
 }

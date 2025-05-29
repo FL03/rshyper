@@ -131,6 +131,11 @@ where
     T: core::fmt::Display,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{{ index: {}, weight: {} }}", self.index(), self.weight())
+        write!(
+            f,
+            "{{ index: {}, weight: {} }}",
+            self.index(),
+            self.weight()
+        )
     }
 }

@@ -65,10 +65,10 @@ where
     /// Find the shortest path between start and goal vertices
     pub fn find_path(&mut self, start: VertexId, goal: VertexId) -> Result<Vec<VertexId>> {
         // Check if both vertices exist
-        if !self.graph.check_vertex(&start) {
+        if !self.graph.contains_node(&start) {
             return Err(Error::VertexDoesNotExist(start));
         }
-        if !self.graph.check_vertex(&goal) {
+        if !self.graph.contains_node(&goal) {
             return Err(Error::VertexDoesNotExist(goal));
         }
 
@@ -204,7 +204,7 @@ where
         // all reachable vertices ordered by their distance from start
         self.reset();
 
-        if !self.graph.check_vertex(&start) {
+        if !self.graph.contains_node(&start) {
             return Err(Error::VertexDoesNotExist(start));
         }
 
