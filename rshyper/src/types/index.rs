@@ -44,7 +44,7 @@ impl_index_kind! {
 #[derive(Clone, Copy, Eq, Hash, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
-    derive(serde_derive::Deserialize, serde_derive::Serialize)
+    derive(serde::Deserialize, serde::Serialize)
 )]
 pub struct Index<Idx, K>
 where
@@ -102,16 +102,23 @@ where
         self.value = value;
         self
     }
+    /// [`swap`](core::mem::swap) the values of two indices
+    pub const fn swap(&mut self, other: &mut Self) {
+        core::mem::swap(&mut self.value, &mut other.value)
+    }
+    /// [`take`](core::mem::take) the value and replace it with the default value
+    pub fn take(&mut self) -> T
+    where
+        T: Default,
+    {
+        core::mem::take(&mut self.value)
+    }
     /// consumes the current index to create another with the given value
     pub fn with<U>(self, value: U) -> Index<U, K> {
         Index {
             value,
             _type: PhantomData::<K>,
         }
-    }
-    /// [`swap`](core::mem::swap) the values of two indices
-    pub const fn swap(&mut self, other: &mut Self) {
-        core::mem::swap(&mut self.value, &mut other.value)
     }
 }
 

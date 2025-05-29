@@ -6,7 +6,11 @@ use crate::traits::Weighted;
 use crate::types::VertexId;
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize, serde::Serialize),
+    serde(rename_all = "lowercase")
+)]
 pub struct Node<T = (), Idx = usize> {
     pub(crate) index: VertexId<Idx>,
     pub(crate) weight: T,

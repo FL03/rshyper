@@ -13,15 +13,15 @@ fn test_breadth_first_traversal() {
     //  \  /
     //   2 -- 4
 
-    let v0 = graph.add_vertex_default();
-    let v1 = graph.add_vertex_default();
-    let v2 = graph.add_vertex_default();
-    let v3 = graph.add_vertex_default();
-    let v4 = graph.add_vertex_default();
+    let v0 = graph.insert_vertex_default();
+    let v1 = graph.insert_vertex_default();
+    let v2 = graph.insert_vertex_default();
+    let v3 = graph.insert_vertex_default();
+    let v4 = graph.insert_vertex_default();
 
-    let _e1 = graph.add_hyperedge(vec![v0, v1, v2]).unwrap();
-    let _e2 = graph.add_hyperedge(vec![v1, v3]).unwrap();
-    let _e3 = graph.add_hyperedge(vec![v2, v4]).unwrap();
+    let _e1 = graph.insert_edge(vec![v0, v1, v2]).unwrap();
+    let _e2 = graph.insert_edge(vec![v1, v3]).unwrap();
+    let _e3 = graph.insert_edge(vec![v2, v4]).unwrap();
 
     let mut bft = graph.bft();
     let path = bft.search(v0).unwrap();
@@ -49,15 +49,15 @@ fn test_bft_cyclic_graph() {
     // |         |
     // +----3----+
 
-    let v0 = graph.add_vertex_default();
-    let v1 = graph.add_vertex_default();
-    let v2 = graph.add_vertex_default();
-    let v3 = graph.add_vertex_default();
+    let v0 = graph.insert_vertex_default();
+    let v1 = graph.insert_vertex_default();
+    let v2 = graph.insert_vertex_default();
+    let v3 = graph.insert_vertex_default();
 
-    let _e1 = graph.add_hyperedge(vec![v0, v1]).unwrap();
-    let _e2 = graph.add_hyperedge(vec![v1, v2]).unwrap();
-    let _e3 = graph.add_hyperedge(vec![v2, v3]).unwrap();
-    let _e4 = graph.add_hyperedge(vec![v3, v0]).unwrap();
+    let _e1 = graph.insert_edge(vec![v0, v1]).unwrap();
+    let _e2 = graph.insert_edge(vec![v1, v2]).unwrap();
+    let _e3 = graph.insert_edge(vec![v2, v3]).unwrap();
+    let _e4 = graph.insert_edge(vec![v3, v0]).unwrap();
 
     let mut bft = graph.bft();
     let path = bft.search(v0).unwrap();
@@ -80,13 +80,13 @@ fn test_bft_disconnected_graph() {
     // Create a disconnected hypergraph
     // 0 -- 1    2 -- 3
 
-    let v0 = graph.add_vertex_default();
-    let v1 = graph.add_vertex_default();
-    let v2 = graph.add_vertex_default();
-    let v3 = graph.add_vertex_default();
+    let v0 = graph.insert_vertex_default();
+    let v1 = graph.insert_vertex_default();
+    let v2 = graph.insert_vertex_default();
+    let v3 = graph.insert_vertex_default();
 
-    let _e1 = graph.add_hyperedge(vec![v0, v1]).unwrap();
-    let _e2 = graph.add_hyperedge(vec![v2, v3]).unwrap();
+    let _e1 = graph.insert_edge(vec![v0, v1]).unwrap();
+    let _e2 = graph.insert_edge(vec![v2, v3]).unwrap();
 
     let mut bft = graph.bft();
     let path = bft.search(v0).unwrap();
@@ -108,14 +108,14 @@ fn test_bft_hyperedge_with_multiple_vertices() {
 
     // Create a hypergraph with a large hyperedge
     // connecting multiple vertices
-    let v0 = graph.add_vertex_default();
-    let v1 = graph.add_vertex_default();
-    let v2 = graph.add_vertex_default();
-    let v3 = graph.add_vertex_default();
-    let v4 = graph.add_vertex_default();
+    let v0 = graph.insert_vertex_default();
+    let v1 = graph.insert_vertex_default();
+    let v2 = graph.insert_vertex_default();
+    let v3 = graph.insert_vertex_default();
+    let v4 = graph.insert_vertex_default();
 
     // Single hyperedge connecting all vertices
-    let _e1 = graph.add_hyperedge(vec![v0, v1, v2, v3, v4]).unwrap();
+    let _e1 = graph.insert_edge(vec![v0, v1, v2, v3, v4]).unwrap();
 
     let mut bft = graph.bft();
     let path = bft.search(v0).unwrap();
@@ -139,14 +139,14 @@ fn test_depth_first_traversal() {
     let mut graph = HashGraph::<()>::new();
 
     // Create a simple hypergraph
-    let v0 = graph.add_vertex_default();
-    let v1 = graph.add_vertex_default();
-    let v2 = graph.add_vertex_default();
-    let v3 = graph.add_vertex_default();
+    let v0 = graph.insert_vertex_default();
+    let v1 = graph.insert_vertex_default();
+    let v2 = graph.insert_vertex_default();
+    let v3 = graph.insert_vertex_default();
 
-    let _e1 = graph.add_hyperedge(vec![v0, v1]).unwrap();
-    let _e2 = graph.add_hyperedge(vec![v1, v2]).unwrap();
-    let _e3 = graph.add_hyperedge(vec![v2, v3]).unwrap();
+    let _e1 = graph.insert_edge(vec![v0, v1]).unwrap();
+    let _e2 = graph.insert_edge(vec![v1, v2]).unwrap();
+    let _e3 = graph.insert_edge(vec![v2, v3]).unwrap();
 
     let mut dft = graph.dft();
     let path = dft.search(v0).unwrap();
@@ -174,16 +174,16 @@ fn test_dft_branching_graph() {
     //     \
     //      3
 
-    let v0 = graph.add_vertex_default();
-    let v1 = graph.add_vertex_default();
-    let v2 = graph.add_vertex_default();
-    let v3 = graph.add_vertex_default();
-    let v4 = graph.add_vertex_default();
+    let v0 = graph.insert_vertex_default();
+    let v1 = graph.insert_vertex_default();
+    let v2 = graph.insert_vertex_default();
+    let v3 = graph.insert_vertex_default();
+    let v4 = graph.insert_vertex_default();
 
-    let _e1 = graph.add_hyperedge(vec![v0, v1]).unwrap();
-    let _e2 = graph.add_hyperedge(vec![v0, v2]).unwrap();
-    let _e3 = graph.add_hyperedge(vec![v0, v3]).unwrap();
-    let _e4 = graph.add_hyperedge(vec![v2, v4]).unwrap();
+    let _e1 = graph.insert_edge(vec![v0, v1]).unwrap();
+    let _e2 = graph.insert_edge(vec![v0, v2]).unwrap();
+    let _e3 = graph.insert_edge(vec![v0, v3]).unwrap();
+    let _e4 = graph.insert_edge(vec![v2, v4]).unwrap();
 
     let mut dft = graph.dft();
     let path = dft.search(v0).unwrap();
@@ -208,15 +208,15 @@ fn test_dft_cyclic_graph() {
     // |         |
     // +----3----+
 
-    let v0 = graph.add_vertex_default();
-    let v1 = graph.add_vertex_default();
-    let v2 = graph.add_vertex_default();
-    let v3 = graph.add_vertex_default();
+    let v0 = graph.insert_vertex_default();
+    let v1 = graph.insert_vertex_default();
+    let v2 = graph.insert_vertex_default();
+    let v3 = graph.insert_vertex_default();
 
-    let _e1 = graph.add_hyperedge(vec![v0, v1]).unwrap();
-    let _e2 = graph.add_hyperedge(vec![v1, v2]).unwrap();
-    let _e3 = graph.add_hyperedge(vec![v2, v3]).unwrap();
-    let _e4 = graph.add_hyperedge(vec![v3, v0]).unwrap();
+    let _e1 = graph.insert_edge(vec![v0, v1]).unwrap();
+    let _e2 = graph.insert_edge(vec![v1, v2]).unwrap();
+    let _e3 = graph.insert_edge(vec![v2, v3]).unwrap();
+    let _e4 = graph.insert_edge(vec![v3, v0]).unwrap();
 
     let mut dft = graph.dft();
     let path = dft.search(v0).unwrap();
@@ -239,11 +239,11 @@ fn test_dft_isolated_vertex() {
     // Create a graph with an isolated vertex
     // 0 -- 1    2
 
-    let v0 = graph.add_vertex_default();
-    let v1 = graph.add_vertex_default();
-    let v2 = graph.add_vertex_default(); // isolated
+    let v0 = graph.insert_vertex_default();
+    let v1 = graph.insert_vertex_default();
+    let v2 = graph.insert_vertex_default(); // isolated
 
-    let _e1 = graph.add_hyperedge(vec![v0, v1]).unwrap();
+    let _e1 = graph.insert_edge(vec![v0, v1]).unwrap();
 
     let mut dft = graph.dft();
     let path = dft.search(v0).unwrap();
@@ -271,20 +271,20 @@ fn test_astar_search() {
     let mut graph = HashGraph::<()>::new();
 
     // Create a simple hypergraph
-    let v0 = graph.add_vertex_default();
-    let v1 = graph.add_vertex_default();
-    let v2 = graph.add_vertex_default();
-    let v3 = graph.add_vertex_default();
-    let v4 = graph.add_vertex_default();
+    let v0 = graph.insert_vertex_default();
+    let v1 = graph.insert_vertex_default();
+    let v2 = graph.insert_vertex_default();
+    let v3 = graph.insert_vertex_default();
+    let v4 = graph.insert_vertex_default();
 
     // Direct path: v0 -> v1 -> v3
-    graph.add_hyperedge(vec![v0, v1]).unwrap();
-    graph.add_hyperedge(vec![v1, v3]).unwrap();
+    graph.insert_edge(vec![v0, v1]).unwrap();
+    graph.insert_edge(vec![v1, v3]).unwrap();
 
     // Longer path: v0 -> v2 -> v4 -> v3
-    graph.add_hyperedge(vec![v0, v2]).unwrap();
-    graph.add_hyperedge(vec![v2, v4]).unwrap();
-    graph.add_hyperedge(vec![v4, v3]).unwrap();
+    graph.insert_edge(vec![v0, v2]).unwrap();
+    graph.insert_edge(vec![v2, v4]).unwrap();
+    graph.insert_edge(vec![v4, v3]).unwrap();
 
     // Simple Euclidean distance heuristic (not used in this test)
     let heuristic = |_: VertexId, _: VertexId| -> f64 { 0.0 };
@@ -310,31 +310,31 @@ fn test_astar_with_heuristic() {
     // |    |    |
     // 6 -- 7 -- 8
 
-    let v0 = graph.add_vertex_default(); // (0,0)
-    let v1 = graph.add_vertex_default(); // (1,0)
-    let v2 = graph.add_vertex_default(); // (2,0)
-    let v3 = graph.add_vertex_default(); // (0,1)
-    let v4 = graph.add_vertex_default(); // (1,1)
-    let v5 = graph.add_vertex_default(); // (2,1)
-    let v6 = graph.add_vertex_default(); // (0,2)
-    let v7 = graph.add_vertex_default(); // (1,2)
-    let v8 = graph.add_vertex_default(); // (2,2)
+    let v0 = graph.insert_vertex_default(); // (0,0)
+    let v1 = graph.insert_vertex_default(); // (1,0)
+    let v2 = graph.insert_vertex_default(); // (2,0)
+    let v3 = graph.insert_vertex_default(); // (0,1)
+    let v4 = graph.insert_vertex_default(); // (1,1)
+    let v5 = graph.insert_vertex_default(); // (2,1)
+    let v6 = graph.insert_vertex_default(); // (0,2)
+    let v7 = graph.insert_vertex_default(); // (1,2)
+    let v8 = graph.insert_vertex_default(); // (2,2)
 
     // Create horizontal connections
-    graph.add_hyperedge(vec![v0, v1]).unwrap();
-    graph.add_hyperedge(vec![v1, v2]).unwrap();
-    graph.add_hyperedge(vec![v3, v4]).unwrap();
-    graph.add_hyperedge(vec![v4, v5]).unwrap();
-    graph.add_hyperedge(vec![v6, v7]).unwrap();
-    graph.add_hyperedge(vec![v7, v8]).unwrap();
+    graph.insert_edge(vec![v0, v1]).unwrap();
+    graph.insert_edge(vec![v1, v2]).unwrap();
+    graph.insert_edge(vec![v3, v4]).unwrap();
+    graph.insert_edge(vec![v4, v5]).unwrap();
+    graph.insert_edge(vec![v6, v7]).unwrap();
+    graph.insert_edge(vec![v7, v8]).unwrap();
 
     // Create vertical connections
-    graph.add_hyperedge(vec![v0, v3]).unwrap();
-    graph.add_hyperedge(vec![v3, v6]).unwrap();
-    graph.add_hyperedge(vec![v1, v4]).unwrap();
-    graph.add_hyperedge(vec![v4, v7]).unwrap();
-    graph.add_hyperedge(vec![v2, v5]).unwrap();
-    graph.add_hyperedge(vec![v5, v8]).unwrap();
+    graph.insert_edge(vec![v0, v3]).unwrap();
+    graph.insert_edge(vec![v3, v6]).unwrap();
+    graph.insert_edge(vec![v1, v4]).unwrap();
+    graph.insert_edge(vec![v4, v7]).unwrap();
+    graph.insert_edge(vec![v2, v5]).unwrap();
+    graph.insert_edge(vec![v5, v8]).unwrap();
 
     // Define positions for each vertex in a 2D grid
     let positions = vec![
@@ -390,13 +390,13 @@ fn test_astar_disconnected() {
     // Create two disconnected components
     // 0 -- 1    2 -- 3
 
-    let v0 = graph.add_vertex_default();
-    let v1 = graph.add_vertex_default();
-    let v2 = graph.add_vertex_default();
-    let v3 = graph.add_vertex_default();
+    let v0 = graph.insert_vertex_default();
+    let v1 = graph.insert_vertex_default();
+    let v2 = graph.insert_vertex_default();
+    let v3 = graph.insert_vertex_default();
 
-    graph.add_hyperedge(vec![v0, v1]).unwrap();
-    graph.add_hyperedge(vec![v2, v3]).unwrap();
+    graph.insert_edge(vec![v0, v1]).unwrap();
+    graph.insert_edge(vec![v2, v3]).unwrap();
 
     // Simple heuristic
     let heuristic = |_: VertexId, _: VertexId| -> f64 { 0.0 };
@@ -421,27 +421,27 @@ fn test_astar_complex_paths() {
     // |         /
     // +-- 6 ---+
 
-    let v0 = graph.add_vertex_default();
-    let v1 = graph.add_vertex_default();
-    let v2 = graph.add_vertex_default();
-    let v3 = graph.add_vertex_default();
-    let v4 = graph.add_vertex_default();
-    let v5 = graph.add_vertex_default();
-    let v6 = graph.add_vertex_default();
+    let v0 = graph.insert_vertex_default();
+    let v1 = graph.insert_vertex_default();
+    let v2 = graph.insert_vertex_default();
+    let v3 = graph.insert_vertex_default();
+    let v4 = graph.insert_vertex_default();
+    let v5 = graph.insert_vertex_default();
+    let v6 = graph.insert_vertex_default();
 
     // Path 1: v0 -> v1 -> v2 -> v3 (length 3)
-    graph.add_hyperedge(vec![v0, v1]).unwrap();
-    graph.add_hyperedge(vec![v1, v2]).unwrap();
-    graph.add_hyperedge(vec![v2, v3]).unwrap();
+    graph.insert_edge(vec![v0, v1]).unwrap();
+    graph.insert_edge(vec![v1, v2]).unwrap();
+    graph.insert_edge(vec![v2, v3]).unwrap();
 
     // Path 2: v0 -> v4 -> v5 -> v3 (length 3)
-    graph.add_hyperedge(vec![v0, v4]).unwrap();
-    graph.add_hyperedge(vec![v4, v5]).unwrap();
-    graph.add_hyperedge(vec![v5, v3]).unwrap();
+    graph.insert_edge(vec![v0, v4]).unwrap();
+    graph.insert_edge(vec![v4, v5]).unwrap();
+    graph.insert_edge(vec![v5, v3]).unwrap();
 
     // Path 3: v0 -> v6 -> v5 -> v3 (also length 3)
-    graph.add_hyperedge(vec![v0, v6]).unwrap();
-    graph.add_hyperedge(vec![v6, v5]).unwrap();
+    graph.insert_edge(vec![v0, v6]).unwrap();
+    graph.insert_edge(vec![v6, v5]).unwrap();
     // v5 -> v3 already defined
 
     // Simple heuristic
