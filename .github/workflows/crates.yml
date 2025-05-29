@@ -49,4 +49,4 @@ jobs:
           cache-workspaces: true
       - 
         name: Publish (${{ matrix.package }})
-        run: cargo publish --locked --package ${{ matrix.package }}
+        run: cargo publish -q --locked --package ${{ matrix.package }}
