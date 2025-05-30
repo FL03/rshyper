@@ -200,14 +200,30 @@ where
         self.connections_mut().insert(eid, vset);
         Ok(eid)
     }
+    /// insert a new hyperedge with the given vertices and weight, returning its ID;
+    pub fn insert_edge_with_weight<I>(
+        &mut self,
+        vertices: I,
+        weight: E,
+    ) -> crate::Result<EdgeId>
+    where
+        I: Clone + IntoIterator<Item = VertexId>,
+        E: Eq + core::hash::Hash,
+    {
+        // insert the edge and get its ID
+        let index = self.insert_edge(vertices)?;
+        // insert the facet with the given weight
+        self.insert_facet(index, weight)
+    }
     /// insert a new facet (hyperedge with an associated weight) into the hypergraph;
-    /// if the facet, or hyperedge, already exists, it will be replaced and returned
-    pub fn insert_facet(&mut self, edge_id: EdgeId, facet: E) -> crate::Result<()> {
-        if !self.contains_edge(&edge_id) {
-            return Err(crate::Error::HyperedgeDoesNotExist(edge_id));
+    /// if the facet, or hyperedge, already exists, it will replace the existing value with 
+    /// the given
+    pub fn insert_facet(&mut self, index: EdgeId, facet: E) -> crate::Result<EdgeId> {
+        if !self.contains_edge(&index) {
+            return Err(crate::Error::HyperedgeDoesNotExist(index));
         }
-        let _prev = self.facets_mut().insert(edge_id, facet);
-        Ok(())
+        let _prev = self.facets_mut().insert(index, facet);
+        Ok(index)
     }
     /// insert a new node with the given weight and return its index
     pub fn insert_node(&mut self, weight: N) -> VertexId {
