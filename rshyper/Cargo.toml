@@ -33,6 +33,12 @@ scsys = { workspace = true }
 # error handling
 anyhow = { optional = true, workspace = true }
 thiserror = { workspace = true }
+# logging
+tracing = { features = ["attributes"], optional = true, workspace = true }
+# macros
+paste = { workspace = true }
+smart-default = { workspace = true }
+strum = { features = ["derive"], workspace = true }
 # math
 num = { workspace = true }
 num-traits = { workspace = true }
@@ -40,15 +46,10 @@ num-traits = { workspace = true }
 getrandom = { optional = true, workspace = true }
 rand = { optional = true, workspace = true }
 rand_distr = { optional = true, workspace = true }
-serde = { optional = true, workspace = true }
+# serialization
+serde = { features = ["derive"], optional = true, workspace = true }
 serde_derive = { optional = true, workspace = true }
 serde_json = { optional = true, workspace = true }
-# macros
-paste = { workspace = true }
-smart-default = { workspace = true }
-strum = { workspace = true }
-# logging
-tracing = { optional = true, workspace = true }
 
 [dev-dependencies]
 criterion = { workspace = true }
@@ -141,7 +142,6 @@ serde = [
     "rand?/serde",
     "rshyper-core/serde",
     "scsys/serde",
-    "serde?/derive",
 ]
 
 serde_json = [
@@ -151,7 +151,6 @@ serde_json = [
 
 tracing = [
     "dep:tracing",
-    "tracing?/attributes",
     "rshyper-core/tracing",
     "scsys/tracing",
 ]
