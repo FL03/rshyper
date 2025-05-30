@@ -18,18 +18,16 @@ pub(crate) mod macros {
 
 #[doc(inline)]
 pub use self::{
-    edge::HyperEdge,
+    cmp::{HyperEdge, HyperNode},
     error::{Error, Result},
     index::prelude::*,
-    node::HyperNode,
     traits::prelude::*,
     types::prelude::*,
 };
 
-pub mod edge;
+pub mod cmp;
 pub mod error;
 pub mod index;
-pub mod node;
 
 pub mod traits {
     //! this module contains various traits used throughout to establish common interfaces and
@@ -41,6 +39,7 @@ pub mod traits {
     pub mod convert;
     pub mod hyper_graph;
     pub mod tags;
+    pub mod transform;
     pub mod weighted;
 
     pub(crate) mod prelude {
@@ -52,6 +51,8 @@ pub mod traits {
         pub use super::hyper_graph::*;
         #[doc(inline)]
         pub use super::tags::*;
+        #[doc(inline)]
+        pub use super::transform::*;
         #[doc(inline)]
         pub use super::weighted::*;
     }
@@ -78,11 +79,9 @@ pub mod prelude {
     pub use crate::error::*;
 
     #[doc(no_inline)]
-    pub use crate::edge::prelude::*;
+    pub use crate::cmp::prelude::*;
     #[doc(no_inline)]
     pub use crate::index::prelude::*;
-    #[doc(no_inline)]
-    pub use crate::node::prelude::*;
     #[doc(no_inline)]
     pub use crate::traits::prelude::*;
     #[doc(no_inline)]

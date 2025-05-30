@@ -51,7 +51,7 @@ pub trait Indexed<T: RawIndex> {
 }
 /// a simple trait for denoting types compatible with to be used as indices in a hypergraph.
 /// **note:** the trait is sealed to prevent external implementations.
-pub trait RawIndex {
+pub trait RawIndex: Clone + PartialEq + PartialOrd {
     private!();
 }
 /// The [`NumIndex`] trait extends the [`RawIndex`] trait to include additional operations and
@@ -62,6 +62,8 @@ where
         + Default
         + Eq
         + PartialOrd
+        + core::fmt::Debug
+        + core::fmt::Display
         + core::hash::Hash
         + core::ops::Add<Output = Self>
         + core::ops::Div<Output = Self>
@@ -76,7 +78,6 @@ where
 /*
  ************* Implementations *************
 */
-use crate::node::HyperNode;
 
 macro_rules! impl_raw_index {
     ($($t:ty),* $(,)?) => {
@@ -94,7 +95,7 @@ macro_rules! impl_raw_index {
 impl_raw_index! {
     usize, u8, u16, u32, u64, u128,
     isize, i8, i16, i32, i64, i128,
-    f32, f64, char, str
+    f32, f64, char
 }
 
 #[cfg(feature = "alloc")]
@@ -109,11 +110,17 @@ where
         + Default
         + Eq
         + Ord
+        + core::fmt::Debug
+        + core::fmt::Display
         + core::hash::Hash
         + core::ops::Add<Output = Self>
         + core::ops::Div<Output = Self>
         + core::ops::Mul<Output = Self>
         + core::ops::Sub<Output = Self>
+        + core::ops::AddAssign
+        + core::ops::DivAssign
+        + core::ops::MulAssign
+        + core::ops::SubAssign
         + num_traits::One
         + num_traits::Zero,
 {
@@ -128,7 +135,7 @@ impl<T: RawIndex> Indexed<T> for VertexId<T> {
     }
 }
 
-impl<T, Idx> Indexed<Idx> for HyperNode<T, Idx>
+impl<T, Idx> Indexed<Idx> for crate::HyperNode<T, Idx>
 where
     Idx: RawIndex,
 {

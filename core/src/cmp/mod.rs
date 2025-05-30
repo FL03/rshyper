@@ -1,20 +1,28 @@
-/*
-    appellation: hyper_node <module>
-    authors: @FL03
-*/
 #[doc(inline)]
 pub use self::prelude::*;
 
+pub mod hyper_edge;
 pub mod hyper_node;
 
 pub(crate) mod prelude {
     #[doc(inline)]
-    pub use super::hyper_node::*;
+    pub use super::hyper_edge::*;
     #[doc(inline)]
-    pub use super::{HashPoint, Point};
+    pub use super::hyper_node::*;
 }
 
 use crate::index::{RawIndex, VertexId};
+
+/// a type alias for an [`HyperEdge`] whose _vertices_ are stored in a [`Vec`](alloc::vec::Vec)
+#[cfg(feature = "alloc")]
+pub type VecEdge<T, Idx = usize> = HyperEdge<T, alloc::vec::Vec<VertexId<Idx>>, Idx>;
+/// a type alias for an [`HyperEdge`] whose _vertices_ are stored in a [`BTreeSet`](alloc::collections::BTreeSet)
+#[cfg(feature = "alloc")]
+pub type BinaryEdge<T, Idx = usize> =
+    HyperEdge<T, alloc::collections::BTreeSet<VertexId<Idx>>, Idx>;
+/// a type alias for an [`HyperEdge`] whose _vertices_ are stored in a [`HashSet`](std::collections::HashSet)
+#[cfg(feature = "std")]
+pub type HashEdge<T, Idx = usize> = HyperEdge<T, std::collections::HashSet<VertexId<Idx>>, Idx>;
 
 /// A trait denoting a node within the hypergraph.
 pub trait Point<Idx: RawIndex> {

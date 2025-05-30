@@ -22,14 +22,14 @@ fn test_hash_graph() -> rshyper::Result<()> {
     assert_ne!(e1, e2);
 
     // Get neighbors of vertex v1
-    let neighbors = graph.neighbors(v1)?;
+    let neighbors = graph.neighbors(&v1)?;
     let exp = HashSet::from_iter([v0, v2, v3]);
     assert_eq!(neighbors, exp);
 
     // verify the degree of vertex v1
-    assert_eq!(graph.get_vertex_degree(v1)?, 2);
+    assert_eq!(graph.get_vertex_degree(&v1)?, 2);
     // remove vertex v1
-    let _ = graph.remove_vertex(v2)?;
+    let _ = graph.remove_vertex(&v2)?;
     // verify the hypergraph does not contain vertex v2
     assert!(!graph.contains_node(&v2));
     // return
@@ -46,8 +46,8 @@ fn test_merge_hash_edge() -> rshyper::Result<()> {
     let e1 = graph.insert_edge(vec![v0, v1])?;
     let e2 = graph.insert_edge(vec![v1, v2])?;
 
-    let merged = graph.merge_edges(e1, e2)?;
-    let hyperedge = graph.remove_edge(merged)?;
+    let merged = graph.merge_edges(&e1, &e2)?;
+    let hyperedge = graph.remove_edge(&merged)?;
     assert!(hyperedge.contains(&v0));
     assert!(hyperedge.contains(&v1));
     assert!(hyperedge.contains(&v2));
@@ -60,12 +60,12 @@ fn test_update_hash_node() -> rshyper::Result<()> {
     let v0 = graph.insert_node(42);
 
     // Check initial weight
-    let initial_weight = graph.get_vertex_weight(v0)?;
+    let initial_weight = graph.get_vertex_weight(&v0)?;
     assert_eq!(initial_weight.weight(), &Weight(42));
     // Update the weight
-    let _ = graph.set_vertex_weight(v0, 100)?;
+    let _ = graph.set_vertex_weight(&v0, 100)?;
     // Check updated weight
-    let updated_weight = graph.get_vertex_weight(v0)?;
+    let updated_weight = graph.get_vertex_weight(&v0)?;
     assert_eq!(**updated_weight.weight(), 100);
 
     Ok(())
@@ -82,7 +82,7 @@ fn test_remove_hash_edges() -> rshyper::Result<()> {
     let e2 = graph.insert_edge(vec![v1, v2])?;
 
     // Remove hyperedge e1
-    let removed_edge = graph.remove_edge(e1)?;
+    let removed_edge = graph.remove_edge(&e1)?;
     assert!(removed_edge.contains(&v0));
     assert!(removed_edge.contains(&v1));
 
