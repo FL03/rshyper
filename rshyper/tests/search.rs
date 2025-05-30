@@ -13,11 +13,11 @@ fn test_breadth_first_traversal() {
     //  \  /
     //   2 -- 4
 
-    let v0 = graph.insert_vertex_default();
-    let v1 = graph.insert_vertex_default();
-    let v2 = graph.insert_vertex_default();
-    let v3 = graph.insert_vertex_default();
-    let v4 = graph.insert_vertex_default();
+    let v0 = graph.insert_node_default();
+    let v1 = graph.insert_node_default();
+    let v2 = graph.insert_node_default();
+    let v3 = graph.insert_node_default();
+    let v4 = graph.insert_node_default();
 
     let _e1 = graph.insert_edge(vec![v0, v1, v2]).unwrap();
     let _e2 = graph.insert_edge(vec![v1, v3]).unwrap();
@@ -49,10 +49,10 @@ fn test_bft_cyclic_graph() {
     // |         |
     // +----3----+
 
-    let v0 = graph.insert_vertex_default();
-    let v1 = graph.insert_vertex_default();
-    let v2 = graph.insert_vertex_default();
-    let v3 = graph.insert_vertex_default();
+    let v0 = graph.insert_node_default();
+    let v1 = graph.insert_node_default();
+    let v2 = graph.insert_node_default();
+    let v3 = graph.insert_node_default();
 
     let _e1 = graph.insert_edge(vec![v0, v1]).unwrap();
     let _e2 = graph.insert_edge(vec![v1, v2]).unwrap();
@@ -80,10 +80,10 @@ fn test_bft_disconnected_graph() {
     // Create a disconnected hypergraph
     // 0 -- 1    2 -- 3
 
-    let v0 = graph.insert_vertex_default();
-    let v1 = graph.insert_vertex_default();
-    let v2 = graph.insert_vertex_default();
-    let v3 = graph.insert_vertex_default();
+    let v0 = graph.insert_node_default();
+    let v1 = graph.insert_node_default();
+    let v2 = graph.insert_node_default();
+    let v3 = graph.insert_node_default();
 
     let _e1 = graph.insert_edge(vec![v0, v1]).unwrap();
     let _e2 = graph.insert_edge(vec![v2, v3]).unwrap();
@@ -108,11 +108,11 @@ fn test_bft_hyperedge_with_multiple_vertices() {
 
     // Create a hypergraph with a large hyperedge
     // connecting multiple vertices
-    let v0 = graph.insert_vertex_default();
-    let v1 = graph.insert_vertex_default();
-    let v2 = graph.insert_vertex_default();
-    let v3 = graph.insert_vertex_default();
-    let v4 = graph.insert_vertex_default();
+    let v0 = graph.insert_node_default();
+    let v1 = graph.insert_node_default();
+    let v2 = graph.insert_node_default();
+    let v3 = graph.insert_node_default();
+    let v4 = graph.insert_node_default();
 
     // Single hyperedge connecting all vertices
     let _e1 = graph.insert_edge(vec![v0, v1, v2, v3, v4]).unwrap();
@@ -139,10 +139,10 @@ fn test_depth_first_traversal() {
     let mut graph = HashGraph::<()>::new();
 
     // Create a simple hypergraph
-    let v0 = graph.insert_vertex_default();
-    let v1 = graph.insert_vertex_default();
-    let v2 = graph.insert_vertex_default();
-    let v3 = graph.insert_vertex_default();
+    let v0 = graph.insert_node_default();
+    let v1 = graph.insert_node_default();
+    let v2 = graph.insert_node_default();
+    let v3 = graph.insert_node_default();
 
     let _e1 = graph.insert_edge(vec![v0, v1]).unwrap();
     let _e2 = graph.insert_edge(vec![v1, v2]).unwrap();
@@ -174,11 +174,11 @@ fn test_dft_branching_graph() {
     //     \
     //      3
 
-    let v0 = graph.insert_vertex_default();
-    let v1 = graph.insert_vertex_default();
-    let v2 = graph.insert_vertex_default();
-    let v3 = graph.insert_vertex_default();
-    let v4 = graph.insert_vertex_default();
+    let v0 = graph.insert_node_default();
+    let v1 = graph.insert_node_default();
+    let v2 = graph.insert_node_default();
+    let v3 = graph.insert_node_default();
+    let v4 = graph.insert_node_default();
 
     let _e1 = graph.insert_edge(vec![v0, v1]).unwrap();
     let _e2 = graph.insert_edge(vec![v0, v2]).unwrap();
@@ -208,10 +208,10 @@ fn test_dft_cyclic_graph() {
     // |         |
     // +----3----+
 
-    let v0 = graph.insert_vertex_default();
-    let v1 = graph.insert_vertex_default();
-    let v2 = graph.insert_vertex_default();
-    let v3 = graph.insert_vertex_default();
+    let v0 = graph.insert_node_default();
+    let v1 = graph.insert_node_default();
+    let v2 = graph.insert_node_default();
+    let v3 = graph.insert_node_default();
 
     let _e1 = graph.insert_edge(vec![v0, v1]).unwrap();
     let _e2 = graph.insert_edge(vec![v1, v2]).unwrap();
@@ -239,9 +239,9 @@ fn test_dft_isolated_vertex() {
     // Create a graph with an isolated vertex
     // 0 -- 1    2
 
-    let v0 = graph.insert_vertex_default();
-    let v1 = graph.insert_vertex_default();
-    let v2 = graph.insert_vertex_default(); // isolated
+    let v0 = graph.insert_node_default();
+    let v1 = graph.insert_node_default();
+    let v2 = graph.insert_node_default(); // isolated
 
     let _e1 = graph.insert_edge(vec![v0, v1]).unwrap();
 
@@ -271,11 +271,11 @@ fn test_astar_search() {
     let mut graph = HashGraph::<()>::new();
 
     // Create a simple hypergraph
-    let v0 = graph.insert_vertex_default();
-    let v1 = graph.insert_vertex_default();
-    let v2 = graph.insert_vertex_default();
-    let v3 = graph.insert_vertex_default();
-    let v4 = graph.insert_vertex_default();
+    let v0 = graph.insert_node_default();
+    let v1 = graph.insert_node_default();
+    let v2 = graph.insert_node_default();
+    let v3 = graph.insert_node_default();
+    let v4 = graph.insert_node_default();
 
     // Direct path: v0 -> v1 -> v3
     graph.insert_edge(vec![v0, v1]).unwrap();
@@ -310,15 +310,15 @@ fn test_astar_with_heuristic() {
     // |    |    |
     // 6 -- 7 -- 8
 
-    let v0 = graph.insert_vertex_default(); // (0,0)
-    let v1 = graph.insert_vertex_default(); // (1,0)
-    let v2 = graph.insert_vertex_default(); // (2,0)
-    let v3 = graph.insert_vertex_default(); // (0,1)
-    let v4 = graph.insert_vertex_default(); // (1,1)
-    let v5 = graph.insert_vertex_default(); // (2,1)
-    let v6 = graph.insert_vertex_default(); // (0,2)
-    let v7 = graph.insert_vertex_default(); // (1,2)
-    let v8 = graph.insert_vertex_default(); // (2,2)
+    let v0 = graph.insert_node_default(); // (0,0)
+    let v1 = graph.insert_node_default(); // (1,0)
+    let v2 = graph.insert_node_default(); // (2,0)
+    let v3 = graph.insert_node_default(); // (0,1)
+    let v4 = graph.insert_node_default(); // (1,1)
+    let v5 = graph.insert_node_default(); // (2,1)
+    let v6 = graph.insert_node_default(); // (0,2)
+    let v7 = graph.insert_node_default(); // (1,2)
+    let v8 = graph.insert_node_default(); // (2,2)
 
     // Create horizontal connections
     graph.insert_edge(vec![v0, v1]).unwrap();
@@ -390,10 +390,10 @@ fn test_astar_disconnected() {
     // Create two disconnected components
     // 0 -- 1    2 -- 3
 
-    let v0 = graph.insert_vertex_default();
-    let v1 = graph.insert_vertex_default();
-    let v2 = graph.insert_vertex_default();
-    let v3 = graph.insert_vertex_default();
+    let v0 = graph.insert_node_default();
+    let v1 = graph.insert_node_default();
+    let v2 = graph.insert_node_default();
+    let v3 = graph.insert_node_default();
 
     graph.insert_edge(vec![v0, v1]).unwrap();
     graph.insert_edge(vec![v2, v3]).unwrap();
@@ -421,13 +421,13 @@ fn test_astar_complex_paths() {
     // |         /
     // +-- 6 ---+
 
-    let v0 = graph.insert_vertex_default();
-    let v1 = graph.insert_vertex_default();
-    let v2 = graph.insert_vertex_default();
-    let v3 = graph.insert_vertex_default();
-    let v4 = graph.insert_vertex_default();
-    let v5 = graph.insert_vertex_default();
-    let v6 = graph.insert_vertex_default();
+    let v0 = graph.insert_node_default();
+    let v1 = graph.insert_node_default();
+    let v2 = graph.insert_node_default();
+    let v3 = graph.insert_node_default();
+    let v4 = graph.insert_node_default();
+    let v5 = graph.insert_node_default();
+    let v6 = graph.insert_node_default();
 
     // Path 1: v0 -> v1 -> v2 -> v3 (length 3)
     graph.insert_edge(vec![v0, v1]).unwrap();

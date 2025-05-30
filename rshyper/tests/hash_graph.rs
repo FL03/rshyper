@@ -3,18 +3,17 @@
     Contrib: @FL03
 */
 use rshyper::HashGraph;
+use std::collections::HashSet;
 
 #[test]
 fn test_hypergraph() -> rshyper::Result<()> {
-    use std::collections::HashSet;
-
     let mut graph = HashGraph::<usize>::new();
 
     // Add some vertices
-    let v0 = graph.insert_vertex_default();
-    let v1 = graph.insert_vertex_default();
-    let v2 = graph.insert_vertex_default();
-    let v3 = graph.insert_vertex_default();
+    let v0 = graph.insert_node_default();
+    let v1 = graph.insert_node_default();
+    let v2 = graph.insert_node_default();
+    let v3 = graph.insert_node_default();
 
     // Add some hyperedges
     let e1 = graph.insert_edge([v0, v1, v2])?;
@@ -30,7 +29,9 @@ fn test_hypergraph() -> rshyper::Result<()> {
     assert_eq!(graph.get_vertex_degree(v1)?, 2);
     // remove vertex v1
     let _ = graph.remove_vertex(v2)?;
+    // verify the hypergraph does not contain vertex v2
     assert!(!graph.contains_node(&v2));
+    // return
     Ok(())
 }
 

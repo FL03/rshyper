@@ -218,7 +218,7 @@ where
         idx
     }
     /// insert a new vertex with the default weight and return its ID
-    pub fn insert_vertex_default(&mut self) -> VertexId
+    pub fn insert_node_default(&mut self) -> VertexId
     where
         N: Default,
     {
@@ -331,11 +331,11 @@ where
     {
         self.insert_edge(vertices)
     }
-    #[deprecated(since = "v0.0.3", note = "use `insert_vertex` instead")]
+    #[deprecated(since = "v0.0.3", note = "use `insert_node` instead")]
     pub fn add_vertex(&mut self, weight: N) -> VertexId {
         self.insert_node(weight)
     }
-    #[deprecated(since = "v0.0.3", note = "use `insert_vertex_default` instead")]
+    #[deprecated(since = "v0.0.3", note = "use `insert_node_default` instead")]
     pub fn add_vertex_default(&mut self) -> VertexId
     where
         N: Default,
