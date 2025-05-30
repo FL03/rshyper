@@ -40,7 +40,6 @@ pub use self::hash_graph::HashGraph;
 #[doc(inline)]
 pub use self::{algo::prelude::*, ops::prelude::*};
 
-/// this module implements the core functionality of the `rshyper` crate
 #[doc(inline)]
 pub use rshyper_core::*;
 
