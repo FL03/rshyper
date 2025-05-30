@@ -51,7 +51,7 @@ pub mod prelude {
     pub use crate::algo::prelude::*;
     #[doc(hidden)]
     #[cfg(feature = "binary_graph")]
-    pub use crate::binary_graph::*;
+    pub use crate::binary_graph::prelude::*;
     #[cfg(feature = "hash_graph")]
     pub use crate::hash_graph::prelude::*;
 }
