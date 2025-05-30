@@ -13,12 +13,14 @@
 pub struct Weight<T>(pub T);
 
 impl<T> Weight<T> {
+    /// returns a new instance of the [`Weight`] with the default value of the inner type.
     pub fn new() -> Self
     where
         T: Default,
     {
         Self(Default::default())
     }
+    /// returns a new instance of the [`Weight`] created from the given value.
     pub fn from_value(value: T) -> Self {
         Self(value)
     }
