@@ -17,7 +17,7 @@ where
     where
         StandardUniform: Distribution<T>,
     {
-        Self::from_value(rand::random())
+        Self::new(rand::random())
     }
     /// generate a random index from a value of type `T` using the provided [`Rng`](rand::Rng)
     pub fn random_in<R>(rng: &mut R) -> Self
@@ -25,7 +25,7 @@ where
         R: ?Sized + rand::Rng,
         StandardUniform: Distribution<T>,
     {
-        Self::from_value(rng.random())
+        Self::new(rng.random())
     }
 }
 
@@ -38,6 +38,6 @@ where
     where
         R: ?Sized + rand::Rng,
     {
-        Index::from_value(rng.random())
+        Index::new(rng.random())
     }
 }

@@ -4,26 +4,6 @@
 */
 use crate::id::{Index, IndexKind};
 
-impl<T, K> Index<T, K>
-where
-    K: IndexKind,
-{
-    /// creates a new index with a value of [`one`](num_traits::One)
-    pub fn one() -> Self
-    where
-        T: num_traits::One,
-    {
-        Self::from_value(T::one())
-    }
-    /// creates a new index with a value of [`zero`](num_traits::Zero)
-    pub fn zero() -> Self
-    where
-        T: num_traits::Zero,
-    {
-        Self::from_value(T::zero())
-    }
-}
-
 impl<T, K> core::ops::Deref for Index<T, K>
 where
     K: IndexKind,
@@ -74,7 +54,7 @@ where
     T: num_traits::One,
 {
     fn one() -> Self {
-        Self::from_value(T::one())
+        Self::new(T::one())
     }
 }
 
@@ -84,7 +64,7 @@ where
     T: num_traits::Zero,
 {
     fn zero() -> Self {
-        Self::from_value(T::zero())
+        Self::new(T::zero())
     }
 
     fn is_zero(&self) -> bool {
@@ -100,7 +80,7 @@ where
     type FromStrRadixErr = T::FromStrRadixErr;
 
     fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
-        T::from_str_radix(str, radix).map(Index::from_value)
+        T::from_str_radix(str, radix).map(Index::new)
     }
 }
 
@@ -114,7 +94,7 @@ macro_rules! impl_bin_op {
             type Output = Index<C, K>;
 
             fn $method(self, rhs: Index<B, K>) -> Self::Output {
-                Index::from_value(core::ops::$trait::$method(self.value, rhs.value))
+                Index::new(core::ops::$trait::$method(self.value, rhs.value))
             }
         }
     };

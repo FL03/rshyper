@@ -11,18 +11,18 @@ where
     pub fn atomic() -> Self {
         use core::sync::atomic::{AtomicUsize, Ordering::Relaxed};
         static COUNTER: AtomicUsize = AtomicUsize::new(1);
-        Self::from_value(COUNTER.fetch_add(1, Relaxed))
+        Self::new(COUNTER.fetch_add(1, Relaxed))
     }
 }
 
 impl<T> Index<T, EdgeIndex> {
     pub fn vertex(value: T) -> Self {
-        Self::from_value(value)
+        Self::new(value)
     }
 }
 
 impl<T> Index<T, VertexIndex> {
     pub fn vertex(value: T) -> Self {
-        Self::from_value(value)
+        Self::new(value)
     }
 }
