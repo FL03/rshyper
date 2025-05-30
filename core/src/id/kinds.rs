@@ -11,7 +11,7 @@ pub trait GraphIndex:
 }
 
 macro_rules! impl_type_kind {
-    ($($vis:vis $i:ident $kind:ident),* $(,)?) => {
+    ($($vis:vis $i:ident $kind:ident);* $(;)?) => {
         $(
             impl_type_kind!(@impl $vis $i $kind);
         )*
@@ -63,6 +63,6 @@ macro_rules! impl_type_kind {
 }
 
 impl_type_kind! {
-    pub struct EdgeIndex,
-    pub struct VertexIndex,
+    pub struct EdgeIndex;
+    pub struct VertexIndex;
 }
