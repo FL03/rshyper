@@ -136,6 +136,5 @@ fn test_dft_isolated_vertex() -> rshyper::Result<()> {
         "Should contain only the isolated vertex"
     );
     assert_eq!(path_from_isolated[0], v2);
-
     Ok(())
 }

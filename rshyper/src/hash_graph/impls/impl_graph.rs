@@ -56,14 +56,14 @@ where
     /// returns all hyperedges containing a given vertex
     pub fn get_edges_with_vertex(&self, index: &VertexId<Idx>) -> crate::Result<Vec<EdgeId<Idx>>>
     where
-        Idx: Clone,
+        Idx: Copy,
     {
         let edges = self
             .edges()
             .iter()
-            .filter_map(|(edge_id, vertices)| {
+            .filter_map(|(&edge_id, vertices)| {
                 if vertices.contains(index) {
-                    Some(edge_id.clone())
+                    Some(edge_id)
                 } else {
                     None
                 }
@@ -71,7 +71,7 @@ where
             .collect::<Vec<_>>();
         // handle the case where no edges are found
         match edges.len() {
-            0 => Err(crate::Error::IndexNotFound),
+            0 => Err(crate::Error::NoEdgesWithVertex),
             _ => Ok(edges),
         }
     }
@@ -79,13 +79,13 @@ where
     pub fn get_facet(&self, index: &EdgeId<Idx>) -> crate::Result<&E> {
         self.facets()
             .get(index)
-            .ok_or_else(|| crate::Error::IndexNotFound)
+            .ok_or_else(|| crate::Error::EdgeNotFound)
     }
     /// retrieves a mutable reference to the facet (hyperedge with an associated weight)
     pub fn get_facet_mut(&mut self, index: &EdgeId<Idx>) -> crate::Result<&mut E> {
         self.facets_mut()
             .get_mut(index)
-            .ok_or_else(|| crate::Error::IndexNotFound)
+            .ok_or_else(|| crate::Error::EdgeNotFound)
     }
     /// retrieves the set of nodes composing the given edge
     pub fn get_nodes_for_edge(

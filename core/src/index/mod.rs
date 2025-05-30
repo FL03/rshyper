@@ -70,18 +70,21 @@ where
 }
 /// The [`NumIndex`] trait extends the [`RawIndex`] trait to include additional operations and
 /// behaviours expected from numerical indices in a hypergraph.
-pub trait NumIndex: RawIndex
+pub trait NumIndex: HashIndex
 where
     Self: Copy
         + Default
-        + Eq
+        + Ord
         + core::fmt::Debug
         + core::fmt::Display
-        + core::hash::Hash
         + core::ops::Add<Output = Self>
         + core::ops::Div<Output = Self>
         + core::ops::Mul<Output = Self>
         + core::ops::Sub<Output = Self>
+        + core::ops::AddAssign
+        + core::ops::DivAssign
+        + core::ops::MulAssign
+        + core::ops::SubAssign
         + num_traits::One
         + num_traits::Zero,
 {
@@ -132,14 +135,12 @@ where
 
 impl<T> NumIndex for T
 where
-    T: RawIndex
+    T: HashIndex
         + Copy
         + Default
-        + Eq
         + Ord
         + core::fmt::Debug
         + core::fmt::Display
-        + core::hash::Hash
         + core::ops::Add<Output = Self>
         + core::ops::Div<Output = Self>
         + core::ops::Mul<Output = Self>
