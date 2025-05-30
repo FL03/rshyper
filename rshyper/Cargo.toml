@@ -31,7 +31,6 @@ rshyper-core = { workspace = true }
 # custom
 scsys = { workspace = true }
 # error handling
-anyhow = { optional = true, workspace = true }
 thiserror = { workspace = true }
 # logging
 tracing = { features = ["attributes"], optional = true, workspace = true }
@@ -54,6 +53,7 @@ serde_json = { optional = true, workspace = true }
 [dev-dependencies]
 criterion = { workspace = true }
 lazy_static = { workspace = true }
+tracing-subscriber = { features = ["chrono", "env-filter", "fmt", "serde", "std"], workspace = true }
 
 [features]
 default = [ 
@@ -78,7 +78,6 @@ hash = [
 # ************* [FF:Environments] *************
 std = [
     "alloc",
-    "anyhow?/std",
     "num/std",
     "num-traits/std",
     "rand?/std",
@@ -106,7 +105,6 @@ alloc = [
 ]
 
 anyhow = [
-    "dep:anyhow",
     "rshyper-core/anyhow",
 ]
 

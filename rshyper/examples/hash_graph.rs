@@ -5,14 +5,21 @@
 use rshyper::HashGraph;
 
 fn main() -> rshyper::Result<()> {
-    let mut graph = HashGraph::<()>::new();
-
-    // Add some vertices
-    let v0 = graph.insert_node_default();
-    let v1 = graph.insert_node_default();
-    let v2 = graph.insert_node_default();
-    let v3 = graph.insert_node_default();
-
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .with_span_events(tracing_subscriber::fmt::format::FmtSpan::ACTIVE)
+        .init();
+    // initialize a new instance of a hypergraph
+    let mut graph: HashGraph<usize, usize> = HashGraph::new();
+    // use the macro to insert nodes into the graph
+    rshyper::hypernode! {
+        graph {
+            let v0;
+            let v1 = 2;
+            let v2 = 3;
+            let v3 = 4;
+        }
+    }
     // Add some hyperedges
     let e1 = graph.insert_edge(vec![v0, v1, v2])?;
     println!("Added hyperedge {e1}: {:?}", [v0, v1, v2]);

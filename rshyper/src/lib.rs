@@ -47,6 +47,8 @@ pub use rshyper_core::*;
 #[macro_use]
 pub(crate) mod macros {
     #[macro_use]
+    pub mod hypergraph;
+    #[macro_use]
     pub mod seal;
 }
 
