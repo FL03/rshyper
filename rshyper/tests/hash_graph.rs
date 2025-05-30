@@ -2,7 +2,8 @@
     Appellation: graph <module>
     Contrib: @FL03
 */
-use rshyper::{Weight, graphs::hash_graph::HashGraph};
+use rshyper::Weight;
+use rshyper::hash_graph::HashGraph;
 use std::collections::HashSet;
 
 #[test]

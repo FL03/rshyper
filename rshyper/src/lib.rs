@@ -31,7 +31,7 @@
 extern crate alloc;
 #[doc(inline)]
 #[cfg(feature = "alloc")]
-pub use self::graphs::prelude::*;
+pub use self::graphs::*;
 #[doc(inline)]
 pub use self::{algo::prelude::*, ops::prelude::*};
 
@@ -46,7 +46,30 @@ pub(crate) mod macros {
 }
 
 pub mod algo;
-pub mod graphs;
+
+pub(crate) mod graphs {
+    //! this module houses all of the hypergraph implementations
+    #[doc(inline)]
+    #[cfg(feature = "alloc")]
+    pub use self::binary_graph::BinaryGraph;
+    #[doc(inline)]
+    #[cfg(feature = "std")]
+    pub use self::hash_graph::HashGraph;
+
+    #[cfg(feature = "alloc")]
+    pub mod binary_graph;
+    #[cfg(feature = "std")]
+    pub mod hash_graph;
+
+    pub(crate) mod prelude {
+        #[cfg(feature = "alloc")]
+        #[doc(inline)]
+        pub use super::binary_graph::*;
+        #[cfg(feature = "hash")]
+        #[doc(inline)]
+        pub use super::hash_graph::*;
+    }
+}
 
 pub mod ops {
     #[doc(inline)]

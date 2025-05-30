@@ -186,8 +186,8 @@ where
         path
     }
 
-    pub fn has_visited(&self, vertex: VertexId) -> bool {
-        self.closed_set.contains(&vertex)
+    pub fn has_visited(&self, vertex: &VertexId) -> bool {
+        self.visited().contains(vertex)
     }
 
     pub const fn visited(&self) -> &HashSet<VertexId> {
@@ -201,10 +201,6 @@ where
     N: Eq + core::hash::Hash,
     F: Fn(VertexId, VertexId) -> f64,
 {
-    fn has_visited(&self, vertex: VertexId) -> bool {
-        self.closed_set.contains(&vertex)
-    }
-
     fn visited(&self) -> &HashSet<VertexId> {
         &self.closed_set
     }

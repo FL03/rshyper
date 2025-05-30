@@ -58,10 +58,6 @@ where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
 {
-    fn has_visited(&self, vertex: VertexId) -> bool {
-        self.visited.contains(&vertex)
-    }
-
     fn visited(&self) -> &HashSet<VertexId> {
         &self.visited
     }
@@ -104,12 +100,12 @@ where
                 // Add vertices in reverse order to maintain expected DFS behavior
                 let mut new_vertices: Vec<_> = vertices
                     .iter()
-                    .filter(|&&v| !self.visited.contains(&v))
+                    .filter(|&v| !self.has_visited(v))
                     .cloned()
                     .collect();
 
                 // Sort in reverse order (arbitrary but consistent)
-                new_vertices.sort_by(|a, b| b.cmp(a));
+                new_vertices.sort_by(|&a, &b| b.cmp(a));
 
                 for vertex in new_vertices {
                     self.stack.push(vertex);

@@ -98,8 +98,8 @@ where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
 {
-    fn has_visited(&self, vertex: VertexId) -> bool {
-        self.visited.contains(&vertex)
+    fn has_visited(&self, vertex: &VertexId) -> bool {
+        self.visited().contains(vertex)
     }
 
     fn visited(&self) -> &HashSet<VertexId> {
