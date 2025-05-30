@@ -2,9 +2,9 @@
     appellation: impl_index <module>
     authors: @FL03
 */
-use crate::index::{GraphIndex, Index, RawIndex};
+use crate::index::{GraphIndex, IndexBase, RawIndex};
 
-impl<T, K> core::ops::Deref for Index<T, K>
+impl<T, K> core::ops::Deref for IndexBase<T, K>
 where
     K: GraphIndex,
     T: RawIndex,
@@ -16,7 +16,7 @@ where
     }
 }
 
-impl<T, K> core::ops::DerefMut for Index<T, K>
+impl<T, K> core::ops::DerefMut for IndexBase<T, K>
 where
     K: GraphIndex,
     T: RawIndex,
@@ -26,33 +26,33 @@ where
     }
 }
 
-impl<T, K> core::ops::Not for Index<T, K>
+impl<T, K> core::ops::Not for IndexBase<T, K>
 where
     K: GraphIndex,
     T: RawIndex + core::ops::Not,
     T::Output: RawIndex,
 {
-    type Output = Index<T::Output, K>;
+    type Output = IndexBase<T::Output, K>;
 
     fn not(self) -> Self::Output {
         self.map(|value| !value)
     }
 }
 
-impl<T, K> core::ops::Neg for Index<T, K>
+impl<T, K> core::ops::Neg for IndexBase<T, K>
 where
     K: GraphIndex,
     T: RawIndex + core::ops::Neg,
     T::Output: RawIndex,
 {
-    type Output = Index<T::Output, K>;
+    type Output = IndexBase<T::Output, K>;
 
     fn neg(self) -> Self::Output {
         self.map(|value| -value)
     }
 }
 
-impl<T, K> num_traits::One for Index<T, K>
+impl<T, K> num_traits::One for IndexBase<T, K>
 where
     K: GraphIndex,
     T: RawIndex + num_traits::One,
@@ -62,7 +62,7 @@ where
     }
 }
 
-impl<T, K> num_traits::Zero for Index<T, K>
+impl<T, K> num_traits::Zero for IndexBase<T, K>
 where
     K: GraphIndex,
     T: RawIndex + num_traits::Zero,
@@ -76,7 +76,7 @@ where
     }
 }
 
-impl<T, K> num::Num for Index<T, K>
+impl<T, K> num::Num for IndexBase<T, K>
 where
     K: GraphIndex + Eq,
     T: RawIndex + num::Num,
@@ -84,35 +84,42 @@ where
     type FromStrRadixErr = T::FromStrRadixErr;
 
     fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
-        T::from_str_radix(str, radix).map(Index::new)
+        T::from_str_radix(str, radix).map(IndexBase::new)
     }
 }
 
-macro_rules! impl_bin_op {
+macro_rules! impl_binary_op {
     (@impl $trait:ident::$method:ident) => {
-        impl<K, A, B, C> ::core::ops::$trait<Index<B, K>> for Index<A, K>
+        impl<K, A, B, C> ::core::ops::$trait<IndexBase<B, K>> for IndexBase<A, K>
         where
             A: RawIndex + ::core::ops::$trait<B, Output = C>,
             B: RawIndex,
             C: RawIndex,
             K: GraphIndex,
         {
-            type Output = Index<C, K>;
+            type Output = IndexBase<C, K>;
 
-            fn $method(self, rhs: Index<B, K>) -> Self::Output {
-                Index::new(::core::ops::$trait::$method(self.value, rhs.value))
+            fn $method(self, rhs: IndexBase<B, K>) -> Self::Output {
+                IndexBase::new(::core::ops::$trait::$method(self.value, rhs.value))
             }
         }
     };
-
+    (@mut $trait:ident::$method:ident) => {
+        paste::paste! {
+            impl_assign_op!(@impl [<$trait Assign>]::[<$method _assign>]);
+        }
+    };
     ($($trait:ident::$method:ident),* $(,)?) => {
-        $(impl_bin_op!(@impl $trait::$method);)*
+        $(
+            impl_binary_op!(@impl $trait::$method);
+            impl_binary_op!(@mut $trait::$method);
+        )*
     };
 }
 
 macro_rules! impl_assign_op {
     (@impl $trait:ident::$method:ident) => {
-        impl<K, A, B> ::core::ops::$trait<B> for Index<A, K>
+        impl<K, A, B> ::core::ops::$trait<B> for IndexBase<A, K>
         where
             A: RawIndex + ::core::ops::$trait<B>,
             K: GraphIndex,
@@ -128,20 +135,7 @@ macro_rules! impl_assign_op {
     };
 }
 
-impl_assign_op! {
-    AddAssign::add_assign,
-    SubAssign::sub_assign,
-    MulAssign::mul_assign,
-    DivAssign::div_assign,
-    RemAssign::rem_assign,
-    BitAndAssign::bitand_assign,
-    BitOrAssign::bitor_assign,
-    BitXorAssign::bitxor_assign,
-    ShlAssign::shl_assign,
-    ShrAssign::shr_assign,
-}
-
-impl_bin_op! {
+impl_binary_op! {
     Add::add,
     Sub::sub,
     Mul::mul,

@@ -84,16 +84,14 @@ where
             path.push(current);
 
             // Get all hyperedges containing the current vertex
-            let edges = self.graph.get_edges_with_vertex(&current)?;
-
-            // For each hyperedge, visit all vertices that haven't been visited yet
-            for edge_id in edges {
-                let vertices = self.graph.get_vertices_for_edge(&edge_id)?;
-
-                for &vertex in vertices {
-                    if !self.has_visited(&vertex) {
-                        self.queue.push_back(vertex);
-                        self.visited.insert(vertex);
+            if let Ok(edges) = self.graph.get_edges_with_vertex(&current) {
+                // visit all vertices within each edge that haven't been visited yet
+                for edge_id in edges {
+                    for &vertex in self.graph.get_vertices_for_edge(&edge_id)? {
+                        if !self.has_visited(&vertex) {
+                            self.queue.push_back(vertex);
+                            self.visited.insert(vertex);
+                        }
                     }
                 }
             }

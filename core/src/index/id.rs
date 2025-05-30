@@ -3,16 +3,16 @@
     Contrib: @FL03
 */
 use super::{GraphIndex, RawIndex};
-/// A generic [`Index`] implementation used to represent various [_kinds_](GraphIndex) of
+/// A generic [`IndexBase`] implementation used to represent various [_kinds_](GraphIndex) of
 /// indices
 #[derive(Clone, Copy, Eq, Hash, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-pub struct Index<Idx, K> {
+pub struct IndexBase<Idx, K> {
     pub(crate) value: Idx,
     pub(crate) _type: core::marker::PhantomData<K>,
 }
 
-impl<T, K> Index<T, K>
+impl<T, K> IndexBase<T, K>
 where
     K: GraphIndex,
     T: RawIndex,
@@ -68,12 +68,12 @@ where
     }
     /// apply a function to the inner value and returns a new Index wrapping the result
     #[inline]
-    pub fn map<U, F>(self, f: F) -> Index<U, K>
+    pub fn map<U, F>(self, f: F) -> IndexBase<U, K>
     where
         F: FnOnce(T) -> U,
         U: RawIndex,
     {
-        Index::new(f(self.value))
+        IndexBase::new(f(self.value))
     }
     /// [`replace`](core::mem::replace) and return the old value after replacing it with the
     /// given value
@@ -100,21 +100,21 @@ where
     }
     /// consumes the current index to create another with the given value
     #[inline]
-    pub fn with<U: RawIndex>(self, value: U) -> Index<U, K> {
-        Index {
+    pub fn with<U: RawIndex>(self, value: U) -> IndexBase<U, K> {
+        IndexBase {
             value,
             _type: core::marker::PhantomData::<K>,
         }
     }
     /// decrements the index value by [one](num_traits::One) and returns a new instance
     #[inline]
-    pub fn dec(self) -> Index<<T as core::ops::Sub>::Output, K>
+    pub fn dec(self) -> IndexBase<<T as core::ops::Sub>::Output, K>
     where
         T: core::ops::Sub + num_traits::One,
         <T as core::ops::Sub>::Output: RawIndex,
     {
         let value = self.value - T::one();
-        Index::new(value)
+        IndexBase::new(value)
     }
     /// mutably decrements the index value by [one](num_traits::One)
     #[inline]
@@ -127,13 +127,13 @@ where
     /// increments the index value by [one](num_traits::One) and consumes the current instance
     /// to create another with the new value.
     #[inline]
-    pub fn inc(self) -> Index<<T as core::ops::Add>::Output, K>
+    pub fn inc(self) -> IndexBase<<T as core::ops::Add>::Output, K>
     where
         T: core::ops::Add + num_traits::One,
         <T as core::ops::Add>::Output: RawIndex,
     {
         let value = self.value + T::one();
-        Index::new(value)
+        IndexBase::new(value)
     }
     /// mutably increments the index value by [one](num_traits::One)
     #[inline]
@@ -164,7 +164,7 @@ where
     }
 }
 
-impl<T, K> AsRef<T> for Index<T, K>
+impl<T, K> AsRef<T> for IndexBase<T, K>
 where
     K: GraphIndex,
     T: RawIndex,
@@ -174,7 +174,7 @@ where
     }
 }
 
-impl<T, K> AsMut<T> for Index<T, K>
+impl<T, K> AsMut<T> for IndexBase<T, K>
 where
     K: GraphIndex,
     T: RawIndex,
@@ -184,7 +184,7 @@ where
     }
 }
 
-impl<T, K> core::borrow::Borrow<T> for Index<T, K>
+impl<T, K> core::borrow::Borrow<T> for IndexBase<T, K>
 where
     K: GraphIndex,
     T: RawIndex,
@@ -193,7 +193,7 @@ where
         &self.value
     }
 }
-impl<T, K> core::borrow::BorrowMut<T> for Index<T, K>
+impl<T, K> core::borrow::BorrowMut<T> for IndexBase<T, K>
 where
     K: GraphIndex,
     T: RawIndex,
@@ -203,7 +203,7 @@ where
     }
 }
 
-impl<T, K> Default for Index<T, K>
+impl<T, K> Default for IndexBase<T, K>
 where
     K: GraphIndex,
     T: Default + RawIndex,
@@ -216,7 +216,7 @@ where
     }
 }
 
-impl<T, K> From<T> for Index<T, K>
+impl<T, K> From<T> for IndexBase<T, K>
 where
     K: GraphIndex,
     T: RawIndex,
@@ -226,7 +226,7 @@ where
     }
 }
 
-impl<T, K> PartialEq<T> for Index<T, K>
+impl<T, K> PartialEq<T> for IndexBase<T, K>
 where
     K: GraphIndex,
     T: PartialEq + RawIndex,
@@ -236,12 +236,12 @@ where
     }
 }
 
-impl<T, K> core::iter::Iterator for Index<T, K>
+impl<T, K> core::iter::Iterator for IndexBase<T, K>
 where
     K: GraphIndex,
     T: Copy + RawIndex + core::ops::Add<T, Output = T> + num_traits::One,
 {
-    type Item = Index<T, K>;
+    type Item = IndexBase<T, K>;
 
     fn next(&mut self) -> Option<Self::Item> {
         // compute the next value
@@ -254,11 +254,17 @@ where
 }
 
 macro_rules! impl_fmt {
-    ($($trait:ident),* $(,)?) => {
-        $(impl_fmt!(@impl $trait);)*
+    (
+        $s:ident(
+            $($trait:ident),* $(,)?
+        )
+    ) => {
+        $(
+            impl_fmt!(@impl $s($trait));
+        )*
     };
-    (@impl $trait:ident) => {
-        impl<T, K> ::core::fmt::$trait for Index<T, K>
+    (@impl $s:ident($trait:ident)) => {
+        impl<T, K> ::core::fmt::$trait for $s<T, K>
         where
             K: GraphIndex,
             T: RawIndex + ::core::fmt::$trait,
@@ -271,13 +277,15 @@ macro_rules! impl_fmt {
 }
 
 impl_fmt! {
-    Binary,
-    Debug,
-    Display,
-    LowerExp,
-    LowerHex,
-    Octal,
-    Pointer,
-    UpperExp,
-    UpperHex,
+    IndexBase(
+        Binary,
+        Debug,
+        Display,
+        LowerExp,
+        LowerHex,
+        Octal,
+        Pointer,
+        UpperExp,
+        UpperHex,
+    )
 }

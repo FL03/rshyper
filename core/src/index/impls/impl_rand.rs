@@ -4,11 +4,11 @@
 */
 #![cfg(feature = "rand")]
 
-use crate::index::{GraphIndex, Index, RawIndex};
+use crate::index::{GraphIndex, IndexBase, RawIndex};
 use rand_distr::{Distribution, StandardUniform};
 
 /// generic implementations for the [`Index<T, K>`] enabled by the `rand` feature
-impl<T, K> Index<T, K>
+impl<T, K> IndexBase<T, K>
 where
     K: GraphIndex,
     T: RawIndex,
@@ -30,16 +30,16 @@ where
     }
 }
 
-impl<T, K> Distribution<Index<T, K>> for StandardUniform
+impl<T, K> Distribution<IndexBase<T, K>> for StandardUniform
 where
     K: GraphIndex,
     T: RawIndex,
     StandardUniform: Distribution<T>,
 {
-    fn sample<R>(&self, rng: &mut R) -> Index<T, K>
+    fn sample<R>(&self, rng: &mut R) -> IndexBase<T, K>
     where
         R: ?Sized + rand::Rng,
     {
-        Index::new(rng.random())
+        IndexBase::new(rng.random())
     }
 }

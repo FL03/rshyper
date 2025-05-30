@@ -27,8 +27,12 @@ pub trait GraphicAlgorithm<H> {
 }
 
 /// this trait is used to denote an algorithmic operator that can be applied to a hypergraph.
-pub trait GraphOperator<N, E> {
-    type Graph<N2, E2>;
+pub trait GraphOperator<'a> {
+    type Graph<N, E, Idx>
+    where
+        N: 'a,
+        E: 'a,
+        Idx: 'a + crate::RawIndex;
 
     private!();
 }

@@ -1,10 +1,10 @@
 /*
-    appellation: hash_graph <module>
+    appellation: binary_graph <module>
     authors: @FL03
 */
-//! this module focuses on implementing a hash-based hypergraph, [`HashGraph`]
+//! this module focuses on implementing a hash-based hypergraph, [`BinaryGraph`]
 #[doc(inline)]
-pub use self::graph::HashGraph;
+pub use self::graph::BinaryGraph;
 
 pub mod graph;
 
