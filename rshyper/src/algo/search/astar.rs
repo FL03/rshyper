@@ -7,7 +7,7 @@ pub use self::priority_node::PriorityNode;
 
 pub(crate) mod priority_node;
 
-use super::Search;
+use super::{Search, Traversal};
 use crate::HashGraph;
 use crate::{Error, Result, VertexId};
 use std::collections::{BinaryHeap, HashMap, HashSet};
@@ -48,8 +48,7 @@ where
     pub fn search(&mut self, start: VertexId) -> Result<Vec<VertexId>> {
         Search::search(self, start)
     }
-
-    /// Reset the search state
+    /// reset the state
     pub fn reset(&mut self) {
         self.open_set.clear();
         self.closed_set.clear();
@@ -188,7 +187,23 @@ where
     }
 }
 
-impl<'a, N, E, F> Search<N> for AStarSearch<'a, N, E, F>
+impl<'a, N, E, F> Traversal<VertexId> for AStarSearch<'a, N, E, F>
+where
+    E: Eq + core::hash::Hash,
+    N: Eq + core::hash::Hash,
+    F: Fn(VertexId, VertexId) -> f64,
+{
+    fn has_visited(&self, vertex: VertexId) -> bool {
+        self.closed_set.contains(&vertex)
+    }
+
+    fn visited_vertices(&self) -> &HashSet<VertexId> {
+        &self.closed_set
+    }
+}
+
+
+impl<'a, N, E, F> Search<VertexId> for AStarSearch<'a, N, E, F>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,

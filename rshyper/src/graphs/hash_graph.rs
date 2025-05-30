@@ -32,7 +32,7 @@ where
             position: Position::zero(),
         }
     }
-    /// returns an immutable reference to the _connections_ forming each hyperedge; in other 
+    /// returns an immutable reference to the _connections_ forming each hyperedge; in other
     /// words, the connections are a map of edges to sets of vertices, where each edge is
     /// represented by an [`EdgeId`] and each vertex by a [`VertexId`].
     pub const fn connections(&self) -> &HashMap<EdgeId, HashSet<VertexId>> {
@@ -59,13 +59,13 @@ where
     pub const fn nodes_mut(&mut self) -> &mut HashMap<VertexId, Node<N>> {
         &mut self.vertices
     }
-    /// returns a copy of the position of the hypergraph; here, the [`position`](Position) is 
+    /// returns a copy of the position of the hypergraph; here, the [`position`](Position) is
     /// used to track the indices (edge & vertex) and define which ones are next to be used
     /// when inserting new hyperedges or vertices
     pub const fn position(&self) -> Position {
         self.position
     }
-    /// returns a mutable reference to the current position of the hypergraph; 
+    /// returns a mutable reference to the current position of the hypergraph;
     pub fn position_mut(&mut self) -> &mut Position {
         &mut self.position
     }
@@ -201,11 +201,7 @@ where
         Ok(eid)
     }
     /// insert a new hyperedge with the given vertices and weight, returning its ID;
-    pub fn insert_edge_with_weight<I>(
-        &mut self,
-        vertices: I,
-        weight: E,
-    ) -> crate::Result<EdgeId>
+    pub fn insert_edge_with_weight<I>(&mut self, vertices: I, weight: E) -> crate::Result<EdgeId>
     where
         I: Clone + IntoIterator<Item = VertexId>,
         E: Eq + core::hash::Hash,
@@ -216,7 +212,7 @@ where
         self.insert_facet(index, weight)
     }
     /// insert a new facet (hyperedge with an associated weight) into the hypergraph;
-    /// if the facet, or hyperedge, already exists, it will replace the existing value with 
+    /// if the facet, or hyperedge, already exists, it will replace the existing value with
     /// the given
     pub fn insert_facet(&mut self, index: EdgeId, facet: E) -> crate::Result<EdgeId> {
         if !self.contains_edge(&index) {
@@ -313,7 +309,7 @@ where
     }
     /// search the hypergraph using the breadth-first traversal algorithm
     pub fn bft(&self) -> crate::algo::BreadthFirstTraversal<'_, N, E> {
-        crate::algo::BreadthFirstTraversal::new(self)
+        crate::algo::BreadthFirstTraversal::from_hypergraph(self)
     }
     /// search the hypergraph using the depth-first traversal algorithm
     pub fn dft(&self) -> crate::algo::DepthFirstTraversal<'_, N, E> {

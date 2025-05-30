@@ -27,7 +27,7 @@
 //!
 #[cfg(feature = "alloc")]
 extern crate alloc;
-
+#[doc(inline)]
 #[cfg(feature = "alloc")]
 pub use self::graphs::prelude::*;
 #[doc(inline)]

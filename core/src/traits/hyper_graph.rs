@@ -4,6 +4,7 @@
 */
 use crate::{EdgeId, VertexId};
 
+
 pub trait RawNode {
     type Idx;
 
@@ -22,12 +23,12 @@ pub trait RawEdge {
     fn index(&self) -> &EdgeId<Self::Idx>;
 }
 
-pub trait RawGraph {
-    type Edge: RawEdge;
-    type Node: RawNode;
-
-    private!();
+pub trait RawHyperGraph<N, E> {
+    type Idx;
 }
 
-/// [`Hypergraph`] is a trait that defines the basic operations for a hypergraph data structure.
-pub trait Hypergraph: RawGraph {}
+/// [`HyperGraph`] is a trait that defines the basic operations for a hypergraph data structure.
+pub trait HyperGraph<N, E>: RawHyperGraph<N, E> {
+    
+    type Adj<N2, E2>;
+}

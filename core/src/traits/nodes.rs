@@ -16,7 +16,7 @@ pub trait HashNode<Idx>: HyperNode<Idx> + Eq + core::hash::Hash {
 }
 
 
-pub trait Weighted<Idx>: HyperNode<Idx> {
+pub trait Weighted {
     type Data;
 
     fn weight(&self) -> &Self::Data;

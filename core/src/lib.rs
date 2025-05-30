@@ -40,6 +40,7 @@ pub mod traits {
     pub mod container;
     pub mod convert;
     pub mod hyper_graph;
+    pub mod indexed;
     pub mod nodes;
     pub mod tags;
 
@@ -50,6 +51,8 @@ pub mod traits {
         pub use super::convert::*;
         #[doc(inline)]
         pub use super::hyper_graph::*;
+        #[doc(inline)]
+        pub use super::indexed::*;
         #[doc(inline)]
         pub use super::nodes::*;
         #[doc(inline)]

@@ -2,7 +2,8 @@
     Appellation: dft <module>
     Contrib: @FL03
 */
-use crate::{Error, HashGraph, Result, Search, VertexId};
+use super::{Search, Traversal};
+use crate::{Error, HashGraph, VertexId};
 use std::collections::HashSet;
 
 /// Depth-First Traversal algorithm for hypergraphs
@@ -31,17 +32,31 @@ where
         self.visited.clear();
     }
     /// a convience method to perform a search
-    pub fn search(&mut self, start: VertexId) -> Result<Vec<VertexId>> {
+    pub fn search(&mut self, start: VertexId) -> crate::Result<Vec<VertexId>> {
         Search::search(self, start)
     }
 }
 
-impl<'a, N, E> Search<N> for DepthFirstTraversal<'a, N, E>
+impl<'a, N, E> Traversal<VertexId> for DepthFirstTraversal<'a, N, E>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
 {
-    fn search(&mut self, start: VertexId) -> Result<Vec<VertexId>> {
+    fn has_visited(&self, vertex: VertexId) -> bool {
+        self.visited.contains(&vertex)
+    }
+
+    fn visited_vertices(&self) -> &HashSet<VertexId> {
+        &self.visited
+    }
+}
+
+impl<'a, N, E> Search<VertexId> for DepthFirstTraversal<'a, N, E>
+where
+    E: Eq + core::hash::Hash,
+    N: Eq + core::hash::Hash,
+{
+    fn search(&mut self, start: VertexId) -> crate::Result<Vec<VertexId>> {
         // Reset state
         self.reset();
 
@@ -96,3 +111,4 @@ where
         &self.visited
     }
 }
+
