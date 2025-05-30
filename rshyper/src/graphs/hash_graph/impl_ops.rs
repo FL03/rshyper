@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use super::HashGraph;
-use rshyper_core::{EdgeId, Node, VertexId};
+use rshyper_core::{EdgeId, HyperNode, VertexId};
 
 impl<N, E> core::ops::Index<EdgeId> for HashGraph<N, E>
 where
@@ -32,7 +32,7 @@ where
     N: Eq + core::hash::Hash,
     E: Eq + core::hash::Hash,
 {
-    type Output = Node<N>;
+    type Output = HyperNode<N>;
 
     fn index(&self, index: VertexId) -> &Self::Output {
         self.get_vertex_weight(index).expect("Node not found")

@@ -3,19 +3,19 @@
     Contrib: @FL03
 */
 use crate::{VertexId, Weight};
-/// The [`Node`] implementation generically associates a [`VertexId`] with a [`Weight`].
+/// The [`HyperNode`] implementation generically associates a [`VertexId`] with a [`Weight`].
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "lowercase")
 )]
-pub struct Node<T = (), Idx = usize> {
+pub struct HyperNode<T = (), Idx = usize> {
     pub(crate) index: VertexId<Idx>,
     pub(crate) weight: Weight<T>,
 }
 
-impl<T, Idx> Node<T, Idx> {
+impl<T, Idx> HyperNode<T, Idx> {
     /// initialize a new instance with the given index and weight
     pub fn new(index: VertexId<Idx>, weight: T) -> Self {
         Self {
@@ -44,15 +44,15 @@ impl<T, Idx> Node<T, Idx> {
         }
     }
     /// consumes the current instance to create another with the given index.
-    pub fn with_index<I2>(self, index: VertexId<I2>) -> Node<T, I2> {
-        Node {
+    pub fn with_index<I2>(self, index: VertexId<I2>) -> HyperNode<T, I2> {
+        HyperNode {
             index,
             weight: self.weight,
         }
     }
     /// consumes the current instance to create another with the given weight.
-    pub fn with_weight<U>(self, weight: Weight<U>) -> Node<U, Idx> {
-        Node {
+    pub fn with_weight<U>(self, weight: Weight<U>) -> HyperNode<U, Idx> {
+        HyperNode {
             index: self.index,
             weight,
         }
@@ -86,33 +86,33 @@ impl<T, Idx> Node<T, Idx> {
     }
     /// consumes the current instance and applies the given function onto the weight,
     /// returning a new instance with the same index and the resulting weight.
-    pub fn map<U, F: FnOnce(T) -> U>(self, f: F) -> Node<U, Idx> {
-        Node {
+    pub fn map<U, F: FnOnce(T) -> U>(self, f: F) -> HyperNode<U, Idx> {
+        HyperNode {
             index: self.index,
             weight: self.weight.map(f),
         }
     }
 }
 
-impl<T, Idx> AsRef<Weight<T>> for Node<T, Idx> {
+impl<T, Idx> AsRef<Weight<T>> for HyperNode<T, Idx> {
     fn as_ref(&self) -> &Weight<T> {
         &self.weight
     }
 }
 
-impl<T, Idx> AsMut<Weight<T>> for Node<T, Idx> {
+impl<T, Idx> AsMut<Weight<T>> for HyperNode<T, Idx> {
     fn as_mut(&mut self) -> &mut Weight<T> {
         &mut self.weight
     }
 }
 
-impl<T, Idx> core::borrow::Borrow<VertexId<Idx>> for Node<T, Idx> {
+impl<T, Idx> core::borrow::Borrow<VertexId<Idx>> for HyperNode<T, Idx> {
     fn borrow(&self) -> &VertexId<Idx> {
         &self.index
     }
 }
 
-impl<T, Idx> core::fmt::Display for Node<T, Idx>
+impl<T, Idx> core::fmt::Display for HyperNode<T, Idx>
 where
     Idx: core::fmt::Display,
     T: core::fmt::Display,

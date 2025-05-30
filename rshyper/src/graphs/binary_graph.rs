@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use alloc::collections::{BTreeMap, BTreeSet};
-use rshyper_core::{EdgeId, Node, VertexId, id::Position};
+use rshyper_core::{EdgeId, HyperNode, VertexId, id::Position};
 
 /// a b-tree based hypergraph implementation
 #[derive(Clone, Debug)]
@@ -11,7 +11,7 @@ use rshyper_core::{EdgeId, Node, VertexId, id::Position};
 pub struct BinaryGraph<N, E> {
     pub(crate) connections: BTreeMap<EdgeId, BTreeSet<VertexId>>,
     pub(crate) facets: BTreeMap<EdgeId, E>,
-    pub(crate) nodes: BTreeMap<VertexId, Node<N>>,
+    pub(crate) nodes: BTreeMap<VertexId, HyperNode<N>>,
     pub(crate) position: Position<usize>,
 }
 
@@ -42,11 +42,11 @@ impl<N, E> BinaryGraph<N, E> {
         &mut self.facets
     }
     /// returns an immutable reference to the nodes of the hypergraph
-    pub const fn nodes(&self) -> &BTreeMap<VertexId, Node<N>> {
+    pub const fn nodes(&self) -> &BTreeMap<VertexId, HyperNode<N>> {
         &self.nodes
     }
     /// returns a mutable reference to the nodes of the hypergraph
-    pub const fn nodes_mut(&mut self) -> &mut BTreeMap<VertexId, Node<N>> {
+    pub const fn nodes_mut(&mut self) -> &mut BTreeMap<VertexId, HyperNode<N>> {
         &mut self.nodes
     }
 

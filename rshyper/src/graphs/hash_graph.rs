@@ -5,7 +5,7 @@
 
 mod impl_ops;
 
-use rshyper_core::{EdgeId, Node, VertexId, id::Position};
+use rshyper_core::{EdgeId, HyperNode, VertexId, id::Position};
 use std::collections::{HashMap, HashSet};
 
 /// A hash-based hypergraph implementation
@@ -14,7 +14,7 @@ use std::collections::{HashMap, HashSet};
 pub struct HashGraph<N = (), E = ()> {
     pub(crate) connections: HashMap<EdgeId, HashSet<VertexId>>,
     pub(crate) facets: HashMap<EdgeId, E>,
-    pub(crate) vertices: HashMap<VertexId, Node<N>>,
+    pub(crate) vertices: HashMap<VertexId, HyperNode<N>>,
     pub(crate) position: Position,
 }
 
@@ -52,11 +52,11 @@ where
         &mut self.facets
     }
     /// returns am immutable reference to the nodes
-    pub const fn nodes(&self) -> &HashMap<VertexId, Node<N>> {
+    pub const fn nodes(&self) -> &HashMap<VertexId, HyperNode<N>> {
         &self.vertices
     }
     /// returns a mutable reference to the nodes of the hypergraph
-    pub const fn nodes_mut(&mut self) -> &mut HashMap<VertexId, Node<N>> {
+    pub const fn nodes_mut(&mut self) -> &mut HashMap<VertexId, HyperNode<N>> {
         &mut self.vertices
     }
     /// returns a copy of the position of the hypergraph; here, the [`position`](Position) is
@@ -136,7 +136,7 @@ where
             .ok_or_else(|| crate::Error::HyperedgeDoesNotExist(index))
     }
     /// retrieves the set of nodes composing the given edge
-    pub fn get_nodes_for_edge(&self, index: EdgeId) -> crate::Result<Vec<&Node<N>>> {
+    pub fn get_nodes_for_edge(&self, index: EdgeId) -> crate::Result<Vec<&HyperNode<N>>> {
         let vertices = self.get_vertices_for_edge(index)?;
         let nodes = vertices
             .iter()
@@ -165,14 +165,14 @@ where
         Ok(degree)
     }
     /// returns the weight of a particular vertex
-    pub fn get_vertex_weight(&self, index: VertexId) -> crate::Result<&Node<N>> {
+    pub fn get_vertex_weight(&self, index: VertexId) -> crate::Result<&HyperNode<N>> {
         self.nodes()
             .get(&index)
             .ok_or(crate::Error::VertexDoesNotExist(index))
     }
 
     /// returns a mutable reference to the weight of a vertex
-    pub fn get_vertex_weight_mut(&mut self, index: VertexId) -> crate::Result<&mut Node<N>> {
+    pub fn get_vertex_weight_mut(&mut self, index: VertexId) -> crate::Result<&mut HyperNode<N>> {
         self.nodes_mut()
             .get_mut(&index)
             .ok_or(crate::Error::VertexDoesNotExist(index))
@@ -226,7 +226,7 @@ where
         // generate a new vertex ID
         let idx = self.next_vertex_id();
         // initialize a new node with the given weight & index
-        let node = Node::new(idx, weight);
+        let node = HyperNode::new(idx, weight);
         // insert the new node into the vertices map
         self.nodes_mut().insert(idx, node);
         idx
@@ -277,7 +277,7 @@ where
             .ok_or(crate::Error::HyperedgeDoesNotExist(index))
     }
     /// removes the vertex with the given id and all of its associated hyperedges
-    pub fn remove_vertex(&mut self, index: VertexId) -> crate::Result<Node<N>> {
+    pub fn remove_vertex(&mut self, index: VertexId) -> crate::Result<HyperNode<N>> {
         self.nodes_mut()
             .remove(&index)
             .map(|node| {

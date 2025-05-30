@@ -15,7 +15,7 @@ pub trait Indexed<T> {
  ************* Implementations *************
 */
 use crate::VertexId;
-use crate::node::Node;
+use crate::node::HyperNode;
 
 impl<T> Indexed<T> for VertexId<T> {
     type Idx<I> = VertexId<I>;
@@ -25,7 +25,7 @@ impl<T> Indexed<T> for VertexId<T> {
     }
 }
 
-impl<T, Idx> Indexed<Idx> for Node<T, Idx> {
+impl<T, Idx> Indexed<Idx> for HyperNode<T, Idx> {
     type Idx<I> = VertexId<I>;
 
     fn index(&self) -> &Self::Idx<Idx> {

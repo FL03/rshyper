@@ -17,10 +17,10 @@ pub(crate) mod macros {
 
 #[doc(inline)]
 pub use self::{
-    edge::Edge,
+    edge::HyperEdge,
     error::{Error, Result},
     id::{EdgeId, Index, VertexId},
-    node::Node,
+    node::HyperNode,
     traits::prelude::*,
     types::prelude::*,
 };
