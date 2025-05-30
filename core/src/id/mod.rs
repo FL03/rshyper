@@ -1,5 +1,5 @@
 /*
-    appellation: index <module>
+    appellation: id <module>
     authors: @FL03
 */
 //! this module defines the [`Index`] type and its associated types for representing indices in
@@ -7,7 +7,7 @@
 #[doc(inline)]
 pub use self::{
     index::Index,
-    kinds::{EdgeIndex, IndexKind, VertexIndex},
+    kinds::{EdgeIndex, GraphIndex, VertexIndex},
     position::Position,
 };
 

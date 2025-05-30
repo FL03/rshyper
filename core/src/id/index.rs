@@ -2,23 +2,22 @@
     Appellation: index <module>
     Contrib: @FL03
 */
-use super::IndexKind;
-use core::marker::PhantomData;
+use super::GraphIndex;
 
 #[derive(Clone, Copy, Eq, Hash, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct Index<Idx, K>
 where
-    K: IndexKind,
+    K: GraphIndex,
 {
     pub(crate) value: Idx,
-    pub(crate) _type: PhantomData<K>,
+    pub(crate) _type: core::marker::PhantomData<K>,
 }
 
 impl<T, K> Index<T, K>
 where
-    K: IndexKind,
-{    
+    K: GraphIndex,
+{
     /// returns a new instance of [`Index`] with the given value.
     pub fn new(index: T) -> Self {
         Self {
@@ -71,10 +70,7 @@ where
     /// apply a function to the inner value and returns a new Index wrapping the result
     #[inline]
     pub fn map<U, F: FnOnce(T) -> U>(self, f: F) -> Index<U, K> {
-        Index {
-            value: f(self.value),
-            _type: PhantomData::<K>,
-        }
+        Index::new(f(self.value))
     }
     /// [`replace`](core::mem::replace) and return the old value after replacing it with the
     /// given value
@@ -104,17 +100,17 @@ where
     pub fn with<U>(self, value: U) -> Index<U, K> {
         Index {
             value,
-            _type: PhantomData::<K>,
+            _type: core::marker::PhantomData::<K>,
         }
     }
     /// decrements the index value by [one](num_traits::One) and returns a new instance
     #[inline]
-    pub fn dec(self) -> Self
+    pub fn dec(self) -> Index<<T as core::ops::Sub>::Output, K>
     where
-        T: core::ops::Sub<Output = T> + num_traits::One,
+        T: core::ops::Sub + num_traits::One,
     {
         let value = self.value - T::one();
-        Self { value, ..self }
+        Index::new(value)
     }
     /// mutably decrements the index value by [one](num_traits::One)
     #[inline]
@@ -127,12 +123,12 @@ where
     /// increments the index value by [one](num_traits::One) and consumes the current instance
     /// to create another with the new value.
     #[inline]
-    pub fn inc(self) -> Self
+    pub fn inc(self) -> Index<<T as core::ops::Add>::Output, K>
     where
-        T: core::ops::Add<Output = T> + num_traits::One,
+        T: core::ops::Add + num_traits::One,
     {
         let value = self.value + T::one();
-        Self { value, ..self }
+        Index::new(value)
     }
     /// mutably increments the index value by [one](num_traits::One)
     #[inline]
@@ -165,7 +161,7 @@ where
 
 impl<T, K> AsRef<T> for Index<T, K>
 where
-    K: IndexKind,
+    K: GraphIndex,
 {
     fn as_ref(&self) -> &T {
         &self.value
@@ -174,7 +170,7 @@ where
 
 impl<T, K> AsMut<T> for Index<T, K>
 where
-    K: IndexKind,
+    K: GraphIndex,
 {
     fn as_mut(&mut self) -> &mut T {
         &mut self.value
@@ -183,7 +179,7 @@ where
 
 impl<T, K> core::borrow::Borrow<T> for Index<T, K>
 where
-    K: IndexKind,
+    K: GraphIndex,
 {
     fn borrow(&self) -> &T {
         &self.value
@@ -191,7 +187,7 @@ where
 }
 impl<T, K> core::borrow::BorrowMut<T> for Index<T, K>
 where
-    K: IndexKind,
+    K: GraphIndex,
 {
     fn borrow_mut(&mut self) -> &mut T {
         &mut self.value
@@ -200,7 +196,7 @@ where
 
 impl<T, K> Default for Index<T, K>
 where
-    K: IndexKind,
+    K: GraphIndex,
     T: Default,
 {
     fn default() -> Self {
@@ -213,7 +209,7 @@ where
 
 impl<T, K> From<T> for Index<T, K>
 where
-    K: IndexKind,
+    K: GraphIndex,
 {
     fn from(index: T) -> Self {
         Self::new(index)
@@ -222,7 +218,7 @@ where
 
 impl<T, K> PartialEq<T> for Index<T, K>
 where
-    K: IndexKind,
+    K: GraphIndex,
     T: PartialEq,
 {
     fn eq(&self, other: &T) -> bool {
@@ -232,7 +228,7 @@ where
 
 impl<T, K> core::iter::Iterator for Index<T, K>
 where
-    K: IndexKind,
+    K: GraphIndex,
     T: Copy + core::ops::Add<T, Output = T> + num_traits::One,
 {
     type Item = Index<T, K>;
@@ -254,7 +250,7 @@ macro_rules! impl_fmt {
     (@impl $trait:ident) => {
         impl<T, K> ::core::fmt::$trait for Index<T, K>
         where
-            K: IndexKind,
+            K: GraphIndex,
             T: ::core::fmt::$trait,
         {
             fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {

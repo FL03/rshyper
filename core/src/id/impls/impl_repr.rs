@@ -2,16 +2,22 @@
     appellation: impl_repr <module>
     authors: @FL03
 */
-use crate::id::{EdgeIndex, Index, IndexKind, VertexIndex};
+use crate::id::{EdgeIndex, GraphIndex, Index, VertexIndex};
+use core::sync::atomic::{AtomicUsize, Ordering};
 
-impl<K> Index<usize, K>
-where
-    K: IndexKind,
-{
+/// a global static counter used to generate unique indices
+pub(crate) static INDEX_COUNTER: AtomicUsize = AtomicUsize::new(0);
+
+impl<K: GraphIndex> Index<usize, K> {
+    /// returns a new index generated using an [`AtomicUsize`]
+    /// This method is useful in that it is `no_std` compatible, thread-safe, and capable of
+    /// generating unique indices in a concurrent environment.
     pub fn atomic() -> Self {
-        use core::sync::atomic::{AtomicUsize, Ordering::Relaxed};
-        static COUNTER: AtomicUsize = AtomicUsize::new(1);
-        Self::new(COUNTER.fetch_add(1, Relaxed))
+        Self::new(INDEX_COUNTER.fetch_add(1, Ordering::Relaxed))
+    }
+    /// consumes the current index and returns a new, atomic index.
+    pub fn atomic_next(self) -> Self {
+        Self::atomic()
     }
 }
 

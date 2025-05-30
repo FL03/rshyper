@@ -4,13 +4,13 @@
 */
 #![cfg(feature = "rand")]
 
-use crate::id::{Index, IndexKind};
+use crate::id::{GraphIndex, Index};
 use rand_distr::{Distribution, StandardUniform};
 
 /// generic implementations for the [`Index<T, K>`] enabled by the `rand` feature
 impl<T, K> Index<T, K>
 where
-    K: IndexKind,
+    K: GraphIndex,
 {
     /// generate a random index from a value of type `T`
     pub fn random() -> Self
@@ -31,7 +31,7 @@ where
 
 impl<T, K> Distribution<Index<T, K>> for StandardUniform
 where
-    K: IndexKind,
+    K: GraphIndex,
     StandardUniform: Distribution<T>,
 {
     fn sample<R>(&self, rng: &mut R) -> Index<T, K>

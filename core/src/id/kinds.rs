@@ -4,7 +4,7 @@
 */
 /// This trait is used to define various _kinds_ of indices that are used to compose graphical
 /// structures.
-pub trait IndexKind:
+pub trait GraphIndex:
     Copy + Eq + Ord + core::fmt::Debug + core::fmt::Display + core::hash::Hash
 {
     private!();
@@ -25,7 +25,7 @@ macro_rules! impl_type_kind {
         #[repr(transparent)]
         pub enum $kind {};
 
-        impl IndexKind for $kind {
+        impl GraphIndex for $kind {
             seal!();
         }
 
@@ -47,7 +47,7 @@ macro_rules! impl_type_kind {
         #[repr(transparent)]
         pub struct $kind;
 
-        impl IndexKind for $kind {
+        impl GraphIndex for $kind {
             seal!();
         }
 

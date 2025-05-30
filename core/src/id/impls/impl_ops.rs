@@ -2,11 +2,11 @@
     appellation: impl_index <module>
     authors: @FL03
 */
-use crate::id::{Index, IndexKind};
+use crate::id::{Index, GraphIndex};
 
 impl<T, K> core::ops::Deref for Index<T, K>
 where
-    K: IndexKind,
+    K: GraphIndex,
 {
     type Target = T;
 
@@ -17,7 +17,7 @@ where
 
 impl<T, K> core::ops::DerefMut for Index<T, K>
 where
-    K: IndexKind,
+    K: GraphIndex,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.value
@@ -26,7 +26,7 @@ where
 
 impl<T, K> core::ops::Not for Index<T, K>
 where
-    K: IndexKind,
+    K: GraphIndex,
     T: core::ops::Not,
 {
     type Output = Index<T::Output, K>;
@@ -38,7 +38,7 @@ where
 
 impl<T, K> core::ops::Neg for Index<T, K>
 where
-    K: IndexKind,
+    K: GraphIndex,
     T: core::ops::Neg,
 {
     type Output = Index<T::Output, K>;
@@ -50,7 +50,7 @@ where
 
 impl<T, K> num_traits::One for Index<T, K>
 where
-    K: IndexKind,
+    K: GraphIndex,
     T: num_traits::One,
 {
     fn one() -> Self {
@@ -60,7 +60,7 @@ where
 
 impl<T, K> num_traits::Zero for Index<T, K>
 where
-    K: IndexKind,
+    K: GraphIndex,
     T: num_traits::Zero,
 {
     fn zero() -> Self {
@@ -74,7 +74,7 @@ where
 
 impl<T, K> num::Num for Index<T, K>
 where
-    K: IndexKind + Eq,
+    K: GraphIndex + Eq,
     T: num::Num,
 {
     type FromStrRadixErr = T::FromStrRadixErr;
@@ -89,7 +89,7 @@ macro_rules! impl_bin_op {
         impl<K, A, B, C> core::ops::$trait<Index<B, K>> for Index<A, K>
         where
             A: core::ops::$trait<B, Output = C>,
-            K: IndexKind,
+            K: GraphIndex,
         {
             type Output = Index<C, K>;
 
@@ -109,7 +109,7 @@ macro_rules! impl_assign_op {
         impl<K, A, B> core::ops::$trait<B> for Index<A, K>
         where
             A: core::ops::$trait<B>,
-            K: IndexKind,
+            K: GraphIndex,
         {
             fn $method(&mut self, rhs: B) {
                 core::ops::$trait::$method(&mut self.value, rhs)
