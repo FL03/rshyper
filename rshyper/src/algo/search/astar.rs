@@ -195,13 +195,15 @@ where
     }
 }
 
-impl<'a, N, E, F> Traversal<VertexId> for AStarSearch<'a, N, E, F>
+impl<'a, N, E, F> Traversal<crate::Idx> for AStarSearch<'a, N, E, F>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
     F: Fn(VertexId, VertexId) -> f64,
 {
-    fn visited(&self) -> &HashSet<VertexId> {
+    type Store<Idx> = HashSet<VertexId<Idx>>;
+
+    fn visited(&self) -> &Self::Store<VertexId> {
         &self.closed_set
     }
 }

@@ -53,12 +53,14 @@ where
     }
 }
 
-impl<'a, N, E> Traversal<VertexId> for DepthFirstTraversal<'a, N, E>
+impl<'a, N, E> Traversal<crate::Idx> for DepthFirstTraversal<'a, N, E>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
 {
-    fn visited(&self) -> &HashSet<VertexId> {
+    type Store<I2: RawIndex> = HashSet<I2>;
+
+    fn visited(&self) -> &Self::Store<VertexId<crate::Idx>> {
         &self.visited
     }
 }

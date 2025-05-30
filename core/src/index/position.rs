@@ -20,7 +20,7 @@ where
     pub(crate) vertex: VertexId<T>,
 }
 
-impl<T> Position<T> 
+impl<T> Position<T>
 where
     T: RawIndex,
 {
