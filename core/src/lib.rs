@@ -41,8 +41,8 @@ pub mod traits {
     pub mod convert;
     pub mod hyper_graph;
     pub mod indexed;
-    pub mod nodes;
     pub mod tags;
+    pub mod weighted;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -54,9 +54,9 @@ pub mod traits {
         #[doc(inline)]
         pub use super::indexed::*;
         #[doc(inline)]
-        pub use super::nodes::*;
-        #[doc(inline)]
         pub use super::tags::*;
+        #[doc(inline)]
+        pub use super::weighted::*;
     }
 }
 pub mod types {

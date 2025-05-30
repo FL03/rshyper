@@ -3,7 +3,7 @@
     Contrib: @FL03
 */
 use crate::{VertexId, Weight};
-
+/// The [`Node`] implementation generically associates a [`VertexId`] with a [`Weight`].
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
@@ -22,7 +22,7 @@ impl<T, Idx> Node<T, Idx> {
             index,
             weight: Weight(weight),
         }
-    }    
+    }
     /// returns a new weighted node using the given value and the logical default for the index
     pub fn from_index(index: VertexId<Idx>) -> Self
     where
@@ -32,7 +32,7 @@ impl<T, Idx> Node<T, Idx> {
             index,
             weight: Weight::default(),
         }
-    }    
+    }
     /// creates a new node with the given index using the logical default for the weight.
     pub fn from_weight(weight: Weight<T>) -> Self
     where

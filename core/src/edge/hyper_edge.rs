@@ -18,7 +18,11 @@ pub struct Edge<W, S, Idx = usize> {
 
 impl<W, S, Idx> Edge<W, S, Idx> {
     pub fn new(id: EdgeId<Idx>, nodes: S, weight: W) -> Self {
-        Self { id, nodes, weight: Weight(weight) }
+        Self {
+            id,
+            nodes,
+            weight: Weight(weight),
+        }
     }
     /// creates a new edge with the given id
     pub fn from_id(id: EdgeId<Idx>) -> Self
@@ -121,7 +125,6 @@ impl<W, S, Idx> Edge<W, S, Idx> {
     }
 }
 
-
 impl<W, S, Idx> AsRef<Weight<W>> for Edge<W, S, Idx> {
     fn as_ref(&self) -> &Weight<W> {
         &self.weight
@@ -167,6 +170,10 @@ where
     S: core::fmt::Display,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "Edge(id: {}, nodes: {}, weight: {})", self.id, self.nodes, self.weight)
+        write!(
+            f,
+            "Edge(id: {}, nodes: {}, weight: {})",
+            self.id, self.nodes, self.weight
+        )
     }
 }
