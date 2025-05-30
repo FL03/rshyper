@@ -2,7 +2,7 @@
     Appellation: graph <module>
     Contrib: @FL03
 */
-use rshyper::HashGraph;
+use rshyper::graphs::hash_graph::HashGraph;
 use std::collections::HashSet;
 
 #[test]
