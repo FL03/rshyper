@@ -3,6 +3,8 @@
     authors: @FL03
 */
 
+/// The [`Weight`] type is a wrapper around a generic type `T` that provides additional
+/// functionality for working with weights in a graph context.
 #[derive(Clone, Copy, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
@@ -48,7 +50,8 @@ impl<T> Weight<T> {
     pub const fn replace(&mut self, value: T) -> T {
         core::mem::replace(self.get_mut(), value)
     }
-
+    /// updates the inner value with the provided value and returns a mutable reference to the
+    /// current instance.
     pub fn set(&mut self, value: T) -> &mut Self {
         *self.get_mut() = value;
         self
@@ -78,12 +81,22 @@ impl<T> Weight<T> {
     {
         Weight(*self.get())
     }
+    /// returns a constant pointer to the inner value; see [`core::ptr::addr_of!`] for more
+    /// information
+    pub fn as_ptr(&self) -> *const T {
+        core::ptr::addr_of!(self.0)
+    }
+    /// returns a mutable pointer to the inner value; see [`core::ptr::addr_of_mut!`] for more
+    /// information
+    pub fn as_mut_ptr(&mut self) -> *mut T {
+        core::ptr::addr_of_mut!(self.0)
+    }
     /// returns a _view_ of the weight whose inner value is a reference to the original.
-    pub const fn view(&self) -> Weight<&T> {
+    pub const fn as_view(&self) -> Weight<&T> {
         Weight(self.get())
     }
     /// returns a _view_ of the weight whose inner value is a mutable reference to the original
-    pub const fn view_mut(&mut self) -> Weight<&mut T> {
+    pub const fn as_view_mut(&mut self) -> Weight<&mut T> {
         Weight(self.get_mut())
     }
     /// consumes the current instance to create another with the given value
@@ -93,15 +106,17 @@ impl<T> Weight<T> {
 }
 
 scsys::fmt_wrapper! {
-    Weight<T> {
-        Debug("{:?}"),
-        Display("{}"),
-        Binary("{:b}"),
-        LowerHex("0x{:x}"),
-        Octal("{:o}"),
-        Pointer("{:p}"),
-        UpperHex("0x{:X}"),
-    }
+    Weight<T>(
+        Binary,
+        Debug,
+        Display,
+        LowerExp,
+        LowerHex,
+        UpperExp,
+        UpperHex,
+        Octal,
+        Pointer,
+    )
 }
 
 impl<T> AsRef<T> for Weight<T> {

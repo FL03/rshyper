@@ -2,7 +2,7 @@
     appellation: graph_kind <module>
     authors: @FL03
 */
-
+/// [GraphKind] is a marker trait for graph types.
 pub trait GraphKind {
     private!();
 }

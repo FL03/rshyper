@@ -2,7 +2,7 @@
     appellation: cursor <module>
     authors: @FL03
 */
-use crate::id::{EdgeId, Idx, VertexId};
+use crate::index::{EdgeId, RawIndex, Udx, VertexId};
 
 /// The [`Position`] implementation is uses to track the current indexes of edges and vertices
 /// within a hypergraph.
@@ -12,12 +12,18 @@ use crate::id::{EdgeId, Idx, VertexId};
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "lowercase")
 )]
-pub struct Position<T = Idx> {
+pub struct Position<T = Udx>
+where
+    T: RawIndex,
+{
     pub(crate) edge: EdgeId<T>,
     pub(crate) vertex: VertexId<T>,
 }
 
-impl<T> Position<T> {
+impl<T> Position<T>
+where
+    T: RawIndex,
+{
     pub fn new(edge: EdgeId<T>, vertex: VertexId<T>) -> Self {
         Self { edge, vertex }
     }

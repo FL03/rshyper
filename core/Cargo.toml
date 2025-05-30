@@ -39,15 +39,16 @@ num-traits = { workspace = true }
 getrandom = { optional = true, workspace = true }
 rand = { optional = true, workspace = true }
 rand_distr = { optional = true, workspace = true }
-serde = { optional = true, workspace = true }
+# serialization
+serde = { features = ["derive"], optional = true, workspace = true }
 serde_derive = { optional = true, workspace = true }
 serde_json = { optional = true, workspace = true }
 # macros
 paste = { workspace = true }
 smart-default = { workspace = true }
-strum = { workspace = true }
+strum = { features = ["derive"], workspace = true }
 # logging
-tracing = { optional = true, workspace = true }
+tracing = { features = ["attributes"], optional = true, workspace = true }
 
 [dev-dependencies]
 lazy_static = { workspace = true }
@@ -126,14 +127,12 @@ serde = [
     "num/serde",
     "rand?/serde",
     "scsys/serde",
-    "serde?/derive",
 ]
 
 serde_json = ["dep:serde_json"]
 
 tracing = [
     "dep:tracing",
-    "tracing?/attributes",
     "scsys/tracing",
 ]
 

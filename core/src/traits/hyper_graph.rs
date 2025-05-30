@@ -2,10 +2,10 @@
     Appellation: hgraph <module>
     Contrib: @FL03
 */
-use crate::{EdgeId, VertexId};
+use crate::{EdgeId, RawIndex, VertexId};
 
 pub trait RawNode {
-    type Idx;
+    type Idx: RawIndex;
 
     private!();
 
@@ -14,7 +14,7 @@ pub trait RawNode {
 }
 
 pub trait RawEdge {
-    type Idx;
+    type Idx: RawIndex;
 
     private!();
 
@@ -23,7 +23,7 @@ pub trait RawEdge {
 }
 
 pub trait RawHyperGraph<N, E> {
-    type Idx;
+    type Idx: RawIndex;
 }
 
 /// [`HyperGraph`] is a trait that defines the basic operations for a hypergraph data structure.

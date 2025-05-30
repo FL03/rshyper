@@ -9,20 +9,39 @@ pub(crate) mod priority_node;
 
 use super::{Search, Traversal};
 use crate::HashGraph;
-use crate::{Error, Result, VertexId};
+use rshyper_core::{Error, VertexId};
 use std::collections::{BinaryHeap, HashMap, HashSet};
+
+/// A simple trait defining a common interface for heuristic functions compatible with the
+/// [`A*`](AStarSearch) search implementation
+pub trait HeuristicFunc<T = VertexId> {
+    type Output;
+
+    fn compute(&self, start: T, goal: T) -> Self::Output;
+}
+
+impl<F> HeuristicFunc<VertexId> for F
+where
+    F: Fn(VertexId, VertexId) -> f64,
+{
+    type Output = f64;
+
+    fn compute(&self, start: VertexId, goal: VertexId) -> Self::Output {
+        self(start, goal)
+    }
+}
 
 /// A* Search algorithm for hypergraphs
 pub struct AStarSearch<'a, N, E, F>
 where
-    F: Fn(VertexId, VertexId) -> f64,
+    F: HeuristicFunc,
 {
     pub(crate) graph: &'a HashGraph<N, E>,
     pub(crate) open_set: HashSet<VertexId>,
     pub(crate) closed_set: HashSet<VertexId>,
     pub(crate) came_from: HashMap<VertexId, VertexId>,
-    pub(crate) g_score: HashMap<VertexId, f64>,
-    pub(crate) f_score: HashMap<VertexId, f64>,
+    pub(crate) g_score: HashMap<VertexId, F::Output>,
+    pub(crate) f_score: HashMap<VertexId, F::Output>,
     pub(crate) heuristic: F,
 }
 
@@ -30,7 +49,7 @@ impl<'a, N, E, F> AStarSearch<'a, N, E, F>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
-    F: Fn(VertexId, VertexId) -> f64,
+    F: HeuristicFunc<Output = f64>,
 {
     /// Create a new A* search instance with the given heuristic function
     pub fn new(graph: &'a HashGraph<N, E>, heuristic: F) -> Self {
@@ -44,21 +63,45 @@ where
             heuristic,
         }
     }
-    /// a convience method to perform a search
-    pub fn search(&mut self, start: VertexId) -> Result<Vec<VertexId>> {
-        Search::search(self, start)
+    /// consumes the current instance to create another from the given heuristic function;
+    /// **note:** while the functions may be different, the output type of both must match.
+    pub fn with_heuristic<G>(self, heuristic: G) -> AStarSearch<'a, N, E, G>
+    where
+        G: HeuristicFunc<Output = F::Output>,
+    {
+        AStarSearch {
+            graph: self.graph,
+            open_set: self.open_set,
+            closed_set: self.closed_set,
+            came_from: self.came_from,
+            g_score: self.g_score,
+            f_score: self.f_score,
+            heuristic,
+        }
+    }
+    /// returns an immutable reference to the heuristic function of the algorithm
+    pub const fn heuristic(&self) -> &F {
+        &self.heuristic
     }
     /// reset the state
-    pub fn reset(&mut self) {
+    pub fn reset(&mut self) -> &mut Self {
         self.open_set.clear();
         self.closed_set.clear();
         self.came_from.clear();
         self.g_score.clear();
         self.f_score.clear();
+        self
+    }
+    /// a convience method to perform a search
+    pub fn search(&mut self, start: VertexId) -> crate::Result<<Self as Search<VertexId>>::Output>
+    where
+        Self: Search<VertexId>,
+    {
+        Search::search(self, start)
     }
 
     /// Find the shortest path between start and goal vertices
-    pub fn find_path(&mut self, start: VertexId, goal: VertexId) -> Result<Vec<VertexId>> {
+    pub fn find_path(&mut self, start: VertexId, goal: VertexId) -> crate::Result<Vec<VertexId>> {
         // Check if both vertices exist
         if !self.graph.contains_node(&start) {
             return Err(Error::VertexDoesNotExist(start));
@@ -74,7 +117,7 @@ where
         self.g_score.insert(start, 0.0);
 
         // Initialize f_score for start node (heuristic only since g=0)
-        let start_f_score = (self.heuristic)(start, goal);
+        let start_f_score = self.heuristic.compute(start, goal);
         self.f_score.insert(start, start_f_score);
 
         // Add start node to the open set
@@ -114,17 +157,11 @@ where
             self.closed_set.insert(current);
 
             // Get all hyperedges containing the current vertex
-            let edges = match self.graph.get_edges_with_vertex(current) {
-                Ok(edges) => edges,
-                Err(e) => return Err(e),
-            };
+            let edges = self.graph.get_edges_with_vertex(&current)?;
 
             for edge_id in edges {
                 // Get all vertices in this hyperedge
-                let vertices = match self.graph.get_vertices_for_edge(edge_id) {
-                    Ok(verts) => verts,
-                    Err(e) => return Err(e),
-                };
+                let vertices = self.graph.get_vertices_for_edge(&edge_id)?;
 
                 // Process each vertex in this hyperedge
                 for &neighbor in vertices {
@@ -146,7 +183,7 @@ where
                         self.g_score.insert(neighbor, tentative_g_score);
 
                         // Update f_score (g_score + heuristic)
-                        let f_score = tentative_g_score + (self.heuristic)(neighbor, goal);
+                        let f_score = tentative_g_score + self.heuristic().compute(neighbor, goal);
                         self.f_score.insert(neighbor, f_score);
 
                         // Add to open set if not already there
@@ -186,8 +223,8 @@ where
         path
     }
 
-    pub fn has_visited(&self, vertex: VertexId) -> bool {
-        self.closed_set.contains(&vertex)
+    pub fn has_visited(&self, vertex: &VertexId) -> bool {
+        self.visited().contains(vertex)
     }
 
     pub const fn visited(&self) -> &HashSet<VertexId> {
@@ -199,13 +236,15 @@ impl<'a, N, E, F> Traversal<VertexId> for AStarSearch<'a, N, E, F>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
-    F: Fn(VertexId, VertexId) -> f64,
+    F: HeuristicFunc,
 {
-    fn has_visited(&self, vertex: VertexId) -> bool {
-        self.closed_set.contains(&vertex)
+    type Store<U> = HashSet<U>;
+
+    fn has_visited(&self, vertex: &VertexId) -> bool {
+        self.visited().contains(vertex)
     }
 
-    fn visited(&self) -> &HashSet<VertexId> {
+    fn visited(&self) -> &Self::Store<VertexId> {
         &self.closed_set
     }
 }
@@ -214,7 +253,7 @@ impl<'a, N, E, F> Search<VertexId> for AStarSearch<'a, N, E, F>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
-    F: Fn(VertexId, VertexId) -> f64,
+    F: HeuristicFunc<Output = f64>,
 {
     type Output = Vec<VertexId>;
 

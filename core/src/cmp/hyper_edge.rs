@@ -2,23 +2,36 @@
     appellation: hyper_edge <module>
     authors: @FL03
 */
-use crate::{EdgeId, Weight};
+use crate::Weight;
+use crate::index::{EdgeId, RawIndex};
 
+/// [`HyperEdge`] is a type representing a hyperedge in a hypergraph.
+/// It contains an identifier, a collection of nodes, and a weight.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "lowercase")
 )]
-pub struct Edge<W, S, Idx = usize> {
+pub struct HyperEdge<W, S, Idx = usize>
+where
+    Idx: RawIndex,
+{
     pub(crate) id: EdgeId<Idx>,
     pub(crate) nodes: S,
     pub(crate) weight: Weight<W>,
 }
 
-impl<W, S, Idx> Edge<W, S, Idx> {
+impl<W, S, Idx> HyperEdge<W, S, Idx>
+where
+    Idx: RawIndex,
+{
     pub fn new(id: EdgeId<Idx>, nodes: S, weight: W) -> Self {
-        Self { id, nodes, weight: Weight(weight) }
+        Self {
+            id,
+            nodes,
+            weight: Weight(weight),
+        }
     }
     /// creates a new edge with the given id
     pub fn from_id(id: EdgeId<Idx>) -> Self
@@ -96,24 +109,24 @@ impl<W, S, Idx> Edge<W, S, Idx> {
         self
     }
     /// consumes the current instance to create another with the given id.
-    pub fn with_id<I2>(self, id: EdgeId<I2>) -> Edge<W, S, I2> {
-        Edge {
+    pub fn with_id<I2: RawIndex>(self, id: EdgeId<I2>) -> HyperEdge<W, S, I2> {
+        HyperEdge {
             id,
             nodes: self.nodes,
             weight: self.weight,
         }
     }
     /// consumes the current instance to create another with the given nodes.
-    pub fn with_nodes<S2>(self, nodes: S2) -> Edge<W, S2, Idx> {
-        Edge {
+    pub fn with_nodes<S2>(self, nodes: S2) -> HyperEdge<W, S2, Idx> {
+        HyperEdge {
             id: self.id,
             nodes,
             weight: self.weight,
         }
     }
     /// consumes the current instance to create another with the given weight.
-    pub fn with_weight<U>(self, weight: Weight<U>) -> Edge<U, S, Idx> {
-        Edge {
+    pub fn with_weight<U>(self, weight: Weight<U>) -> HyperEdge<U, S, Idx> {
+        HyperEdge {
             id: self.id,
             nodes: self.nodes,
             weight,
@@ -121,32 +134,46 @@ impl<W, S, Idx> Edge<W, S, Idx> {
     }
 }
 
-
-impl<W, S, Idx> AsRef<Weight<W>> for Edge<W, S, Idx> {
+impl<W, S, Idx> AsRef<Weight<W>> for HyperEdge<W, S, Idx>
+where
+    Idx: RawIndex,
+{
     fn as_ref(&self) -> &Weight<W> {
         &self.weight
     }
 }
 
-impl<W, S, Idx> AsMut<Weight<W>> for Edge<W, S, Idx> {
+impl<W, S, Idx> AsMut<Weight<W>> for HyperEdge<W, S, Idx>
+where
+    Idx: RawIndex,
+{
     fn as_mut(&mut self) -> &mut Weight<W> {
         &mut self.weight
     }
 }
 
-impl<W, S, Idx> core::borrow::Borrow<EdgeId<Idx>> for Edge<W, S, Idx> {
+impl<W, S, Idx> core::borrow::Borrow<EdgeId<Idx>> for HyperEdge<W, S, Idx>
+where
+    Idx: RawIndex,
+{
     fn borrow(&self) -> &EdgeId<Idx> {
         &self.id
     }
 }
 
-impl<W, S, Idx> core::borrow::BorrowMut<EdgeId<Idx>> for Edge<W, S, Idx> {
+impl<W, S, Idx> core::borrow::BorrowMut<EdgeId<Idx>> for HyperEdge<W, S, Idx>
+where
+    Idx: RawIndex,
+{
     fn borrow_mut(&mut self) -> &mut EdgeId<Idx> {
         &mut self.id
     }
 }
 
-impl<W, S, Idx> core::ops::Deref for Edge<W, S, Idx> {
+impl<W, S, Idx> core::ops::Deref for HyperEdge<W, S, Idx>
+where
+    Idx: RawIndex,
+{
     type Target = Weight<W>;
 
     fn deref(&self) -> &Self::Target {
@@ -154,19 +181,26 @@ impl<W, S, Idx> core::ops::Deref for Edge<W, S, Idx> {
     }
 }
 
-impl<W, S, Idx> core::ops::DerefMut for Edge<W, S, Idx> {
+impl<W, S, Idx> core::ops::DerefMut for HyperEdge<W, S, Idx>
+where
+    Idx: RawIndex,
+{
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.weight
     }
 }
 
-impl<W, S, Idx> core::fmt::Display for Edge<W, S, Idx>
+impl<W, S, Idx> core::fmt::Display for HyperEdge<W, S, Idx>
 where
-    Idx: core::fmt::Display,
+    Idx: RawIndex + core::fmt::Display,
     W: core::fmt::Display,
     S: core::fmt::Display,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "Edge(id: {}, nodes: {}, weight: {})", self.id, self.nodes, self.weight)
+        write!(
+            f,
+            "Edge(id: {}, nodes: {}, weight: {})",
+            self.id, self.nodes, self.weight
+        )
     }
 }
