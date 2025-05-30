@@ -2,7 +2,7 @@
     appellation: impl_ops <module>
     authors: @FL03
 */
-use crate::hash_graph::graph::HashGraph;
+use super::HashGraph;
 use rshyper_core::{EdgeId, Node, VertexId};
 
 impl<N, E> core::ops::Index<EdgeId> for HashGraph<N, E>

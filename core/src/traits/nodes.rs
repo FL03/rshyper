@@ -9,6 +9,13 @@ pub trait HyperNode<Idx> {
     fn index(&self) -> &VertexId<Idx>;
 }
 
+/// Extends the base [HyperNode] trait with the [`Eq`] and [`Hash`](core::hash::Hash) traits
+/// for use with hash-related structures.
+pub trait HashNode<Idx>: HyperNode<Idx> + Eq + core::hash::Hash {
+    private!();
+}
+
+
 pub trait Weighted<Idx>: HyperNode<Idx> {
     type Data;
 
@@ -18,6 +25,13 @@ pub trait Weighted<Idx>: HyperNode<Idx> {
 /*
  ************* Implementations *************
 */
+impl<T, Idx> HashNode<Idx> for T
+where
+    T: HyperNode<Idx> + Eq + core::hash::Hash,
+{
+    seal!();
+}
+
 impl<T, Idx> HyperNode<Idx> for T
 where
     T: core::borrow::Borrow<VertexId<Idx>>,

@@ -1,7 +1,10 @@
 /*
-    Appellation: graph <module>
+    Appellation: hash_graph <module>
     Contrib: @FL03
 */
+
+mod impl_ops;
+
 use rshyper_core::{EdgeId, Node, VertexId, id::Position};
 use std::collections::{HashMap, HashSet};
 

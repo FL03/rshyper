@@ -8,7 +8,7 @@ pub use self::priority_node::PriorityNode;
 pub(crate) mod priority_node;
 
 use super::Search;
-use crate::hash_graph::HashGraph;
+use crate::HashGraph;
 use crate::{Error, Result, VertexId};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 
