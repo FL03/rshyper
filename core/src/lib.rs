@@ -3,7 +3,12 @@
     authors: @FL03
 */
 //! This crate provides the core functionality for the rshyper library.
-
+#![crate_name = "rshyper_core"]
+#![crate_type = "lib"]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.docs/assets/logo.png",
+    html_favicon_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.docs/assets/favicon.svg"
+)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(feature = "alloc")]
@@ -27,13 +32,12 @@ pub use self::{
 
 pub mod edge;
 pub mod error;
-/// this module defines the [`Index`] type and its associated types for representing indices in
-/// a hypergraph.
 pub mod id;
 pub mod node;
-/// this module contains various traits used throughout to establish common interfaces and
-/// behaviors
+
 pub mod traits {
+    //! this module contains various traits used throughout to establish common interfaces and
+    //! behaviors
     #[doc(inline)]
     pub use self::prelude::*;
 
@@ -75,6 +79,7 @@ pub mod types {
     }
 }
 
+#[doc(hidden)]
 pub mod prelude {
     #[doc(no_inline)]
     pub use crate::error::*;
