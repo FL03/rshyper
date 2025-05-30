@@ -2,7 +2,7 @@
     Appellation: indexable <module>
     Contrib: @FL03
 */
-use crate::id::{EdgeId, RawIndex, VertexId};
+use crate::index::{EdgeId, RawIndex, VertexId};
 
 /// a trait for converting a type into a valid [`EdgeId`]
 pub trait IntoEdgeId<Idx: RawIndex> {

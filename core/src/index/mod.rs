@@ -6,12 +6,12 @@
 //! a hypergraph.
 #[doc(inline)]
 pub use self::{
-    index::Index,
+    id::Index,
     kinds::{EdgeIndex, GraphIndex, VertexIndex},
     position::Position,
 };
 
-pub mod index;
+pub mod id;
 pub mod kinds;
 pub mod position;
 
@@ -25,7 +25,7 @@ mod impls {
 
 pub(crate) mod prelude {
     #[doc(inline)]
-    pub use super::index::*;
+    pub use super::id::*;
     #[doc(inline)]
     pub use super::kinds::*;
     #[doc(inline)]

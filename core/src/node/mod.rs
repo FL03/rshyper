@@ -14,7 +14,7 @@ pub(crate) mod prelude {
     pub use super::{HashPoint, Point};
 }
 
-use crate::id::{RawIndex, VertexId};
+use crate::index::{RawIndex, VertexId};
 
 /// A trait denoting a node within the hypergraph.
 pub trait Point<Idx: RawIndex> {

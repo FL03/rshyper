@@ -2,8 +2,8 @@
     Appellation: node <module>
     Contrib: @FL03
 */
-use crate::id::RawIndex;
-use crate::{VertexId, Weight};
+use crate::index::{RawIndex, VertexId};
+use crate::Weight;
 
 /// The [`HyperNode`] implementation generically associates a [`VertexId`] with a [`Weight`].
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]

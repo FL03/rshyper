@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use crate::Weight;
-use crate::id::{EdgeId, RawIndex};
+use crate::index::{EdgeId, RawIndex};
 
 /// [`HyperEdge`] is a type representing a hyperedge in a hypergraph.
 /// It contains an identifier, a collection of nodes, and a weight.

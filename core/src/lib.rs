@@ -20,7 +20,7 @@ pub(crate) mod macros {
 pub use self::{
     edge::HyperEdge,
     error::{Error, Result},
-    id::{EdgeId, Index, NumIndex, Position, RawIndex, VertexId},
+    index::{EdgeId, Index, NumIndex, Position, RawIndex, VertexId},
     node::HyperNode,
     traits::prelude::*,
     types::prelude::*,
@@ -28,7 +28,7 @@ pub use self::{
 
 pub mod edge;
 pub mod error;
-pub mod id;
+pub mod index;
 pub mod node;
 
 pub mod traits {
@@ -80,7 +80,7 @@ pub mod prelude {
     #[doc(no_inline)]
     pub use crate::edge::prelude::*;
     #[doc(no_inline)]
-    pub use crate::id::prelude::*;
+    pub use crate::index::prelude::*;
     #[doc(no_inline)]
     pub use crate::node::prelude::*;
     #[doc(no_inline)]
