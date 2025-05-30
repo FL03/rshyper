@@ -52,6 +52,12 @@ where
     pub fn search(&mut self, start: VertexId) -> crate::Result<Vec<VertexId>> {
         Search::search(self, start)
     }
+    /// include the given index in both the stack and visited stores
+    pub fn register_vertex(&mut self, index: VertexId) -> &mut Self {
+        self.stack_mut().push(index);
+        self.visited_mut().insert(index);
+        self
+    }
 }
 
 impl<'a, N, E> Traversal<VertexId> for DepthFirstTraversal<'a, N, E>
@@ -105,18 +111,19 @@ where
                 let vertices = self.graph.get_vertices_for_edge(&edge_id)?;
 
                 // Add vertices in reverse order to maintain expected DFS behavior
-                let mut new_vertices: Vec<_> = vertices
+                let mut new_vertices = vertices
                     .iter()
                     .filter(|&v| !self.has_visited(v))
                     .cloned()
-                    .collect();
+                    .collect::<Vec<_>>();
 
-                // Sort in reverse order (arbitrary but consistent)
-                new_vertices.sort_by(|&a, &b| b.cmp(a));
+                // Sort in reverse order (arbitrary but consistent) tbefore registering the indices
+                new_vertices
+                    .sort_by(|&a, &b| b.cmp(a));
+                
 
-                for vertex in new_vertices {
-                    self.stack.push(vertex);
-                    self.visited.insert(vertex);
+                for v in new_vertices {
+                    self.register_vertex(v);
                 }
             }
         }

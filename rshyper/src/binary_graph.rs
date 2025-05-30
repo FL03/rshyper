@@ -6,8 +6,12 @@ use alloc::collections::{BTreeMap, BTreeSet};
 use rshyper_core::{EdgeId, HyperNode, Position, RawIndex, VertexId};
 
 /// a b-tree based hypergraph implementation
-#[derive(Clone, Debug)]
-#[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
+#[derive(Clone, Debug, PartialEq, PartialOrd)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize, serde::Serialize),
+    serde(rename_all = "snake_case")
+)]
 pub struct BinaryGraph<N, E, Idx = usize>
 where
     Idx: RawIndex + Ord,

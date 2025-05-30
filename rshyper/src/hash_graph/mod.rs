@@ -9,7 +9,9 @@ pub use self::graph::HashGraph;
 pub mod graph;
 
 mod impls {
+    pub mod impl_graph;
     pub mod impl_ops;
+    pub mod impl_repr;
 }
 
 pub(crate) mod prelude {

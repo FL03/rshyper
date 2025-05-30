@@ -2,11 +2,11 @@
     appellation: id <module>
     authors: @FL03
 */
-//! this module defines the [`Index`] type and its associated types for representing indices in
+//! this module defines the [`IndexBase`] type and its associated types for representing indices in
 //! a hypergraph.
 #[doc(inline)]
 pub use self::{
-    id::Index,
+    id::IndexBase,
     kinds::{EdgeIndex, GraphIndex, VertexIndex},
     position::Position,
 };
@@ -31,16 +31,16 @@ pub(crate) mod prelude {
     #[doc(inline)]
     pub use super::position::*;
     #[doc(inline)]
-    pub use super::{EdgeId, Indexed, Ix, NumIndex, RawIndex, VertexId};
+    pub use super::{EdgeId, HashIndex, Indexed, Ix, NumIndex, RawIndex, VertexId};
 }
 
 /// a type alias for a [`usize`] used to define the default index type throughout the crate.
 pub type Ix = usize;
 
 /// a type alias for an [`Index`] whose _kind_ is [`EdgeIndex`]
-pub type EdgeId<T = Ix> = Index<T, EdgeIndex>;
+pub type EdgeId<T = Ix> = IndexBase<T, EdgeIndex>;
 /// a type alias for an [`Index`] whose _kind_ is [`VertexIndex`]
-pub type VertexId<T = Ix> = Index<T, VertexIndex>;
+pub type VertexId<T = Ix> = IndexBase<T, VertexIndex>;
 
 /// This trait is used to denote a type that is aware of its own index.
 pub trait Indexed<T: RawIndex> {
@@ -51,7 +51,21 @@ pub trait Indexed<T: RawIndex> {
 }
 /// a simple trait for denoting types compatible with to be used as indices in a hypergraph.
 /// **note:** the trait is sealed to prevent external implementations.
-pub trait RawIndex: Clone + PartialEq + PartialOrd {
+pub trait RawIndex {
+    private!();
+}
+
+pub trait Idx: RawIndex
+where
+    Self: Clone + PartialEq + PartialOrd,
+{
+    private!();
+}
+
+pub trait HashIndex: RawIndex
+where
+    Self: Eq + core::hash::Hash,
+{
     private!();
 }
 /// The [`NumIndex`] trait extends the [`RawIndex`] trait to include additional operations and
@@ -61,7 +75,6 @@ where
     Self: Copy
         + Default
         + Eq
-        + PartialOrd
         + core::fmt::Debug
         + core::fmt::Display
         + core::hash::Hash
@@ -101,6 +114,20 @@ impl_raw_index! {
 #[cfg(feature = "alloc")]
 impl_raw_index! {
     alloc::string::String,
+}
+
+impl<T> Idx for T
+where
+    T: RawIndex + Clone + PartialEq + PartialOrd,
+{
+    seal!();
+}
+
+impl<T> HashIndex for T
+where
+    T: RawIndex + Eq + core::hash::Hash,
+{
+    seal!();
 }
 
 impl<T> NumIndex for T

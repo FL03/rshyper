@@ -57,8 +57,9 @@ tracing-subscriber = { features = ["chrono", "env-filter", "fmt", "serde", "std"
 
 [features]
 default = [ 
-    "hash", 
     "std",
+    "binary_graph",
+    "hash_graph",
 ]
 
 full = [
@@ -71,7 +72,12 @@ full = [
 ]
 
 # ************* [FF:Flags] *************
-hash = [
+
+binary_graph = [
+    "alloc"
+]
+
+hash_graph = [
     "std"
 ]
 
@@ -167,7 +173,7 @@ required-features = ["std"]
 # ************* [Examples] *************
 [[example]]
 name = "hash_graph"
-required-features = [ "hash" ]
+required-features = ["hash_graph", "std", "tracing"]
 
 # ************* [Tests] *************
 [[test]]
@@ -176,16 +182,16 @@ required-features = [  ]
 
 [[test]]
 name = "astar"
-required-features = ["std"]
+required-features = ["default"]
 
 [[test]]
 name = "bft"
-required-features = ["std"]
+required-features = ["default"]
 
 [[test]]
 name = "dft"
-required-features = ["std"]
+required-features = ["default"]
 
 [[test]]
 name = "hash_graph"
-required-features = ["std"]
+required-features = ["default"]
