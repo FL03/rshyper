@@ -2,8 +2,6 @@
     appellation: rshyper <library>
     authors: @FL03
 */
-#![crate_name = "rshyper"]
-#![crate_type = "lib"]
 //! # rshyper
 //!
 //! Welcome to the `rshyper` crate - a Rust library for hypergraphs.
@@ -25,6 +23,14 @@
 //! many applications such as database design, network analysis, combinatorial optimization,
 //! modeling topological spaces, and more.
 //!
+#![cfg_attr(not(feature = "std"), no_std)]
+#![crate_name = "rshyper"]
+#![crate_type = "lib"]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.docs/assets/logo.png",
+    html_favicon_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.docs/assets/favicon.svg"
+)]
+
 #[cfg(feature = "alloc")]
 extern crate alloc;
 #[doc(inline)]
