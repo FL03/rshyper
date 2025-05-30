@@ -2,12 +2,14 @@
     Appellation: index <module>
     Contrib: @FL03
 */
-use super::GraphIndex;
-
+use super::{GraphIndex, RawIndex};
+/// A generic [`Index`] implementation used to represent various [_kinds_](GraphIndex) of
+/// indices
 #[derive(Clone, Copy, Eq, Hash, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct Index<Idx, K>
 where
+    Idx: RawIndex,
     K: GraphIndex,
 {
     pub(crate) value: Idx,
@@ -17,6 +19,7 @@ where
 impl<T, K> Index<T, K>
 where
     K: GraphIndex,
+    T: RawIndex,
 {
     /// returns a new instance of [`Index`] with the given value.
     pub fn new(index: T) -> Self {
@@ -69,7 +72,11 @@ where
     }
     /// apply a function to the inner value and returns a new Index wrapping the result
     #[inline]
-    pub fn map<U, F: FnOnce(T) -> U>(self, f: F) -> Index<U, K> {
+    pub fn map<U, F>(self, f: F) -> Index<U, K>
+    where
+        F: FnOnce(T) -> U,
+        U: RawIndex,
+    {
         Index::new(f(self.value))
     }
     /// [`replace`](core::mem::replace) and return the old value after replacing it with the
@@ -97,7 +104,7 @@ where
     }
     /// consumes the current index to create another with the given value
     #[inline]
-    pub fn with<U>(self, value: U) -> Index<U, K> {
+    pub fn with<U: RawIndex>(self, value: U) -> Index<U, K> {
         Index {
             value,
             _type: core::marker::PhantomData::<K>,
@@ -108,6 +115,7 @@ where
     pub fn dec(self) -> Index<<T as core::ops::Sub>::Output, K>
     where
         T: core::ops::Sub + num_traits::One,
+        <T as core::ops::Sub>::Output: RawIndex,
     {
         let value = self.value - T::one();
         Index::new(value)
@@ -126,6 +134,7 @@ where
     pub fn inc(self) -> Index<<T as core::ops::Add>::Output, K>
     where
         T: core::ops::Add + num_traits::One,
+        <T as core::ops::Add>::Output: RawIndex,
     {
         let value = self.value + T::one();
         Index::new(value)
@@ -162,6 +171,7 @@ where
 impl<T, K> AsRef<T> for Index<T, K>
 where
     K: GraphIndex,
+    T: RawIndex,
 {
     fn as_ref(&self) -> &T {
         &self.value
@@ -171,6 +181,7 @@ where
 impl<T, K> AsMut<T> for Index<T, K>
 where
     K: GraphIndex,
+    T: RawIndex,
 {
     fn as_mut(&mut self) -> &mut T {
         &mut self.value
@@ -180,6 +191,7 @@ where
 impl<T, K> core::borrow::Borrow<T> for Index<T, K>
 where
     K: GraphIndex,
+    T: RawIndex,
 {
     fn borrow(&self) -> &T {
         &self.value
@@ -188,6 +200,7 @@ where
 impl<T, K> core::borrow::BorrowMut<T> for Index<T, K>
 where
     K: GraphIndex,
+    T: RawIndex,
 {
     fn borrow_mut(&mut self) -> &mut T {
         &mut self.value
@@ -197,7 +210,7 @@ where
 impl<T, K> Default for Index<T, K>
 where
     K: GraphIndex,
-    T: Default,
+    T: Default + RawIndex,
 {
     fn default() -> Self {
         Self {
@@ -210,6 +223,7 @@ where
 impl<T, K> From<T> for Index<T, K>
 where
     K: GraphIndex,
+    T: RawIndex,
 {
     fn from(index: T) -> Self {
         Self::new(index)
@@ -219,7 +233,7 @@ where
 impl<T, K> PartialEq<T> for Index<T, K>
 where
     K: GraphIndex,
-    T: PartialEq,
+    T: PartialEq + RawIndex,
 {
     fn eq(&self, other: &T) -> bool {
         &self.value == other
@@ -229,7 +243,7 @@ where
 impl<T, K> core::iter::Iterator for Index<T, K>
 where
     K: GraphIndex,
-    T: Copy + core::ops::Add<T, Output = T> + num_traits::One,
+    T: Copy + RawIndex + core::ops::Add<T, Output = T> + num_traits::One,
 {
     type Item = Index<T, K>;
 
@@ -251,7 +265,7 @@ macro_rules! impl_fmt {
         impl<T, K> ::core::fmt::$trait for Index<T, K>
         where
             K: GraphIndex,
-            T: ::core::fmt::$trait,
+            T: RawIndex + ::core::fmt::$trait,
         {
             fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
                 ::core::fmt::$trait::fmt(&self.value, f)

@@ -2,7 +2,9 @@
     appellation: hyper_edge <module>
     authors: @FL03
 */
-use crate::{EdgeId, Weight};
+use crate::Weight;
+use crate::id::{EdgeId, RawIndex};
+
 /// [`HyperEdge`] is a type representing a hyperedge in a hypergraph.
 /// It contains an identifier, a collection of nodes, and a weight.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -11,13 +13,19 @@ use crate::{EdgeId, Weight};
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "lowercase")
 )]
-pub struct HyperEdge<W, S, Idx = usize> {
+pub struct HyperEdge<W, S, Idx = usize>
+where
+    Idx: RawIndex,
+{
     pub(crate) id: EdgeId<Idx>,
     pub(crate) nodes: S,
     pub(crate) weight: Weight<W>,
 }
 
-impl<W, S, Idx> HyperEdge<W, S, Idx> {
+impl<W, S, Idx> HyperEdge<W, S, Idx>
+where
+    Idx: RawIndex,
+{
     pub fn new(id: EdgeId<Idx>, nodes: S, weight: W) -> Self {
         Self {
             id,
@@ -101,7 +109,7 @@ impl<W, S, Idx> HyperEdge<W, S, Idx> {
         self
     }
     /// consumes the current instance to create another with the given id.
-    pub fn with_id<I2>(self, id: EdgeId<I2>) -> HyperEdge<W, S, I2> {
+    pub fn with_id<I2: RawIndex>(self, id: EdgeId<I2>) -> HyperEdge<W, S, I2> {
         HyperEdge {
             id,
             nodes: self.nodes,
@@ -126,31 +134,46 @@ impl<W, S, Idx> HyperEdge<W, S, Idx> {
     }
 }
 
-impl<W, S, Idx> AsRef<Weight<W>> for HyperEdge<W, S, Idx> {
+impl<W, S, Idx> AsRef<Weight<W>> for HyperEdge<W, S, Idx>
+where
+    Idx: RawIndex,
+{
     fn as_ref(&self) -> &Weight<W> {
         &self.weight
     }
 }
 
-impl<W, S, Idx> AsMut<Weight<W>> for HyperEdge<W, S, Idx> {
+impl<W, S, Idx> AsMut<Weight<W>> for HyperEdge<W, S, Idx>
+where
+    Idx: RawIndex,
+{
     fn as_mut(&mut self) -> &mut Weight<W> {
         &mut self.weight
     }
 }
 
-impl<W, S, Idx> core::borrow::Borrow<EdgeId<Idx>> for HyperEdge<W, S, Idx> {
+impl<W, S, Idx> core::borrow::Borrow<EdgeId<Idx>> for HyperEdge<W, S, Idx>
+where
+    Idx: RawIndex,
+{
     fn borrow(&self) -> &EdgeId<Idx> {
         &self.id
     }
 }
 
-impl<W, S, Idx> core::borrow::BorrowMut<EdgeId<Idx>> for HyperEdge<W, S, Idx> {
+impl<W, S, Idx> core::borrow::BorrowMut<EdgeId<Idx>> for HyperEdge<W, S, Idx>
+where
+    Idx: RawIndex,
+{
     fn borrow_mut(&mut self) -> &mut EdgeId<Idx> {
         &mut self.id
     }
 }
 
-impl<W, S, Idx> core::ops::Deref for HyperEdge<W, S, Idx> {
+impl<W, S, Idx> core::ops::Deref for HyperEdge<W, S, Idx>
+where
+    Idx: RawIndex,
+{
     type Target = Weight<W>;
 
     fn deref(&self) -> &Self::Target {
@@ -158,7 +181,10 @@ impl<W, S, Idx> core::ops::Deref for HyperEdge<W, S, Idx> {
     }
 }
 
-impl<W, S, Idx> core::ops::DerefMut for HyperEdge<W, S, Idx> {
+impl<W, S, Idx> core::ops::DerefMut for HyperEdge<W, S, Idx>
+where
+    Idx: RawIndex,
+{
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.weight
     }
@@ -166,7 +192,7 @@ impl<W, S, Idx> core::ops::DerefMut for HyperEdge<W, S, Idx> {
 
 impl<W, S, Idx> core::fmt::Display for HyperEdge<W, S, Idx>
 where
-    Idx: core::fmt::Display,
+    Idx: RawIndex + core::fmt::Display,
     W: core::fmt::Display,
     S: core::fmt::Display,
 {

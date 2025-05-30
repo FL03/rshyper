@@ -2,11 +2,12 @@
     appellation: impl_index <module>
     authors: @FL03
 */
-use crate::id::{GraphIndex, Index};
+use crate::id::{GraphIndex, Index, RawIndex};
 
 impl<T, K> core::ops::Deref for Index<T, K>
 where
     K: GraphIndex,
+    T: RawIndex,
 {
     type Target = T;
 
@@ -18,6 +19,7 @@ where
 impl<T, K> core::ops::DerefMut for Index<T, K>
 where
     K: GraphIndex,
+    T: RawIndex,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.value
@@ -27,7 +29,8 @@ where
 impl<T, K> core::ops::Not for Index<T, K>
 where
     K: GraphIndex,
-    T: core::ops::Not,
+    T: RawIndex + core::ops::Not,
+    T::Output: RawIndex,
 {
     type Output = Index<T::Output, K>;
 
@@ -39,7 +42,8 @@ where
 impl<T, K> core::ops::Neg for Index<T, K>
 where
     K: GraphIndex,
-    T: core::ops::Neg,
+    T: RawIndex + core::ops::Neg,
+    T::Output: RawIndex,
 {
     type Output = Index<T::Output, K>;
 
@@ -51,7 +55,7 @@ where
 impl<T, K> num_traits::One for Index<T, K>
 where
     K: GraphIndex,
-    T: num_traits::One,
+    T: RawIndex + num_traits::One,
 {
     fn one() -> Self {
         Self::new(T::one())
@@ -61,7 +65,7 @@ where
 impl<T, K> num_traits::Zero for Index<T, K>
 where
     K: GraphIndex,
-    T: num_traits::Zero,
+    T: RawIndex + num_traits::Zero,
 {
     fn zero() -> Self {
         Self::new(T::zero())
@@ -75,7 +79,7 @@ where
 impl<T, K> num::Num for Index<T, K>
 where
     K: GraphIndex + Eq,
-    T: num::Num,
+    T: RawIndex + num::Num,
 {
     type FromStrRadixErr = T::FromStrRadixErr;
 
@@ -86,15 +90,17 @@ where
 
 macro_rules! impl_bin_op {
     (@impl $trait:ident::$method:ident) => {
-        impl<K, A, B, C> core::ops::$trait<Index<B, K>> for Index<A, K>
+        impl<K, A, B, C> ::core::ops::$trait<Index<B, K>> for Index<A, K>
         where
-            A: core::ops::$trait<B, Output = C>,
+            A: RawIndex + ::core::ops::$trait<B, Output = C>,
+            B: RawIndex,
+            C: RawIndex,
             K: GraphIndex,
         {
             type Output = Index<C, K>;
 
             fn $method(self, rhs: Index<B, K>) -> Self::Output {
-                Index::new(core::ops::$trait::$method(self.value, rhs.value))
+                Index::new(::core::ops::$trait::$method(self.value, rhs.value))
             }
         }
     };
@@ -106,13 +112,13 @@ macro_rules! impl_bin_op {
 
 macro_rules! impl_assign_op {
     (@impl $trait:ident::$method:ident) => {
-        impl<K, A, B> core::ops::$trait<B> for Index<A, K>
+        impl<K, A, B> ::core::ops::$trait<B> for Index<A, K>
         where
-            A: core::ops::$trait<B>,
+            A: RawIndex + ::core::ops::$trait<B>,
             K: GraphIndex,
         {
             fn $method(&mut self, rhs: B) {
-                core::ops::$trait::$method(&mut self.value, rhs)
+                ::core::ops::$trait::$method(&mut self.value, rhs)
             }
         }
     };

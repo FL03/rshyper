@@ -746,9 +746,9 @@ dependencies = [
 
 [[package]]
 name = "scsys"
-version = "0.2.7"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b84cdb04892f5374da3db226f88a78474578c68f10bb88b161185441233fd8fb"
+checksum = "611a66e87dfdb691d117bfb00cb281aea45a6cf36a0024b078e9f0354d79eb7d"
 dependencies = [
  "scsys-config",
  "scsys-core",
@@ -760,9 +760,9 @@ dependencies = [
 
 [[package]]
 name = "scsys-config"
-version = "0.2.7"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04c04b7688acb4772a5df0be48732d11e73051a2181d5eee82268394800fb6e7"
+checksum = "116a2e1d4edf29df645b60bf21f3c9e79b2d00cee4890b99632db42c2a64cbf1"
 dependencies = [
  "scsys-core",
  "smart-default",
@@ -773,9 +773,9 @@ dependencies = [
 
 [[package]]
 name = "scsys-core"
-version = "0.2.7"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1949f8fce59c34ece73469b8fb0441a475b14adfeedafb2d24c6d16a66d82ee5"
+checksum = "fd399aec2895143cefde2a71711bcb6fa46d27b072baec155c6bbbe52fe5a263"
 dependencies = [
  "anyhow",
  "chrono",
@@ -799,9 +799,9 @@ dependencies = [
 
 [[package]]
 name = "scsys-crypto"
-version = "0.2.7"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bb67c9ddef122a369b5eadfa6fe4864bc0ca2c03bdb01ca0f6c597558311991b"
+checksum = "e31f0ddd5b6c6f1a5115f121c93c318979532ba7451b7d499dcb218f695298d6"
 dependencies = [
  "anyhow",
  "bincode",
@@ -828,9 +828,9 @@ dependencies = [
 
 [[package]]
 name = "scsys-derive"
-version = "0.2.7"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9c0bb01079875a64a72b2f1495431de1a3e1e9ada5c151f9e02ddbebe4db9a6"
+checksum = "e120b90ac00014d38767588f7fe52ff34c89eff17f79f2cd5bc6ae389273ce17"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -839,18 +839,18 @@ dependencies = [
 
 [[package]]
 name = "scsys-traits"
-version = "0.2.7"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a54797d9a3a38730949363d36eae59e9ecb637415339560e0cb7d748f2248c91"
+checksum = "788fccc9e6f96dca5d973e66322edf445184b54afb37b07f4d5d72caa865d131"
 dependencies = [
  "num-traits",
 ]
 
 [[package]]
 name = "scsys-util"
-version = "0.2.7"
+version = "0.2.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c80a5b63b2b2f64c3f55c5308aa6eddbbc02038233e001a0564ac65e06c4b587"
+checksum = "c23e2cf19762946b932a38e04f160883b3ce0ee05f8bec9feb255aeefe922e37"
 dependencies = [
  "num-traits",
  "rand 0.9.1",

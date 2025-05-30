@@ -2,7 +2,9 @@
     Appellation: node <module>
     Contrib: @FL03
 */
+use crate::id::RawIndex;
 use crate::{VertexId, Weight};
+
 /// The [`HyperNode`] implementation generically associates a [`VertexId`] with a [`Weight`].
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(
@@ -10,12 +12,18 @@ use crate::{VertexId, Weight};
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "lowercase")
 )]
-pub struct HyperNode<T = (), Idx = usize> {
+pub struct HyperNode<T = (), Idx = usize>
+where
+    Idx: RawIndex,
+{
     pub(crate) index: VertexId<Idx>,
     pub(crate) weight: Weight<T>,
 }
 
-impl<T, Idx> HyperNode<T, Idx> {
+impl<T, Idx> HyperNode<T, Idx>
+where
+    Idx: RawIndex,
+{
     /// initialize a new instance with the given index and weight
     pub fn new(index: VertexId<Idx>, weight: T) -> Self {
         Self {
@@ -44,7 +52,7 @@ impl<T, Idx> HyperNode<T, Idx> {
         }
     }
     /// consumes the current instance to create another with the given index.
-    pub fn with_index<I2>(self, index: VertexId<I2>) -> HyperNode<T, I2> {
+    pub fn with_index<I2: RawIndex>(self, index: VertexId<I2>) -> HyperNode<T, I2> {
         HyperNode {
             index,
             weight: self.weight,
@@ -94,19 +102,19 @@ impl<T, Idx> HyperNode<T, Idx> {
     }
 }
 
-impl<T, Idx> AsRef<Weight<T>> for HyperNode<T, Idx> {
+impl<T, Idx: RawIndex> AsRef<Weight<T>> for HyperNode<T, Idx> {
     fn as_ref(&self) -> &Weight<T> {
         &self.weight
     }
 }
 
-impl<T, Idx> AsMut<Weight<T>> for HyperNode<T, Idx> {
+impl<T, Idx: RawIndex> AsMut<Weight<T>> for HyperNode<T, Idx> {
     fn as_mut(&mut self) -> &mut Weight<T> {
         &mut self.weight
     }
 }
 
-impl<T, Idx> core::borrow::Borrow<VertexId<Idx>> for HyperNode<T, Idx> {
+impl<T, Idx: RawIndex> core::borrow::Borrow<VertexId<Idx>> for HyperNode<T, Idx> {
     fn borrow(&self) -> &VertexId<Idx> {
         &self.index
     }
@@ -114,7 +122,7 @@ impl<T, Idx> core::borrow::Borrow<VertexId<Idx>> for HyperNode<T, Idx> {
 
 impl<T, Idx> core::fmt::Display for HyperNode<T, Idx>
 where
-    Idx: core::fmt::Display,
+    Idx: RawIndex + core::fmt::Display,
     T: core::fmt::Display,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {

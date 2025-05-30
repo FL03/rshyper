@@ -2,7 +2,7 @@
     appellation: impl_repr <module>
     authors: @FL03
 */
-use crate::id::{EdgeIndex, GraphIndex, Index, VertexIndex};
+use crate::id::{EdgeIndex, GraphIndex, Index, RawIndex, VertexIndex};
 use core::sync::atomic::{AtomicUsize, Ordering};
 
 /// a global static counter used to generate unique indices
@@ -21,13 +21,13 @@ impl<K: GraphIndex> Index<usize, K> {
     }
 }
 
-impl<T> Index<T, EdgeIndex> {
+impl<T: RawIndex> Index<T, EdgeIndex> {
     pub fn vertex(value: T) -> Self {
         Self::new(value)
     }
 }
 
-impl<T> Index<T, VertexIndex> {
+impl<T: RawIndex> Index<T, VertexIndex> {
     pub fn vertex(value: T) -> Self {
         Self::new(value)
     }

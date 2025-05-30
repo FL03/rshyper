@@ -5,10 +5,6 @@
 //! This crate provides the core functionality for the rshyper library.
 #![crate_name = "rshyper_core"]
 #![crate_type = "lib"]
-#![doc(
-    html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.docs/assets/logo.png",
-    html_favicon_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.docs/assets/favicon.svg"
-)]
 #![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(feature = "alloc")]
@@ -24,7 +20,7 @@ pub(crate) mod macros {
 pub use self::{
     edge::HyperEdge,
     error::{Error, Result},
-    id::{EdgeId, Index, VertexId},
+    id::{EdgeId, Index, NumIndex, Position, RawIndex, VertexId},
     node::HyperNode,
     traits::prelude::*,
     types::prelude::*,
@@ -44,7 +40,6 @@ pub mod traits {
     pub mod container;
     pub mod convert;
     pub mod hyper_graph;
-    pub mod indexed;
     pub mod tags;
     pub mod weighted;
 
@@ -55,8 +50,6 @@ pub mod traits {
         pub use super::convert::*;
         #[doc(inline)]
         pub use super::hyper_graph::*;
-        #[doc(inline)]
-        pub use super::indexed::*;
         #[doc(inline)]
         pub use super::tags::*;
         #[doc(inline)]

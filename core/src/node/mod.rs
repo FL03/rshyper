@@ -14,16 +14,16 @@ pub(crate) mod prelude {
     pub use super::{HashPoint, Point};
 }
 
-use crate::VertexId;
+use crate::id::{RawIndex, VertexId};
 
 /// A trait denoting a node within the hypergraph.
-pub trait Point<Idx> {
+pub trait Point<Idx: RawIndex> {
     fn index(&self) -> &VertexId<Idx>;
 }
 
 /// Extends the base [HyperNode] trait with the [`Eq`] and [`Hash`](core::hash::Hash) traits
 /// for use with hash-related structures.
-pub trait HashPoint<Idx>: Point<Idx> + Eq + core::hash::Hash {
+pub trait HashPoint<Idx: RawIndex>: Point<Idx> + Eq + core::hash::Hash {
     private!();
 }
 
@@ -33,6 +33,7 @@ pub trait HashPoint<Idx>: Point<Idx> + Eq + core::hash::Hash {
 
 impl<T, Idx> HashPoint<Idx> for T
 where
+    Idx: RawIndex,
     T: Point<Idx> + Eq + core::hash::Hash,
 {
     seal!();
@@ -40,6 +41,7 @@ where
 
 impl<T, Idx> Point<Idx> for T
 where
+    Idx: RawIndex,
     T: core::borrow::Borrow<VertexId<Idx>>,
 {
     fn index(&self) -> &VertexId<Idx> {
