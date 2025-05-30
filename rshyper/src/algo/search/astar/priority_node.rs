@@ -6,7 +6,7 @@ use crate::VertexId;
 use core::cmp::Ordering;
 
 /// Priority queue node for A* algorithm
-#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq, PartialOrd)]
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct PriorityNode<P = i64> {
     pub(crate) vertex: VertexId,
@@ -18,13 +18,22 @@ impl<P> PriorityNode<P> {
     pub fn new(vertex: VertexId, priority: P) -> Self {
         Self { vertex, priority }
     }
-    /// Get the vertex ID of the node
-    pub const fn vertex(&self) -> VertexId {
-        self.vertex
-    }
     /// returns an immutable reference to the priority of the node
     pub const fn priority(&self) -> &P {
         &self.priority
+    }
+    /// returns a copy of the associated vertex index
+    pub const fn vertex(&self) -> VertexId {
+        self.vertex
+    }
+}
+
+impl<P> PartialEq<P> for PriorityNode<P>
+where
+    P: PartialEq,
+{
+    fn eq(&self, other: &P) -> bool {
+        self.priority() == other
     }
 }
 
@@ -38,12 +47,12 @@ where
     }
 }
 
-impl<P> PartialEq<P> for PriorityNode<P>
+impl<P> PartialOrd for PriorityNode<P>
 where
-    P: PartialEq,
+    P: PartialOrd,
 {
-    fn eq(&self, other: &P) -> bool {
-        self.priority() == other
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.priority().partial_cmp(other.priority())
     }
 }
 
@@ -55,3 +64,7 @@ where
         self.priority().partial_cmp(other)
     }
 }
+
+
+
+

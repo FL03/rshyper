@@ -16,13 +16,14 @@ pub struct Node<T = (), Idx = usize> {
 }
 
 impl<T, Idx> Node<T, Idx> {
+    /// initialize a new instance with the given index and weight
     pub fn new(index: VertexId<Idx>, weight: T) -> Self {
         Self {
             index,
             weight: Weight(weight),
         }
-    }
-    /// creates a new node with the given index and default weight
+    }    
+    /// returns a new weighted node using the given value and the logical default for the index
     pub fn from_index(index: VertexId<Idx>) -> Self
     where
         T: Default,
@@ -31,15 +32,15 @@ impl<T, Idx> Node<T, Idx> {
             index,
             weight: Weight::default(),
         }
-    }
-    /// creates a new instance from the given value
-    pub fn from_weight(weight: T) -> Self
+    }    
+    /// creates a new node with the given index using the logical default for the weight.
+    pub fn from_weight(weight: Weight<T>) -> Self
     where
         Idx: Default,
     {
         Self {
             index: VertexId::default(),
-            weight: Weight(weight),
+            weight,
         }
     }
     /// consumes the current instance to create another with the given index.
