@@ -4,7 +4,7 @@
 */
 #![cfg(feature = "rand")]
 
-use crate::id::{GraphIndex, Index, RawIndex};
+use crate::index::{GraphIndex, Index, RawIndex};
 use rand_distr::{Distribution, StandardUniform};
 
 /// generic implementations for the [`Index<T, K>`] enabled by the `rand` feature

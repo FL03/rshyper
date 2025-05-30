@@ -2,7 +2,8 @@
     Appellation: bft <module>
     Contrib: @FL03
 */
-use crate::{Error, HashGraph, VertexId};
+use crate::hash_graph::HashGraph;
+use rshyper_core::{Error, VertexId};
 use std::collections::{HashSet, VecDeque};
 
 use super::{Search, Traversal};
@@ -102,14 +103,18 @@ where
     }
 }
 
-impl<'a, N, E> Traversal<crate::Idx> for BreadthFirstTraversal<'a, N, E>
+impl<'a, N, E> Traversal<VertexId> for BreadthFirstTraversal<'a, N, E>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
 {
-    type Store<Idx> = HashSet<VertexId<Idx>>;
+    type Store<I2> = HashSet<I2>;
 
-    fn visited(&self) -> &Self::Store<VertexId<crate::Idx>> {
+    fn has_visited(&self, vertex: &VertexId) -> bool {
+        self.visited().contains(vertex)
+    }
+
+    fn visited(&self) -> &Self::Store<VertexId> {
         &self.visited
     }
 }

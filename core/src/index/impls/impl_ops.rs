@@ -2,7 +2,7 @@
     appellation: impl_index <module>
     authors: @FL03
 */
-use crate::id::{GraphIndex, Index, RawIndex};
+use crate::index::{GraphIndex, Index, RawIndex};
 
 impl<T, K> core::ops::Deref for Index<T, K>
 where

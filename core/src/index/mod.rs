@@ -31,16 +31,16 @@ pub(crate) mod prelude {
     #[doc(inline)]
     pub use super::position::*;
     #[doc(inline)]
-    pub use super::{EdgeId, Idx, Indexed, VertexId};
+    pub use super::{EdgeId, Indexed, Ix, NumIndex, RawIndex, VertexId};
 }
 
 /// a type alias for a [`usize`] used to define the default index type throughout the crate.
-pub type Idx = usize;
+pub type Ix = usize;
 
 /// a type alias for an [`Index`] whose _kind_ is [`EdgeIndex`]
-pub type EdgeId<T = Idx> = Index<T, EdgeIndex>;
+pub type EdgeId<T = Ix> = Index<T, EdgeIndex>;
 /// a type alias for an [`Index`] whose _kind_ is [`VertexIndex`]
-pub type VertexId<T = Idx> = Index<T, VertexIndex>;
+pub type VertexId<T = Ix> = Index<T, VertexIndex>;
 
 /// This trait is used to denote a type that is aware of its own index.
 pub trait Indexed<T: RawIndex> {
@@ -54,12 +54,14 @@ pub trait Indexed<T: RawIndex> {
 pub trait RawIndex {
     private!();
 }
+/// The [`NumIndex`] trait extends the [`RawIndex`] trait to include additional operations and
+/// behaviours expected from numerical indices in a hypergraph.
 pub trait NumIndex: RawIndex
 where
     Self: Copy
         + Default
         + Eq
-        + Ord
+        + PartialOrd
         + core::hash::Hash
         + core::ops::Add<Output = Self>
         + core::ops::Div<Output = Self>

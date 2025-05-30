@@ -2,7 +2,7 @@
     appellation: impl_repr <module>
     authors: @FL03
 */
-use crate::id::{EdgeIndex, GraphIndex, Index, RawIndex, VertexIndex};
+use crate::index::{EdgeIndex, GraphIndex, Index, RawIndex, VertexIndex};
 use core::sync::atomic::{AtomicUsize, Ordering};
 
 /// a global static counter used to generate unique indices

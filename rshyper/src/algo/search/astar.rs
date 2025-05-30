@@ -9,7 +9,7 @@ pub(crate) mod priority_node;
 
 use super::{Search, Traversal};
 use crate::HashGraph;
-use crate::{Error, Result, VertexId};
+use rshyper_core::{Error, VertexId};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 
 /// A* Search algorithm for hypergraphs
@@ -45,7 +45,7 @@ where
         }
     }
     /// a convience method to perform a search
-    pub fn search(&mut self, start: VertexId) -> Result<Vec<VertexId>> {
+    pub fn search(&mut self, start: VertexId) -> crate::Result<Vec<VertexId>> {
         Search::search(self, start)
     }
     /// reset the state
@@ -58,7 +58,7 @@ where
     }
 
     /// Find the shortest path between start and goal vertices
-    pub fn find_path(&mut self, start: VertexId, goal: VertexId) -> Result<Vec<VertexId>> {
+    pub fn find_path(&mut self, start: VertexId, goal: VertexId) -> crate::Result<Vec<VertexId>> {
         // Check if both vertices exist
         if !self.graph.contains_node(&start) {
             return Err(Error::VertexDoesNotExist(start));
@@ -195,13 +195,17 @@ where
     }
 }
 
-impl<'a, N, E, F> Traversal<crate::Idx> for AStarSearch<'a, N, E, F>
+impl<'a, N, E, F> Traversal<VertexId> for AStarSearch<'a, N, E, F>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
     F: Fn(VertexId, VertexId) -> f64,
 {
-    type Store<Idx> = HashSet<VertexId<Idx>>;
+    type Store<U> = HashSet<U>;
+
+    fn has_visited(&self, vertex: &VertexId) -> bool {
+        self.visited().contains(vertex)
+    }
 
     fn visited(&self) -> &Self::Store<VertexId> {
         &self.closed_set

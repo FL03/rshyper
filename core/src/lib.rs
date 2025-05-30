@@ -20,7 +20,7 @@ pub(crate) mod macros {
 pub use self::{
     edge::HyperEdge,
     error::{Error, Result},
-    index::{EdgeId, Index, NumIndex, Position, RawIndex, VertexId},
+    index::prelude::*,
     node::HyperNode,
     traits::prelude::*,
     types::prelude::*,

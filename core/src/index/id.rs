@@ -7,11 +7,7 @@ use super::{GraphIndex, RawIndex};
 /// indices
 #[derive(Clone, Copy, Eq, Hash, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-pub struct Index<Idx, K>
-where
-    Idx: RawIndex,
-    K: GraphIndex,
-{
+pub struct Index<Idx, K> {
     pub(crate) value: Idx,
     pub(crate) _type: core::marker::PhantomData<K>,
 }

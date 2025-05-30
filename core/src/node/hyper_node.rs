@@ -12,7 +12,7 @@ use crate::index::{RawIndex, VertexId};
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "lowercase")
 )]
-pub struct HyperNode<T = (), Idx = usize>
+pub struct HyperNode<T, Idx>
 where
     Idx: RawIndex,
 {

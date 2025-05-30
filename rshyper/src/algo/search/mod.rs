@@ -14,8 +14,11 @@
 #[doc(inline)]
 pub use self::prelude::*;
 
+/// this module implements the A* search algorithm
 pub mod astar;
+/// this module implements the breadth-first search algorithm
 pub mod breadth_first;
+/// this module implements the depth-first search algorithm
 pub mod depth_first;
 
 pub(crate) mod prelude {
@@ -29,19 +32,15 @@ pub(crate) mod prelude {
     #[doc(inline)]
     pub use super::{Search, Traversal};
 }
-use crate::{RawIndex, VertexId};
 
-use std::collections::HashSet;
 /// [`Traversal`] trait defines an interface for operators capable of _traversing_ some type,
 /// which in this case is a hypergraph.
 pub trait Traversal<N> {
-    type Store<I2: RawIndex>;
+    type Store<I2>;
     /// Check if the search has visited a specific vertex
-    fn has_visited(&self, vertex: &VertexId<N>) -> bool {
-        self.visited().contains(&vertex)
-    }
+    fn has_visited(&self, dest: &N) -> bool;
     /// Get all vertices that have been visited during the search
-    fn visited(&self) -> &Self::Store<VertexId<N>>;
+    fn visited(&self) -> &Self::Store<N>;
 }
 
 /// A trait defining a search algorithm for a hypergraph
@@ -57,6 +56,10 @@ pub trait Search<N> {
 pub trait GraphSearch<Idx>: Search<Idx> + Traversal<Idx> {
     private!();
 }
+
+/*
+ ************* Implementations *************
+*/
 
 impl<T, Idx> GraphSearch<Idx> for T
 where

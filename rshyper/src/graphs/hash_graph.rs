@@ -5,7 +5,7 @@
 
 mod impl_ops;
 
-use rshyper_core::{EdgeId, HyperNode, NumIndex, Position, VertexId};
+use rshyper_core::{EdgeId, HyperNode, NumIndex, Position, RawIndex, VertexId};
 use std::collections::{HashMap, HashSet};
 
 /// A hash-based hypergraph implementation
@@ -13,9 +13,9 @@ use std::collections::{HashMap, HashSet};
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct HashGraph<N = (), E = (), Idx = usize>
 where
-    Idx: NumIndex,
+    Idx: Eq + RawIndex + core::hash::Hash,
 {
-    pub(crate) connections: HashMap<EdgeId<Idx>, HashSet<VertexId<Idx>>>,
+    pub(crate) emap: HashMap<EdgeId<Idx>, HashSet<VertexId<Idx>>>,
     pub(crate) facets: HashMap<EdgeId<Idx>, E>,
     pub(crate) vertices: HashMap<VertexId<Idx>, HyperNode<N, Idx>>,
     pub(crate) position: Position<Idx>,
@@ -33,8 +33,8 @@ where
         Idx: Default,
     {
         HashGraph {
+            emap: HashMap::new(),
             facets: HashMap::new(),
-            connections: HashMap::new(),
             vertices: HashMap::new(),
             position: Position::default(),
         }
@@ -43,11 +43,11 @@ where
     /// words, the connections are a map of edges to sets of vertices, where each edge is
     /// represented by an [`EdgeId`] and each vertex by a [`VertexId`].
     pub const fn connections(&self) -> &HashMap<EdgeId<Idx>, HashSet<VertexId<Idx>>> {
-        &self.connections
+        &self.emap
     }
     /// returns a mutable reference to the hyperedges
     pub const fn connections_mut(&mut self) -> &mut HashMap<EdgeId<Idx>, HashSet<VertexId<Idx>>> {
-        &mut self.connections
+        &mut self.emap
     }
     /// returns an immutable reference to the facets of the hypergraph; here, a facet is a
     /// hyperedge with an associated weight
