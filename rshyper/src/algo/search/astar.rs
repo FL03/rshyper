@@ -185,6 +185,14 @@ where
         path.reverse();
         path
     }
+
+    pub fn has_visited(&self, vertex: VertexId) -> bool {
+        self.closed_set.contains(&vertex)
+    }
+
+    pub const fn visited(&self) -> &HashSet<VertexId> {
+        &self.closed_set
+    }
 }
 
 impl<'a, N, E, F> Traversal<VertexId> for AStarSearch<'a, N, E, F>
@@ -197,11 +205,10 @@ where
         self.closed_set.contains(&vertex)
     }
 
-    fn visited_vertices(&self) -> &HashSet<VertexId> {
+    fn visited(&self) -> &HashSet<VertexId> {
         &self.closed_set
     }
 }
-
 
 impl<'a, N, E, F> Search<VertexId> for AStarSearch<'a, N, E, F>
 where
@@ -209,7 +216,9 @@ where
     N: Eq + core::hash::Hash,
     F: Fn(VertexId, VertexId) -> f64,
 {
-    fn search(&mut self, start: VertexId) -> Result<Vec<VertexId>> {
+    type Output = Vec<VertexId>;
+
+    fn search(&mut self, start: VertexId) -> crate::Result<Self::Output> {
         // For A*, we need a goal vertex to compute the heuristic
         // This implementation of search will explore the graph and return
         // all reachable vertices ordered by their distance from start
@@ -227,13 +236,5 @@ where
         };
 
         self.find_path(start, max_vertex_id)
-    }
-
-    fn has_visited(&self, vertex: VertexId) -> bool {
-        self.closed_set.contains(&vertex)
-    }
-
-    fn visited_vertices(&self) -> &HashSet<VertexId> {
-        &self.closed_set
     }
 }

@@ -4,7 +4,6 @@
 */
 use crate::{EdgeId, VertexId};
 
-
 pub trait RawNode {
     type Idx;
 
@@ -29,6 +28,5 @@ pub trait RawHyperGraph<N, E> {
 
 /// [`HyperGraph`] is a trait that defines the basic operations for a hypergraph data structure.
 pub trait HyperGraph<N, E>: RawHyperGraph<N, E> {
-    
     type Adj<N2, E2>;
 }

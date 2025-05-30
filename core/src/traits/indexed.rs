@@ -11,9 +11,8 @@ pub trait Indexed<T> {
     fn index(&self) -> &Self::Idx<T>;
 }
 
-
 /*
-    ************* Implementations *************
+ ************* Implementations *************
 */
 use crate::VertexId;
 use crate::node::Node;

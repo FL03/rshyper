@@ -17,7 +17,10 @@ pub struct Node<T = (), Idx = usize> {
 
 impl<T, Idx> Node<T, Idx> {
     pub fn new(index: VertexId<Idx>, weight: T) -> Self {
-        Self { index, weight: Weight(weight) }
+        Self {
+            index,
+            weight: Weight(weight),
+        }
     }
     /// creates a new node with the given index and default weight
     pub fn from_index(index: VertexId<Idx>) -> Self
@@ -90,14 +93,14 @@ impl<T, Idx> Node<T, Idx> {
     }
 }
 
-impl<T, Idx> AsRef<T> for Node<T, Idx> {
-    fn as_ref(&self) -> &T {
+impl<T, Idx> AsRef<Weight<T>> for Node<T, Idx> {
+    fn as_ref(&self) -> &Weight<T> {
         &self.weight
     }
 }
 
-impl<T, Idx> AsMut<T> for Node<T, Idx> {
-    fn as_mut(&mut self) -> &mut T {
+impl<T, Idx> AsMut<Weight<T>> for Node<T, Idx> {
+    fn as_mut(&mut self) -> &mut Weight<T> {
         &mut self.weight
     }
 }
@@ -122,11 +125,3 @@ where
         )
     }
 }
-
-// impl<T, Idx> Weighted<Idx> for Node<T, Idx> {
-//     type Data = T;
-
-//     fn weight(&self) -> &Self::Data {
-//         &self.weight
-//     }
-// }

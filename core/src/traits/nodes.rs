@@ -2,7 +2,7 @@
     Appellation: nodes <module>
     Contrib: @FL03
 */
-use crate::VertexId;
+use crate::{VertexId, Weight};
 
 /// A trait denoting a node within the hypergraph.
 pub trait HyperNode<Idx> {
@@ -15,16 +15,28 @@ pub trait HashNode<Idx>: HyperNode<Idx> + Eq + core::hash::Hash {
     private!();
 }
 
+pub trait Weighted<T> {
+    fn weight(&self) -> &Weight<T>;
 
-pub trait Weighted {
-    type Data;
-
-    fn weight(&self) -> &Self::Data;
+    fn weight_mut(&mut self) -> &mut Weight<T>;
 }
 
 /*
  ************* Implementations *************
 */
+impl<T> Weighted<T> for T
+where
+    T: AsRef<Weight<T>> + AsMut<Weight<T>>,
+{
+    fn weight(&self) -> &Weight<T> {
+        self.as_ref()
+    }
+
+    fn weight_mut(&mut self) -> &mut Weight<T> {
+        self.as_mut()
+    }
+}
+
 impl<T, Idx> HashNode<Idx> for T
 where
     T: HyperNode<Idx> + Eq + core::hash::Hash,

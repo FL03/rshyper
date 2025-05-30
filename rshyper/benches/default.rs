@@ -30,17 +30,20 @@ fn bench_fib_iter(c: &mut Criterion) {
     group.measurement_time(Duration::from_secs(MEASURE_FOR_SECS));
     group.sample_size(SAMPLE_SIZE);
 
-    [10, 50, 100, 500, 1000].iter().copied().for_each(|n: usize| {
-        group.bench_with_input(BenchmarkId::new("fib::Fibonacci", n), &n, |b, &x| {
-            b.iter_batched(
-                fib::Fibonacci::new,
-                |mut fib| {
-                    black_box(fib.compute(x));
-                },
-                BatchSize::SmallInput,
-            );
+    [10, 50, 100, 500, 1000]
+        .iter()
+        .copied()
+        .for_each(|n: usize| {
+            group.bench_with_input(BenchmarkId::new("fib::Fibonacci", n), &n, |b, &x| {
+                b.iter_batched(
+                    fib::Fibonacci::new,
+                    |mut fib| {
+                        black_box(fib.compute(x));
+                    },
+                    BatchSize::SmallInput,
+                );
+            });
         });
-    });
 
     group.finish();
 }

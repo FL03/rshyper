@@ -27,6 +27,14 @@ where
             visited: HashSet::new(),
         }
     }
+    /// returns an immutable reference to the queue
+    pub const fn queue(&self) -> &VecDeque<VertexId> {
+        &self.queue
+    }
+
+    pub const fn visited(&self) -> &HashSet<VertexId> {
+        &self.visited
+    }
     /// Reset the traversal state to allow reusing the instance
     pub fn reset(&mut self) {
         self.queue.clear();
@@ -43,7 +51,9 @@ where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
 {
-    fn search(&mut self, start: VertexId) -> crate::Result<Vec<VertexId>> {
+    type Output = Vec<VertexId>;
+
+    fn search(&mut self, start: VertexId) -> crate::Result<Self::Output> {
         // Reset state
         self.reset();
 
@@ -81,14 +91,6 @@ where
 
         Ok(path)
     }
-
-    fn has_visited(&self, vertex: VertexId) -> bool {
-        self.visited.contains(&vertex)
-    }
-
-    fn visited_vertices(&self) -> &HashSet<VertexId> {
-        &self.visited
-    }
 }
 
 impl<'a, N, E> Traversal<VertexId> for BreadthFirstTraversal<'a, N, E>
@@ -100,7 +102,7 @@ where
         self.visited.contains(&vertex)
     }
 
-    fn visited_vertices(&self) -> &HashSet<VertexId> {
+    fn visited(&self) -> &HashSet<VertexId> {
         &self.visited
     }
 }

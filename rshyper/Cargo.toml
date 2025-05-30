@@ -160,12 +160,12 @@ tracing = [
 [[bench]]
 harness = false
 name = "default"
-required-features = [ "std" ]
+required-features = ["std"]
 
 [[bench]]
 harness = false
 name = "hash_graph"
-required-features = [ "std" ]
+required-features = ["std"]
 
 # ************* [Examples] *************
 [[example]]
@@ -178,9 +178,17 @@ name = "default"
 required-features = [  ]
 
 [[test]]
-name = "hash_graph"
-required-features = [ "hash" ]
+name = "astar"
+required-features = ["std"]
 
 [[test]]
-name = "search"
-required-features = [ "hash" ]
+name = "bft"
+required-features = ["std"]
+
+[[test]]
+name = "dft"
+required-features = ["std"]
+
+[[test]]
+name = "hash_graph"
+required-features = ["std"]

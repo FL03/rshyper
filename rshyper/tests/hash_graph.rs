@@ -2,11 +2,11 @@
     Appellation: graph <module>
     Contrib: @FL03
 */
-use rshyper::graphs::hash_graph::HashGraph;
+use rshyper::{Weight, graphs::hash_graph::HashGraph};
 use std::collections::HashSet;
 
 #[test]
-fn test_hypergraph() -> rshyper::Result<()> {
+fn test_hash_graph() -> rshyper::Result<()> {
     let mut graph = HashGraph::<usize>::new();
 
     // Add some vertices
@@ -36,7 +36,7 @@ fn test_hypergraph() -> rshyper::Result<()> {
 }
 
 #[test]
-fn merge_hyperedge() -> rshyper::Result<()> {
+fn test_merge_hash_edge() -> rshyper::Result<()> {
     let mut graph = HashGraph::<usize>::new();
     let v0 = graph.insert_node(10);
     let v1 = graph.insert_node(20);
@@ -54,24 +54,24 @@ fn merge_hyperedge() -> rshyper::Result<()> {
 }
 
 #[test]
-fn update_vertex() -> rshyper::Result<()> {
+fn test_update_hash_node() -> rshyper::Result<()> {
     let mut graph = HashGraph::<usize>::new();
     let v0 = graph.insert_node(42);
 
     // Check initial weight
     let initial_weight = graph.get_vertex_weight(v0)?;
-    assert_eq!(initial_weight.weight(), &42);
+    assert_eq!(initial_weight.weight(), &Weight(42));
     // Update the weight
     let _ = graph.set_vertex_weight(v0, 100)?;
     // Check updated weight
     let updated_weight = graph.get_vertex_weight(v0)?;
-    assert_eq!(updated_weight.weight(), &100);
+    assert_eq!(**updated_weight.weight(), 100);
 
     Ok(())
 }
 
 #[test]
-fn remove_hyperedge() -> rshyper::Result<()> {
+fn test_remove_hash_edges() -> rshyper::Result<()> {
     let mut graph = HashGraph::<usize>::new();
     let v0 = graph.insert_node(10);
     let v1 = graph.insert_node(20);
