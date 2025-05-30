@@ -3,19 +3,15 @@
     Contrib: @FL03
 */
 use criterion::{BatchSize, BenchmarkId, Criterion, criterion_group, criterion_main};
-use lazy_static::lazy_static;
 use std::hint::black_box;
 use std::time::Duration;
 
 /// the default number of iterations to benchmark a method for
 const N: usize = 20;
-/// the default number of seconds a benchmark should complete in
-const DEFAULT_DURATION_SECS: u64 = 10;
 
-lazy_static! {
-    /// a static reference to the duration of the benchmark
-    static ref DURATION: Duration = Duration::from_secs(DEFAULT_DURATION_SECS);
-}
+const SAMPLE_SIZE: usize = 50;
+/// the default number of seconds a benchmark should complete in
+const MEASURE_FOR_SECS: u64 = 10;
 
 fn bench_fib_func(c: &mut Criterion) {
     c.bench_function("fib::fibonacci_at", |b| {
@@ -30,22 +26,24 @@ fn bench_fib_recursive(c: &mut Criterion) {
 }
 
 fn bench_fib_iter(c: &mut Criterion) {
-    let measure_for = Duration::from_secs(DEFAULT_DURATION_SECS);
     let mut group = c.benchmark_group("Fibonacci Iter");
-    group.measurement_time(measure_for);
-    group.sample_size(50);
+    group.measurement_time(Duration::from_secs(MEASURE_FOR_SECS));
+    group.sample_size(SAMPLE_SIZE);
 
-    for &n in &[10, 50, 100, 500, 1000] {
-        group.bench_with_input(BenchmarkId::new("fib::Fibonacci", n), &n, |b, &x| {
-            b.iter_batched(
-                fib::Fibonacci::new,
-                |mut fib| {
-                    black_box(fib.compute(x));
-                },
-                BatchSize::SmallInput,
-            );
+    [10, 50, 100, 500, 1000]
+        .iter()
+        .copied()
+        .for_each(|n: usize| {
+            group.bench_with_input(BenchmarkId::new("fib::Fibonacci", n), &n, |b, &x| {
+                b.iter_batched(
+                    fib::Fibonacci::new,
+                    |mut fib| {
+                        black_box(fib.compute(x));
+                    },
+                    BatchSize::SmallInput,
+                );
+            });
         });
-    }
 
     group.finish();
 }

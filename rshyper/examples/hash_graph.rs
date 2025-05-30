@@ -8,10 +8,10 @@ fn main() -> rshyper::Result<()> {
     let mut graph = HashGraph::<()>::new();
 
     // Add some vertices
-    let v0 = graph.insert_vertex_default();
-    let v1 = graph.insert_vertex_default();
-    let v2 = graph.insert_vertex_default();
-    let v3 = graph.insert_vertex_default();
+    let v0 = graph.insert_node_default();
+    let v1 = graph.insert_node_default();
+    let v2 = graph.insert_node_default();
+    let v3 = graph.insert_node_default();
 
     // Add some hyperedges
     let e1 = graph.insert_edge(vec![v0, v1, v2])?;

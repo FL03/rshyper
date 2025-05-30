@@ -2,8 +2,10 @@
     Appellation: bft <module>
     Contrib: @FL03
 */
-use crate::{Error, HashGraph, Result, Search, VertexId};
+use crate::{Error, HashGraph, VertexId};
 use std::collections::{HashSet, VecDeque};
+
+use super::{Search, Traversal};
 
 /// Breadth-First Traversal algorithm for hypergraphs
 pub struct BreadthFirstTraversal<'a, N, E> {
@@ -17,28 +19,41 @@ where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
 {
-    /// Create a new BreadthFirstTraversal instance
-    pub(crate) fn new(graph: &'a HashGraph<N, E>) -> Self {
+    /// create a new instance from a hypergraph
+    pub(crate) fn from_hypergraph(graph: &'a HashGraph<N, E>) -> Self {
         Self {
             graph,
             queue: VecDeque::new(),
             visited: HashSet::new(),
         }
     }
+    /// returns an immutable reference to the queue
+    pub const fn queue(&self) -> &VecDeque<VertexId> {
+        &self.queue
+    }
 
+    pub const fn visited(&self) -> &HashSet<VertexId> {
+        &self.visited
+    }
     /// Reset the traversal state to allow reusing the instance
     pub fn reset(&mut self) {
         self.queue.clear();
         self.visited.clear();
     }
+    /// a convience method to perform a search
+    pub fn search(&mut self, start: VertexId) -> crate::Result<Vec<VertexId>> {
+        Search::search(self, start)
+    }
 }
 
-impl<'a, N, E> Search<N> for BreadthFirstTraversal<'a, N, E>
+impl<'a, N, E> Search<VertexId> for BreadthFirstTraversal<'a, N, E>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
 {
-    fn search(&mut self, start: VertexId) -> Result<Vec<VertexId>> {
+    type Output = Vec<VertexId>;
+
+    fn search(&mut self, start: VertexId) -> crate::Result<Self::Output> {
         // Reset state
         self.reset();
 
@@ -76,12 +91,18 @@ where
 
         Ok(path)
     }
+}
 
+impl<'a, N, E> Traversal<VertexId> for BreadthFirstTraversal<'a, N, E>
+where
+    E: Eq + core::hash::Hash,
+    N: Eq + core::hash::Hash,
+{
     fn has_visited(&self, vertex: VertexId) -> bool {
         self.visited.contains(&vertex)
     }
 
-    fn visited_vertices(&self) -> &HashSet<VertexId> {
+    fn visited(&self) -> &HashSet<VertexId> {
         &self.visited
     }
 }

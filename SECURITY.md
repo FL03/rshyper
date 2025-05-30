@@ -6,7 +6,9 @@ Checkout the current and supported packages below:
 
 |  Version  |     Supported?     |
 |-----------|--------------------|
+| 0.0.6     | :white_check_mark: |
 | <=0.0.4   | :white_check_mark: |
+| < 0.0.3   | :x:                |
 
 ## Reporting a Vulnerability
 

@@ -2,7 +2,8 @@
     Appellation: dft <module>
     Contrib: @FL03
 */
-use crate::{Error, HashGraph, Result, Search, VertexId};
+use super::{Search, Traversal};
+use crate::{Error, HashGraph, VertexId};
 use std::collections::HashSet;
 
 /// Depth-First Traversal algorithm for hypergraphs
@@ -25,20 +26,55 @@ where
             visited: HashSet::new(),
         }
     }
-
-    /// Reset the traversal state
+    /// returns an immutable reference to the stack
+    pub const fn stack(&self) -> &Vec<VertexId> {
+        &self.stack
+    }
+    /// returns a mutable reference to the stack
+    pub const fn stack_mut(&mut self) -> &mut Vec<VertexId> {
+        &mut self.stack
+    }
+    /// returns an immutable reference to the indices of the visited nodes
+    pub const fn visited(&self) -> &HashSet<VertexId> {
+        &self.visited
+    }
+    /// returns a mutable reference to the indices of the visited nodes
+    pub const fn visited_mut(&mut self) -> &mut HashSet<VertexId> {
+        &mut self.visited
+    }
+    /// reset the traversal state
     pub fn reset(&mut self) {
-        self.stack.clear();
-        self.visited.clear();
+        self.stack_mut().clear();
+        self.visited_mut().clear();
+    }
+    /// a convience method to perform a search
+    pub fn search(&mut self, start: VertexId) -> crate::Result<Vec<VertexId>> {
+        Search::search(self, start)
     }
 }
 
-impl<'a, N, E> Search<N> for DepthFirstTraversal<'a, N, E>
+impl<'a, N, E> Traversal<VertexId> for DepthFirstTraversal<'a, N, E>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
 {
-    fn search(&mut self, start: VertexId) -> Result<Vec<VertexId>> {
+    fn has_visited(&self, vertex: VertexId) -> bool {
+        self.visited.contains(&vertex)
+    }
+
+    fn visited(&self) -> &HashSet<VertexId> {
+        &self.visited
+    }
+}
+
+impl<'a, N, E> Search<VertexId> for DepthFirstTraversal<'a, N, E>
+where
+    E: Eq + core::hash::Hash,
+    N: Eq + core::hash::Hash,
+{
+    type Output = Vec<VertexId>;
+
+    fn search(&mut self, start: VertexId) -> crate::Result<Self::Output> {
         // Reset state
         self.reset();
 
@@ -83,13 +119,5 @@ where
         }
 
         Ok(path)
-    }
-
-    fn has_visited(&self, vertex: VertexId) -> bool {
-        self.visited.contains(&vertex)
-    }
-
-    fn visited_vertices(&self) -> &HashSet<VertexId> {
-        &self.visited
     }
 }

@@ -32,29 +32,6 @@ Formally, a hypergraph is defined as a pair $H = (V, E)$ where:
 
 - [x] `hash` - A hash-based hypergraph implementation.
 
-## Getting Started
-
-### Building from the source
-
-Start by cloning the repository
-
-```bash
-git clone https://github.com//rshyper.git
-cd rshyper
-```
-
-#### _Building the project_
-
-```bash
-cargo build --all-features -r -v --workspace
-```
-
-#### _Running tests_
-
-```bash
-cargo test --all-features -r -v --workspace
-```
-
 ## Usage
 
 Add this to your `Cargo.toml`:
@@ -72,27 +49,98 @@ version = "0.0.x"
 ```rust
     extern crate rshyper;
 
-    fn main() -> anyhow::Result<()> {
+    fn main() -> rshyper::Result<()> {
         let mut graph = HashGraph::<()>::new();
 
         // Add some vertices
-        let v0 = graph.add_vertex_default();
-        let v1 = graph.add_vertex_default();
-        let v2 = graph.add_vertex_default();
-        let v3 = graph.add_vertex_default();
+        let v0 = graph.insert_node_default();
+        let v1 = graph.insert_node_default();
+        let v2 = graph.insert_node_default();
+        let v3 = graph.insert_node_default();
 
-        // add hyperedges
-        let e1 = graph.add_hyperedge(vec![v0, v1, v2])?;
-        let e2 = graph.add_hyperedge(vec![v1, v2, v3])?;
+        // Add some hyperedges
+        let e1 = graph.insert_edge(vec![v0, v1, v2])?;
+        println!("Added hyperedge {e1}: {:?}", [v0, v1, v2]);
+
+        let e2 = graph.insert_edge(vec![v1, v2, v3])?;
+        println!("Added hyperedge {e2}: {:?}", [v1, v2, v3]);
+
         // Get neighbors of vertex v1
-        let neighbors = graph.get_neighbors(v1)?;
+        let neighbors = graph.neighbors(v1)?;
+        println!("Neighbors of {}: {:?}", v1, neighbors);
+
         // Get degree of vertex v1
-        let degree = graph.vertex_degree(v1)?;
+        let degree = graph.get_vertex_degree(v1)?;
+        println!("Degree of {v1}: {degree}");
+
         // Remove a vertex
         graph.remove_vertex(v2)?;
-        println!("\n****** Final Graph State ******\n{state:?}", state = graph);
+        println!("Removed vertex {v2}");
+
+        println!("---------\nFinal graph state: {:?}", graph);
         Ok(())
     }
+
+```
+
+## Getting Started
+
+### Prerequisites
+
+Ensure you have the latest version of Rust installed. You can install Rust using [rustup](https://rustup.rs/).
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+After installation, I always recommend ensuring that rustup is updated to the latest version:
+
+```bash
+rustup update
+```
+
+And to add the latest nightly toolchain, which is often useful for development:
+
+```bash
+rustup toolchain install nightly
+```
+
+Additionally, you may wish to install the `cargo-binstall` utility to streamline the installation of Rust binaries:
+
+```bash
+cargo install cargo-binstall
+```
+
+If necessary, add the `wasm32-*` target(s) if you plan to compile for WebAssembly:
+
+```bash
+rustup target add wasm32-unknown-unknown wasm32-p1 wasm32-p2
+```
+
+### Building from the source
+
+Start by cloning the repository
+
+```bash
+git clone https://github.com/FL03/rshyper.git -b main --depth 1
+```
+
+Then, navigate to the project directory:
+
+```bash
+cd rshyper
+```
+
+Once you're in the project directory, you can build the project using `cargo`:
+
+```bash
+cargo build --workspace --release --all-features
+```
+
+Or, if you want to run the tests, you can use:
+
+```bash
+cargo test --workspace --release --all-features
 ```
 
 ## Contributing

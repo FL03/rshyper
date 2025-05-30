@@ -18,12 +18,34 @@ where
 impl<T, K> Index<T, K>
 where
     K: IndexKind,
-{
-    pub fn from_value(index: T) -> Self {
+{    
+    /// returns a new instance of [`Index`] with the given value.
+    pub fn new(index: T) -> Self {
         Self {
             value: index,
-            _type: PhantomData::<K>,
+            _type: core::marker::PhantomData::<K>,
         }
+    }
+    /// initializes a new instance of [`Index`] using the logical default for the type `T`
+    pub fn default() -> Self
+    where
+        T: Default,
+    {
+        Self::new(T::default())
+    }
+    /// creates a new index with a value of [`one`](num_traits::One)
+    pub fn one() -> Self
+    where
+        T: num_traits::One,
+    {
+        Self::new(T::one())
+    }
+    /// creates a new index with a value of [`zero`](num_traits::Zero)
+    pub fn zero() -> Self
+    where
+        T: num_traits::Zero,
+    {
+        Self::new(T::zero())
     }
     /// returns a pointer to the inner value
     pub const fn as_ptr(&self) -> *const T {
@@ -60,6 +82,7 @@ where
         core::mem::replace(&mut self.value, index)
     }
     /// set the index to the given value
+    #[inline]
     pub fn set(&mut self, value: T) -> &mut Self {
         self.value = value;
         self
@@ -77,6 +100,7 @@ where
         core::mem::take(&mut self.value)
     }
     /// consumes the current index to create another with the given value
+    #[inline]
     pub fn with<U>(self, value: U) -> Index<U, K> {
         Index {
             value,
@@ -84,6 +108,7 @@ where
         }
     }
     /// decrements the index value by [one](num_traits::One) and returns a new instance
+    #[inline]
     pub fn dec(self) -> Self
     where
         T: core::ops::Sub<Output = T> + num_traits::One,
@@ -101,6 +126,7 @@ where
     }
     /// increments the index value by [one](num_traits::One) and consumes the current instance
     /// to create another with the new value.
+    #[inline]
     pub fn inc(self) -> Self
     where
         T: core::ops::Add<Output = T> + num_traits::One,
@@ -120,7 +146,7 @@ where
     ///
     /// ```rust
     ///     use rshyper_core::EdgeId;
-    ///     let mut edge_id = EdgeId::<usize>::default();
+    ///     let mut edge_id = EdgeId::<usize>::zero();
     ///     let e0 = edge_id.step()?;
     ///     let e1 = edge_id.step()?;
     ///     let e2 = edge_id.step()?;
@@ -190,7 +216,7 @@ where
     K: IndexKind,
 {
     fn from(index: T) -> Self {
-        Self::from_value(index)
+        Self::new(index)
     }
 }
 
@@ -217,7 +243,7 @@ where
         // replace the current value with the next one
         let prev = core::mem::replace(&mut self.value, next);
         // return the previous instance
-        Some(Self::from_value(prev))
+        Some(Self::new(prev))
     }
 }
 

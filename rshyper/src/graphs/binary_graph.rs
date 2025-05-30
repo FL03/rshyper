@@ -1,6 +1,6 @@
 /*
-    Appellation: graph <module>
-    Contrib: @FL03
+    appellation: binary_graph <module>
+    authors: @FL03
 */
 use alloc::collections::{BTreeMap, BTreeSet};
 use rshyper_core::{EdgeId, Node, VertexId, id::Position};

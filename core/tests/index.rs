@@ -19,14 +19,14 @@ fn test_edge_id() -> rshyper::Result<()> {
 
 #[test]
 fn test_vertex_id() -> rshyper::Result<()> {
-    let vertex_id = VertexId::from_value(1);
+    let vertex_id = VertexId::new(1);
     assert_eq!(vertex_id.get(), &1);
     Ok(())
 }
 
 #[test]
 fn test_index() -> rshyper::Result<()> {
-    let mut index = Index::<usize, VertexIndex>::from_value(1);
+    let mut index = Index::<usize, VertexIndex>::new(1);
     assert_eq!(index.get(), &1);
     index.set(2);
     assert_eq!(index.get(), &2);

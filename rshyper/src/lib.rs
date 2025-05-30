@@ -25,22 +25,14 @@
 //! many applications such as database design, network analysis, combinatorial optimization,
 //! modeling topological spaces, and more.
 //!
-//! _**definition.**_ Formally, a hypergraph is defined as a pair $\( H = (V, E) \)$ where:
-//!
-//! ***
-//!
 #[cfg(feature = "alloc")]
 extern crate alloc;
-
-#[cfg(feature = "alloc")]
-pub use self::binary_graph::BinaryGraph;
-#[cfg(feature = "hash")]
 #[doc(inline)]
-pub use self::hash_graph::HashGraph;
+#[cfg(feature = "alloc")]
+pub use self::graphs::prelude::*;
 #[doc(inline)]
 pub use self::{algo::prelude::*, ops::prelude::*};
 
-/// this module implements the core functionality of the `rshyper` crate
 #[doc(inline)]
 pub use rshyper_core::*;
 
@@ -52,10 +44,7 @@ pub(crate) mod macros {
 }
 
 pub mod algo;
-#[cfg(feature = "alloc")]
-pub mod binary_graph;
-#[cfg(feature = "hash")]
-pub mod hash_graph;
+pub mod graphs;
 
 pub mod ops {
     #[doc(inline)]
@@ -77,10 +66,7 @@ pub mod prelude {
     pub use crate::algo::prelude::*;
     #[cfg(feature = "alloc")]
     #[doc(no_inline)]
-    pub use crate::binary_graph::prelude::*;
-    #[cfg(feature = "hash")]
-    #[doc(no_inline)]
-    pub use crate::hash_graph::prelude::*;
+    pub use crate::graphs::prelude::*;
     #[doc(no_inline)]
     pub use crate::ops::prelude::*;
 }
