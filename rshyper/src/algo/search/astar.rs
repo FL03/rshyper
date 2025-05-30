@@ -17,7 +17,7 @@ use std::collections::{BinaryHeap, HashMap, HashSet};
 pub trait HeuristicFunc<T = VertexId> {
     type Output;
 
-    fn heuristic(&self, start: T, goal: T) -> Self::Output;
+    fn compute(&self, start: T, goal: T) -> Self::Output;
 }
 
 impl<F> HeuristicFunc<VertexId> for F
@@ -26,7 +26,7 @@ where
 {
     type Output = f64;
 
-    fn heuristic(&self, start: VertexId, goal: VertexId) -> Self::Output {
+    fn compute(&self, start: VertexId, goal: VertexId) -> Self::Output {
         self(start, goal)
     }
 }
@@ -63,6 +63,26 @@ where
             heuristic,
         }
     }
+    /// consumes the current instance to create another from the given heuristic function;
+    /// **note:** while the functions may be different, the output type of both must match.
+    pub fn with_heuristic<G>(self, heuristic: G) -> AStarSearch<'a, N, E, G>
+    where
+        G: HeuristicFunc<Output = F::Output>,
+    {
+        AStarSearch {
+            graph: self.graph,
+            open_set: self.open_set,
+            closed_set: self.closed_set,
+            came_from: self.came_from,
+            g_score: self.g_score,
+            f_score: self.f_score,
+            heuristic,
+        }
+    }
+    /// returns an immutable reference to the heuristic function of the algorithm
+    pub const fn heuristic(&self) -> &F {
+        &self.heuristic
+    }
     /// reset the state
     pub fn reset(&mut self) -> &mut Self {
         self.open_set.clear();
@@ -97,7 +117,7 @@ where
         self.g_score.insert(start, 0.0);
 
         // Initialize f_score for start node (heuristic only since g=0)
-        let start_f_score = self.heuristic.heuristic(start, goal);
+        let start_f_score = self.heuristic.compute(start, goal);
         self.f_score.insert(start, start_f_score);
 
         // Add start node to the open set
@@ -137,17 +157,11 @@ where
             self.closed_set.insert(current);
 
             // Get all hyperedges containing the current vertex
-            let edges = match self.graph.get_edges_with_vertex(&current) {
-                Ok(edges) => edges,
-                Err(e) => return Err(e),
-            };
+            let edges = self.graph.get_edges_with_vertex(&current)?;
 
             for edge_id in edges {
                 // Get all vertices in this hyperedge
-                let vertices = match self.graph.get_vertices_for_edge(&edge_id) {
-                    Ok(verts) => verts,
-                    Err(e) => return Err(e),
-                };
+                let vertices = self.graph.get_vertices_for_edge(&edge_id)?;
 
                 // Process each vertex in this hyperedge
                 for &neighbor in vertices {
@@ -169,7 +183,7 @@ where
                         self.g_score.insert(neighbor, tentative_g_score);
 
                         // Update f_score (g_score + heuristic)
-                        let f_score = tentative_g_score + self.heuristic.heuristic(neighbor, goal);
+                        let f_score = tentative_g_score + self.heuristic().compute(neighbor, goal);
                         self.f_score.insert(neighbor, f_score);
 
                         // Add to open set if not already there

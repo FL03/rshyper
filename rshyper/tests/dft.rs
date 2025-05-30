@@ -2,11 +2,10 @@
     appellation: dft <test>
     authors: @FL03
 */
-use rshyper::HashGraph;
+use rshyper::{HashGraph, Traversal};
 
 #[test]
 fn test_depth_first_traversal() -> rshyper::Result<()> {
-    use rshyper::Traversal;
     let mut graph = HashGraph::<()>::new();
 
     // Create a simple hypergraph
@@ -117,17 +116,14 @@ fn test_dft_isolated_vertex() -> rshyper::Result<()> {
     let v2 = graph.insert_node_default(); // isolated
 
     let _e1 = graph.insert_edge(vec![v0, v1])?;
-
+    // create a new dft instance
     let mut dft = graph.dft();
+    // test search starting from `v0`
     let path = dft.search(v0)?;
-
-    // Should only visit connected vertices
+    // algotihm should only visit connected vertices
     assert_eq!(path.len(), 2, "Should visit only connected vertices");
-
     // v2 should not be visited
-    let visited = dft.visited();
-    assert!(!visited.contains(&v2));
-
+    assert!(!dft.has_visited(&v2));
     // Starting from isolated vertex should only visit that vertex
     let path_from_isolated = dft.search(v2)?;
     assert_eq!(

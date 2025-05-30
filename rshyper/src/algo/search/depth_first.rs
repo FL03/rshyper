@@ -8,7 +8,7 @@ use crate::index::{HashIndex, NumIndex, VertexId};
 use std::collections::HashSet;
 
 /// Depth-First Traversal algorithm for hypergraphs
-pub struct DepthFirstTraversal<'a, N, E, Idx = crate::Ix>
+pub struct DepthFirstTraversal<'a, N, E, Idx = crate::Udx>
 where
     Idx: HashIndex,
 {
@@ -110,8 +110,7 @@ where
         }
 
         // Add start vertex to stack and mark as visited
-        self.stack.push(start);
-        self.visited.insert(start);
+        self.register_vertex(start);
 
         // Path to return (traversal order)
         let mut path = Vec::new();
@@ -121,25 +120,25 @@ where
             path.push(current);
 
             // Get all hyperedges containing the current vertex
-            let edges = self.graph.get_edges_with_vertex(&current)?;
+            if let Ok(edges) = self.graph.get_edges_with_vertex(&current) {
+                // For each hyperedge, visit all vertices that haven't been visited yet
+                for edge_id in edges {
+                    let vertices = self.graph.get_vertices_for_edge(&edge_id)?;
 
-            // For each hyperedge, visit all vertices that haven't been visited yet
-            for edge_id in edges {
-                let vertices = self.graph.get_vertices_for_edge(&edge_id)?;
+                    // Add vertices in reverse order to maintain expected DFS behavior
+                    let mut new_vertices = vertices
+                        .iter()
+                        .filter(|&v| !self.visited.contains(v))
+                        .copied()
+                        .collect::<Vec<_>>();
 
-                // Add vertices in reverse order to maintain expected DFS behavior
-                let mut new_vertices = vertices
-                    .iter()
-                    .filter(|&v| !self.visited.contains(v))
-                    .copied()
-                    .collect::<Vec<_>>();
+                    // Sort in reverse order (arbitrary but consistent)
+                    new_vertices.sort_by(|&a, &b| b.cmp(a));
 
-                // Sort in reverse order (arbitrary but consistent)
-                new_vertices.sort_by(|&a, &b| b.cmp(a));
-
-                for v in new_vertices {
-                    // add the index to the stack and indicate it has been viewed
-                    self.register_vertex(v);
+                    for v in new_vertices {
+                        // add the index to the stack and indicate it has been viewed
+                        self.register_vertex(v);
+                    }
                 }
             }
         }

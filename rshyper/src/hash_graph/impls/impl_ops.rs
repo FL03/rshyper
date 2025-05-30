@@ -4,10 +4,10 @@
 */
 use crate::algo::search;
 use crate::hash_graph::HashGraph;
-use rshyper_core::{EdgeId, Ix, HyperNode, HashIndex, VertexId};
+use rshyper_core::{EdgeId, Udx, HyperNode, HashIndex, VertexId};
 
 /// implementations for various algorithms and operators on the hypergraph
-impl<N, E> HashGraph<N, E, Ix>
+impl<N, E> HashGraph<N, E, Udx>
 where
     N: Eq + core::hash::Hash,
     E: Eq + core::hash::Hash,
@@ -15,7 +15,7 @@ where
     /// search the hypergraph using the A* algorithm with the given heuristic function
     pub fn astar<F>(&self, heuristic: F) -> search::AStarSearch<'_, N, E, F>
     where
-        F: search::astar::HeuristicFunc<VertexId<Ix>, Output = f64>,
+        F: search::astar::HeuristicFunc<VertexId<Udx>, Output = f64>,
     {
         search::AStarSearch::new(self, heuristic)
     }

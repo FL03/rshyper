@@ -2,6 +2,12 @@
     appellation: rshyper-core <library>
     authors: @FL03
 */
+//! ---
+//! description: the core modules for the rshyper framework
+//! title: rshyper-core
+//! ---
+//! 
+//! 
 //! This crate provides the core functionality for the rshyper library.
 #![crate_name = "rshyper_core"]
 #![crate_type = "lib"]
