@@ -31,6 +31,10 @@ where
         self.queue.clear();
         self.visited.clear();
     }
+    /// a convience method to perform a search
+    pub fn search(&mut self, start: VertexId) -> Result<Vec<VertexId>> {
+        Search::search(self, start)
+    }
 }
 
 impl<'a, N, E> Search<N> for BreadthFirstTraversal<'a, N, E>

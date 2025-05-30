@@ -44,6 +44,10 @@ where
             heuristic,
         }
     }
+    /// a convience method to perform a search
+    pub fn search(&mut self, start: VertexId) -> Result<Vec<VertexId>> {
+        Search::search(self, start)
+    }
 
     /// Reset the search state
     pub fn reset(&mut self) {

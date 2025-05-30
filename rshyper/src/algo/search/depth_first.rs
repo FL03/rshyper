@@ -25,11 +25,14 @@ where
             visited: HashSet::new(),
         }
     }
-
-    /// Reset the traversal state
+    /// reset the traversal state
     pub fn reset(&mut self) {
         self.stack.clear();
         self.visited.clear();
+    }
+    /// a convience method to perform a search
+    pub fn search(&mut self, start: VertexId) -> Result<Vec<VertexId>> {
+        Search::search(self, start)
     }
 }
 
