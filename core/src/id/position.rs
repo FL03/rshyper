@@ -20,7 +20,10 @@ where
     pub(crate) vertex: VertexId<T>,
 }
 
-impl<T: RawIndex> Position<T> {
+impl<T> Position<T> 
+where
+    T: RawIndex,
+{
     pub fn new(edge: EdgeId<T>, vertex: VertexId<T>) -> Self {
         Self { edge, vertex }
     }
