@@ -6,11 +6,6 @@ use rshyper_core::{EdgeId, Node, VertexId, id::Position};
 use std::collections::{HashMap, HashSet};
 
 /// A hash-based hypergraph implementation
-///
-/// ## Features
-///
-/// - ``
-/// - `facet`: a materialized hyperedge with an associated weight
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct HashGraph<N = (), E = ()> {
@@ -34,7 +29,9 @@ where
             position: Position::zero(),
         }
     }
-    /// returns an immutable reference to the hyperedges
+    /// returns an immutable reference to the _connections_ forming each hyperedge; in other 
+    /// words, the connections are a map of edges to sets of vertices, where each edge is
+    /// represented by an [`EdgeId`] and each vertex by a [`VertexId`].
     pub const fn connections(&self) -> &HashMap<EdgeId, HashSet<VertexId>> {
         &self.connections
     }
@@ -59,11 +56,13 @@ where
     pub const fn nodes_mut(&mut self) -> &mut HashMap<VertexId, Node<N>> {
         &mut self.vertices
     }
-    /// returns a copy of the current position of the hypergraph
+    /// returns a copy of the position of the hypergraph; here, the [`position`](Position) is 
+    /// used to track the indices (edge & vertex) and define which ones are next to be used
+    /// when inserting new hyperedges or vertices
     pub const fn position(&self) -> Position {
         self.position
     }
-    /// returns a mutable reference to the current position of the hypergraph
+    /// returns a mutable reference to the current position of the hypergraph; 
     pub fn position_mut(&mut self) -> &mut Position {
         &mut self.position
     }
