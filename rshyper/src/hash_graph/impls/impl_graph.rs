@@ -1,4 +1,3 @@
-
 use crate::cmp::HyperNode;
 use crate::hash_graph::HashGraph;
 use crate::index::{EdgeId, HashIndex, VertexId};
@@ -195,7 +194,7 @@ where
         // insert the facet with the given weight
         self.insert_edge_weight(index, weight)
     }
-    
+
     /// insert a new node with the given weight and return its index
     pub fn insert_node(&mut self, weight: N) -> VertexId<Idx>
     where

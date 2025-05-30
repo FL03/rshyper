@@ -2,21 +2,21 @@
 #![crate_name = "rshyper"]
 #![crate_type = "lib"]
 //! # rshyper
-//! 
+//!
 //! [![crates.io](https://img.shields.io/crates/v/rshyper?style=for-the-badge&logo=rust)](https://crates.io/crates/rshyper)
 //! [![docs.rs](https://img.shields.io/docsrs/rshyper?style=for-the-badge&logo=docs.rs)](https://docs.rs/rshyper)
 //! [![GitHub License](https://img.shields.io/github/license/FL03/rshyper?style=for-the-badge&logo=github)](https://github.com/FL03/rshyper/blob/main/LICENSE)
-//! 
+//!
 //! ***
 //!
-//! Welcome to the `rshyper` crate - a Rust package providing a comprehensive framework for creating, manipulating, and analyzing hypergraphs using a myriad of mathematical and algorithmic 
+//! Welcome to the `rshyper` crate - a Rust package providing a comprehensive framework for creating, manipulating, and analyzing hypergraphs using a myriad of mathematical and algorithmic
 //! techniques. The crate is designed to be flexible and modular enabled via heavy feature-gating throughout the framework.
 //!
 //! ## Background
 //!
 //! Before diving in to the technical side of things, let's start by defining several terms
 //! commonly used in the definition and implementation of hypergraphs.
-//! 
+//!
 //! ### Terminology
 //!
 //! - **edge**: an edge is a connection between two or more vertices.
@@ -64,9 +64,9 @@ pub mod binary_graph;
 pub mod hash_graph;
 
 #[doc(inline)]
-pub use rshyper_core::*;
-#[doc(inline)]
 pub use self::algo::prelude::*;
+#[doc(inline)]
+pub use rshyper_core::*;
 
 #[doc(hidden)]
 #[cfg(feature = "binary_graph")]

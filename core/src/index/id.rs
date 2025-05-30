@@ -278,8 +278,8 @@ macro_rules! impl_fmt {
 
 impl_fmt! {
     IndexBase(
-        Binary, 
-        Debug, 
+        Binary,
+        Debug,
         Display,
         LowerExp,
         LowerHex,

@@ -135,7 +135,6 @@ where
     }
 }
 
-
 impl<N, E, Idx> Default for HashGraph<N, E, Idx>
 where
     E: Eq + core::hash::Hash,

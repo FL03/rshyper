@@ -4,7 +4,7 @@
 */
 use crate::algo::search;
 use crate::hash_graph::HashGraph;
-use rshyper_core::{EdgeId, Udx, HyperNode, HashIndex, VertexId};
+use rshyper_core::{EdgeId, HashIndex, HyperNode, Udx, VertexId};
 
 /// implementations for various algorithms and operators on the hypergraph
 impl<N, E> HashGraph<N, E, Udx>

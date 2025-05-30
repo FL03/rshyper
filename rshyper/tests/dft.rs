@@ -26,7 +26,12 @@ fn test_depth_first_traversal() -> rshyper::Result<()> {
     assert_eq!(path[0], v0, "Should start with v0");
 
     // All vertices should be visited
-    assert!(dft.has_visited(&v0) && dft.has_visited(&v1) && dft.has_visited(&v2) && dft.has_visited(&v3));
+    assert!(
+        dft.has_visited(&v0)
+            && dft.has_visited(&v1)
+            && dft.has_visited(&v2)
+            && dft.has_visited(&v3)
+    );
 
     Ok(())
 }

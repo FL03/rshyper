@@ -61,4 +61,3 @@ impl From<String> for Error {
         Error::Unknown(s)
     }
 }
-
