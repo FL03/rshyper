@@ -33,7 +33,7 @@ fn main() -> rshyper::Result<()> {
     println!("Neighbors of {}: {:?}", v1, neighbors);
 
     // Get degree of vertex v1
-    let degree = graph.get_vertex_degree(&v1);
+    let degree = graph.get_degree_of_node(&v1);
     println!("Degree of {v1}: {degree}");
 
     // Remove a vertex

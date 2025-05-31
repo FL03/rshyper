@@ -25,6 +25,18 @@ where
             .map(|vertices| vertices.len())
             .ok_or(crate::Error::IndexNotFound)
     }
+    /// returns the degree of a given vertex where the degree is the number of hyperedges that
+    /// contain the vertex
+    pub fn get_degree_of_node<Q>(&self, index: &Q) -> usize
+    where
+        Q: Eq + core::hash::Hash,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.edges()
+            .values()
+            .filter(|vertices| vertices.contains(index))
+            .count()
+    }
     /// returns all hyperedges containing a given vertex
     pub fn get_edges_with_vertex(&self, index: &VertexId<Idx>) -> crate::Result<Vec<EdgeId<Idx>>>
     where
@@ -69,12 +81,12 @@ where
             .ok_or_else(|| crate::Error::EdgeNotFound)
     }
     /// retrieves the set of nodes composing the given edge
-    pub fn get_nodes_for_edge<Q>(&self, index: &Q) -> crate::Result<Vec<&HyperNode<N, Idx>>>
+    pub fn get_edge_nodes<Q>(&self, index: &Q) -> crate::Result<Vec<&HyperNode<N, Idx>>>
     where
         Q: Eq + core::hash::Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        let vertices = self.get_vertices_for_edge(&index)?;
+        let vertices = self.get_edge_vertices(&index)?;
         let nodes = vertices
             .iter()
             .map(|v| self.get_vertex_weight(&v).expect("vertex not found"))
@@ -82,7 +94,7 @@ where
         Ok(nodes)
     }
     /// returns the set of vertices composing the given edge
-    pub fn get_vertices_for_edge<Q>(&self, index: &Q) -> crate::Result<&VertexSet<Idx>>
+    pub fn get_edge_vertices<Q>(&self, index: &Q) -> crate::Result<&VertexSet<Idx>>
     where
         Q: Eq + core::hash::Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -90,18 +102,6 @@ where
         self.edges()
             .get(index)
             .ok_or_else(|| crate::Error::EdgeNotFound)
-    }
-    /// returns the degree of a given vertex where the degree is the number of hyperedges that
-    /// contain the vertex
-    pub fn get_vertex_degree<Q>(&self, index: &Q) -> usize
-    where
-        Q: Eq + core::hash::Hash,
-        VertexId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.edges()
-            .values()
-            .filter(|vertices| vertices.contains(index))
-            .count()
     }
     /// returns the weight of a particular vertex
     #[cfg_attr(feature = "tracing", tracing::instrument(skip(self)))]
@@ -125,18 +125,17 @@ where
         Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
     {
         // collect the vertices into a HashSet to ensure uniqueness
-        let vset = VertexSet::from_iter(
-            vertices
-                .into_iter()
-                .map(|v| {
-                    // ensure the vertex ID is valid
-                    if !self.contains_node(&v) {
-                        return Err(crate::Error::NodeNotFound);
-                    }
-                    Ok(v)
-                })
-                .filter_map(Result::ok),
-        );
+        let vset = vertices
+            .into_iter()
+            .map(|v| {
+                // ensure the vertex ID is valid
+                if !self.contains_node(&v) {
+                    return Err(crate::Error::NodeNotFound);
+                }
+                Ok(v)
+            })
+            .filter_map(Result::ok)
+            .collect::<VertexSet<_>>();
         // fetch the next edge index
         let eid = self.next_edge_id();
         // handle the case where the edge has no associated vertices
@@ -146,19 +145,6 @@ where
         // insert the new hyperedge into the adjacency map
         self.edges_mut().insert(eid, vset);
         Ok(eid)
-    }
-    /// insert a new facet (hyperedge with an associated weight) into the hypergraph;
-    /// if the facet, or hyperedge, already exists, it will replace the existing value with
-    /// the given
-    pub fn insert_edge_weight(&mut self, index: EdgeId<Idx>, facet: E) -> crate::Result<EdgeId<Idx>>
-    where
-        Idx: Copy,
-    {
-        if !self.contains_edge(&index) {
-            return Err(crate::Error::EdgeNotFound);
-        }
-        let _prev = self.facets_mut().insert(index, facet);
-        Ok(index)
     }
     /// insert a new hyperedge with the given vertices and weight, returning its ID;
     pub fn insert_edge_with_weight<I>(
@@ -174,9 +160,21 @@ where
         // insert the edge and get its ID
         let index = self.insert_edge(vertices)?;
         // insert the facet with the given weight
-        self.insert_edge_weight(index, weight)
+        self.insert_facet(index, weight)
     }
-
+    /// insert a new facet (hyperedge with an associated weight) into the hypergraph;
+    /// if the facet, or hyperedge, already exists, it will replace the existing value with
+    /// the given
+    pub fn insert_facet(&mut self, index: EdgeId<Idx>, facet: E) -> crate::Result<EdgeId<Idx>>
+    where
+        Idx: Copy,
+    {
+        if !self.contains_edge(&index) {
+            return Err(crate::Error::EdgeNotFound);
+        }
+        let _prev = self.facets_mut().insert(index, facet);
+        Ok(index)
+    }
     /// insert a new node with the given weight and return its index
     pub fn insert_node(&mut self, weight: N) -> VertexId<Idx>
     where
@@ -191,7 +189,7 @@ where
         idx
     }
     /// insert a new vertex with the default weight and return its ID
-    pub fn insert_node_default(&mut self) -> VertexId<Idx>
+    pub fn insert_vertex(&mut self) -> VertexId<Idx>
     where
         N: Default,
         Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,

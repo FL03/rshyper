@@ -209,10 +209,7 @@ where
         &mut self,
         e1: &EdgeId<Idx>,
         e2: &EdgeId<Idx>,
-    ) -> crate::Result<EdgeId<Idx>>
-    where
-        Idx: core::ops::Add<Output = Idx> + num_traits::One,
-    {
+    ) -> crate::Result<EdgeId<Idx>> {
         self.merge_edges(e1, e2)
     }
     #[deprecated(since = "v0.0.3", note = "use `remove_edge` instead")]
@@ -223,24 +220,19 @@ where
     pub fn add_hyperedge<I>(&mut self, vertices: I) -> crate::Result<EdgeId<Idx>>
     where
         I: Clone + IntoIterator<Item = VertexId<Idx>>,
-        Idx: core::ops::Add<Output = Idx> + num_traits::One,
     {
         self.insert_edge(vertices)
     }
     #[deprecated(since = "v0.0.3", note = "use `insert_node` instead")]
-    pub fn add_vertex(&mut self, weight: N) -> VertexId<Idx>
-    where
-        Idx: core::ops::Add<Output = Idx> + num_traits::One,
-    {
+    pub fn add_vertex(&mut self, weight: N) -> VertexId<Idx> {
         self.insert_node(weight)
     }
-    #[deprecated(since = "v0.0.3", note = "use `insert_node_default` instead")]
+    #[deprecated(since = "v0.0.3", note = "use `insert_vertex` instead")]
     pub fn add_vertex_default(&mut self) -> VertexId<Idx>
     where
         N: Default,
-        Idx: core::ops::Add<Output = Idx> + num_traits::One,
     {
-        self.insert_node(N::default())
+        self.insert_vertex()
     }
     #[deprecated(
         since = "v0.0.4",
@@ -248,6 +240,13 @@ where
     )]
     pub fn get_neighbors(&self, index: &VertexId<Idx>) -> crate::Result<VertexSet<Idx>> {
         self.neighbors(index)
+    }
+    #[deprecated(since = "v0.0.3", note = "use `insert_vertex` instead")]
+    pub fn insert_node_default(&mut self) -> VertexId<Idx>
+    where
+        N: Default,
+    {
+        self.insert_vertex()
     }
 }
 

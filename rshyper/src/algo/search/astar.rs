@@ -161,7 +161,7 @@ where
 
             for edge_id in edges {
                 // Get all vertices in this hyperedge
-                let vertices = self.graph.get_vertices_for_edge(&edge_id)?;
+                let vertices = self.graph.get_edge_vertices(&edge_id)?;
 
                 // Process each vertex in this hyperedge
                 for &neighbor in vertices {

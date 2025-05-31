@@ -58,6 +58,6 @@ macro_rules! hypernode {
         let $var = $src.insert_node($w);
     };
     (@new $src:ident[$var:ident]) => {
-        let $var = $src.insert_node_default();
+        let $var = $src.insert_vertex();
     };
 }

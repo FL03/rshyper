@@ -15,11 +15,11 @@ fn test_astar_search() -> rshyper::Result<()> {
     let mut graph = HashGraph::<()>::new();
 
     // Create a simple hypergraph
-    let v0 = graph.insert_node_default();
-    let v1 = graph.insert_node_default();
-    let v2 = graph.insert_node_default();
-    let v3 = graph.insert_node_default();
-    let v4 = graph.insert_node_default();
+    let v0 = graph.insert_vertex();
+    let v1 = graph.insert_vertex();
+    let v2 = graph.insert_vertex();
+    let v3 = graph.insert_vertex();
+    let v4 = graph.insert_vertex();
 
     // Direct path: v0 -> v1 -> v3
     let _e0 = graph.insert_edge(vec![v0, v1])?;
@@ -52,15 +52,15 @@ fn test_astar_with_heuristic() -> rshyper::Result<()> {
     // |    |    |
     // 6 -- 7 -- 8
 
-    let v0 = graph.insert_node_default(); // (0,0)
-    let v1 = graph.insert_node_default(); // (1,0)
-    let v2 = graph.insert_node_default(); // (2,0)
-    let v3 = graph.insert_node_default(); // (0,1)
-    let v4 = graph.insert_node_default(); // (1,1)
-    let v5 = graph.insert_node_default(); // (2,1)
-    let v6 = graph.insert_node_default(); // (0,2)
-    let v7 = graph.insert_node_default(); // (1,2)
-    let v8 = graph.insert_node_default(); // (2,2)
+    let v0 = graph.insert_vertex(); // (0,0)
+    let v1 = graph.insert_vertex(); // (1,0)
+    let v2 = graph.insert_vertex(); // (2,0)
+    let v3 = graph.insert_vertex(); // (0,1)
+    let v4 = graph.insert_vertex(); // (1,1)
+    let v5 = graph.insert_vertex(); // (2,1)
+    let v6 = graph.insert_vertex(); // (0,2)
+    let v7 = graph.insert_vertex(); // (1,2)
+    let v8 = graph.insert_vertex(); // (2,2)
 
     // Create horizontal connections
     graph.insert_edge(vec![v0, v1])?;
@@ -134,10 +134,10 @@ fn test_astar_disconnected() -> rshyper::Result<()> {
     // Create two disconnected components
     // 0 -- 1    2 -- 3
 
-    let v0 = graph.insert_node_default();
-    let v1 = graph.insert_node_default();
-    let v2 = graph.insert_node_default();
-    let v3 = graph.insert_node_default();
+    let v0 = graph.insert_vertex();
+    let v1 = graph.insert_vertex();
+    let v2 = graph.insert_vertex();
+    let v3 = graph.insert_vertex();
 
     graph.insert_edge(vec![v0, v1])?;
     graph.insert_edge(vec![v2, v3])?;
@@ -167,13 +167,13 @@ fn test_astar_complex_paths() -> rshyper::Result<()> {
     // |         /
     // +-- 6 ---+
 
-    let v0 = graph.insert_node_default();
-    let v1 = graph.insert_node_default();
-    let v2 = graph.insert_node_default();
-    let v3 = graph.insert_node_default();
-    let v4 = graph.insert_node_default();
-    let v5 = graph.insert_node_default();
-    let v6 = graph.insert_node_default();
+    let v0 = graph.insert_vertex();
+    let v1 = graph.insert_vertex();
+    let v2 = graph.insert_vertex();
+    let v3 = graph.insert_vertex();
+    let v4 = graph.insert_vertex();
+    let v5 = graph.insert_vertex();
+    let v6 = graph.insert_vertex();
 
     // Path 1: v0 -> v1 -> v2 -> v3 (length 3)
     graph.insert_edge(vec![v0, v1])?;
