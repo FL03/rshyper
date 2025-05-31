@@ -20,13 +20,7 @@ pub enum Error {
     NodeNotFound,
     #[error("No edges contain the given vertex")]
     NoEdgesWithVertex,
-    #[error("The index does not exist")]
-    IndexNotFound,
-    #[error("Index is out of bounds")]
-    IndexOutOfBounds,
-    #[error("Invalid index")]
-    InvalidIndex,
-    #[error("Cannot create empty hyperedge")]
+    #[error("Cannot create an empty hyperedge")]
     EmptyHyperedge,
     #[error(transparent)]
     IndexError(#[from] crate::index::IndexError),

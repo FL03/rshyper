@@ -2,7 +2,7 @@
     appellation: cursor <module>
     authors: @FL03
 */
-use crate::index::{EdgeId, RawIndex, Udx, VertexId};
+use crate::index::{EdgeId, IndexResult, RawIndex, Udx, VertexId};
 
 /// The [`Position`] implementation is uses to track the current indexes of edges and vertices
 /// within a hypergraph.
@@ -91,20 +91,20 @@ where
     pub fn vertex_mut(&mut self) -> &mut VertexId<T> {
         &mut self.vertex
     }
-
-    pub fn next_edge(&mut self) -> crate::Result<EdgeId<T>>
+    /// increments the current edge index by one and returns the previous value; see 
+    /// [`step`](crate::index::IndexBase::step) for more details.
+    pub fn next_edge(&mut self) -> IndexResult<EdgeId<T>>
     where
         T: Copy + core::ops::Add<T, Output = T> + num_traits::One,
     {
-        self.edge_mut().next().ok_or(crate::Error::IndexOutOfBounds)
+        self.edge_mut().step()
     }
-
-    pub fn next_vertex(&mut self) -> crate::Result<VertexId<T>>
+    /// increments the current vertex index by one and returns the previous value; see 
+    /// [`step`](crate::index::IndexBase::step) for more details.
+    pub fn next_vertex(&mut self) -> IndexResult<VertexId<T>>
     where
         T: Copy + core::ops::Add<T, Output = T> + num_traits::One,
     {
-        self.vertex_mut()
-            .next()
-            .ok_or(crate::Error::IndexOutOfBounds)
+        self.vertex_mut().step()
     }
 }

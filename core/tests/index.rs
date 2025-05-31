@@ -36,8 +36,21 @@ fn test_index() -> rshyper::Result<()> {
 #[test]
 fn test_position() -> rshyper::Result<()> {
     let mut index = Position::<usize>::zero();
+    // create some edge indices
     let e0 = index.next_edge()?;
+    let e1 = index.next_edge()?;
+    let e2 = index.next_edge()?;
+    // check the edge indices
+    assert_eq!(e0.get(), &0);
+    assert_eq!(e1.get(), &1);
+    assert_eq!(e2.get(), &2);
+    // create some vertex indices
     let v0 = index.next_vertex()?;
+    let v1 = index.next_vertex()?;
+    let v2 = index.next_vertex()?;
+    // check the vertex indices
     assert_eq!(e0.get(), v0.get());
+    assert_eq!(e1.get(), v1.get());
+    assert_eq!(e2.get(), v2.get());
     Ok(())
 }

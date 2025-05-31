@@ -23,7 +23,7 @@ where
         self.edges()
             .get(index)
             .map(|vertices| vertices.len())
-            .ok_or(crate::Error::IndexNotFound)
+            .ok_or(crate::Error::EdgeNotFound)
     }
     /// returns the degree of a given vertex where the degree is the number of hyperedges that
     /// contain the vertex
@@ -207,11 +207,11 @@ where
         let set1 = self
             .edges_mut()
             .remove(e1)
-            .ok_or(crate::Error::IndexNotFound)?;
+            .ok_or(crate::Error::EdgeNotFound)?;
         let set2 = self
             .edges_mut()
             .remove(e2)
-            .ok_or(crate::Error::IndexNotFound)?;
+            .ok_or(crate::Error::EdgeNotFound)?;
         let merged = set1.union(&set2).copied().collect::<VertexSet<_>>();
         let new_edge = self.next_edge_id();
         self.edges_mut().insert(new_edge, merged);
@@ -223,7 +223,7 @@ where
         Idx: Copy,
     {
         if !self.contains_node(index) {
-            return Err(crate::Error::IndexNotFound);
+            return Err(crate::Error::NodeNotFound);
         }
         // initialize an empty set to hold the neighbors
         let mut neighbors = VertexSet::new();
@@ -245,7 +245,7 @@ where
     {
         self.edges_mut()
             .remove(index)
-            .ok_or(crate::Error::IndexNotFound)
+            .ok_or(crate::Error::EdgeNotFound)
     }
     /// removes the vertex with the given id and all of its associated hyperedges
     #[cfg_attr(feature = "tracing", tracing::instrument(skip(self, index)))]
@@ -265,7 +265,7 @@ where
                     .retain(|_, vertices| !vertices.contains(index));
                 node
             })
-            .ok_or(crate::Error::IndexNotFound)
+            .ok_or(crate::Error::NodeNotFound)
     }
     /// update the weight of a given vertex
     #[inline]
@@ -280,7 +280,7 @@ where
             .map(|node| {
                 node.set_weight(weight);
             })
-            .ok_or(crate::Error::IndexNotFound)?;
+            .ok_or(crate::Error::NodeNotFound)?;
         Ok(self)
     }
 }

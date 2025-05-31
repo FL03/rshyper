@@ -7,7 +7,7 @@
 use crate::index::{GraphIndex, IndexBase, RawIndex};
 use rand_distr::{Distribution, StandardUniform};
 
-/// generic implementations for the [`Index<T, K>`] enabled by the `rand` feature
+/// generic implementations for the [`IndexBase<T, K>`] enabled by the `rand` feature
 impl<T, K> IndexBase<T, K>
 where
     K: GraphIndex,

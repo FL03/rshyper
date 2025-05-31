@@ -72,7 +72,7 @@ where
     }
 
     fn is_zero(&self) -> bool {
-        self.value.is_zero()
+        self.get().is_zero()
     }
 }
 
