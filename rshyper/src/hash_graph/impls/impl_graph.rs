@@ -19,7 +19,7 @@ where
         self
     }
     /// returns the size, or order, of a particular hyperedge
-    pub fn get_edge_order(&self, index: &EdgeId<Idx>) -> crate::Result<usize> {
+    pub fn find_order_of_edge(&self, index: &EdgeId<Idx>) -> crate::Result<usize> {
         self.edges()
             .get(index)
             .map(|vertices| vertices.len())
@@ -49,22 +49,31 @@ where
         Ok(edges)
     }
     /// retrieves a reference to the facet (hyperedge with an associated weight)
-    pub fn get_facet(&self, index: &EdgeId<Idx>) -> crate::Result<&E> {
+    pub fn get_facet<Q>(&self, index: &Q) -> crate::Result<&E>
+    where
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
         self.facets()
             .get(index)
             .ok_or_else(|| crate::Error::EdgeNotFound)
     }
     /// retrieves a mutable reference to the facet (hyperedge with an associated weight)
-    pub fn get_facet_mut(&mut self, index: &EdgeId<Idx>) -> crate::Result<&mut E> {
+    pub fn get_facet_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut E>
+    where
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
         self.facets_mut()
             .get_mut(index)
             .ok_or_else(|| crate::Error::EdgeNotFound)
     }
     /// retrieves the set of nodes composing the given edge
-    pub fn get_nodes_for_edge(
-        &self,
-        index: &EdgeId<Idx>,
-    ) -> crate::Result<Vec<&HyperNode<N, Idx>>> {
+    pub fn get_nodes_for_edge<Q>(&self, index: &Q) -> crate::Result<Vec<&HyperNode<N, Idx>>>
+    where
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
         let vertices = self.get_vertices_for_edge(&index)?;
         let nodes = vertices
             .iter()
@@ -73,14 +82,22 @@ where
         Ok(nodes)
     }
     /// returns the set of vertices composing the given edge
-    pub fn get_vertices_for_edge(&self, index: &EdgeId<Idx>) -> crate::Result<&VertexSet<Idx>> {
+    pub fn get_vertices_for_edge<Q>(&self, index: &Q) -> crate::Result<&VertexSet<Idx>>
+    where
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
         self.edges()
             .get(index)
             .ok_or_else(|| crate::Error::EdgeNotFound)
     }
     /// returns the degree of a given vertex where the degree is the number of hyperedges that
     /// contain the vertex
-    pub fn get_vertex_degree(&self, index: &VertexId<Idx>) -> usize {
+    pub fn get_vertex_degree<Q>(&self, index: &Q) -> usize
+    where
+        Q: Eq + core::hash::Hash,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
+    {
         self.edges()
             .values()
             .filter(|vertices| vertices.contains(index))
@@ -92,10 +109,11 @@ where
         self.nodes().get(index).ok_or(crate::Error::NodeNotFound)
     }
     /// returns a mutable reference to the weight of a vertex
-    pub fn get_vertex_weight_mut(
-        &mut self,
-        index: &VertexId<Idx>,
-    ) -> crate::Result<&mut HyperNode<N, Idx>> {
+    pub fn get_vertex_weight_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut HyperNode<N, Idx>>
+    where
+        Q: Eq + core::hash::Hash,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
+    {
         self.nodes_mut()
             .get_mut(index)
             .ok_or(crate::Error::NodeNotFound)
@@ -181,9 +199,11 @@ where
         self.insert_node(N::default())
     }
     /// merges two hyperedges into one (combining their vertices)
-    pub fn merge_edges(&mut self, e1: &EdgeId<Idx>, e2: &EdgeId<Idx>) -> crate::Result<EdgeId<Idx>>
+    pub fn merge_edges<Q>(&mut self, e1: &Q, e2: &Q) -> crate::Result<EdgeId<Idx>>
     where
         Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         let set1 = self
             .edges_mut()
@@ -217,13 +237,21 @@ where
         Ok(neighbors)
     }
     /// remove the hyperedge with the given id
-    pub fn remove_edge(&mut self, index: &EdgeId<Idx>) -> crate::Result<VertexSet<Idx>> {
+    pub fn remove_edge<Q>(&mut self, index: &Q) -> crate::Result<VertexSet<Idx>>
+    where
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
         self.edges_mut()
             .remove(index)
             .ok_or(crate::Error::IndexNotFound)
     }
     /// removes the vertex with the given id and all of its associated hyperedges
-    pub fn remove_vertex(&mut self, index: &VertexId<Idx>) -> crate::Result<HyperNode<N, Idx>> {
+    pub fn remove_vertex<Q>(&mut self, index: &Q) -> crate::Result<HyperNode<N, Idx>>
+    where
+        Q: Eq + core::hash::Hash,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
+    {
         self.nodes_mut()
             .remove(index)
             .map(|node| {
@@ -235,7 +263,11 @@ where
             .ok_or(crate::Error::IndexNotFound)
     }
     /// update the weight of a given vertex
-    pub fn set_vertex_weight(&mut self, index: &VertexId<Idx>, weight: N) -> crate::Result<()> {
+    pub fn set_vertex_weight<Q>(&mut self, index: &Q, weight: N) -> crate::Result<()>
+    where
+        Q: Eq + core::hash::Hash,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
+    {
         self.nodes_mut()
             .get_mut(index)
             .map(|node| {

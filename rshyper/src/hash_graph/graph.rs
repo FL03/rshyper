@@ -31,7 +31,7 @@ where
     N: Eq + core::hash::Hash,
     Idx: Eq + RawIndex + core::hash::Hash,
 {
-    /// initialize a new hypergraph
+    /// initialize a new, empty hypergraph
     pub fn new() -> Self
     where
         Idx: Default,
@@ -40,6 +40,18 @@ where
             facets: FacetMap::new(),
             edges: EdgeMap::new(),
             nodes: NodeMap::new(),
+            position: Position::default(),
+        }
+    }
+    /// creates a new instance of the hypergraph with the given capacity for edges and nodes
+    pub fn with_capacity(edges: usize, nodes: usize) -> Self
+    where
+        Idx: Default,
+    {
+        HashGraph {
+            facets: FacetMap::with_capacity(edges),
+            edges: EdgeMap::with_capacity(edges),
+            nodes: NodeMap::with_capacity(nodes),
             position: Position::default(),
         }
     }
@@ -79,12 +91,87 @@ where
     pub fn position_mut(&mut self) -> &mut Position<Idx> {
         &mut self.position
     }
+    /// overrides the current edges and returns a mutable reference to the hypergraph
+    #[inline]
+    pub fn set_edges(&mut self, edges: EdgeMap<Idx>) -> &mut Self
+    where
+        Idx: Default,
+    {
+        self.edges = edges;
+        self
+    }
+    /// overrides the current facets and returns a mutable reference to the hypergraph
+    #[inline]
+    pub fn set_facets(&mut self, facets: FacetMap<E, Idx>) -> &mut Self
+    where
+        Idx: Default,
+    {
+        self.facets = facets;
+        self
+    }
+    /// overrides the current nodes and returns a mutable reference to the hypergraph
+    #[inline]
+    pub fn set_nodes(&mut self, nodes: NodeMap<N, Idx>) -> &mut Self
+    where
+        Idx: Default,
+    {
+        self.nodes = nodes;
+        self
+    }
+    /// overrides the current position and returns a mutable reference to the hypergraph
+    #[inline]
+    pub fn set_position(&mut self, position: Position<Idx>) -> &mut Self
+    where
+        Idx: Default,
+    {
+        self.position = position;
+        self
+    }
+    /// consumes the current instance to create another with the given edges
+    #[inline]
+    pub fn with_edges(self, edges: EdgeMap<Idx>) -> Self
+    where
+        Idx: Default,
+    {
+        Self { edges, ..self }
+    }
+    /// consumes the current instance to create another with the given facets
+    #[inline]
+    pub fn with_facets(self, facets: FacetMap<E, Idx>) -> Self
+    where
+        Idx: Default,
+    {
+        Self { facets, ..self }
+    }
+    /// consumes the current instance to create another with the given nodes
+    #[inline]
+    pub fn with_nodes(self, nodes: NodeMap<N, Idx>) -> Self
+    where
+        Idx: Default,
+    {
+        Self { nodes, ..self }
+    }
+    /// consumes the current instance to create another with the given position
+    pub fn with_position(self, position: Position<Idx>) -> Self
+    where
+        Idx: Default,
+    {
+        Self { position, ..self }
+    }
     /// check if a hyperedge with the given id exists
-    pub fn contains_edge(&self, index: &EdgeId<Idx>) -> bool {
+    pub fn contains_edge<Q>(&self, index: &Q) -> bool
+    where
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
         self.edges().contains_key(index)
     }
     /// check if a vertex with the given id exists
-    pub fn contains_node(&self, index: &VertexId<Idx>) -> bool {
+    pub fn contains_node<Q>(&self, index: &Q) -> bool
+    where
+        Q: Eq + core::hash::Hash,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
+    {
         self.nodes().contains_key(index)
     }
     /// get the next edge index and updates the current position
