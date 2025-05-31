@@ -8,8 +8,8 @@ pub use self::priority_node::PriorityNode;
 pub(crate) mod priority_node;
 
 use super::{Search, Traversal};
-use crate::HashGraph;
-use rshyper_core::{Error, VertexId};
+use crate::hash_graph::{HashGraph, VertexSet};
+use crate::index::{IndexError, VertexId};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 
 /// A simple trait defining a common interface for heuristic functions compatible with the
@@ -37,8 +37,8 @@ where
     F: HeuristicFunc,
 {
     pub(crate) graph: &'a HashGraph<N, E>,
-    pub(crate) open_set: HashSet<VertexId>,
-    pub(crate) closed_set: HashSet<VertexId>,
+    pub(crate) open_set: VertexSet,
+    pub(crate) closed_set: VertexSet,
     pub(crate) came_from: HashMap<VertexId, VertexId>,
     pub(crate) g_score: HashMap<VertexId, F::Output>,
     pub(crate) f_score: HashMap<VertexId, F::Output>,
@@ -49,14 +49,14 @@ impl<'a, N, E, F> AStarSearch<'a, N, E, F>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
-    F: HeuristicFunc<Output = f64>,
+    F: HeuristicFunc,
 {
     /// Create a new A* search instance with the given heuristic function
     pub fn new(graph: &'a HashGraph<N, E>, heuristic: F) -> Self {
         Self {
             graph,
-            open_set: HashSet::new(),
-            closed_set: HashSet::new(),
+            open_set: VertexSet::new(),
+            closed_set: VertexSet::new(),
             came_from: HashMap::new(),
             g_score: HashMap::new(),
             f_score: HashMap::new(),
@@ -79,9 +79,17 @@ where
             heuristic,
         }
     }
+    /// returns an immutable reference to the set of visited vertices
+    pub const fn closed_set(&self) -> &HashSet<VertexId> {
+        &self.closed_set
+    }
     /// returns an immutable reference to the heuristic function of the algorithm
     pub const fn heuristic(&self) -> &F {
         &self.heuristic
+    }
+    /// returns true if the given vertex has been visited
+    pub fn has_visited(&self, vertex: &VertexId) -> bool {
+        self.closed_set().contains(vertex)
     }
     /// reset the state
     pub fn reset(&mut self) -> &mut Self {
@@ -99,15 +107,17 @@ where
     {
         Search::search(self, start)
     }
-
     /// Find the shortest path between start and goal vertices
-    pub fn find_path(&mut self, start: VertexId, goal: VertexId) -> crate::Result<Vec<VertexId>> {
+    pub fn find_path(&mut self, start: VertexId, goal: VertexId) -> crate::Result<Vec<VertexId>>
+    where
+        F: HeuristicFunc<Output = f64>,
+    {
         // Check if both vertices exist
         if !self.graph.contains_node(&start) {
-            return Err(Error::VertexDoesNotExist(start));
+            return Err(IndexError::VertexDoesNotExist(start).into());
         }
         if !self.graph.contains_node(&goal) {
-            return Err(Error::VertexDoesNotExist(goal));
+            return Err(IndexError::VertexDoesNotExist(goal).into());
         }
 
         // Reset state
@@ -116,15 +126,15 @@ where
         // Initialize g_score for start node (0) and infinity for all other nodes
         self.g_score.insert(start, 0.0);
 
-        // Initialize f_score for start node (heuristic only since g=0)
-        let start_f_score = self.heuristic.compute(start, goal);
+        // initialize f_score for start node (heuristic only since g=0)
+        let start_f_score = self.heuristic().compute(start, goal);
         self.f_score.insert(start, start_f_score);
-
-        // Add start node to the open set
+        // add start node to the open set
         self.open_set.insert(start);
 
-        // Create a priority queue and add the start node
+        // initialize priority queue
         let mut priority_queue = BinaryHeap::new();
+        // push the start node with its f_score
         priority_queue.push(PriorityNode {
             vertex: start,
             priority: -(start_f_score as i64),
@@ -133,13 +143,11 @@ where
         // Track processed nodes to avoid duplicate processing
         let mut processed = HashSet::new();
 
-        while !priority_queue.is_empty() {
-            // Get node with lowest f_score
-            let current = match priority_queue.pop() {
-                Some(node) => node.vertex,
-                None => break, // Should never happen if priority queue is not empty
-            };
-
+        while let Some(PriorityNode {
+            priority: _,
+            vertex: current,
+        }) = priority_queue.pop()
+        {
             // Skip if we've already processed this vertex with a better path
             // or it's no longer in the open set
             if processed.contains(&current) || !self.open_set.contains(&current) {
@@ -203,10 +211,12 @@ where
         }
 
         // No path found
-        Err(Error::Unknown(format!(
-            "No path found from {} to {}",
-            start, goal
-        )))
+        Err(IndexError::NoPathFoundBetween {
+            source: None,
+            from: start,
+            to: goal,
+        }
+        .into())
     }
 
     // Reconstruct path from came_from map
@@ -222,21 +232,13 @@ where
         path.reverse();
         path
     }
-
-    pub fn has_visited(&self, vertex: &VertexId) -> bool {
-        self.visited().contains(vertex)
-    }
-
-    pub const fn visited(&self) -> &HashSet<VertexId> {
-        &self.closed_set
-    }
 }
 
 impl<'a, N, E, F> Traversal<VertexId> for AStarSearch<'a, N, E, F>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
-    F: HeuristicFunc,
+    F: HeuristicFunc<Output = f64>,
 {
     type Store<U> = HashSet<U>;
 
@@ -245,7 +247,7 @@ where
     }
 
     fn visited(&self) -> &Self::Store<VertexId> {
-        &self.closed_set
+        self.closed_set()
     }
 }
 
@@ -264,7 +266,7 @@ where
         self.reset();
 
         if !self.graph.contains_node(&start) {
-            return Err(Error::VertexDoesNotExist(start));
+            return Err(IndexError::VertexDoesNotExist(start).into());
         }
 
         // Using the vertex with the largest ID as a pseudo-goal

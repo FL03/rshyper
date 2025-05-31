@@ -8,11 +8,13 @@
 #[doc(inline)]
 pub use self::{
     aliases::*,
+    error::*,
     id::IndexBase,
     kinds::{EdgeIndex, GraphIndex, VertexIndex},
     position::Position,
 };
 
+pub mod error;
 pub mod id;
 pub mod kinds;
 pub mod position;
@@ -26,6 +28,8 @@ mod impls {
 }
 
 pub(crate) mod prelude {
+    #[doc(inline)]
+    pub use super::error::*;
     #[doc(inline)]
     pub use super::id::*;
     #[doc(inline)]

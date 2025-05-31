@@ -8,8 +8,6 @@
 #[cfg(feature = "alloc")]
 use alloc::{boxed::Box, string::String};
 
-use crate::{EdgeId, VertexId};
-
 /// A type alias for a [Result] with the crate-specific error type [Error]
 pub type Result<T = ()> = core::result::Result<T, Error>;
 
@@ -30,10 +28,8 @@ pub enum Error {
     InvalidIndex,
     #[error("Cannot create empty hyperedge")]
     EmptyHyperedge,
-    #[error("Hyperedge {0} does not exist")]
-    HyperedgeDoesNotExist(EdgeId<usize>),
-    #[error("Vertex {0} does not exist")]
-    VertexDoesNotExist(VertexId<usize>),
+    #[error(transparent)]
+    IndexError(#[from] crate::index::IndexError),
     #[cfg(feature = "anyhow")]
     #[error(transparent)]
     AnyError(#[from] anyhow::Error),
