@@ -118,7 +118,7 @@ where
             .get_mut(index)
             .ok_or(crate::Error::NodeNotFound)
     }
-    
+
     /// add a new hyperedge with the given vertices and return its ID
     pub fn insert_edge<I>(&mut self, vertices: I) -> crate::Result<EdgeId<Idx>>
     where

@@ -181,7 +181,7 @@ where
     {
         self.edges().contains_key(index)
     }
-    /// check if a facet with the given id exists; this method is a little heavier since it 
+    /// check if a facet with the given id exists; this method is a little heavier since it
     /// checks both the facets and edges fields to ensure the index points to a valid facet.
     pub fn contains_facet<Q>(&self, index: &Q) -> bool
     where
