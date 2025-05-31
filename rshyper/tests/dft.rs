@@ -9,10 +9,10 @@ fn test_depth_first_traversal() -> rshyper::Result<()> {
     let mut graph = HashGraph::<()>::new();
 
     // Create a simple hypergraph
-    let v0 = graph.insert_node_default();
-    let v1 = graph.insert_node_default();
-    let v2 = graph.insert_node_default();
-    let v3 = graph.insert_node_default();
+    let v0 = graph.insert_vertex();
+    let v1 = graph.insert_vertex();
+    let v2 = graph.insert_vertex();
+    let v3 = graph.insert_vertex();
 
     let _e1 = graph.insert_edge(vec![v0, v1])?;
     let _e2 = graph.insert_edge(vec![v1, v2])?;
@@ -47,11 +47,11 @@ fn test_dft_branching_graph() -> rshyper::Result<()> {
     //     \
     //      3
 
-    let v0 = graph.insert_node_default();
-    let v1 = graph.insert_node_default();
-    let v2 = graph.insert_node_default();
-    let v3 = graph.insert_node_default();
-    let v4 = graph.insert_node_default();
+    let v0 = graph.insert_vertex();
+    let v1 = graph.insert_vertex();
+    let v2 = graph.insert_vertex();
+    let v3 = graph.insert_vertex();
+    let v4 = graph.insert_vertex();
 
     let _e1 = graph.insert_edge(vec![v0, v1])?;
     let _e2 = graph.insert_edge(vec![v0, v2])?;
@@ -83,10 +83,10 @@ fn test_dft_cyclic_graph() -> rshyper::Result<()> {
     // |         |
     // +----3----+
 
-    let v0 = graph.insert_node_default();
-    let v1 = graph.insert_node_default();
-    let v2 = graph.insert_node_default();
-    let v3 = graph.insert_node_default();
+    let v0 = graph.insert_vertex();
+    let v1 = graph.insert_vertex();
+    let v2 = graph.insert_vertex();
+    let v3 = graph.insert_vertex();
 
     let _e1 = graph.insert_edge(vec![v0, v1])?;
     let _e2 = graph.insert_edge(vec![v1, v2])?;
@@ -116,9 +116,9 @@ fn test_dft_isolated_vertex() -> rshyper::Result<()> {
     // Create a graph with an isolated vertex
     // 0 -- 1    2
 
-    let v0 = graph.insert_node_default();
-    let v1 = graph.insert_node_default();
-    let v2 = graph.insert_node_default(); // isolated
+    let v0 = graph.insert_vertex();
+    let v1 = graph.insert_vertex();
+    let v2 = graph.insert_vertex(); // isolated
 
     let _e1 = graph.insert_edge(vec![v0, v1])?;
     // create a new dft instance

@@ -21,6 +21,7 @@ fn main() -> rshyper::Result<()> {
             let v3 = 4;
         }
     }
+    tracing::info!("Initial graph state: {:?}", graph);
     // Add some hyperedges
     let e1 = graph.insert_edge(vec![v0, v1, v2])?;
     println!("Added hyperedge {e1}: {:?}", [v0, v1, v2]);
@@ -33,13 +34,13 @@ fn main() -> rshyper::Result<()> {
     println!("Neighbors of {}: {:?}", v1, neighbors);
 
     // Get degree of vertex v1
-    let degree = graph.get_vertex_degree(&v1)?;
+    let degree = graph.get_degree_of_node(&v1);
     println!("Degree of {v1}: {degree}");
 
     // Remove a vertex
     graph.remove_vertex(&v2)?;
-    println!("Removed vertex {v2}");
+    tracing::info!("removed vertex {v2}...");
 
-    println!("---------\nFinal graph state: {:?}", graph);
+    tracing::info!("Final graph state: {:?}", graph);
     Ok(())
 }

@@ -13,11 +13,11 @@ fn test_breadth_first_traversal() {
     //  \  /
     //   2 -- 4
 
-    let v0 = graph.insert_node_default();
-    let v1 = graph.insert_node_default();
-    let v2 = graph.insert_node_default();
-    let v3 = graph.insert_node_default();
-    let v4 = graph.insert_node_default();
+    let v0 = graph.insert_vertex();
+    let v1 = graph.insert_vertex();
+    let v2 = graph.insert_vertex();
+    let v3 = graph.insert_vertex();
+    let v4 = graph.insert_vertex();
 
     let _e1 = graph.insert_edge(vec![v0, v1, v2]).unwrap();
     let _e2 = graph.insert_edge(vec![v1, v3]).unwrap();
@@ -49,10 +49,10 @@ fn test_bft_cyclic_graph() {
     // |         |
     // +----3----+
 
-    let v0 = graph.insert_node_default();
-    let v1 = graph.insert_node_default();
-    let v2 = graph.insert_node_default();
-    let v3 = graph.insert_node_default();
+    let v0 = graph.insert_vertex();
+    let v1 = graph.insert_vertex();
+    let v2 = graph.insert_vertex();
+    let v3 = graph.insert_vertex();
 
     let _e1 = graph.insert_edge(vec![v0, v1]).unwrap();
     let _e2 = graph.insert_edge(vec![v1, v2]).unwrap();
@@ -80,10 +80,10 @@ fn test_bft_disconnected_graph() {
     // Create a disconnected hypergraph
     // 0 -- 1    2 -- 3
 
-    let v0 = graph.insert_node_default();
-    let v1 = graph.insert_node_default();
-    let v2 = graph.insert_node_default();
-    let v3 = graph.insert_node_default();
+    let v0 = graph.insert_vertex();
+    let v1 = graph.insert_vertex();
+    let v2 = graph.insert_vertex();
+    let v3 = graph.insert_vertex();
 
     let _e1 = graph.insert_edge(vec![v0, v1]).unwrap();
     let _e2 = graph.insert_edge(vec![v2, v3]).unwrap();
@@ -108,11 +108,11 @@ fn test_bft_hyperedge_with_multiple_vertices() {
 
     // Create a hypergraph with a large hyperedge
     // connecting multiple vertices
-    let v0 = graph.insert_node_default();
-    let v1 = graph.insert_node_default();
-    let v2 = graph.insert_node_default();
-    let v3 = graph.insert_node_default();
-    let v4 = graph.insert_node_default();
+    let v0 = graph.insert_vertex();
+    let v1 = graph.insert_vertex();
+    let v2 = graph.insert_vertex();
+    let v3 = graph.insert_vertex();
+    let v4 = graph.insert_vertex();
 
     // Single hyperedge connecting all vertices
     let _e1 = graph.insert_edge(vec![v0, v1, v2, v3, v4]).unwrap();

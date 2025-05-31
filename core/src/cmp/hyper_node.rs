@@ -10,8 +10,9 @@ use crate::index::{RawIndex, VertexId};
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize, serde::Serialize),
-    serde(rename_all = "lowercase")
+    serde(rename_all = "snake_case")
 )]
+#[repr(C)]
 pub struct HyperNode<T, Idx>
 where
     Idx: RawIndex,

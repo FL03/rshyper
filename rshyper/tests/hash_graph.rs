@@ -11,10 +11,10 @@ fn test_hash_graph() -> rshyper::Result<()> {
     let mut graph = HashGraph::<usize>::new();
 
     // Add some vertices
-    let v0 = graph.insert_node_default();
-    let v1 = graph.insert_node_default();
-    let v2 = graph.insert_node_default();
-    let v3 = graph.insert_node_default();
+    let v0 = graph.insert_vertex();
+    let v1 = graph.insert_vertex();
+    let v2 = graph.insert_vertex();
+    let v3 = graph.insert_vertex();
 
     // Add some hyperedges
     let e1 = graph.insert_edge([v0, v1, v2])?;
@@ -27,11 +27,12 @@ fn test_hash_graph() -> rshyper::Result<()> {
     assert_eq!(neighbors, exp);
 
     // verify the degree of vertex v1
-    assert_eq!(graph.get_vertex_degree(&v1)?, 2);
+    assert_eq!(graph.get_degree_of_node(&v1), 2);
     // remove vertex v1
     let _ = graph.remove_vertex(&v2)?;
     // verify the hypergraph does not contain vertex v2
     assert!(!graph.contains_node(&v2));
+    assert_eq!(graph.get_degree_of_node(&v2), 0);
     // return
     Ok(())
 }
@@ -60,12 +61,12 @@ fn test_update_hash_node() -> rshyper::Result<()> {
     let v0 = graph.insert_node(42);
 
     // Check initial weight
-    let initial_weight = graph.get_vertex_weight(&v0)?;
+    let initial_weight = graph.get_node(&v0)?;
     assert_eq!(initial_weight.weight(), &Weight(42));
     // Update the weight
     let _ = graph.set_vertex_weight(&v0, 100)?;
     // Check updated weight
-    let updated_weight = graph.get_vertex_weight(&v0)?;
+    let updated_weight = graph.get_node(&v0)?;
     assert_eq!(**updated_weight.weight(), 100);
 
     Ok(())

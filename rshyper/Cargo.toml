@@ -53,7 +53,7 @@ serde_json = { optional = true, workspace = true }
 [dev-dependencies]
 criterion = { workspace = true }
 lazy_static = { workspace = true }
-tracing-subscriber = { features = ["chrono", "env-filter", "fmt", "serde", "std"], workspace = true }
+tracing-subscriber = { features = ["ansi", "chrono", "serde", "std"], workspace = true }
 
 [features]
 default = [ 
