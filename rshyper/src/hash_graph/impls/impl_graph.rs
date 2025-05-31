@@ -1,7 +1,10 @@
+/*
+    appellation: impl_graph <module>
+    authors: @FL03
+*/
 use crate::cmp::HyperNode;
-use crate::hash_graph::HashGraph;
+use crate::hash_graph::{HashGraph, VertexSet};
 use crate::index::{EdgeId, HashIndex, VertexId};
-use std::collections::HashSet;
 
 impl<N, E, Idx> HashGraph<N, E, Idx>
 where
@@ -14,36 +17,6 @@ where
         self.nodes_mut().clear();
         self.edges_mut().clear();
         self
-    }
-    /// check if a hyperedge with the given id exists
-    pub fn contains_edge(&self, index: &EdgeId<Idx>) -> bool {
-        self.edges().contains_key(index)
-    }
-    /// check if a vertex with the given id exists
-    pub fn contains_node(&self, index: &VertexId<Idx>) -> bool {
-        self.nodes().contains_key(index)
-    }
-    /// get the next edge index and updates the current position
-    pub fn next_edge_id(&mut self) -> EdgeId<Idx>
-    where
-        Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
-    {
-        self.position_mut().next_edge().unwrap()
-    }
-    /// returns the next vertex index and updates the current position
-    pub fn next_vertex_id(&mut self) -> VertexId<Idx>
-    where
-        Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
-    {
-        self.position_mut().next_vertex().unwrap()
-    }
-    /// returns the total number of hyperedges in the hypergraph
-    pub fn total_edges(&self) -> usize {
-        self.edges().len()
-    }
-    /// returns the total number of vertices in the hypergraph
-    pub fn total_vertices(&self) -> usize {
-        self.nodes().len()
     }
     /// returns the size, or order, of a particular hyperedge
     pub fn get_edge_order(&self, index: &EdgeId<Idx>) -> crate::Result<usize> {
@@ -103,7 +76,7 @@ where
     pub fn get_vertices_for_edge(
         &self,
         index: &EdgeId<Idx>,
-    ) -> crate::Result<&HashSet<VertexId<Idx>>> {
+    ) -> crate::Result<&VertexSet<Idx>> {
         self.edges()
             .get(index)
             .ok_or_else(|| crate::Error::EdgeNotFound)
@@ -143,7 +116,7 @@ where
         Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
     {
         // collect the vertices into a HashSet to ensure uniqueness
-        let vset = HashSet::from_iter(
+        let vset = VertexSet::from_iter(
             vertices
                 .into_iter()
                 .map(|v| {
@@ -229,13 +202,13 @@ where
             .edges_mut()
             .remove(e2)
             .ok_or(crate::Error::IndexNotFound)?;
-        let merged = set1.union(&set2).copied().collect::<HashSet<_>>();
+        let merged = set1.union(&set2).copied().collect::<VertexSet<_>>();
         let new_edge = self.next_edge_id();
         self.edges_mut().insert(new_edge, merged);
         Ok(new_edge)
     }
     /// returns a set of vertices that are in the hyperedge with the given id
-    pub fn neighbors(&self, index: &VertexId<Idx>) -> crate::Result<HashSet<VertexId<Idx>>>
+    pub fn neighbors(&self, index: &VertexId<Idx>) -> crate::Result<VertexSet<Idx>>
     where
         Idx: Copy,
     {
@@ -243,7 +216,7 @@ where
             return Err(crate::Error::IndexNotFound);
         }
         // initialize an empty set to hold the neighbors
-        let mut neighbors = HashSet::new();
+        let mut neighbors = VertexSet::new();
         // iterate through all the connections
         self.edges().values().for_each(|vertices| {
             if vertices.contains(index) {
@@ -253,7 +226,7 @@ where
         Ok(neighbors)
     }
     /// remove the hyperedge with the given id
-    pub fn remove_edge(&mut self, index: &EdgeId<Idx>) -> crate::Result<HashSet<VertexId<Idx>>> {
+    pub fn remove_edge(&mut self, index: &EdgeId<Idx>) -> crate::Result<VertexSet<Idx>> {
         self.edges_mut()
             .remove(index)
             .ok_or(crate::Error::IndexNotFound)
@@ -271,14 +244,11 @@ where
             .ok_or(crate::Error::IndexNotFound)
     }
     /// update the weight of a given vertex
-    pub fn set_vertex_weight(&mut self, index: &VertexId<Idx>, weight: N) -> crate::Result<()>
-    where
-        N: Clone,
-    {
+    pub fn set_vertex_weight(&mut self, index: &VertexId<Idx>, weight: N) -> crate::Result<()> {
         self.nodes_mut()
             .get_mut(index)
             .map(|node| {
-                node.set_weight(weight.clone());
+                node.set_weight(weight);
             })
             .ok_or(crate::Error::IndexNotFound)
     }

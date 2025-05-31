@@ -2,9 +2,9 @@
     Appellation: hash_graph <module>
     Contrib: @FL03
 */
-use rshyper_core::{EdgeId, HyperNode, NumIndex, Position, RawIndex, VertexId};
-use std::collections::{HashMap, HashSet};
+use super::aliases::*;
 
+use rshyper_core::{EdgeId, NumIndex, Position, RawIndex, VertexId};
 /// A hash-based hypergraph implementation
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
@@ -14,12 +14,14 @@ where
 {
     /// the `edges` of a hypergraph is a map associating hyperedges (identified by `EdgeId`) to
     /// sets of vertices (identified by `VertexId`).
-    pub(crate) edges: HashMap<EdgeId<Idx>, HashSet<VertexId<Idx>>>,
+    pub(crate) edges: EdgeMap<Idx>,
     /// the `facets` of a hypergraph materializes hyperedges by associating them with a weight
-    pub(crate) facets: HashMap<EdgeId<Idx>, E>,
+    pub(crate) facets: FacetMap<E, Idx>,
     /// the `nodes` of a hypergraph are the vertices, each identified by a `VertexId` and
     /// associated with a weight of type `N`.
-    pub(crate) nodes: HashMap<VertexId<Idx>, HyperNode<N, Idx>>,
+    pub(crate) nodes: NodeMap<N, Idx>,
+    /// tracks the current position of the hypergraph, which is used to determine the next
+    /// available indices for edges and vertices.
     pub(crate) position: Position<Idx>,
 }
 
@@ -35,36 +37,36 @@ where
         Idx: Default,
     {
         HashGraph {
-            facets: HashMap::new(),
-            edges: HashMap::new(),
-            nodes: HashMap::new(),
+            facets: FacetMap::new(),
+            edges: EdgeMap::new(),
+            nodes: NodeMap::new(),
             position: Position::default(),
         }
     }
     /// returns an immutable reference to the edges of the hypergraph; a mapping of edges to vertices essentially forming a topological space
     /// that enables the data-structure to be traversed, analyzed, and manipulated.
-    pub const fn edges(&self) -> &HashMap<EdgeId<Idx>, HashSet<VertexId<Idx>>> {
+    pub const fn edges(&self) -> &EdgeMap<Idx> {
         &self.edges
     }
     /// returns a mutable reference to the hyperedges
-    pub const fn edges_mut(&mut self) -> &mut HashMap<EdgeId<Idx>, HashSet<VertexId<Idx>>> {
+    pub const fn edges_mut(&mut self) -> &mut EdgeMap<Idx> {
         &mut self.edges
     }
     /// returns an immutable reference to the facets of the hypergraph; here, a facet is a
     /// hyperedge with an associated weight
-    pub const fn facets(&self) -> &HashMap<EdgeId<Idx>, E> {
+    pub const fn facets(&self) -> &FacetMap<E, Idx> {
         &self.facets
     }
     /// returns a mutable reference to the edges, or facets, of the hypergraph
-    pub const fn facets_mut(&mut self) -> &mut HashMap<EdgeId<Idx>, E> {
+    pub const fn facets_mut(&mut self) -> &mut FacetMap<E, Idx> {
         &mut self.facets
     }
     /// returns am immutable reference to the nodes
-    pub const fn nodes(&self) -> &HashMap<VertexId<Idx>, HyperNode<N, Idx>> {
+    pub const fn nodes(&self) -> &NodeMap<N, Idx> {
         &self.nodes
     }
     /// returns a mutable reference to the nodes of the hypergraph
-    pub const fn nodes_mut(&mut self) -> &mut HashMap<VertexId<Idx>, HyperNode<N, Idx>> {
+    pub const fn nodes_mut(&mut self) -> &mut NodeMap<N, Idx> {
         &mut self.nodes
     }
     /// returns a copy of the position of the hypergraph; here, the [`position`](Position) is
@@ -76,6 +78,36 @@ where
     /// returns a mutable reference to the current position of the hypergraph;
     pub fn position_mut(&mut self) -> &mut Position<Idx> {
         &mut self.position
+    }
+    /// check if a hyperedge with the given id exists
+    pub fn contains_edge(&self, index: &EdgeId<Idx>) -> bool {
+        self.edges().contains_key(index)
+    }
+    /// check if a vertex with the given id exists
+    pub fn contains_node(&self, index: &VertexId<Idx>) -> bool {
+        self.nodes().contains_key(index)
+    }
+    /// get the next edge index and updates the current position
+    pub fn next_edge_id(&mut self) -> EdgeId<Idx>
+    where
+        Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
+    {
+        self.position_mut().next_edge().unwrap()
+    }
+    /// returns the next vertex index and updates the current position
+    pub fn next_vertex_id(&mut self) -> VertexId<Idx>
+    where
+        Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
+    {
+        self.position_mut().next_vertex().unwrap()
+    }
+    /// returns the total number of hyperedges in the hypergraph
+    pub fn total_edges(&self) -> usize {
+        self.edges().len()
+    }
+    /// returns the total number of vertices in the hypergraph
+    pub fn total_vertices(&self) -> usize {
+        self.nodes().len()
     }
 }
 /// depreciated implementations for the [`HashGraph`]
@@ -100,7 +132,7 @@ where
     pub fn remove_hyperedge(
         &mut self,
         index: &EdgeId<Idx>,
-    ) -> crate::Result<HashSet<VertexId<Idx>>> {
+    ) -> crate::Result<VertexSet<Idx>> {
         self.remove_edge(index)
     }
     #[deprecated(since = "v0.0.3", note = "use `insert_edge` instead")]
@@ -130,7 +162,7 @@ where
         since = "v0.0.4",
         note = "use `neighbors` instead to get the neighbors of a vertex"
     )]
-    pub fn get_neighbors(&self, index: &VertexId<Idx>) -> crate::Result<HashSet<VertexId<Idx>>> {
+    pub fn get_neighbors(&self, index: &VertexId<Idx>) -> crate::Result<VertexSet<Idx>> {
         self.neighbors(index)
     }
 }
