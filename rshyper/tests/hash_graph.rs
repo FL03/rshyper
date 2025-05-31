@@ -61,12 +61,12 @@ fn test_update_hash_node() -> rshyper::Result<()> {
     let v0 = graph.insert_node(42);
 
     // Check initial weight
-    let initial_weight = graph.get_vertex_weight(&v0)?;
+    let initial_weight = graph.get_node(&v0)?;
     assert_eq!(initial_weight.weight(), &Weight(42));
     // Update the weight
     let _ = graph.set_vertex_weight(&v0, 100)?;
     // Check updated weight
-    let updated_weight = graph.get_vertex_weight(&v0)?;
+    let updated_weight = graph.get_node(&v0)?;
     assert_eq!(**updated_weight.weight(), 100);
 
     Ok(())

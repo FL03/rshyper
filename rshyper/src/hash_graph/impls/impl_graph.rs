@@ -89,7 +89,7 @@ where
         let vertices = self.get_edge_vertices(&index)?;
         let nodes = vertices
             .iter()
-            .map(|v| self.get_vertex_weight(&v).expect("vertex not found"))
+            .map(|v| self.get_node(&v).expect("vertex not found"))
             .collect::<Vec<_>>();
         Ok(nodes)
     }
@@ -105,11 +105,11 @@ where
     }
     /// returns the weight of a particular vertex
     #[cfg_attr(feature = "tracing", tracing::instrument(skip(self)))]
-    pub fn get_vertex_weight(&self, index: &VertexId<Idx>) -> crate::Result<&HyperNode<N, Idx>> {
+    pub fn get_node(&self, index: &VertexId<Idx>) -> crate::Result<&HyperNode<N, Idx>> {
         self.nodes().get(index).ok_or(crate::Error::NodeNotFound)
     }
     /// returns a mutable reference to the weight of a vertex
-    pub fn get_vertex_weight_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut HyperNode<N, Idx>>
+    pub fn get_node_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut HyperNode<N, Idx>>
     where
         Q: Eq + core::hash::Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
@@ -118,6 +118,7 @@ where
             .get_mut(index)
             .ok_or(crate::Error::NodeNotFound)
     }
+    
     /// add a new hyperedge with the given vertices and return its ID
     pub fn insert_edge<I>(&mut self, vertices: I) -> crate::Result<EdgeId<Idx>>
     where
@@ -235,6 +236,8 @@ where
         Ok(neighbors)
     }
     /// remove the hyperedge with the given id
+    #[cfg_attr(feature = "tracing", tracing::instrument(skip(self, index)))]
+    #[inline]
     pub fn remove_edge<Q>(&mut self, index: &Q) -> crate::Result<VertexSet<Idx>>
     where
         Q: Eq + core::hash::Hash,
@@ -245,11 +248,15 @@ where
             .ok_or(crate::Error::IndexNotFound)
     }
     /// removes the vertex with the given id and all of its associated hyperedges
+    #[cfg_attr(feature = "tracing", tracing::instrument(skip(self, index)))]
+    #[inline]
     pub fn remove_vertex<Q>(&mut self, index: &Q) -> crate::Result<HyperNode<N, Idx>>
     where
-        Q: Eq + core::hash::Hash,
+        Q: Eq + core::fmt::Debug + core::hash::Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
+        #[cfg(feature = "tracing")]
+        tracing::info!("removing the vertex {index:?} from the hypergraph...");
         self.nodes_mut()
             .remove(index)
             .map(|node| {
@@ -261,16 +268,19 @@ where
             .ok_or(crate::Error::IndexNotFound)
     }
     /// update the weight of a given vertex
-    pub fn set_vertex_weight<Q>(&mut self, index: &Q, weight: N) -> crate::Result<()>
+    #[inline]
+    pub fn set_vertex_weight<Q>(&mut self, index: &Q, weight: N) -> crate::Result<&mut Self>
     where
         Q: Eq + core::hash::Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.nodes_mut()
+        let _ = self
+            .nodes_mut()
             .get_mut(index)
             .map(|node| {
                 node.set_weight(weight);
             })
-            .ok_or(crate::Error::IndexNotFound)
+            .ok_or(crate::Error::IndexNotFound)?;
+        Ok(self)
     }
 }

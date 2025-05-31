@@ -158,6 +158,21 @@ where
     {
         Self { position, ..self }
     }
+    /// returns an [`EdgeEntry`] for the edge with the given index, allowing for modifications
+    /// or insertions
+    pub fn edge(&mut self, index: EdgeId<Idx>) -> EdgeEntry<'_, Idx> {
+        self.edges_mut().entry(index)
+    }
+    /// returns a [`FacetEntry`] for the facet with the given index, allowing for modifications
+    /// or insertions
+    pub fn facet(&mut self, index: EdgeId<Idx>) -> FacetEntry<'_, E, Idx> {
+        self.facets_mut().entry(index)
+    }
+    /// returns a [`NodeEntry`] for the node with the given index, allowing for modifications
+    /// or insertions
+    pub fn node(&mut self, index: VertexId<Idx>) -> NodeEntry<'_, N, Idx> {
+        self.nodes_mut().entry(index)
+    }
     /// check if a hyperedge with the given id exists
     pub fn contains_edge<Q>(&self, index: &Q) -> bool
     where
@@ -165,6 +180,15 @@ where
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.edges().contains_key(index)
+    }
+    /// check if a facet with the given id exists; this method is a little heavier since it 
+    /// checks both the facets and edges fields to ensure the index points to a valid facet.
+    pub fn contains_facet<Q>(&self, index: &Q) -> bool
+    where
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.facets().contains_key(index) && self.edges().contains_key(index)
     }
     /// check if a vertex with the given id exists
     pub fn contains_node<Q>(&self, index: &Q) -> bool

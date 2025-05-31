@@ -21,6 +21,7 @@ fn main() -> rshyper::Result<()> {
             let v3 = 4;
         }
     }
+    tracing::info!("Initial graph state: {:?}", graph);
     // Add some hyperedges
     let e1 = graph.insert_edge(vec![v0, v1, v2])?;
     println!("Added hyperedge {e1}: {:?}", [v0, v1, v2]);
@@ -38,8 +39,8 @@ fn main() -> rshyper::Result<()> {
 
     // Remove a vertex
     graph.remove_vertex(&v2)?;
-    println!("Removed vertex {v2}");
+    tracing::info!("removed vertex {v2}...");
 
-    println!("---------\nFinal graph state: {:?}", graph);
+    tracing::info!("Final graph state: {:?}", graph);
     Ok(())
 }
