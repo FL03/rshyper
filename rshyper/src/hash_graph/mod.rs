@@ -3,10 +3,10 @@
     authors: @FL03
 */
 //! this module focuses on implementing a hash-based hypergraph, [`HashGraph`]
-#[doc(inline)]
-pub use self::graph::HashGraph;
 #[allow(unused_imports)]
 pub(crate) use self::aliases::*;
+#[doc(inline)]
+pub use self::graph::HashGraph;
 
 pub mod graph;
 
@@ -22,8 +22,8 @@ pub(crate) mod prelude {
 }
 
 pub(crate) mod aliases {
-    use crate::index::{EdgeId, VertexId};
     use crate::cmp::HyperNode;
+    use crate::index::{EdgeId, VertexId};
     /// a type alias for a [`HashSet`](std::collections::HashSet) of [`VertexId`]
     pub(crate) type VertexSet<Idx = usize> = std::collections::HashSet<VertexId<Idx>>;
     /// a type alias for a [`HashMap`](std::collections::HashMap) that maps [`EdgeId`] to a [`VertexSet`]

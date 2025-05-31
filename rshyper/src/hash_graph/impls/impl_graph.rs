@@ -73,27 +73,18 @@ where
         Ok(nodes)
     }
     /// returns the set of vertices composing the given edge
-    pub fn get_vertices_for_edge(
-        &self,
-        index: &EdgeId<Idx>,
-    ) -> crate::Result<&VertexSet<Idx>> {
+    pub fn get_vertices_for_edge(&self, index: &EdgeId<Idx>) -> crate::Result<&VertexSet<Idx>> {
         self.edges()
             .get(index)
             .ok_or_else(|| crate::Error::EdgeNotFound)
     }
     /// returns the degree of a given vertex where the degree is the number of hyperedges that
     /// contain the vertex
-    pub fn get_vertex_degree(&self, index: &VertexId<Idx>) -> crate::Result<usize> {
-        if !self.contains_node(index) {
-            return Err(crate::Error::NodeNotFound);
-        }
-
-        let degree = self
-            .edges()
+    pub fn get_vertex_degree(&self, index: &VertexId<Idx>) -> usize {
+        self.edges()
             .values()
             .filter(|vertices| vertices.contains(index))
-            .count();
-        Ok(degree)
+            .count()
     }
     /// returns the weight of a particular vertex
     #[cfg_attr(feature = "tracing", tracing::instrument(skip(self)))]

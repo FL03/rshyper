@@ -129,10 +129,7 @@ where
         self.merge_edges(e1, e2)
     }
     #[deprecated(since = "v0.0.3", note = "use `remove_edge` instead")]
-    pub fn remove_hyperedge(
-        &mut self,
-        index: &EdgeId<Idx>,
-    ) -> crate::Result<VertexSet<Idx>> {
+    pub fn remove_hyperedge(&mut self, index: &EdgeId<Idx>) -> crate::Result<VertexSet<Idx>> {
         self.remove_edge(index)
     }
     #[deprecated(since = "v0.0.3", note = "use `insert_edge` instead")]
