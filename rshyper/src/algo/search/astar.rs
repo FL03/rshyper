@@ -114,7 +114,7 @@ where
     {
         // Check if both vertices exist
         if !self.graph.contains_node(&start) {
-            return Err(crate::Error::NodeNotFound);
+            return Err(IndexError::VertexDoesNotExist(start).into());
         }
         if !self.graph.contains_node(&goal) {
             return Err(IndexError::VertexDoesNotExist(goal).into());

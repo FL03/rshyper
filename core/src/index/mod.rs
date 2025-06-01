@@ -10,7 +10,7 @@ pub use self::{
     aliases::*,
     error::*,
     id::IndexBase,
-    kinds::{EdgeIndex, GraphIndex, VertexIndex},
+    kinds::*,
     position::Position,
 };
 
@@ -64,12 +64,12 @@ pub trait Indexed<T: RawIndex> {
 pub trait RawIndex: 'static + Send + Sync + core::fmt::Debug + core::fmt::Display {
     private!();
 }
-/// The [`Idx`] trait extends the [`RawIndex`] trait to include additional operations and
+/// The [`StdIndex`] trait extends the [`RawIndex`] trait to include additional operations and
 /// behaviours commonly expected from indices in a hypergraph.
 ///
 /// **note:** the trait is automatically implemented for all types that implement [`RawIndex`]
 /// alongside traits including: [Clone], [Default], [PartialEq], and [PartialOrd]
-pub trait Index: RawIndex
+pub trait StdIndex: RawIndex
 where
     Self: Clone + Default + PartialEq + PartialOrd,
 {
@@ -80,7 +80,7 @@ where
 /// **note:** the trait is automatically implemented for all types that implement [`Idx`]
 ///  alongside traits including: [Eq] and [Hash](core::hash::Hash)
 /// implementations.
-pub trait HashIndex: Index
+pub trait HashIndex: StdIndex
 where
     Self: Eq + core::hash::Hash,
 {
@@ -123,9 +123,10 @@ where
 /*
  ************* Implementations *************
 */
-impl<T> Index for T where T: 'static + RawIndex + Clone + Default + PartialEq + PartialOrd {}
 
-impl<T> HashIndex for T where T: Index + Eq + core::hash::Hash {}
+impl<T> StdIndex for T where T: 'static + RawIndex + Clone + Default + PartialEq + PartialOrd {}
+
+impl<T> HashIndex for T where T: StdIndex + Eq + core::hash::Hash {}
 
 impl<T> NumIndex for T where
     T: HashIndex

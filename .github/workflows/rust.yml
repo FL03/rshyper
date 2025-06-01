@@ -48,8 +48,8 @@ jobs:
           cache-workspaces: true
           target: ${{ matrix.target }}
       - 
-        name: Build
-        run: cargo build -r -v --workspace --locked --features full --target ${{ matrix.target }}
+        name: Build (--all-features)
+        run: cargo build --release --locked --workspace --all-features
   test:
     needs: build
     strategy:
@@ -72,24 +72,24 @@ jobs:
           override: true
       - 
         name: Test (default)
-        run: cargo test -r --workspace --locked
+        run: cargo test --workspace --release
       - 
         name: Test (full)
-        run: cargo test -r --workspace --locked --features full
+        run: cargo test --workspace --release --features full
       - 
         name: Test (alloc)
         if: matrix.toolchain == 'nightly'
         continue-on-error: true
         env:
           RUSTFLAGS: "-C panic=abort -Z panic_abort_tests"
-        run: cargo test -r --workspace --locked --no-default-features --features alloc
+        run: cargo test --workspace --release --no-default-features --features alloc
       - 
         name: Test (no_std)
         continue-on-error: true
         if: matrix.toolchain == 'nightly'
         env:
           RUSTFLAGS: "-C panic=abort -Z panic_abort_tests"
-        run: cargo test -r --workspace --locked --no-default-features
+        run: cargo test --workspace --release --no-default-features
   benchmark:
     needs: build
     strategy:
