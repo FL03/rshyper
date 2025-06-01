@@ -21,19 +21,28 @@ fn test_astar_shortest_path() -> rshyper::Result<()> {
             let v1;
             let v2;
             let v3;
-            let v4 = 1;
-            let v5 = 2;
+            let v4;
+            let v5;
         }
     }
-    // Direct path: v0 -> v1 -> v3
-    let _e0 = graph.insert_edge(vec![v0, v1])?;
-    let _e1 = graph.insert_edge(vec![v1, v3])?;
-
-    // Longer path: v0 -> v2 -> v4 -> v5 -> v3
-    let _e3 = graph.insert_edge(vec![v0, v2])?;
-    let _e4 = graph.insert_edge(vec![v2, v4])?;
-    let _e5 = graph.insert_edge(vec![v4, v5])?;
-    let _e6 = graph.insert_edge(vec![v5, v3])?;
+    // create two paths with varying lengths
+    // Path 1: v0 -> v1 -> v3
+    rshyper::hyperedge! {
+        graph {
+            let _e0 = [v0, v1]; // Direct path: v0 -> v1
+            let _e1 = [v1, v3]; // Direct path: v1 -> v3
+        }
+    }
+    // Path 2: v0 -> v2 -> v4 -> v1 -> v5 -> v3
+    rshyper::hyperedge! {
+        graph {
+            let _e2 = [v0, v2]; // Longer path: v0 -> v2
+            let _e3 = [v2, v4]; // Longer path: v2 -> v4
+            let _e4 = [v4, v1]; // Longer path: v4 -> vv
+            let _e5 = [v1, v5]; // Longer path: v1 -> v5
+            let _e6 = [v5, v3]; // Longer path: v5 -> v3
+        }
+    }
 
     // use the a* search algorithm to find a set of paths
     let path = graph.astar(heuristic).find_path(v0, v3)?;

@@ -72,27 +72,27 @@ jobs:
           override: true
       - 
         name: Test (default)
-        run: cargo test --locked --workspace --release
+        run: cargo test -r --locked --workspace
       - 
         name: Test (all-features)
-        run: cargo test --locked --workspace --all-features --release
+        run: cargo test -r --locked --workspace --all-features
       - 
         name: Test (full)
-        run: cargo test --locked --workspace --features full --release
+        run: cargo test -r --locked --workspace --features full
       - 
         name: Test (alloc)
         if: matrix.toolchain == 'nightly'
         continue-on-error: true
         env:
           RUSTFLAGS: "-C panic=abort -Z panic_abort_tests"
-        run: cargo test --locked --workspace --release --no-default-features --features alloc
+        run: cargo test -r --locked --workspace --no-default-features --features alloc
       - 
         name: Test (no_std)
         continue-on-error: true
         if: matrix.toolchain == 'nightly'
         env:
           RUSTFLAGS: "-C panic=abort -Z panic_abort_tests"
-        run: cargo test --locked --workspace --release --no-default-features
+        run: cargo test -r --locked --workspace --no-default-features
   benchmark:
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') || github.event.action == 'repository_dispatch' && github.event.action == 'rust'
     needs: build
