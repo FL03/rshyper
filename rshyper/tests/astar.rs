@@ -22,16 +22,19 @@ fn test_astar_shortest_path() -> rshyper::Result<()> {
             let v2;
             let v3;
             let v4 = 1;
+            let v5 = 2;
         }
     }
     // Direct path: v0 -> v1 -> v3
     let _e0 = graph.insert_edge(vec![v0, v1])?;
     let _e1 = graph.insert_edge(vec![v1, v3])?;
 
-    // Longer path: v0 -> v2 -> v4 -> v3
+    // Longer path: v0 -> v2 -> v4 -> v5 -> v3
     let _e3 = graph.insert_edge(vec![v0, v2])?;
     let _e4 = graph.insert_edge(vec![v2, v4])?;
-    let _e5 = graph.insert_edge(vec![v4, v3])?;
+    let _e5 = graph.insert_edge(vec![v4, v5])?;
+    let _e6 = graph.insert_edge(vec![v5, v3])?;
+
     // use the a* search algorithm to find a set of paths
     let path = graph.astar(heuristic).find_path(v0, v3)?;
 

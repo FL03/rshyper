@@ -72,24 +72,24 @@ jobs:
           override: true
       - 
         name: Test (default)
-        run: cargo test --workspace --release
+        run: cargo test --locked --workspace --release
       - 
         name: Test (full)
-        run: cargo test --workspace --release --features full
+        run: cargo test --locked --workspace --release --features full
       - 
         name: Test (alloc)
         if: matrix.toolchain == 'nightly'
         continue-on-error: true
         env:
           RUSTFLAGS: "-C panic=abort -Z panic_abort_tests"
-        run: cargo test --workspace --release --no-default-features --features alloc
+        run: cargo test --locked --workspace --release --no-default-features --features alloc
       - 
         name: Test (no_std)
         continue-on-error: true
         if: matrix.toolchain == 'nightly'
         env:
           RUSTFLAGS: "-C panic=abort -Z panic_abort_tests"
-        run: cargo test --workspace --release --no-default-features
+        run: cargo test --locked --workspace --release --no-default-features
   benchmark:
     needs: build
     strategy:
