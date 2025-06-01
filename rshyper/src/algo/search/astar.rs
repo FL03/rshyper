@@ -9,7 +9,7 @@ pub(crate) mod priority_node;
 
 use super::{Search, Traversal};
 use crate::hash_graph::{HashGraph, VertexSet};
-use crate::index::{IndexError, VertexId};
+use crate::index::{IndexError, RawIndex, VertexId};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 
 /// A simple trait defining a common interface for heuristic functions compatible with the
@@ -20,13 +20,14 @@ pub trait HeuristicFunc<T = VertexId> {
     fn compute(&self, start: T, goal: T) -> Self::Output;
 }
 
-impl<F> HeuristicFunc<VertexId> for F
+impl<F, I> HeuristicFunc<VertexId<I>> for F
 where
-    F: Fn(VertexId, VertexId) -> f64,
+    I: RawIndex,
+    F: Fn(VertexId<I>, VertexId<I>) -> f64,
 {
     type Output = f64;
 
-    fn compute(&self, start: VertexId, goal: VertexId) -> Self::Output {
+    fn compute(&self, start: VertexId<I>, goal: VertexId<I>) -> Self::Output {
         self(start, goal)
     }
 }
