@@ -80,22 +80,40 @@ where
             heuristic,
         }
     }
-    /// returns an immutable reference to the set of visited vertices
+    /// returns an immutable reference to the closed set of vertices
     pub const fn closed_set(&self) -> &HashSet<VertexId> {
         &self.closed_set
+    }
+    /// returns a mutable reference to the closed set of vertices
+    pub const fn closed_set_mut(&mut self) -> &mut HashSet<VertexId> {
+        &mut self.closed_set
     }
     /// returns an immutable reference to the heuristic function of the algorithm
     pub const fn heuristic(&self) -> &F {
         &self.heuristic
     }
+    /// returns an immutable reference to the set of vertices that have been visited
+    pub const fn open_set(&self) -> &VertexSet {
+        &self.open_set
+    }
+    /// returns amutable reference to the open set of vertices
+    pub const fn open_set_mut(&mut self) -> &mut VertexSet {
+        &mut self.open_set
+    }
     /// returns true if the given vertex has been visited
     pub fn has_visited(&self, vertex: &VertexId) -> bool {
         self.closed_set().contains(vertex)
     }
+    /// removes a vertex from the open set into the closed set
+    /// this is useful to mark a vertex as processed
+    fn move_open_to_closed(&mut self, vertex: &VertexId) {
+        self.open_set_mut().remove(vertex);
+        self.closed_set_mut().insert(*vertex);
+    }
     /// reset the state
     pub fn reset(&mut self) -> &mut Self {
-        self.open_set.clear();
-        self.closed_set.clear();
+        self.open_set_mut().clear();
+        self.closed_set_mut().clear();
         self.came_from.clear();
         self.g_score.clear();
         self.f_score.clear();
@@ -145,8 +163,7 @@ where
         let mut processed = HashSet::new();
 
         while let Some(PriorityNode {
-            vertex: current,
-            ..
+            vertex: current, ..
         }) = priority_queue.pop()
         {
             // Skip if we've already processed this vertex with a better path
@@ -162,15 +179,17 @@ where
             }
 
             // Move from open to closed set
-            self.open_set.remove(&current);
-            self.closed_set.insert(current);
+            self.move_open_to_closed(&current);
 
             // Get all hyperedges containing the current vertex
             let edges = self.graph.get_edges_with_vertex(&current)?;
 
             edges.iter().for_each(|edge_id| {
                 // Get all vertices in this hyperedge
-                let vertices = self.graph.get_edge_vertices(edge_id).expect("Failed to get edge vertices");
+                let vertices = self
+                    .graph
+                    .get_edge_vertices(edge_id)
+                    .expect("Failed to get edge vertices");
 
                 // Process each vertex in this hyperedge
                 for &neighbor in vertices {
@@ -196,19 +215,16 @@ where
                         self.f_score.insert(neighbor, f_score);
 
                         // Add to open set if not already there
-                        if !self.open_set.contains(&neighbor) {
-                            self.open_set.insert(neighbor);
+                        if !self.open_set().contains(&neighbor) {
+                            self.open_set_mut().insert(neighbor);
                         }
 
-                        // Always add to priority queue with new f_score
-                        // (The duplicate check above ensures we don't process unnecessarily)
-                        priority_queue.push(PriorityNode {
-                            vertex: neighbor,
-                            priority: -(f_score as i64),
-                        });
+                        // push the neighbor into the priority queue with its f_score (negative for min-heap behavior)
+                        let pnode = PriorityNode::new(neighbor, -(f_score as i64));
+                        priority_queue.push(pnode);
                     }
                 }
-            }); 
+            });
         }
 
         // No path found
