@@ -4,7 +4,6 @@
 */
 //! this module implements the [`Error`] type for the [`rshyper`](https://docs.rs/rshyper)
 //! crate.
-
 #[cfg(feature = "alloc")]
 use alloc::{boxed::Box, string::String};
 
@@ -27,12 +26,17 @@ pub enum Error {
     #[cfg(feature = "anyhow")]
     #[error(transparent)]
     AnyError(#[from] anyhow::Error),
+    #[cfg(feature = "alloc")]
+    #[error(transparent)]
+    BoxError(#[from] Box<dyn core::error::Error + Send + Sync + 'static>),
+    #[error(transparent)]
+    FmtError(#[from] core::fmt::Error),
+    #[cfg(feature = "std")]
+    #[error(transparent)]
+    IOError(#[from] std::io::Error),
     #[cfg(feature = "serde_json")]
     #[error(transparent)]
     JsonError(#[from] serde_json::Error),
-    #[cfg(feature = "alloc")]
-    #[error(transparent)]
-    Other(#[from] Box<dyn core::error::Error + Send + Sync + 'static>),
     #[cfg(feature = "alloc")]
     #[error("Unknown error: {0}")]
     Unknown(String),

@@ -6,6 +6,15 @@ extern crate rshyper_core as rshyper;
 use rshyper::index::{EdgeId, IndexBase, Position, VertexId, VertexIndex};
 
 #[test]
+fn test_index() -> rshyper::Result<()> {
+    let mut idx = IndexBase::<usize, VertexIndex>::new(1);
+    assert_eq!(idx.get(), &1);
+    idx.set(2);
+    assert_eq!(idx.get(), &2);
+    Ok(())
+}
+
+#[test]
 fn test_edge_id() -> rshyper::Result<()> {
     let mut edge_id = EdgeId::<usize>::default();
     let e0 = edge_id.step()?;
@@ -21,15 +30,6 @@ fn test_edge_id() -> rshyper::Result<()> {
 fn test_vertex_id() -> rshyper::Result<()> {
     let vertex_id = VertexId::new(1);
     assert_eq!(vertex_id.get(), &1);
-    Ok(())
-}
-
-#[test]
-fn test_index() -> rshyper::Result<()> {
-    let mut index = IndexBase::<usize, VertexIndex>::new(1);
-    assert_eq!(index.get(), &1);
-    index.set(2);
-    assert_eq!(index.get(), &2);
     Ok(())
 }
 

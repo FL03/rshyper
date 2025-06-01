@@ -114,7 +114,7 @@ where
     {
         // Check if both vertices exist
         if !self.graph.contains_node(&start) {
-            return Err(IndexError::VertexDoesNotExist(start).into());
+            return Err(crate::Error::NodeNotFound);
         }
         if !self.graph.contains_node(&goal) {
             return Err(IndexError::VertexDoesNotExist(goal).into());
@@ -212,9 +212,8 @@ where
 
         // No path found
         Err(IndexError::NoPathFoundBetween {
-            source: None,
-            from: start,
-            to: goal,
+            from: *start.get(),
+            to: *goal.get(),
         }
         .into())
     }

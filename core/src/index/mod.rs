@@ -179,6 +179,15 @@ where
 /*
  ************* [impl] RawIndex *************
 */
+#[cfg(feature = "alloc")]
+impl RawIndex for alloc::boxed::Box<dyn RawIndex> {
+    seal!();
+}
+
+#[cfg(feature = "alloc")]
+impl RawIndex for alloc::boxed::Box<dyn RawIndex + Send + Sync + 'static> {
+    seal!();
+}
 
 macro_rules! impl_raw_index {
     ($($t:ty),* $(,)?) => {

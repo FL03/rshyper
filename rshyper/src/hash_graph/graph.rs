@@ -221,58 +221,6 @@ where
         self.nodes().len()
     }
 }
-/// depreciated implementations for the [`HashGraph`]
-impl<N, E, Idx> HashGraph<N, E, Idx>
-where
-    N: Eq + core::hash::Hash,
-    E: Eq + core::hash::Hash,
-    Idx: NumIndex,
-{
-    #[deprecated(since = "v0.0.3", note = "use `merge_edges` instead")]
-    pub fn merge_hyperedges(
-        &mut self,
-        e1: &EdgeId<Idx>,
-        e2: &EdgeId<Idx>,
-    ) -> crate::Result<EdgeId<Idx>> {
-        self.merge_edges(e1, e2)
-    }
-    #[deprecated(since = "v0.0.3", note = "use `remove_edge` instead")]
-    pub fn remove_hyperedge(&mut self, index: &EdgeId<Idx>) -> crate::Result<VertexSet<Idx>> {
-        self.remove_edge(index)
-    }
-    #[deprecated(since = "v0.0.3", note = "use `insert_edge` instead")]
-    pub fn add_hyperedge<I>(&mut self, vertices: I) -> crate::Result<EdgeId<Idx>>
-    where
-        I: Clone + IntoIterator<Item = VertexId<Idx>>,
-    {
-        self.insert_edge(vertices)
-    }
-    #[deprecated(since = "v0.0.3", note = "use `insert_node` instead")]
-    pub fn add_vertex(&mut self, weight: N) -> VertexId<Idx> {
-        self.insert_node(weight)
-    }
-    #[deprecated(since = "v0.0.3", note = "use `insert_vertex` instead")]
-    pub fn add_vertex_default(&mut self) -> VertexId<Idx>
-    where
-        N: Default,
-    {
-        self.insert_vertex()
-    }
-    #[deprecated(
-        since = "v0.0.4",
-        note = "use `neighbors` instead to get the neighbors of a vertex"
-    )]
-    pub fn get_neighbors(&self, index: &VertexId<Idx>) -> crate::Result<VertexSet<Idx>> {
-        self.neighbors(index)
-    }
-    #[deprecated(since = "v0.0.3", note = "use `insert_vertex` instead")]
-    pub fn insert_node_default(&mut self) -> VertexId<Idx>
-    where
-        N: Default,
-    {
-        self.insert_vertex()
-    }
-}
 
 impl<N, E, Idx> Default for HashGraph<N, E, Idx>
 where

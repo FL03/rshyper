@@ -156,11 +156,11 @@ where
     ///     assert_eq!(e2.get(), &2);
     /// ```
     #[inline]
-    pub fn step(&mut self) -> IndexResult<Self>
+    pub fn step(&mut self) -> IndexResult<Self, T>
     where
         T: Copy + core::ops::Add<T, Output = T> + num_traits::One,
     {
-        self.next().ok_or(IndexError::InvalidIndex)
+        self.next().ok_or(IndexError::IndexOutOfBounds(*self.get()))
     }
 }
 
