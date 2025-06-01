@@ -163,6 +163,24 @@ impl<T> From<T> for Weight<T> {
     }
 }
 
+impl<T> PartialEq<T> for Weight<T>
+where
+    T: PartialEq,
+{
+    fn eq(&self, other: &T) -> bool {
+        self.get() == other
+    }
+}
+
+impl<T> PartialOrd<T> for Weight<T>
+where
+    T: PartialOrd,
+{
+    fn partial_cmp(&self, other: &T) -> Option<core::cmp::Ordering> {
+        self.get().partial_cmp(other)
+    }
+}
+
 macro_rules! impl_wrapper_binary_op {
     ($s:ident::<[$($op:ident.$call:ident),* $(,)?]>) => {
         $(

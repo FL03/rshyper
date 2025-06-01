@@ -58,16 +58,19 @@ fn test_astar_with_heuristic() -> rshyper::Result<()> {
     // 3 -- 4 -- 5
     // |    |    |
     // 6 -- 7 -- 8
-
-    let v0 = graph.insert_vertex(); // (0,0)
-    let v1 = graph.insert_vertex(); // (1,0)
-    let v2 = graph.insert_vertex(); // (2,0)
-    let v3 = graph.insert_vertex(); // (0,1)
-    let v4 = graph.insert_vertex(); // (1,1)
-    let v5 = graph.insert_vertex(); // (2,1)
-    let v6 = graph.insert_vertex(); // (0,2)
-    let v7 = graph.insert_vertex(); // (1,2)
-    let v8 = graph.insert_vertex(); // (2,2)
+    rshyper::hypernode! {
+        graph {
+            let v0; // (0,0)
+            let v1; // (1,0)
+            let v2; // (2,0)
+            let v3; // (0,1)
+            let v4; // (1,1)
+            let v5; // (2,1)
+            let v6; // (0,2)
+            let v7; // (1,2)
+            let v8; // (2,2)
+        }
+    }
 
     // Create horizontal connections
     graph.insert_edge(vec![v0, v1])?;
