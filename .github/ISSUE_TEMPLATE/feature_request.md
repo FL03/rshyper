@@ -2,6 +2,7 @@
 name: Feature request
 about: Suggest an idea for this project
 title: ''
+assignees: [ FL03 ]
 labels: [ enhancement ]
 type: feature
 ---

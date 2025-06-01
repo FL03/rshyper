@@ -4,39 +4,55 @@
 */
 use rshyper::{HashGraph, VertexId};
 
-#[ignore = "A* search cannot find min paths"]
+// #[ignore = "A* search cannot find min paths"]
 #[test]
-fn test_astar_search() -> rshyper::Result<()> {
+fn test_astar_shortest_path() -> rshyper::Result<()> {
     // Simple Euclidean distance heuristic (not used in this test)
     fn heuristic(_x: VertexId, _y: VertexId) -> f64 {
         0.0 // No heuristic, just a placeholder
     }
     // initialize a new graph
-    let mut graph = HashGraph::<()>::new();
+    let mut graph = HashGraph::<usize, usize>::new();
 
-    // Create a simple hypergraph
-    let v0 = graph.insert_node_default();
-    let v1 = graph.insert_node_default();
-    let v2 = graph.insert_node_default();
-    let v3 = graph.insert_node_default();
-    let v4 = graph.insert_node_default();
+    // use the macro create some new vertices
+    rshyper::hypernode! {
+        graph {
+            let v0;
+            let v1;
+            let v2;
+            let v3;
+            let v4;
+            let v5;
+        }
+    }
+    // create two paths with varying lengths
+    // Path 1: v0 -> v1 -> v3
+    rshyper::hyperedge! {
+        graph {
+            let _e0 = [v0, v1]; // Direct path: v0 -> v1
+            let _e1 = [v1, v3]; // Direct path: v1 -> v3
+        }
+    }
+    // Path 2: v0 -> v2 -> v4 -> v1 -> v5 -> v3
+    rshyper::hyperedge! {
+        graph {
+            let _e2 = [v0, v2]; // Longer path: v0 -> v2
+            let _e3 = [v2, v4]; // Longer path: v2 -> v4
+            let _e4 = [v4, v1]; // Longer path: v4 -> vv
+            let _e5 = [v1, v5]; // Longer path: v1 -> v5
+            let _e6 = [v5, v3]; // Longer path: v5 -> v3
+        }
+    }
 
-    // Direct path: v0 -> v1 -> v3
-    let _e0 = graph.insert_edge(vec![v0, v1])?;
-    let _e1 = graph.insert_edge(vec![v1, v3])?;
-
-    // Longer path: v0 -> v2 -> v4 -> v3
-    let _e3 = graph.insert_edge(vec![v0, v2])?;
-    let _e4 = graph.insert_edge(vec![v2, v4])?;
-    let _e5 = graph.insert_edge(vec![v4, v3])?;
     // use the a* search algorithm to find a set of paths
     let path = graph.astar(heuristic).find_path(v0, v3)?;
 
     // A* should find the shortest path (v0 -> v1 -> v3)
-    assert_eq!(path.len(), 3, "Shortest path should have 3 vertices");
-    assert_eq!(path[0], v0, "Path should start with v0");
-    assert_eq!(path[2], v3, "Path should end with v3");
-    assert_eq!(path[1], v1, "Path should go through v1 (shortest route)");
+    assert_eq!(
+        path,
+        vec![v0, v1, v3],
+        "Path should start with v0, go through v1, and end with v3"
+    );
 
     Ok(())
 }
@@ -51,16 +67,19 @@ fn test_astar_with_heuristic() -> rshyper::Result<()> {
     // 3 -- 4 -- 5
     // |    |    |
     // 6 -- 7 -- 8
-
-    let v0 = graph.insert_node_default(); // (0,0)
-    let v1 = graph.insert_node_default(); // (1,0)
-    let v2 = graph.insert_node_default(); // (2,0)
-    let v3 = graph.insert_node_default(); // (0,1)
-    let v4 = graph.insert_node_default(); // (1,1)
-    let v5 = graph.insert_node_default(); // (2,1)
-    let v6 = graph.insert_node_default(); // (0,2)
-    let v7 = graph.insert_node_default(); // (1,2)
-    let v8 = graph.insert_node_default(); // (2,2)
+    rshyper::hypernode! {
+        graph {
+            let v0; // (0,0)
+            let v1; // (1,0)
+            let v2; // (2,0)
+            let v3; // (0,1)
+            let v4; // (1,1)
+            let v5; // (2,1)
+            let v6; // (0,2)
+            let v7; // (1,2)
+            let v8; // (2,2)
+        }
+    }
 
     // Create horizontal connections
     graph.insert_edge(vec![v0, v1])?;
@@ -134,10 +153,10 @@ fn test_astar_disconnected() -> rshyper::Result<()> {
     // Create two disconnected components
     // 0 -- 1    2 -- 3
 
-    let v0 = graph.insert_node_default();
-    let v1 = graph.insert_node_default();
-    let v2 = graph.insert_node_default();
-    let v3 = graph.insert_node_default();
+    let v0 = graph.insert_vertex();
+    let v1 = graph.insert_vertex();
+    let v2 = graph.insert_vertex();
+    let v3 = graph.insert_vertex();
 
     graph.insert_edge(vec![v0, v1])?;
     graph.insert_edge(vec![v2, v3])?;
@@ -167,13 +186,13 @@ fn test_astar_complex_paths() -> rshyper::Result<()> {
     // |         /
     // +-- 6 ---+
 
-    let v0 = graph.insert_node_default();
-    let v1 = graph.insert_node_default();
-    let v2 = graph.insert_node_default();
-    let v3 = graph.insert_node_default();
-    let v4 = graph.insert_node_default();
-    let v5 = graph.insert_node_default();
-    let v6 = graph.insert_node_default();
+    let v0 = graph.insert_vertex();
+    let v1 = graph.insert_vertex();
+    let v2 = graph.insert_vertex();
+    let v3 = graph.insert_vertex();
+    let v4 = graph.insert_vertex();
+    let v5 = graph.insert_vertex();
+    let v6 = graph.insert_vertex();
 
     // Path 1: v0 -> v1 -> v2 -> v3 (length 3)
     graph.insert_edge(vec![v0, v1])?;

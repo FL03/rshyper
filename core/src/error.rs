@@ -4,11 +4,8 @@
 */
 //! this module implements the [`Error`] type for the [`rshyper`](https://docs.rs/rshyper)
 //! crate.
-
 #[cfg(feature = "alloc")]
 use alloc::{boxed::Box, string::String};
-
-use crate::{EdgeId, VertexId};
 
 /// A type alias for a [Result] with the crate-specific error type [Error]
 pub type Result<T = ()> = core::result::Result<T, Error>;
@@ -22,27 +19,24 @@ pub enum Error {
     NodeNotFound,
     #[error("No edges contain the given vertex")]
     NoEdgesWithVertex,
-    #[error("The index does not exist")]
-    IndexNotFound,
-    #[error("Index is out of bounds")]
-    IndexOutOfBounds,
-    #[error("Invalid index")]
-    InvalidIndex,
-    #[error("Cannot create empty hyperedge")]
+    #[error("Cannot create an empty hyperedge")]
     EmptyHyperedge,
-    #[error("Hyperedge {0} does not exist")]
-    HyperedgeDoesNotExist(EdgeId<usize>),
-    #[error("Vertex {0} does not exist")]
-    VertexDoesNotExist(VertexId<usize>),
+    #[error(transparent)]
+    IndexError(#[from] crate::index::IndexError),
     #[cfg(feature = "anyhow")]
     #[error(transparent)]
     AnyError(#[from] anyhow::Error),
+    #[cfg(feature = "alloc")]
+    #[error(transparent)]
+    BoxError(#[from] Box<dyn core::error::Error + Send + Sync + 'static>),
+    #[error(transparent)]
+    FmtError(#[from] core::fmt::Error),
+    #[cfg(feature = "std")]
+    #[error(transparent)]
+    IOError(#[from] std::io::Error),
     #[cfg(feature = "serde_json")]
     #[error(transparent)]
     JsonError(#[from] serde_json::Error),
-    #[cfg(feature = "alloc")]
-    #[error(transparent)]
-    Other(#[from] Box<dyn core::error::Error + Send + Sync + 'static>),
     #[cfg(feature = "alloc")]
     #[error("Unknown error: {0}")]
     Unknown(String),

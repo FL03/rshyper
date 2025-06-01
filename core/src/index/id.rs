@@ -2,7 +2,7 @@
     Appellation: index <module>
     Contrib: @FL03
 */
-use super::{GraphIndex, RawIndex};
+use super::{GraphIndex, IndexError, IndexResult, RawIndex};
 /// A generic [`IndexBase`] implementation used to represent various [_kinds_](GraphIndex) of
 /// indices
 #[derive(Clone, Copy, Eq, Hash, PartialEq, Ord, PartialOrd)]
@@ -156,11 +156,11 @@ where
     ///     assert_eq!(e2.get(), &2);
     /// ```
     #[inline]
-    pub fn step(&mut self) -> crate::Result<Self>
+    pub fn step(&mut self) -> IndexResult<Self, T>
     where
         T: Copy + core::ops::Add<T, Output = T> + num_traits::One,
     {
-        self.next().ok_or(crate::Error::InvalidIndex)
+        self.next().ok_or(IndexError::IndexOutOfBounds(*self.get()))
     }
 }
 

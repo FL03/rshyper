@@ -6,13 +6,9 @@
 //! Additional type aliases ([`EdgeId`] and [`VertexId`]) are provided for convenience, as well
 //! as traits that define the behaviour of indices in a hypergraph.
 #[doc(inline)]
-pub use self::{
-    aliases::*,
-    id::IndexBase,
-    kinds::{EdgeIndex, GraphIndex, VertexIndex},
-    position::Position,
-};
+pub use self::{aliases::*, error::*, id::IndexBase, kinds::*, position::Position};
 
+pub mod error;
 pub mod id;
 pub mod kinds;
 pub mod position;
@@ -26,6 +22,8 @@ mod impls {
 }
 
 pub(crate) mod prelude {
+    #[doc(inline)]
+    pub use super::error::*;
     #[doc(inline)]
     pub use super::id::*;
     #[doc(inline)]
@@ -60,12 +58,12 @@ pub trait Indexed<T: RawIndex> {
 pub trait RawIndex: 'static + Send + Sync + core::fmt::Debug + core::fmt::Display {
     private!();
 }
-/// The [`Idx`] trait extends the [`RawIndex`] trait to include additional operations and
+/// The [`StdIndex`] trait extends the [`RawIndex`] trait to include additional operations and
 /// behaviours commonly expected from indices in a hypergraph.
 ///
 /// **note:** the trait is automatically implemented for all types that implement [`RawIndex`]
 /// alongside traits including: [Clone], [Default], [PartialEq], and [PartialOrd]
-pub trait Index: RawIndex
+pub trait StdIndex: RawIndex
 where
     Self: Clone + Default + PartialEq + PartialOrd,
 {
@@ -76,7 +74,7 @@ where
 /// **note:** the trait is automatically implemented for all types that implement [`Idx`]
 ///  alongside traits including: [Eq] and [Hash](core::hash::Hash)
 /// implementations.
-pub trait HashIndex: Index
+pub trait HashIndex: StdIndex
 where
     Self: Eq + core::hash::Hash,
 {
@@ -119,9 +117,10 @@ where
 /*
  ************* Implementations *************
 */
-impl<T> Index for T where T: 'static + RawIndex + Clone + Default + PartialEq + PartialOrd {}
 
-impl<T> HashIndex for T where T: Index + Eq + core::hash::Hash {}
+impl<T> StdIndex for T where T: 'static + RawIndex + Clone + Default + PartialEq + PartialOrd {}
+
+impl<T> HashIndex for T where T: StdIndex + Eq + core::hash::Hash {}
 
 impl<T> NumIndex for T where
     T: HashIndex
@@ -175,6 +174,15 @@ where
 /*
  ************* [impl] RawIndex *************
 */
+#[cfg(feature = "alloc")]
+impl RawIndex for alloc::boxed::Box<dyn RawIndex> {
+    seal!();
+}
+
+#[cfg(feature = "alloc")]
+impl RawIndex for alloc::boxed::Box<dyn RawIndex + Send + Sync + 'static> {
+    seal!();
+}
 
 macro_rules! impl_raw_index {
     ($($t:ty),* $(,)?) => {

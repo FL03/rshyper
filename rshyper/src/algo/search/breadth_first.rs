@@ -3,7 +3,7 @@
     Contrib: @FL03
 */
 use crate::hash_graph::HashGraph;
-use rshyper_core::{Error, VertexId};
+use crate::index::{IndexError, VertexId};
 use std::collections::{HashSet, VecDeque};
 
 use super::{Search, Traversal};
@@ -33,7 +33,7 @@ where
         &self.queue
     }
     /// returns a mutable reference to the queue
-    pub const fn queue_mut(&mut self) -> &mut VecDeque<VertexId> {
+    pub(crate) const fn queue_mut(&mut self) -> &mut VecDeque<VertexId> {
         &mut self.queue
     }
     /// returns an immutable reference to the visited vertices
@@ -69,7 +69,7 @@ where
 
         // Check if starting vertex exists
         if !self.graph.contains_node(&start) {
-            return Err(Error::VertexDoesNotExist(start));
+            return Err(IndexError::VertexDoesNotExist(start).into());
         }
 
         // Add start vertex to queue and mark as visited
@@ -87,7 +87,7 @@ where
             if let Ok(edges) = self.graph.get_edges_with_vertex(&current) {
                 // visit all vertices within each edge that haven't been visited yet
                 for edge_id in edges {
-                    for &vertex in self.graph.get_vertices_for_edge(&edge_id)? {
+                    for &vertex in self.graph.get_edge_vertices(&edge_id)? {
                         if !self.has_visited(&vertex) {
                             self.queue.push_back(vertex);
                             self.visited.insert(vertex);

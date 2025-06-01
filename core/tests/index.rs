@@ -6,6 +6,15 @@ extern crate rshyper_core as rshyper;
 use rshyper::index::{EdgeId, IndexBase, Position, VertexId, VertexIndex};
 
 #[test]
+fn test_index() -> rshyper::Result<()> {
+    let mut idx = IndexBase::<usize, VertexIndex>::new(1);
+    assert_eq!(idx.get(), &1);
+    idx.set(2);
+    assert_eq!(idx.get(), &2);
+    Ok(())
+}
+
+#[test]
 fn test_edge_id() -> rshyper::Result<()> {
     let mut edge_id = EdgeId::<usize>::default();
     let e0 = edge_id.step()?;
@@ -25,19 +34,23 @@ fn test_vertex_id() -> rshyper::Result<()> {
 }
 
 #[test]
-fn test_index() -> rshyper::Result<()> {
-    let mut index = IndexBase::<usize, VertexIndex>::new(1);
-    assert_eq!(index.get(), &1);
-    index.set(2);
-    assert_eq!(index.get(), &2);
-    Ok(())
-}
-
-#[test]
 fn test_position() -> rshyper::Result<()> {
     let mut index = Position::<usize>::zero();
+    // create some edge indices
     let e0 = index.next_edge()?;
+    let e1 = index.next_edge()?;
+    let e2 = index.next_edge()?;
+    // check the edge indices
+    assert_eq!(e0.get(), &0);
+    assert_eq!(e1.get(), &1);
+    assert_eq!(e2.get(), &2);
+    // create some vertex indices
     let v0 = index.next_vertex()?;
+    let v1 = index.next_vertex()?;
+    let v2 = index.next_vertex()?;
+    // check the vertex indices
     assert_eq!(e0.get(), v0.get());
+    assert_eq!(e1.get(), v1.get());
+    assert_eq!(e2.get(), v2.get());
     Ok(())
 }

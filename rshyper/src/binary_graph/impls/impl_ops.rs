@@ -12,7 +12,6 @@ where
     E: Ord,
     Idx: RawIndex + Ord,
 {
-
 }
 
 impl<N, E, Idx> core::ops::Index<&EdgeId<Idx>> for BinaryGraph<N, E, Idx>
@@ -24,7 +23,9 @@ where
     type Output = E;
 
     fn index(&self, index: &EdgeId<Idx>) -> &Self::Output {
-        self.facets().get(index).expect("EdgeId not found in connections")
+        self.facets()
+            .get(index)
+            .expect("EdgeId not found in connections")
     }
 }
 
@@ -37,7 +38,9 @@ where
     type Output = HyperNode<N, Idx>;
 
     fn index(&self, index: &VertexId<Idx>) -> &Self::Output {
-        self.nodes().get(index).expect("VertexId not found in connections")
+        self.nodes()
+            .get(index)
+            .expect("VertexId not found in connections")
     }
 }
 
@@ -48,7 +51,9 @@ where
     Idx: RawIndex + Ord,
 {
     fn index_mut(&mut self, index: &EdgeId<Idx>) -> &mut Self::Output {
-        self.facets_mut().get_mut(index).expect("EdgeId not found in connections")
+        self.facets_mut()
+            .get_mut(index)
+            .expect("EdgeId not found in connections")
     }
 }
 
@@ -59,6 +64,8 @@ where
     Idx: RawIndex + Ord,
 {
     fn index_mut(&mut self, index: &VertexId<Idx>) -> &mut Self::Output {
-        self.nodes_mut().get_mut(index).expect("VertexId not found in connections")
+        self.nodes_mut()
+            .get_mut(index)
+            .expect("VertexId not found in connections")
     }
 }

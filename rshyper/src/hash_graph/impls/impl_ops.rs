@@ -62,7 +62,7 @@ where
     type Output = HyperNode<N, Idx>;
 
     fn index(&self, index: &VertexId<Idx>) -> &Self::Output {
-        self.get_vertex_weight(index).expect("Node not found")
+        self.get_node(index).expect("Node not found")
     }
 }
 
@@ -73,6 +73,6 @@ where
     Idx: HashIndex,
 {
     fn index_mut(&mut self, index: &VertexId<Idx>) -> &mut Self::Output {
-        self.get_vertex_weight_mut(index).expect("Node not found")
+        self.get_node_mut(index).expect("Node not found")
     }
 }

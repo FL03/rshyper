@@ -2,7 +2,7 @@
     appellation: cursor <module>
     authors: @FL03
 */
-use crate::index::{EdgeId, RawIndex, Udx, VertexId};
+use crate::index::{EdgeId, IndexResult, RawIndex, Udx, VertexId};
 
 /// The [`Position`] implementation is uses to track the current indexes of edges and vertices
 /// within a hypergraph.
@@ -24,10 +24,12 @@ impl<T> Position<T>
 where
     T: RawIndex,
 {
+    /// returns a new [`Position`] instance with the given edge and vertex indices.
     pub fn new(edge: EdgeId<T>, vertex: VertexId<T>) -> Self {
         Self { edge, vertex }
     }
-
+    /// initialize a new [`Position`] using the logical default for both the edge and vertex
+    /// indices.
     pub fn default() -> Self
     where
         T: Default,
@@ -37,7 +39,19 @@ where
             vertex: VertexId::default(),
         }
     }
-
+    /// initializes a new [`Position`] instance with [`one`](num_traits::One) values for both
+    /// edge and vertex indices.
+    pub fn one() -> Self
+    where
+        T: num_traits::One,
+    {
+        Self {
+            edge: EdgeId::one(),
+            vertex: VertexId::one(),
+        }
+    }
+    /// initializes a new [`Position`] instance with [`zero`](num_traits::Zero) values for both
+    /// edge and vertex indices.
     pub fn zero() -> Self
     where
         T: num_traits::Zero,
@@ -47,7 +61,8 @@ where
             vertex: VertexId::zero(),
         }
     }
-
+    /// returns a new position instance using the given edge index and the logical default for
+    /// the vertex index.
     pub fn from_edge(edge: EdgeId<T>) -> Self
     where
         T: Default,
@@ -91,20 +106,20 @@ where
     pub fn vertex_mut(&mut self) -> &mut VertexId<T> {
         &mut self.vertex
     }
-
-    pub fn next_edge(&mut self) -> crate::Result<EdgeId<T>>
+    /// increments the current edge index by one and returns the previous value; see
+    /// [`step`](crate::index::IndexBase::step) for more details.
+    pub fn next_edge(&mut self) -> IndexResult<EdgeId<T>, T>
     where
         T: Copy + core::ops::Add<T, Output = T> + num_traits::One,
     {
-        self.edge_mut().next().ok_or(crate::Error::IndexOutOfBounds)
+        self.edge_mut().step()
     }
-
-    pub fn next_vertex(&mut self) -> crate::Result<VertexId<T>>
+    /// increments the current vertex index by one and returns the previous value; see
+    /// [`step`](crate::index::IndexBase::step) for more details.
+    pub fn next_vertex(&mut self) -> IndexResult<VertexId<T>, T>
     where
         T: Copy + core::ops::Add<T, Output = T> + num_traits::One,
     {
-        self.vertex_mut()
-            .next()
-            .ok_or(crate::Error::IndexOutOfBounds)
+        self.vertex_mut().step()
     }
 }
