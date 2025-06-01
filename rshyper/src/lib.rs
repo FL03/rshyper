@@ -48,7 +48,6 @@ pub use self::binary_graph::BinaryGraph;
 #[cfg(feature = "hash_graph")]
 pub use self::hash_graph::HashGraph;
 
-
 /// the `algo` module focuses on implementing algorithms and operators for hypergraphs
 pub mod algo;
 #[doc(hidden)]

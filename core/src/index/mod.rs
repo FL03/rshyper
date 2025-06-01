@@ -6,13 +6,7 @@
 //! Additional type aliases ([`EdgeId`] and [`VertexId`]) are provided for convenience, as well
 //! as traits that define the behaviour of indices in a hypergraph.
 #[doc(inline)]
-pub use self::{
-    aliases::*,
-    error::*,
-    id::IndexBase,
-    kinds::*,
-    position::Position,
-};
+pub use self::{aliases::*, error::*, id::IndexBase, kinds::*, position::Position};
 
 pub mod error;
 pub mod id;

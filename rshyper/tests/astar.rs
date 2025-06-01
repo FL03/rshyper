@@ -36,7 +36,11 @@ fn test_astar_shortest_path() -> rshyper::Result<()> {
     let path = graph.astar(heuristic).find_path(v0, v3)?;
 
     // A* should find the shortest path (v0 -> v1 -> v3)
-    assert_eq!(path, vec![v0, v1, v3], "Path should start with v0, go through v1, and end with v3");
+    assert_eq!(
+        path,
+        vec![v0, v1, v3],
+        "Path should start with v0, go through v1, and end with v3"
+    );
 
     Ok(())
 }
