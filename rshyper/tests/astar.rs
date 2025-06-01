@@ -4,9 +4,9 @@
 */
 use rshyper::{HashGraph, VertexId};
 
-#[ignore = "A* search cannot find min paths"]
+// #[ignore = "A* search cannot find min paths"]
 #[test]
-fn test_astar_search() -> rshyper::Result<()> {
+fn test_astar_shortest_path() -> rshyper::Result<()> {
     // Simple Euclidean distance heuristic (not used in this test)
     fn heuristic(_x: VertexId, _y: VertexId) -> f64 {
         0.0 // No heuristic, just a placeholder

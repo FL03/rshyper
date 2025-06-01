@@ -52,7 +52,8 @@ where
     P: PartialOrd,
 {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.priority().partial_cmp(other.priority())
+        // Reverse ordering to create a min-heap (lowest f_score has highest priority)
+        other.priority().partial_cmp(&self.priority)
     }
 }
 
@@ -61,6 +62,7 @@ where
     P: PartialOrd,
 {
     fn partial_cmp(&self, other: &P) -> Option<Ordering> {
-        self.priority().partial_cmp(other)
+        // Reverse ordering to create a min-heap (lowest f_score has highest priority)
+        other.partial_cmp(self.priority())
     }
 }
