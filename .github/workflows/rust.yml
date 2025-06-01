@@ -94,6 +94,7 @@ jobs:
           RUSTFLAGS: "-C panic=abort -Z panic_abort_tests"
         run: cargo test --locked --workspace --release --no-default-features
   benchmark:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') || github.event.action == 'repository_dispatch' && github.event.action == 'rust'
     needs: build
     strategy:
       fail-fast: false
