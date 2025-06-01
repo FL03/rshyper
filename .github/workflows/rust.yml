@@ -71,11 +71,8 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           override: true
       - 
-        name: Test (default)
-        run: cargo test --workspace --release
-      - 
         name: Test (full)
-        run: cargo test --workspace --release --features full
+        run: cargo test --workspace --release --all-features
       - 
         name: Test (alloc)
         if: matrix.toolchain == 'nightly'
