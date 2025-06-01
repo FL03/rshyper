@@ -191,15 +191,14 @@ where
             return Err(IndexError::VertexDoesNotExist(goal).into());
         }
 
-        // Reset state
+        // reset state
         self.reset();
-
-        // Initialize g_score for start node (0) and infinity for all other nodes
+        // initialize g_score for start node (0) and infinity for all other nodes
         self.g_score_mut().insert(start, 0.0);
 
         // initialize f_score for start node (heuristic only since g=0)
-        let start_f_score = self.heuristic().compute(start, goal);
-        self.f_score_mut().insert(start, start_f_score);
+        let initial_fscore = self.heuristic().compute(start, goal);
+        self.f_score_mut().insert(start, initial_fscore);
         // add start node to the open set
         self.open_set_mut().insert(start);
         // initialize priority queue
@@ -207,7 +206,7 @@ where
         // push the start node with its f_score
         priority_queue.push(PriorityNode {
             vertex: start,
-            priority: -(start_f_score as i64),
+            priority: -(initial_fscore as i64),
         });
         // track processed nodes to avoid duplicate processing
         let mut processed = HashSet::new();
@@ -218,7 +217,7 @@ where
         {
             // Skip if we've already processed this vertex with a better path
             // or it's no longer in the open set
-            if processed.contains(&current) || !self.open_set.contains(&current) {
+            if processed.contains(&current) || !self.in_open_set(&current) {
                 continue;
             }
             processed.insert(current);
