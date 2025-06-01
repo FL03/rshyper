@@ -32,7 +32,7 @@ fn main() -> rshyper::Result<()> {
     tracing::info!("Initial graph state: {:?}", graph);
     // Add some hyperedges
     println!("Added hyperedge {e0}: {:?}", [v0, v1, v2]);
-    println!("Added hyperedge {e1}: {:?}", [v1, v2, v3]);    
+    println!("Added hyperedge {e1}: {:?}", [v1, v2, v3]);
     println!("Added hyperedge {e2}: {:?}", [v2, v3]);
 
     // Get neighbors of vertex v1
