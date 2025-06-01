@@ -76,10 +76,10 @@ where
     }
 }
 
-impl<T, K> num::Num for IndexBase<T, K>
+impl<T, K> num_traits::Num for IndexBase<T, K>
 where
     K: GraphIndex + Eq,
-    T: RawIndex + num::Num,
+    T: RawIndex + num_traits::Num,
 {
     type FromStrRadixErr = T::FromStrRadixErr;
 

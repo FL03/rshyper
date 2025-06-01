@@ -44,7 +44,6 @@ pub mod traits {
     pub mod container;
     pub mod convert;
     pub mod hyper_graph;
-    pub mod tags;
     pub mod transform;
     pub mod weighted;
 
@@ -55,8 +54,6 @@ pub mod traits {
         pub use super::convert::*;
         #[doc(inline)]
         pub use super::hyper_graph::*;
-        #[doc(inline)]
-        pub use super::tags::*;
         #[doc(inline)]
         pub use super::transform::*;
         #[doc(inline)]
