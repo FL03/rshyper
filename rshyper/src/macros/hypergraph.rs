@@ -40,9 +40,11 @@ macro_rules! hypergraph {
 /// rshyper::hypernode! {
 ///     graph {
 ///         let v0;
-///         let v1 = 1;
-///         let v2 = 2;
-///         let v3 = 3;
+///         let v1;
+///         let v2;
+///         let v3 = 1;
+///         let v4 = 2;
+///         let v5 = 3;
 ///     }
 ///  }
 /// ```

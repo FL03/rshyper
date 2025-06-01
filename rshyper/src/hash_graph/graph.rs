@@ -159,7 +159,7 @@ where
         Self { position, ..self }
     }
     /// returns an [`EdgeEntry`] for the edge with the given index, allowing for modifications
-    /// or insertions
+    /// or insertions to the mapping
     pub fn edge(&mut self, index: EdgeId<Idx>) -> EdgeEntry<'_, Idx> {
         self.edges_mut().entry(index)
     }

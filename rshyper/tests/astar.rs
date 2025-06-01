@@ -12,15 +12,18 @@ fn test_astar_shortest_path() -> rshyper::Result<()> {
         0.0 // No heuristic, just a placeholder
     }
     // initialize a new graph
-    let mut graph = HashGraph::<()>::new();
+    let mut graph = HashGraph::<usize, usize>::new();
 
-    // Create a simple hypergraph
-    let v0 = graph.insert_vertex();
-    let v1 = graph.insert_vertex();
-    let v2 = graph.insert_vertex();
-    let v3 = graph.insert_vertex();
-    let v4 = graph.insert_vertex();
-
+    // use the macro create some new vertices
+    rshyper::hypernode! {
+        graph {
+            let v0;
+            let v1;
+            let v2;
+            let v3;
+            let v4 = 1;
+        }
+    }
     // Direct path: v0 -> v1 -> v3
     let _e0 = graph.insert_edge(vec![v0, v1])?;
     let _e1 = graph.insert_edge(vec![v1, v3])?;
