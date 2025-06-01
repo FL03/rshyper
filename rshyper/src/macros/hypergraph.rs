@@ -13,9 +13,32 @@ macro_rules! hypergraph {
             $(
                 let $var:ident$(= $w:expr)?
             );* $(;)?
-        }
+        };
+        edges: {
+            $(
+                $edge:ident: [$($node:ident),*] $(= $weight:expr)?
+            ),* $(,)?
+        };
     ) => {
         // insert nodes into the graph
         $crate::hypernode!($graph { $(let $var $(= $w)?);* });
+    };
+}
+
+#[macro_export]
+macro_rules! hyperedge {
+    ($src:ident { $(let $edge:ident = [$($var:ident),*] $(=> $w:expr)?);* $(;)? }) => {
+        $(
+            $crate::hyperedge!(@impl let $src.$edge = [$($var),*] $(=> $w)?);
+        )*
+    };
+    (@impl let $src:ident.$edge:ident = [$($var:ident),*] $(=> $w:expr)?) => {
+        $crate::hyperedge!(@new let $src.$edge = [$($var),*] $(=> $w)?);
+    };
+    (@new let $src:ident.$edge:ident = [$($var:ident),*]) => {
+        let $edge = $src.insert_edge([$($var),*]).expect("Failed to insert edge");
+    };
+    (@new let $src:ident.$edge:ident = [$($var:ident),*] => $w:expr) => {
+        let $edge = $src.insert_edge_with_weight([$($var),*], $w).expect("Failed to insert edge");
     };
 }

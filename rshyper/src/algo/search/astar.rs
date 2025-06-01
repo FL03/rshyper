@@ -220,6 +220,7 @@ where
             if processed.contains(&current) || !self.in_open_set(&current) {
                 continue;
             }
+            // add the current vertex to the processed set
             processed.insert(current);
 
             // If we've reached the goal, construct and return the path
