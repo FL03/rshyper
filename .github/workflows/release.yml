@@ -1,4 +1,4 @@
-name: crates-io
+name: release
 
 concurrency:   
   cancel-in-progress: false
@@ -13,19 +13,23 @@ on:
   release:
     types: [ published ]
   repository_dispatch:
-    types: [ crates-io ]
+    types: [ release ]
   workflow_dispatch:
     inputs:
-      publish:
-        default: true
-        description: 'Publish the crate(s) to crates.io?'
+      environment:
+        default: 'production'
+        description: 'Deployment environment (e.g., production, staging)?'
+        type: environment
+      draft:
+        default: false
+        description: 'Create a draft release?'
         type: boolean
-
+      prerelease:
+        default: false
+        description: 'Create a pre-release?'
+        type: boolean
 jobs:
-  crates-io:    
-    environment:
-      name: crates-io
-      url: https://crates.io/crates/${{ matrix.package }}
+  release:
     permissions:
       contents: read
       deployments: write
@@ -47,6 +51,4 @@ jobs:
         with:
           cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           cache-workspaces: true
-      - 
-        name: Publish (${{ matrix.package }})
-        run: cargo publish -q --locked --package ${{ matrix.package }}
+

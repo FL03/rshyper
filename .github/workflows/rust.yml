@@ -7,7 +7,6 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: full
-  RUST_LOG: info
 
 on:
   pull_request:
