@@ -139,5 +139,8 @@ tracing = [
 # ************* [Tests] *************
 [[test]]
 name = "default"
-required-features = [  ]
+required-features = []
 
+[[test]]
+name = "index"
+required-features = ["std"]

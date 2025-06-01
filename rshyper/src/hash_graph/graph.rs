@@ -4,9 +4,9 @@
 */
 use super::aliases::*;
 
-use rshyper_core::{EdgeId, NumIndex, Position, RawIndex, VertexId};
+use rshyper_core::{EdgeId, Position, RawIndex, VertexId};
 /// A hash-based hypergraph implementation
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct HashGraph<N = (), E = (), Idx = usize>
 where
@@ -157,30 +157,15 @@ where
         Idx: Default,
     {
         Self { position, ..self }
-    }
-    /// returns an [`EdgeEntry`] for the edge with the given index, allowing for modifications
-    /// or insertions to the mapping
-    pub fn edge(&mut self, index: EdgeId<Idx>) -> EdgeEntry<'_, Idx> {
-        self.edges_mut().entry(index)
-    }
-    /// returns a [`FacetEntry`] for the facet with the given index, allowing for modifications
-    /// or insertions
-    pub fn facet(&mut self, index: EdgeId<Idx>) -> FacetEntry<'_, E, Idx> {
-        self.facets_mut().entry(index)
-    }
-    /// returns a [`NodeEntry`] for the node with the given index, allowing for modifications
-    /// or insertions
-    pub fn node(&mut self, index: VertexId<Idx>) -> NodeEntry<'_, N, Idx> {
-        self.nodes_mut().entry(index)
-    }
-    /// check if a hyperedge with the given id exists
+    }    
+    /// returns true if the hypergraph contains an edge with the given index;
     pub fn contains_edge<Q>(&self, index: &Q) -> bool
     where
         Q: Eq + core::hash::Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.edges().contains_key(index)
-    }
+    }    
     /// check if a facet with the given id exists; this method is a little heavier since it
     /// checks both the facets and edges fields to ensure the index points to a valid facet.
     pub fn contains_facet<Q>(&self, index: &Q) -> bool
@@ -197,6 +182,25 @@ where
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.nodes().contains_key(index)
+    }
+    /// returns true if the hypergraph is empty, meaning it has no edges, facets, or nodes
+    pub fn is_empty(&self) -> bool {
+        self.edges().is_empty() && self.facets().is_empty() && self.nodes().is_empty()
+    }
+    /// returns an [`EdgeEntry`] for the edge with the given index, allowing for modifications
+    /// or insertions to the mapping
+    pub fn edge(&mut self, index: EdgeId<Idx>) -> EdgeEntry<'_, Idx> {
+        self.edges_mut().entry(index)
+    }
+    /// returns a [`FacetEntry`] for the facet with the given index, allowing for modifications
+    /// or insertions
+    pub fn facet(&mut self, index: EdgeId<Idx>) -> FacetEntry<'_, E, Idx> {
+        self.facets_mut().entry(index)
+    }
+    /// returns a [`NodeEntry`] for the node with the given index, allowing for modifications
+    /// or insertions
+    pub fn node(&mut self, index: VertexId<Idx>) -> NodeEntry<'_, N, Idx> {
+        self.nodes_mut().entry(index)
     }
     /// get the next edge index and updates the current position
     pub fn next_edge_id(&mut self) -> EdgeId<Idx>
@@ -216,19 +220,12 @@ where
     pub fn total_edges(&self) -> usize {
         self.edges().len()
     }
+    /// returns the total number of facets in the hypergraph
+    pub fn total_facets(&self) -> usize {
+        self.facets().len()
+    }
     /// returns the total number of vertices in the hypergraph
     pub fn total_vertices(&self) -> usize {
         self.nodes().len()
-    }
-}
-
-impl<N, E, Idx> Default for HashGraph<N, E, Idx>
-where
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
-    Idx: NumIndex,
-{
-    fn default() -> Self {
-        Self::new()
     }
 }
