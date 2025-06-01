@@ -80,6 +80,14 @@ where
             heuristic,
         }
     }
+
+    pub const fn came_from(&self) -> &HashMap<VertexId, VertexId> {
+        &self.came_from
+    }
+    /// returns a mutable reference to the map of vertices that have been processed
+    pub const fn came_from_mut(&mut self) -> &mut HashMap<VertexId, VertexId> {
+        &mut self.came_from
+    }
     /// returns an immutable reference to the closed set of vertices
     pub const fn closed_set(&self) -> &HashSet<VertexId> {
         &self.closed_set
@@ -87,6 +95,22 @@ where
     /// returns a mutable reference to the closed set of vertices
     pub const fn closed_set_mut(&mut self) -> &mut HashSet<VertexId> {
         &mut self.closed_set
+    }
+    /// returns an immutable reference to the f_score map
+    pub const fn f_score(&self) -> &HashMap<VertexId, F::Output> {
+        &self.f_score
+    }
+    /// returns a mutable reference to the f_score map
+    pub const fn f_score_mut(&mut self) -> &mut HashMap<VertexId, F::Output> {
+        &mut self.f_score
+    }
+    /// returns an immutable reference to the g_score map
+    pub const fn g_score(&self) -> &HashMap<VertexId, F::Output> {
+        &self.g_score
+    }
+    /// returns a mutable reference to the g_score map
+    pub const fn g_score_mut(&mut self) -> &mut HashMap<VertexId, F::Output> {
+        &mut self.g_score
     }
     /// returns an immutable reference to the heuristic function of the algorithm
     pub const fn heuristic(&self) -> &F {
@@ -100,13 +124,41 @@ where
     pub const fn open_set_mut(&mut self) -> &mut VertexSet {
         &mut self.open_set
     }
+    /// returns true if the given vertex has a f_score
+    pub fn has_f_score<Q>(&self, vertex: &Q) -> bool
+    where
+        Q: Eq + core::hash::Hash,
+        VertexId: core::borrow::Borrow<Q>,
+    {
+        self.f_score().contains_key(vertex)
+    }
+    /// returns true if the given vertex has a g_score
+    pub fn has_g_score<Q>(&self, vertex: &Q) -> bool
+    where
+        Q: Eq + core::hash::Hash,
+        VertexId: core::borrow::Borrow<Q>,
+    {
+        self.g_score().contains_key(vertex)
+    }
     /// returns true if the given vertex has been visited
-    pub fn has_visited(&self, vertex: &VertexId) -> bool {
+    pub fn has_visited<Q>(&self, vertex: &Q) -> bool
+    where
+        Q: Eq + core::hash::Hash,
+        VertexId: core::borrow::Borrow<Q>,
+    {
         self.closed_set().contains(vertex)
     }
-    /// removes a vertex from the open set into the closed set
-    /// this is useful to mark a vertex as processed
-    fn move_open_to_closed(&mut self, vertex: &VertexId) {
+    /// returns true if the given vertex is in the open set
+    pub fn in_open_set<Q>(&self, vertex: &Q) -> bool
+    where
+        Q: Eq + core::hash::Hash,
+        VertexId: core::borrow::Borrow<Q>,
+    {
+        self.open_set().contains(vertex)
+    }
+    /// moves the vertex from the open set before inserting it into the closed set; this is
+    /// useful for updating the state, marking a node as processed.
+    pub fn move_open_to_closed(&mut self, vertex: &VertexId) {
         self.open_set_mut().remove(vertex);
         self.closed_set_mut().insert(*vertex);
     }
@@ -114,9 +166,9 @@ where
     pub fn reset(&mut self) -> &mut Self {
         self.open_set_mut().clear();
         self.closed_set_mut().clear();
-        self.came_from.clear();
-        self.g_score.clear();
-        self.f_score.clear();
+        self.came_from_mut().clear();
+        self.g_score_mut().clear();
+        self.f_score_mut().clear();
         self
     }
     /// a convience method to perform a search
@@ -143,14 +195,13 @@ where
         self.reset();
 
         // Initialize g_score for start node (0) and infinity for all other nodes
-        self.g_score.insert(start, 0.0);
+        self.g_score_mut().insert(start, 0.0);
 
         // initialize f_score for start node (heuristic only since g=0)
         let start_f_score = self.heuristic().compute(start, goal);
-        self.f_score.insert(start, start_f_score);
+        self.f_score_mut().insert(start, start_f_score);
         // add start node to the open set
-        self.open_set.insert(start);
-
+        self.open_set_mut().insert(start);
         // initialize priority queue
         let mut priority_queue = BinaryHeap::new();
         // push the start node with its f_score
@@ -158,10 +209,9 @@ where
             vertex: start,
             priority: -(start_f_score as i64),
         });
-
-        // Track processed nodes to avoid duplicate processing
+        // track processed nodes to avoid duplicate processing
         let mut processed = HashSet::new();
-
+        // process nodes until the queue is empty or we attain the goal
         while let Some(PriorityNode {
             vertex: current, ..
         }) = priority_queue.pop()
@@ -194,7 +244,7 @@ where
                 // Process each vertex in this hyperedge
                 for &neighbor in vertices {
                     // Skip if this is the current vertex or already evaluated
-                    if neighbor == current || self.closed_set.contains(&neighbor) {
+                    if neighbor == current || self.has_visited(&neighbor) {
                         continue;
                     }
 
@@ -202,26 +252,28 @@ where
                     let tentative_g_score = self.g_score[&current] + 1.0;
 
                     // Check if this path is better than any previous path
-                    let is_better_path = !self.g_score.contains_key(&neighbor)
-                        || tentative_g_score < self.g_score[&neighbor];
+                    let is_better_path =
+                        !self.has_g_score(&neighbor) || tentative_g_score < self.g_score[&neighbor];
 
                     if is_better_path {
                         // Update path info
-                        self.came_from.insert(neighbor, current);
-                        self.g_score.insert(neighbor, tentative_g_score);
+                        self.came_from_mut().insert(neighbor, current);
+                        self.g_score_mut().insert(neighbor, tentative_g_score);
 
                         // Update f_score (g_score + heuristic)
                         let f_score = tentative_g_score + self.heuristic().compute(neighbor, goal);
-                        self.f_score.insert(neighbor, f_score);
+                        self.f_score_mut().insert(neighbor, f_score);
 
                         // Add to open set if not already there
-                        if !self.open_set().contains(&neighbor) {
+                        if !self.in_open_set(&neighbor) {
                             self.open_set_mut().insert(neighbor);
                         }
 
                         // push the neighbor into the priority queue with its f_score (negative for min-heap behavior)
-                        let pnode = PriorityNode::new(neighbor, -(f_score as i64));
-                        priority_queue.push(pnode);
+                        priority_queue.push(PriorityNode {
+                            vertex: neighbor,
+                            priority: -(f_score as i64),
+                        });
                     }
                 }
             });
