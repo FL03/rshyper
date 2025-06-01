@@ -72,10 +72,13 @@ jobs:
           override: true
       - 
         name: Test (default)
-        run: cargo test --locked --workspace --release
+        run: cargo test --locked --workspace
+      - 
+        name: Test (all-features)
+        run: cargo test --locked --workspace --all-features
       - 
         name: Test (full)
-        run: cargo test --locked --workspace --release --features full
+        run: cargo test --locked --workspace --features full
       - 
         name: Test (alloc)
         if: matrix.toolchain == 'nightly'
