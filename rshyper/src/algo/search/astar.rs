@@ -145,8 +145,8 @@ where
         let mut processed = HashSet::new();
 
         while let Some(PriorityNode {
-            priority: _,
             vertex: current,
+            ..
         }) = priority_queue.pop()
         {
             // Skip if we've already processed this vertex with a better path
@@ -168,9 +168,9 @@ where
             // Get all hyperedges containing the current vertex
             let edges = self.graph.get_edges_with_vertex(&current)?;
 
-            for edge_id in edges {
+            edges.iter().for_each(|edge_id| {
                 // Get all vertices in this hyperedge
-                let vertices = self.graph.get_edge_vertices(&edge_id)?;
+                let vertices = self.graph.get_edge_vertices(edge_id).expect("Failed to get edge vertices");
 
                 // Process each vertex in this hyperedge
                 for &neighbor in vertices {
@@ -208,7 +208,7 @@ where
                         });
                     }
                 }
-            }
+            }); 
         }
 
         // No path found
