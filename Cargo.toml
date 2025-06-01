@@ -71,8 +71,9 @@ incremental = true
 lto = 'thin'
 panic = 'abort'
 rpath = true
-opt-level = 3
+opt-level = 2
 overflow-checks = true
+strip = 'none'
 
 [profile.release]
 codegen-units = 16
@@ -83,4 +84,5 @@ lto = true
 panic = 'abort'
 rpath = false
 opt-level = "z"
-overflow-checks = false
+overflow-checks = true
+strip = 'debuginfo'
