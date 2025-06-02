@@ -79,6 +79,10 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           override: true
       -
+        if: matrix.features == ('full')
+        name: Test (${{ matrix.features }})
+        run: cargo test -r --locked --workspace --target ${{ matrix.target}} --features ${{ matrix.features }}
+      -
         if: matrix.features == 'default'
         name: Test (default)
         run: cargo test -r --locked --workspace --target ${{ matrix.target}}
@@ -86,10 +90,6 @@ jobs:
         if: matrix.features == 'all'
         name: Test (all-features)
         run: cargo test -r --locked --workspace --target ${{ matrix.target}} --all-features
-      -
-        if: matrix.features != 'default' || matrix.features != 'all' || matrix.features != 'alloc' || matrix.features != 'no_std'
-        name: Test (${{ matrix.features }})
-        run: cargo test -r --locked --workspace --target ${{ matrix.target}} --features ${{ matrix.features }}
       -
         name: Test (alloc)
         if: matrix.toolchain == 'nightly' && matrix.features == 'alloc'
