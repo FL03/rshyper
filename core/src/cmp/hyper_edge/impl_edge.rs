@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use crate::cmp::{HyperEdge, RawEdgeStore};
-use crate::index::{EdgeId, RawIndex};
+use crate::index::{EdgeId, RawIndex, VertexId};
 use crate::{Directed, GraphKind, Undirected};
 
 impl<S, Idx> HyperEdge<S, Directed, Idx>
@@ -25,6 +25,43 @@ where
     /// creates a new undirected hyperedge with the given id and nodes
     pub fn undirected(id: EdgeId<Idx>, nodes: S) -> Self {
         Self::new(id, nodes)
+    }
+}
+
+impl<S, K, Idx> FromIterator<VertexId<Idx>> for HyperEdge<S, K, Idx>
+where
+    Idx: Default + RawIndex,
+    K: GraphKind,
+    S: RawEdgeStore<Idx> + FromIterator<VertexId<Idx>>,
+{
+    fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = VertexId<Idx>>,
+    {
+        let store = S::from_iter(iter);
+        Self::from_points(store)
+    }
+}
+
+impl<S, K, Idx> From<EdgeId<Idx>> for HyperEdge<S, K, Idx>
+where
+    Idx: RawIndex,
+    K: GraphKind,
+    S: Default + RawEdgeStore<Idx>,
+{
+    fn from(from: EdgeId<Idx>) -> Self {
+        Self::from_id(from)
+    }
+}
+
+impl<S, K, Idx> From<HyperEdge<S, K, Idx>> for EdgeId<Idx>
+where
+    Idx: RawIndex,
+    K: GraphKind,
+    S: RawEdgeStore<Idx>,
+{
+    fn from(from: HyperEdge<S, K, Idx>) -> Self {
+        from.id
     }
 }
 

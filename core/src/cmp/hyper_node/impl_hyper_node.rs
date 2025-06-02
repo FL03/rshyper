@@ -70,3 +70,49 @@ where
         self.weight_mut()
     }
 }
+
+impl<T, Idx> From<Weight<T>> for HyperNode<T, Idx>
+where
+    Idx: Default + RawIndex,
+{
+    fn from(weight: Weight<T>) -> Self {
+        HyperNode::from_weight(weight)
+    }
+}
+
+impl<T, Idx> From<VertexId<Idx>> for HyperNode<T, Idx>
+where
+    Idx: RawIndex,
+    T: Default,
+{
+    fn from(index: VertexId<Idx>) -> Self {
+        HyperNode::from_index(index)
+    }
+}
+
+impl<T, Idx> From<(VertexId<Idx>, Weight<T>)> for HyperNode<T, Idx>
+where
+    Idx: RawIndex,
+{
+    fn from((index, weight): (VertexId<Idx>, Weight<T>)) -> Self {
+        HyperNode::new(index, weight)
+    }
+}
+
+impl<T, Idx> From<HyperNode<T, Idx>> for (VertexId<Idx>, Weight<T>)
+where
+    Idx: RawIndex,
+{
+    fn from(node: HyperNode<T, Idx>) -> Self {
+        (node.index, node.weight)
+    }
+}
+
+impl<T, Idx> From<HyperNode<T, Idx>> for VertexId<Idx>
+where
+    Idx: RawIndex,
+{
+    fn from(node: HyperNode<T, Idx>) -> Self {
+        node.index
+    }
+}

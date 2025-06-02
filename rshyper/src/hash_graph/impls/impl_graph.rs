@@ -79,7 +79,7 @@ where
         // generate a new vertex ID
         let idx = self.next_vertex_id();
         // initialize a new node with the given weight & index
-        let node = HyperNode::new(idx, weight);
+        let node = HyperNode::new(idx, Weight(weight));
         // insert the new node into the vertices map
         self.nodes_mut().insert(idx, node);
         idx

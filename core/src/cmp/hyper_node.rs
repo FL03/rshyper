@@ -28,31 +28,22 @@ where
     Idx: RawIndex,
 {
     /// initialize a new instance with the given index and weight
-    pub fn new(index: VertexId<Idx>, weight: T) -> Self {
-        Self {
-            index,
-            weight: Weight(weight),
-        }
+    pub fn new(index: VertexId<Idx>, weight: Weight<T>) -> Self {
+        Self { index, weight }
     }
     /// returns a new weighted node using the given value and the logical default for the index
     pub fn from_index(index: VertexId<Idx>) -> Self
     where
         T: Default,
     {
-        Self {
-            index,
-            weight: Weight::default(),
-        }
+        Self::new(index, Default::default())
     }
     /// creates a new node with the given index using the logical default for the weight.
     pub fn from_weight(weight: Weight<T>) -> Self
     where
         Idx: Default,
     {
-        Self {
-            index: VertexId::default(),
-            weight,
-        }
+        Self::new(Default::default(), weight)
     }
     /// consumes the current instance to create another with the given index.
     pub fn with_index<I2: RawIndex>(self, index: VertexId<I2>) -> HyperNode<T, I2> {
