@@ -767,12 +767,11 @@ checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
 
 [[package]]
 name = "rshyper"
-version = "0.0.7"
+version = "0.0.8"
 dependencies = [
  "criterion",
  "getrandom",
  "lazy_static",
- "num",
  "num-traits",
  "paste",
  "rand 0.9.1",
@@ -791,12 +790,11 @@ dependencies = [
 
 [[package]]
 name = "rshyper-core"
-version = "0.0.7"
+version = "0.0.8"
 dependencies = [
  "anyhow",
  "getrandom",
  "lazy_static",
- "num",
  "num-traits",
  "paste",
  "rand 0.9.1",

@@ -2,13 +2,12 @@
     appellation: rshyper-core <library>
     authors: @FL03
 */
-//! ---
-//! description: the core modules for the rshyper framework
-//! title: rshyper-core
-//! ---
+//! # rshyper-core
+//!
+//! This crate provides the core functionality for the rshyper library, implementing various
+//! primitives and utilities for working with hypergraphs.
 //!
 //!
-//! This crate provides the core functionality for the rshyper library.
 #![crate_name = "rshyper_core"]
 #![crate_type = "lib"]
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -24,7 +23,7 @@ pub(crate) mod macros {
 
 #[doc(inline)]
 pub use self::{
-    cmp::{HyperEdge, HyperNode},
+    cmp::{HyperEdge, HyperFacet, HyperNode},
     error::{Error, Result},
     index::prelude::*,
     traits::prelude::*,
@@ -44,7 +43,7 @@ pub mod traits {
     pub mod container;
     pub mod convert;
     pub mod hyper_graph;
-    pub mod tags;
+    pub mod points;
     pub mod transform;
     pub mod weighted;
 
@@ -56,7 +55,7 @@ pub mod traits {
         #[doc(inline)]
         pub use super::hyper_graph::*;
         #[doc(inline)]
-        pub use super::tags::*;
+        pub use super::points::*;
         #[doc(inline)]
         pub use super::transform::*;
         #[doc(inline)]
@@ -68,10 +67,13 @@ pub mod types {
     #[doc(inline)]
     pub use self::prelude::*;
 
+    pub mod attrs;
     pub mod graph_kind;
     pub mod weight;
 
     pub(crate) mod prelude {
+        #[doc(inline)]
+        pub use super::attrs::*;
         #[doc(inline)]
         pub use super::graph_kind::*;
         #[doc(inline)]

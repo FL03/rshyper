@@ -36,15 +36,15 @@
 #[macro_export]
 macro_rules! hypernode {
     ($src:ident { $(let $var:ident $(= $w:expr)?);* $(;)? }) => {
-        $($crate::hypernode!(@impl $src [$var] $(= $w)?);)*
+        $($crate::hypernode!(@impl $src.$var $(= $w)?);)*
     };
-    (@impl $src:ident[$var:ident] $(= $w:expr)?) => {
-        $crate::hypernode!(@new $src[$var] $(= $w)?);
+    (@impl $src:ident.$var:ident $(= $w:expr)?) => {
+        $crate::hypernode!(@new $src.$var $(= $w)?);
     };
-    (@new $src:ident[$var:ident] = $w:expr) => {
-        let $var = $src.insert_node($w);
+    (@new $src:ident.$var:ident = $w:expr) => {
+        let $var = $src.add_node($w);
     };
-    (@new $src:ident[$var:ident]) => {
-        let $var = $src.insert_vertex();
+    (@new $src:ident.$var:ident) => {
+        let $var = $src.add_vertex();
     };
 }

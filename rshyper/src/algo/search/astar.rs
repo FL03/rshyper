@@ -9,51 +9,56 @@ pub(crate) mod priority_node;
 
 use super::{Search, Traversal};
 use crate::hash_graph::{HashGraph, VertexSet};
-use crate::index::{IndexError, RawIndex, VertexId};
+use rshyper_core::GraphKind;
+use rshyper_core::index::{NumIndex, RawIndex, VertexId};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 
 /// A simple trait defining a common interface for heuristic functions compatible with the
 /// [`A*`](AStarSearch) search implementation
-pub trait HeuristicFunc<T = VertexId> {
+pub trait HeuristicFunc<T = crate::Udx> {
     type Output;
 
-    fn compute(&self, start: T, goal: T) -> Self::Output;
+    fn compute(&self, start: VertexId<T>, goal: VertexId<T>) -> Self::Output;
 }
 
-impl<F, I> HeuristicFunc<VertexId<I>> for F
+impl<F, Idx> HeuristicFunc<Idx> for F
 where
-    I: RawIndex,
-    F: Fn(VertexId<I>, VertexId<I>) -> f64,
+    Idx: RawIndex,
+    F: Fn(VertexId<Idx>, VertexId<Idx>) -> f64,
 {
     type Output = f64;
 
-    fn compute(&self, start: VertexId<I>, goal: VertexId<I>) -> Self::Output {
+    fn compute(&self, start: VertexId<Idx>, goal: VertexId<Idx>) -> Self::Output {
         self(start, goal)
     }
 }
 
 /// A* Search algorithm for hypergraphs
-pub struct AStarSearch<'a, N, E, F>
+pub struct AStarSearch<'a, N, E, F, K, Idx>
 where
-    F: HeuristicFunc,
+    F: HeuristicFunc<Idx>,
+    K: GraphKind,
+    Idx: RawIndex + Eq + core::hash::Hash,
 {
-    pub(crate) graph: &'a HashGraph<N, E>,
-    pub(crate) open_set: VertexSet,
-    pub(crate) closed_set: VertexSet,
-    pub(crate) came_from: HashMap<VertexId, VertexId>,
-    pub(crate) g_score: HashMap<VertexId, F::Output>,
-    pub(crate) f_score: HashMap<VertexId, F::Output>,
+    pub(crate) graph: &'a HashGraph<N, E, K, Idx>,
+    pub(crate) open_set: VertexSet<Idx>,
+    pub(crate) closed_set: VertexSet<Idx>,
+    pub(crate) came_from: HashMap<VertexId<Idx>, VertexId<Idx>>,
+    pub(crate) g_score: HashMap<VertexId<Idx>, F::Output>,
+    pub(crate) f_score: HashMap<VertexId<Idx>, F::Output>,
     pub(crate) heuristic: F,
 }
 
-impl<'a, N, E, F> AStarSearch<'a, N, E, F>
+impl<'a, N, E, F, K, Idx> AStarSearch<'a, N, E, F, K, Idx>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
-    F: HeuristicFunc,
+    F: HeuristicFunc<Idx>,
+    K: GraphKind,
+    Idx: RawIndex + Eq + core::hash::Hash,
 {
     /// Create a new A* search instance with the given heuristic function
-    pub fn new(graph: &'a HashGraph<N, E>, heuristic: F) -> Self {
+    pub fn new(graph: &'a HashGraph<N, E, K, Idx>, heuristic: F) -> Self {
         Self {
             graph,
             open_set: VertexSet::new(),
@@ -66,9 +71,9 @@ where
     }
     /// consumes the current instance to create another from the given heuristic function;
     /// **note:** while the functions may be different, the output type of both must match.
-    pub fn with_heuristic<G>(self, heuristic: G) -> AStarSearch<'a, N, E, G>
+    pub fn with_heuristic<G>(self, heuristic: G) -> AStarSearch<'a, N, E, G, K, Idx>
     where
-        G: HeuristicFunc<Output = F::Output>,
+        G: HeuristicFunc<Idx, Output = F::Output>,
     {
         AStarSearch {
             graph: self.graph,
@@ -81,35 +86,35 @@ where
         }
     }
 
-    pub const fn came_from(&self) -> &HashMap<VertexId, VertexId> {
+    pub const fn came_from(&self) -> &HashMap<VertexId<Idx>, VertexId<Idx>> {
         &self.came_from
     }
     /// returns a mutable reference to the map of vertices that have been processed
-    pub const fn came_from_mut(&mut self) -> &mut HashMap<VertexId, VertexId> {
+    pub const fn came_from_mut(&mut self) -> &mut HashMap<VertexId<Idx>, VertexId<Idx>> {
         &mut self.came_from
     }
     /// returns an immutable reference to the closed set of vertices
-    pub const fn closed_set(&self) -> &HashSet<VertexId> {
+    pub const fn closed_set(&self) -> &VertexSet<Idx> {
         &self.closed_set
     }
     /// returns a mutable reference to the closed set of vertices
-    pub const fn closed_set_mut(&mut self) -> &mut HashSet<VertexId> {
+    pub const fn closed_set_mut(&mut self) -> &mut VertexSet<Idx> {
         &mut self.closed_set
     }
     /// returns an immutable reference to the f_score map
-    pub const fn f_score(&self) -> &HashMap<VertexId, F::Output> {
+    pub const fn f_score(&self) -> &HashMap<VertexId<Idx>, F::Output> {
         &self.f_score
     }
     /// returns a mutable reference to the f_score map
-    pub const fn f_score_mut(&mut self) -> &mut HashMap<VertexId, F::Output> {
+    pub const fn f_score_mut(&mut self) -> &mut HashMap<VertexId<Idx>, F::Output> {
         &mut self.f_score
     }
     /// returns an immutable reference to the g_score map
-    pub const fn g_score(&self) -> &HashMap<VertexId, F::Output> {
+    pub const fn g_score(&self) -> &HashMap<VertexId<Idx>, F::Output> {
         &self.g_score
     }
     /// returns a mutable reference to the g_score map
-    pub const fn g_score_mut(&mut self) -> &mut HashMap<VertexId, F::Output> {
+    pub const fn g_score_mut(&mut self) -> &mut HashMap<VertexId<Idx>, F::Output> {
         &mut self.g_score
     }
     /// returns an immutable reference to the heuristic function of the algorithm
@@ -117,18 +122,18 @@ where
         &self.heuristic
     }
     /// returns an immutable reference to the set of vertices that have been visited
-    pub const fn open_set(&self) -> &VertexSet {
+    pub const fn open_set(&self) -> &VertexSet<Idx> {
         &self.open_set
     }
     /// returns amutable reference to the open set of vertices
-    pub const fn open_set_mut(&mut self) -> &mut VertexSet {
+    pub const fn open_set_mut(&mut self) -> &mut VertexSet<Idx> {
         &mut self.open_set
     }
     /// returns true if the given vertex has a f_score
     pub fn has_f_score<Q>(&self, vertex: &Q) -> bool
     where
         Q: Eq + core::hash::Hash,
-        VertexId: core::borrow::Borrow<Q>,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.f_score().contains_key(vertex)
     }
@@ -136,7 +141,7 @@ where
     pub fn has_g_score<Q>(&self, vertex: &Q) -> bool
     where
         Q: Eq + core::hash::Hash,
-        VertexId: core::borrow::Borrow<Q>,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.g_score().contains_key(vertex)
     }
@@ -144,7 +149,7 @@ where
     pub fn has_visited<Q>(&self, vertex: &Q) -> bool
     where
         Q: Eq + core::hash::Hash,
-        VertexId: core::borrow::Borrow<Q>,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.closed_set().contains(vertex)
     }
@@ -152,13 +157,16 @@ where
     pub fn in_open_set<Q>(&self, vertex: &Q) -> bool
     where
         Q: Eq + core::hash::Hash,
-        VertexId: core::borrow::Borrow<Q>,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.open_set().contains(vertex)
     }
     /// moves the vertex from the open set before inserting it into the closed set; this is
     /// useful for updating the state, marking a node as processed.
-    pub fn move_open_to_closed(&mut self, vertex: &VertexId) {
+    pub fn move_open_to_closed(&mut self, vertex: &VertexId<Idx>)
+    where
+        Idx: Copy,
+    {
         self.open_set_mut().remove(vertex);
         self.closed_set_mut().insert(*vertex);
     }
@@ -172,23 +180,37 @@ where
         self
     }
     /// a convience method to perform a search
-    pub fn search(&mut self, start: VertexId) -> crate::Result<<Self as Search<VertexId>>::Output>
+    pub fn search(
+        &mut self,
+        start: VertexId<Idx>,
+    ) -> crate::Result<<Self as Search<VertexId<Idx>>>::Output>
     where
-        Self: Search<VertexId>,
+        Self: Search<VertexId<Idx>>,
     {
         Search::search(self, start)
     }
+}
+
+impl<'a, N, E, F, K, Idx> AStarSearch<'a, N, E, F, K, Idx>
+where
+    E: Eq + core::hash::Hash,
+    N: Eq + core::hash::Hash,
+    F: HeuristicFunc<Idx, Output = f64>,
+    K: GraphKind,
+    Idx: NumIndex,
+{
     /// Find the shortest path between start and goal vertices
-    pub fn find_path(&mut self, start: VertexId, goal: VertexId) -> crate::Result<Vec<VertexId>>
-    where
-        F: HeuristicFunc<Output = f64>,
-    {
+    pub fn find_path(
+        &mut self,
+        start: VertexId<Idx>,
+        goal: VertexId<Idx>,
+    ) -> crate::Result<Vec<VertexId<Idx>>> {
         // Check if both vertices exist
         if !self.graph.contains_node(&start) {
-            return Err(IndexError::VertexDoesNotExist(start).into());
+            return Err(crate::Error::NodeNotFound);
         }
         if !self.graph.contains_node(&goal) {
-            return Err(IndexError::VertexDoesNotExist(goal).into());
+            return Err(crate::Error::NodeNotFound);
         }
 
         // reset state
@@ -280,15 +302,14 @@ where
         }
 
         // No path found
-        Err(IndexError::NoPathFoundBetween {
-            from: *start.get(),
-            to: *goal.get(),
-        }
-        .into())
+        Err(crate::Error::PathNotFound)
     }
 
     // Reconstruct path from came_from map
-    fn reconstruct_path(&self, goal: VertexId) -> Vec<VertexId> {
+    fn reconstruct_path(&self, goal: VertexId<Idx>) -> Vec<VertexId<Idx>>
+    where
+        Idx: NumIndex,
+    {
         let mut path = vec![goal];
         let mut current = goal;
 
@@ -302,39 +323,43 @@ where
     }
 }
 
-impl<'a, N, E, F> Traversal<VertexId> for AStarSearch<'a, N, E, F>
+impl<'a, N, E, F, K, Idx> Traversal<VertexId<Idx>> for AStarSearch<'a, N, E, F, K, Idx>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
-    F: HeuristicFunc<Output = f64>,
+    F: HeuristicFunc<Idx, Output = f64>,
+    K: GraphKind,
+    Idx: RawIndex + Eq + core::hash::Hash,
 {
     type Store<U> = HashSet<U>;
 
-    fn has_visited(&self, vertex: &VertexId) -> bool {
+    fn has_visited(&self, vertex: &VertexId<Idx>) -> bool {
         self.visited().contains(vertex)
     }
 
-    fn visited(&self) -> &Self::Store<VertexId> {
+    fn visited(&self) -> &Self::Store<VertexId<Idx>> {
         self.closed_set()
     }
 }
 
-impl<'a, N, E, F> Search<VertexId> for AStarSearch<'a, N, E, F>
+impl<'a, N, E, F, K, Idx> Search<VertexId<Idx>> for AStarSearch<'a, N, E, F, K, Idx>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
-    F: HeuristicFunc<Output = f64>,
+    F: HeuristicFunc<Idx, Output = f64>,
+    K: GraphKind,
+    Idx: NumIndex,
 {
-    type Output = Vec<VertexId>;
+    type Output = Vec<VertexId<Idx>>;
 
-    fn search(&mut self, start: VertexId) -> crate::Result<Self::Output> {
+    fn search(&mut self, start: VertexId<Idx>) -> crate::Result<Self::Output> {
         // For A*, we need a goal vertex to compute the heuristic
         // This implementation of search will explore the graph and return
         // all reachable vertices ordered by their distance from start
         self.reset();
 
         if !self.graph.contains_node(&start) {
-            return Err(IndexError::VertexDoesNotExist(start).into());
+            return Err(crate::Error::NodeNotFound);
         }
 
         // Using the vertex with the largest ID as a pseudo-goal

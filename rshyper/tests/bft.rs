@@ -2,26 +2,26 @@
     Appellation: search <test>
     Contrib: @FL03
 */
-use rshyper::HashGraph;
+use rshyper::hash_graph::UndirectedHashGraph as HyperGraph;
 
 #[test]
 fn test_breadth_first_traversal() {
-    let mut graph = HashGraph::<()>::new();
+    let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Create a simple hypergraph
     // 0 -- 1 -- 3
     //  \  /
     //   2 -- 4
 
-    let v0 = graph.insert_vertex();
-    let v1 = graph.insert_vertex();
-    let v2 = graph.insert_vertex();
-    let v3 = graph.insert_vertex();
-    let v4 = graph.insert_vertex();
+    let v0 = graph.add_vertex();
+    let v1 = graph.add_vertex();
+    let v2 = graph.add_vertex();
+    let v3 = graph.add_vertex();
+    let v4 = graph.add_vertex();
 
-    let _e1 = graph.insert_edge(vec![v0, v1, v2]).unwrap();
-    let _e2 = graph.insert_edge(vec![v1, v3]).unwrap();
-    let _e3 = graph.insert_edge(vec![v2, v4]).unwrap();
+    let _e1 = graph.add_edge(vec![v0, v1, v2]).unwrap();
+    let _e2 = graph.add_edge(vec![v1, v3]).unwrap();
+    let _e3 = graph.add_edge(vec![v2, v4]).unwrap();
 
     let mut bft = graph.bft();
     let path = bft.search(v0).unwrap();
@@ -42,22 +42,22 @@ fn test_breadth_first_traversal() {
 
 #[test]
 fn test_bft_cyclic_graph() {
-    let mut graph = HashGraph::<()>::new();
+    let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Create a cyclic hypergraph
     // 0 -- 1 -- 2
     // |         |
     // +----3----+
 
-    let v0 = graph.insert_vertex();
-    let v1 = graph.insert_vertex();
-    let v2 = graph.insert_vertex();
-    let v3 = graph.insert_vertex();
+    let v0 = graph.add_vertex();
+    let v1 = graph.add_vertex();
+    let v2 = graph.add_vertex();
+    let v3 = graph.add_vertex();
 
-    let _e1 = graph.insert_edge(vec![v0, v1]).unwrap();
-    let _e2 = graph.insert_edge(vec![v1, v2]).unwrap();
-    let _e3 = graph.insert_edge(vec![v2, v3]).unwrap();
-    let _e4 = graph.insert_edge(vec![v3, v0]).unwrap();
+    let _e1 = graph.add_edge(vec![v0, v1]).unwrap();
+    let _e2 = graph.add_edge(vec![v1, v2]).unwrap();
+    let _e3 = graph.add_edge(vec![v2, v3]).unwrap();
+    let _e4 = graph.add_edge(vec![v3, v0]).unwrap();
 
     let mut bft = graph.bft();
     let path = bft.search(v0).unwrap();
@@ -75,18 +75,18 @@ fn test_bft_cyclic_graph() {
 
 #[test]
 fn test_bft_disconnected_graph() {
-    let mut graph = HashGraph::<()>::new();
+    let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Create a disconnected hypergraph
     // 0 -- 1    2 -- 3
 
-    let v0 = graph.insert_vertex();
-    let v1 = graph.insert_vertex();
-    let v2 = graph.insert_vertex();
-    let v3 = graph.insert_vertex();
+    let v0 = graph.add_vertex();
+    let v1 = graph.add_vertex();
+    let v2 = graph.add_vertex();
+    let v3 = graph.add_vertex();
 
-    let _e1 = graph.insert_edge(vec![v0, v1]).unwrap();
-    let _e2 = graph.insert_edge(vec![v2, v3]).unwrap();
+    let _e1 = graph.add_edge(vec![v0, v1]).unwrap();
+    let _e2 = graph.add_edge(vec![v2, v3]).unwrap();
 
     let mut bft = graph.bft();
     let path = bft.search(v0).unwrap();
@@ -104,18 +104,18 @@ fn test_bft_disconnected_graph() {
 
 #[test]
 fn test_bft_hyperedge_with_multiple_vertices() {
-    let mut graph = HashGraph::<()>::new();
+    let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Create a hypergraph with a large hyperedge
     // connecting multiple vertices
-    let v0 = graph.insert_vertex();
-    let v1 = graph.insert_vertex();
-    let v2 = graph.insert_vertex();
-    let v3 = graph.insert_vertex();
-    let v4 = graph.insert_vertex();
+    let v0 = graph.add_vertex();
+    let v1 = graph.add_vertex();
+    let v2 = graph.add_vertex();
+    let v3 = graph.add_vertex();
+    let v4 = graph.add_vertex();
 
     // Single hyperedge connecting all vertices
-    let _e1 = graph.insert_edge(vec![v0, v1, v2, v3, v4]).unwrap();
+    let _e1 = graph.add_edge(vec![v0, v1, v2, v3, v4]).unwrap();
 
     let mut bft = graph.bft();
     let path = bft.search(v0).unwrap();

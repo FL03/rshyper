@@ -3,25 +3,32 @@
     Contrib: @FL03
 */
 use crate::hash_graph::HashGraph;
-use crate::index::{IndexError, VertexId};
+use rshyper_core::GraphKind;
+use rshyper_core::index::{NumIndex, RawIndex, VertexId};
 use std::collections::{HashSet, VecDeque};
 
 use super::{Search, Traversal};
 
 /// Breadth-First Traversal algorithm for hypergraphs
-pub struct BreadthFirstTraversal<'a, N, E> {
-    pub(crate) graph: &'a HashGraph<N, E>,
-    pub(crate) queue: VecDeque<VertexId>,
-    pub(crate) visited: HashSet<VertexId>,
+pub struct BreadthFirstTraversal<'a, N, E, K, Idx = crate::Udx>
+where
+    K: GraphKind,
+    Idx: RawIndex + Eq + core::hash::Hash,
+{
+    pub(crate) graph: &'a HashGraph<N, E, K, Idx>,
+    pub(crate) queue: VecDeque<VertexId<Idx>>,
+    pub(crate) visited: HashSet<VertexId<Idx>>,
 }
 
-impl<'a, N, E> BreadthFirstTraversal<'a, N, E>
+impl<'a, N, E, K, Idx> BreadthFirstTraversal<'a, N, E, K, Idx>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
+    K: GraphKind,
+    Idx: RawIndex + Eq + core::hash::Hash,
 {
     /// create a new instance from a hypergraph
-    pub(crate) fn from_hypergraph(graph: &'a HashGraph<N, E>) -> Self {
+    pub(crate) fn from_hypergraph(graph: &'a HashGraph<N, E, K, Idx>) -> Self {
         Self {
             graph,
             queue: VecDeque::new(),
@@ -29,19 +36,19 @@ where
         }
     }
     /// returns an immutable reference to the queue
-    pub const fn queue(&self) -> &VecDeque<VertexId> {
+    pub const fn queue(&self) -> &VecDeque<VertexId<Idx>> {
         &self.queue
     }
     /// returns a mutable reference to the queue
-    pub(crate) const fn queue_mut(&mut self) -> &mut VecDeque<VertexId> {
+    pub(crate) const fn queue_mut(&mut self) -> &mut VecDeque<VertexId<Idx>> {
         &mut self.queue
     }
     /// returns an immutable reference to the visited vertices
-    pub const fn visited(&self) -> &HashSet<VertexId> {
+    pub const fn visited(&self) -> &HashSet<VertexId<Idx>> {
         &self.visited
     }
     /// returns a mutable reference to the visited vertices
-    pub const fn visited_mut(&mut self) -> &mut HashSet<VertexId> {
+    pub const fn visited_mut(&mut self) -> &mut HashSet<VertexId<Idx>> {
         &mut self.visited
     }
     /// Reset the traversal state to allow reusing the instance
@@ -51,25 +58,30 @@ where
         self
     }
     /// a convience method to perform a search
-    pub fn search(&mut self, start: VertexId) -> crate::Result<Vec<VertexId>> {
+    pub fn search(&mut self, start: VertexId<Idx>) -> crate::Result<Vec<VertexId<Idx>>>
+    where
+        Idx: NumIndex,
+    {
         Search::search(self, start)
     }
 }
 
-impl<'a, N, E> Search<VertexId> for BreadthFirstTraversal<'a, N, E>
+impl<'a, N, E, K, Idx> Search<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, K, Idx>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
+    K: GraphKind,
+    Idx: NumIndex,
 {
-    type Output = Vec<VertexId>;
+    type Output = Vec<VertexId<Idx>>;
 
-    fn search(&mut self, start: VertexId) -> crate::Result<Self::Output> {
+    fn search(&mut self, start: VertexId<Idx>) -> crate::Result<Self::Output> {
         // Reset state
         self.reset();
 
         // Check if starting vertex exists
         if !self.graph.contains_node(&start) {
-            return Err(IndexError::VertexDoesNotExist(start).into());
+            return Err(crate::Error::NodeNotFound);
         }
 
         // Add start vertex to queue and mark as visited
@@ -101,18 +113,20 @@ where
     }
 }
 
-impl<'a, N, E> Traversal<VertexId> for BreadthFirstTraversal<'a, N, E>
+impl<'a, N, E, K, Idx> Traversal<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, K, Idx>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
+    K: GraphKind,
+    Idx: RawIndex + Eq + core::hash::Hash,
 {
     type Store<I2> = HashSet<I2>;
 
-    fn has_visited(&self, vertex: &VertexId) -> bool {
+    fn has_visited(&self, vertex: &VertexId<Idx>) -> bool {
         self.visited().contains(vertex)
     }
 
-    fn visited(&self) -> &Self::Store<VertexId> {
+    fn visited(&self) -> &Self::Store<VertexId<Idx>> {
         &self.visited
     }
 }

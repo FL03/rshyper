@@ -2,21 +2,22 @@
     appellation: dft <test>
     authors: @FL03
 */
-use rshyper::{HashGraph, Traversal};
+use rshyper::Traversal;
+use rshyper::hash_graph::UndirectedHashGraph as HyperGraph;
 
 #[test]
 fn test_depth_first_traversal() -> rshyper::Result<()> {
-    let mut graph = HashGraph::<()>::new();
+    let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Create a simple hypergraph
-    let v0 = graph.insert_vertex();
-    let v1 = graph.insert_vertex();
-    let v2 = graph.insert_vertex();
-    let v3 = graph.insert_vertex();
+    let v0 = graph.add_vertex();
+    let v1 = graph.add_vertex();
+    let v2 = graph.add_vertex();
+    let v3 = graph.add_vertex();
 
-    let _e1 = graph.insert_edge(vec![v0, v1])?;
-    let _e2 = graph.insert_edge(vec![v1, v2])?;
-    let _e3 = graph.insert_edge(vec![v2, v3])?;
+    let _e1 = graph.add_edge(vec![v0, v1])?;
+    let _e2 = graph.add_edge(vec![v1, v2])?;
+    let _e3 = graph.add_edge(vec![v2, v3])?;
 
     let mut dft = graph.dft();
     let path = dft.search(v0)?;
@@ -38,7 +39,7 @@ fn test_depth_first_traversal() -> rshyper::Result<()> {
 
 #[test]
 fn test_dft_branching_graph() -> rshyper::Result<()> {
-    let mut graph = HashGraph::<()>::new();
+    let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Create a branching hypergraph
     //      1
@@ -47,16 +48,16 @@ fn test_dft_branching_graph() -> rshyper::Result<()> {
     //     \
     //      3
 
-    let v0 = graph.insert_vertex();
-    let v1 = graph.insert_vertex();
-    let v2 = graph.insert_vertex();
-    let v3 = graph.insert_vertex();
-    let v4 = graph.insert_vertex();
+    let v0 = graph.add_vertex();
+    let v1 = graph.add_vertex();
+    let v2 = graph.add_vertex();
+    let v3 = graph.add_vertex();
+    let v4 = graph.add_vertex();
 
-    let _e1 = graph.insert_edge(vec![v0, v1])?;
-    let _e2 = graph.insert_edge(vec![v0, v2])?;
-    let _e3 = graph.insert_edge(vec![v0, v3])?;
-    let _e4 = graph.insert_edge(vec![v2, v4])?;
+    let _e1 = graph.add_edge(vec![v0, v1])?;
+    let _e2 = graph.add_edge(vec![v0, v2])?;
+    let _e3 = graph.add_edge(vec![v0, v3])?;
+    let _e4 = graph.add_edge(vec![v2, v4])?;
 
     let mut dft = graph.dft();
     let path = dft.search(v0)?;
@@ -76,22 +77,22 @@ fn test_dft_branching_graph() -> rshyper::Result<()> {
 
 #[test]
 fn test_dft_cyclic_graph() -> rshyper::Result<()> {
-    let mut graph = HashGraph::<()>::new();
+    let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Create a cyclic graph
     // 0 -- 1 -- 2
     // |         |
     // +----3----+
 
-    let v0 = graph.insert_vertex();
-    let v1 = graph.insert_vertex();
-    let v2 = graph.insert_vertex();
-    let v3 = graph.insert_vertex();
+    let v0 = graph.add_vertex();
+    let v1 = graph.add_vertex();
+    let v2 = graph.add_vertex();
+    let v3 = graph.add_vertex();
 
-    let _e1 = graph.insert_edge(vec![v0, v1])?;
-    let _e2 = graph.insert_edge(vec![v1, v2])?;
-    let _e3 = graph.insert_edge(vec![v2, v3])?;
-    let _e4 = graph.insert_edge(vec![v3, v0])?;
+    let _e1 = graph.add_edge(vec![v0, v1])?;
+    let _e2 = graph.add_edge(vec![v1, v2])?;
+    let _e3 = graph.add_edge(vec![v2, v3])?;
+    let _e4 = graph.add_edge(vec![v3, v0])?;
 
     let mut dft = graph.dft();
     let path = dft.search(v0)?;
@@ -111,16 +112,16 @@ fn test_dft_cyclic_graph() -> rshyper::Result<()> {
 
 #[test]
 fn test_dft_isolated_vertex() -> rshyper::Result<()> {
-    let mut graph = HashGraph::<()>::new();
+    let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Create a graph with an isolated vertex
     // 0 -- 1    2
 
-    let v0 = graph.insert_vertex();
-    let v1 = graph.insert_vertex();
-    let v2 = graph.insert_vertex(); // isolated
+    let v0 = graph.add_vertex();
+    let v1 = graph.add_vertex();
+    let v2 = graph.add_vertex(); // isolated
 
-    let _e1 = graph.insert_edge(vec![v0, v1])?;
+    let _e1 = graph.add_edge(vec![v0, v1])?;
     // create a new dft instance
     let mut dft = graph.dft();
     // test search starting from `v0`

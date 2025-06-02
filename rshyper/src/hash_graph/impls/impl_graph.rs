@@ -2,20 +2,101 @@
     appellation: impl_graph <module>
     authors: @FL03
 */
-use crate::cmp::HyperNode;
+use crate::GraphKind;
 use crate::hash_graph::{HashGraph, VertexSet};
-use crate::index::{EdgeId, HashIndex, VertexId};
+use num_traits::One;
+use rshyper_core::index::{EdgeId, HashIndex, RawIndex, VertexId};
+use rshyper_core::prelude::{HyperNode, Weight};
 
-impl<N, E, Idx> HashGraph<N, E, Idx>
+impl<N, E, K, Idx> HashGraph<N, E, K, Idx>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
-    Idx: HashIndex,
+    K: GraphKind,
+    Idx: Eq + RawIndex + core::hash::Hash,
 {
-    /// clears all vertices and hyperedges, resetting the hypergraph
+    /// add a new hyperedge with the given vertices and return its ID
+    pub fn add_edge<I>(&mut self, vertices: I) -> crate::Result<EdgeId<Idx>>
+    where
+        I: IntoIterator<Item = VertexId<Idx>>,
+        Idx: Copy + core::ops::Add<Output = Idx> + One,
+    {
+        // collect the vertices into a HashSet to ensure uniqueness
+        let vset = vertices
+            .into_iter()
+            .map(|v| {
+                // ensure the vertex ID is valid
+                if !self.contains_node(&v) {
+                    return Err(crate::Error::NodeNotFound);
+                }
+                Ok(v)
+            })
+            .filter_map(Result::ok)
+            .collect::<VertexSet<_>>();
+        // fetch the next edge index
+        let eid = self.next_edge_id();
+        // handle the case where the edge has no associated vertices
+        if vset.is_empty() {
+            return Err(crate::Error::EmptyHyperedge);
+        }
+        // insert the new hyperedge into the adjacency map
+        self.edges_mut().insert(eid, vset);
+        Ok(eid)
+    }
+    /// add a new hyperedge with the given vertices and weight, returning its ID;
+    pub fn add_edge_with_weight<I>(&mut self, vertices: I, weight: E) -> crate::Result<EdgeId<Idx>>
+    where
+        I: Clone + IntoIterator<Item = VertexId<Idx>>,
+        E: Eq + core::hash::Hash,
+        Idx: Copy + core::ops::Add<Output = Idx> + One,
+    {
+        // insert the edge and get its ID
+        let index = self.add_edge(vertices)?;
+        // insert the facet with the given weight
+        let _prev = self.add_facet(index, Weight(weight));
+        Ok(index)
+    }
+    /// add a facet associated with the given edge index
+    pub fn add_facet(
+        &mut self,
+        index: EdgeId<Idx>,
+        facet: Weight<E>,
+    ) -> crate::Result<Option<Weight<E>>>
+    where
+        Idx: Copy,
+    {
+        if !self.contains_edge(&index) {
+            return Err(crate::Error::EdgeNotFound);
+        }
+        let _prev = self.facets_mut().insert(index, facet);
+        Ok(_prev)
+    }
+    /// add a new node with the given weight and return its index
+    pub fn add_node(&mut self, weight: N) -> VertexId<Idx>
+    where
+        Idx: Copy + core::ops::Add<Output = Idx> + One,
+    {
+        // generate a new vertex ID
+        let idx = self.next_vertex_id();
+        // initialize a new node with the given weight & index
+        let node = HyperNode::new(idx, Weight(weight));
+        // insert the new node into the vertices map
+        self.nodes_mut().insert(idx, node);
+        idx
+    }
+    /// add a new vertex with the default weight and return its ID
+    pub fn add_vertex(&mut self) -> VertexId<Idx>
+    where
+        N: Default,
+        Idx: Copy + core::ops::Add<Output = Idx> + One,
+    {
+        self.add_node(N::default())
+    }
+    /// reset the hypergraph by clearing all nodes, edges, and facets
     pub fn clear(&mut self) -> &mut Self {
-        self.nodes_mut().clear();
         self.edges_mut().clear();
+        self.facets_mut().clear();
+        self.nodes_mut().clear();
         self
     }
     /// returns the size, or order, of a particular hyperedge
@@ -61,7 +142,7 @@ where
         Ok(edges)
     }
     /// retrieves a reference to the facet (hyperedge with an associated weight)
-    pub fn get_facet<Q>(&self, index: &Q) -> crate::Result<&E>
+    pub fn get_facet<Q>(&self, index: &Q) -> crate::Result<&Weight<E>>
     where
         Q: Eq + core::hash::Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -71,7 +152,7 @@ where
             .ok_or_else(|| crate::Error::EdgeNotFound)
     }
     /// retrieves a mutable reference to the facet (hyperedge with an associated weight)
-    pub fn get_facet_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut E>
+    pub fn get_facet_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut Weight<E>>
     where
         Q: Eq + core::hash::Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -118,89 +199,10 @@ where
             .get_mut(index)
             .ok_or(crate::Error::NodeNotFound)
     }
-
-    /// add a new hyperedge with the given vertices and return its ID
-    pub fn insert_edge<I>(&mut self, vertices: I) -> crate::Result<EdgeId<Idx>>
-    where
-        I: IntoIterator<Item = VertexId<Idx>>,
-        Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
-    {
-        // collect the vertices into a HashSet to ensure uniqueness
-        let vset = vertices
-            .into_iter()
-            .map(|v| {
-                // ensure the vertex ID is valid
-                if !self.contains_node(&v) {
-                    return Err(crate::Error::NodeNotFound);
-                }
-                Ok(v)
-            })
-            .filter_map(Result::ok)
-            .collect::<VertexSet<_>>();
-        // fetch the next edge index
-        let eid = self.next_edge_id();
-        // handle the case where the edge has no associated vertices
-        if vset.is_empty() {
-            return Err(crate::Error::EmptyHyperedge);
-        }
-        // insert the new hyperedge into the adjacency map
-        self.edges_mut().insert(eid, vset);
-        Ok(eid)
-    }
-    /// insert a new hyperedge with the given vertices and weight, returning its ID;
-    pub fn insert_edge_with_weight<I>(
-        &mut self,
-        vertices: I,
-        weight: E,
-    ) -> crate::Result<EdgeId<Idx>>
-    where
-        I: Clone + IntoIterator<Item = VertexId<Idx>>,
-        E: Eq + core::hash::Hash,
-        Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
-    {
-        // insert the edge and get its ID
-        let index = self.insert_edge(vertices)?;
-        // insert the facet with the given weight
-        self.insert_facet(index, weight)
-    }
-    /// insert a new facet (hyperedge with an associated weight) into the hypergraph;
-    /// if the facet, or hyperedge, already exists, it will replace the existing value with
-    /// the given
-    pub fn insert_facet(&mut self, index: EdgeId<Idx>, facet: E) -> crate::Result<EdgeId<Idx>>
-    where
-        Idx: Copy,
-    {
-        if !self.contains_edge(&index) {
-            return Err(crate::Error::EdgeNotFound);
-        }
-        let _prev = self.facets_mut().insert(index, facet);
-        Ok(index)
-    }
-    /// insert a new node with the given weight and return its index
-    pub fn insert_node(&mut self, weight: N) -> VertexId<Idx>
-    where
-        Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
-    {
-        // generate a new vertex ID
-        let idx = self.next_vertex_id();
-        // initialize a new node with the given weight & index
-        let node = HyperNode::new(idx, weight);
-        // insert the new node into the vertices map
-        self.nodes_mut().insert(idx, node);
-        idx
-    }
-    /// insert a new vertex with the default weight and return its ID
-    pub fn insert_vertex(&mut self) -> VertexId<Idx>
-    where
-        N: Default,
-        Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
-    {
-        self.insert_node(N::default())
-    }
     /// merges two hyperedges into one (combining their vertices)
     pub fn merge_edges<Q>(&mut self, e1: &Q, e2: &Q) -> crate::Result<EdgeId<Idx>>
     where
-        Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
+        Idx: Copy + core::ops::Add<Output = Idx> + One,
         Q: Eq + core::hash::Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
@@ -282,5 +284,108 @@ where
             })
             .ok_or(crate::Error::NodeNotFound)?;
         Ok(self)
+    }
+}
+
+impl<N, E, K, Idx> HashGraph<N, E, K, Idx>
+where
+    N: Eq + core::hash::Hash,
+    E: Eq + core::hash::Hash,
+    Idx: HashIndex,
+    K: GraphKind,
+{
+    #[doc(hidden)]
+    #[deprecated(note = "use `get_edge_weight")]
+    /// retrieves a reference to the facet (hyperedge with an associated weight)
+    pub fn _get_facet<Q>(&self, index: &Q) -> crate::Result<&Weight<E>>
+    where
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.facets()
+            .get(index)
+            .ok_or_else(|| crate::Error::EdgeNotFound)
+    }
+    #[doc(hidden)]
+    #[deprecated(note = "use `get_edge_weight_mut")]
+    /// retrieves a mutable reference to the facet (hyperedge with an associated weight)
+    pub fn _get_facet_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut Weight<E>>
+    where
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.facets_mut()
+            .get_mut(index)
+            .ok_or_else(|| crate::Error::EdgeNotFound)
+    }
+
+    #[deprecated(note = "use `add_edge")]
+    /// add a new hyperedge with the given vertices and return its ID
+    pub fn insert_edge<I>(&mut self, vertices: I) -> crate::Result<EdgeId<Idx>>
+    where
+        I: IntoIterator<Item = VertexId<Idx>>,
+        Idx: Copy + core::ops::Add<Output = Idx> + One,
+    {
+        // collect the vertices into a HashSet to ensure uniqueness
+        let vset = vertices
+            .into_iter()
+            .map(|v| {
+                // ensure the vertex ID is valid
+                if !self.contains_node(&v) {
+                    return Err(crate::Error::NodeNotFound);
+                }
+                Ok(v)
+            })
+            .filter_map(Result::ok)
+            .collect::<VertexSet<_>>();
+        // fetch the next edge index
+        let eid = self.next_edge_id();
+        // handle the case where the edge has no associated vertices
+        if vset.is_empty() {
+            return Err(crate::Error::EmptyHyperedge);
+        }
+        // insert the new hyperedge into the adjacency map
+        self.edges_mut().insert(eid, vset);
+        Ok(eid)
+    }
+
+    #[deprecated(note = "use `add_edge_with_weight", since = "0.0.8")]
+    /// insert a new hyperedge with the given vertices and weight, returning its ID;
+    pub fn insert_edge_with_weight<I>(
+        &mut self,
+        vertices: I,
+        weight: E,
+    ) -> crate::Result<EdgeId<Idx>>
+    where
+        I: Clone + IntoIterator<Item = VertexId<Idx>>,
+        E: Eq + core::hash::Hash,
+        Idx: Copy + core::ops::Add<Output = Idx> + One,
+    {
+        self.add_edge_with_weight(vertices, weight)
+    }
+    #[deprecated(note = "use `add_facet", since = "0.0.8")]
+    /// insert a facet associated with the given edge index
+    pub fn insert_facet(&mut self, index: EdgeId<Idx>, facet: E) -> crate::Result<EdgeId<Idx>>
+    where
+        Idx: Copy,
+    {
+        self.add_facet(index, Weight(facet)).map(|_| index)
+    }
+    #[deprecated(note = "use `add_node", since = "0.0.8")]
+    /// insert a new node with the given weight and return its index
+    pub fn insert_node(&mut self, weight: N) -> VertexId<Idx>
+    where
+        Idx: Copy + core::ops::Add<Output = Idx> + One,
+    {
+        self.add_node(weight)
+    }
+    #[deprecated(note = "use `add_vertex", since = "0.0.8")]
+    /// insert a new vertex with the default weight and return its ID
+    pub fn insert_vertex(&mut self) -> VertexId<Idx>
+    where
+        N: Default,
+        Idx: Copy + core::ops::Add<Output = Idx> + One,
+    {
+        self.add_vertex()
     }
 }

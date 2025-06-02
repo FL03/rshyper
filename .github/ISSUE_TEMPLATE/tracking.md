@@ -1,20 +1,29 @@
 ---
 name: Tracking Issue
 
-about: Create a new tracking issue to track the progress of a feature, issue, or proposal.
-labels: [ tracking ]
-title: 'Tracking Issue:'
-type: feature
+about: A template for creating issues dedicated to tracking other issues and pull requests
 assignees: [ FL03 ]
+labels: [ 'tracking' ]
+title: 'Tracking issue for '
+type: Feature
 ---
 
-__**This is a tracking issue for [insert feature or proposal name here]**__
-This issue is used to track the progress of the proposal or feature. It should be updated as work progresses, and it can be used to link to related issues, discussions, and pull requests.
+<!-- A concise explanation of the issue (or feature) being tracked. -->
 
 ## Overview
 
-- [ ]
+<!-- 
+Detail the issue or feature being tracked. Include any relevant context, such as the problem it solves or the motivation behind it. 
+-->
+
+## Related Issues and Pull Requests
+
+- [#issue-number](link-to-issue) - Brief description of the issue or PR
 
 ## Roadmap
 
-- [ ]
+- []
+
+## Resources
+
+_Include any relevant links or resources..._

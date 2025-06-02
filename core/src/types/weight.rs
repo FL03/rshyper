@@ -27,7 +27,7 @@ impl<T> Weight<T> {
         Self(value)
     }
     /// consumes the current instance to return the inner value
-    pub fn into_inner(self) -> T {
+    pub fn value(self) -> T {
         self.0
     }
     /// returns an immutable reference to the inner value.
@@ -44,7 +44,17 @@ impl<T> Weight<T> {
     where
         F: FnOnce(T) -> U,
     {
-        Weight(f(self.0))
+        Weight(f(self.value()))
+    }
+    /// apply the function onto a mutable reference to the inner value and return a
+    /// mutable reference to the current instanc storing the updating weight.
+    pub fn map_mut<F>(&mut self, f: F) -> &mut Self
+    where
+        F: FnOnce(&mut T),
+    {
+        // apply the function onto the inner value
+        f(self.get_mut());
+        self
     }
     /// [`replace`](core::mem::replace) the inner value and return the previous value.
     pub const fn replace(&mut self, value: T) -> T {
@@ -92,16 +102,38 @@ impl<T> Weight<T> {
         core::ptr::addr_of_mut!(self.0)
     }
     /// returns a _view_ of the weight whose inner value is a reference to the original.
-    pub const fn as_view(&self) -> Weight<&T> {
+    pub const fn view(&self) -> Weight<&T> {
         Weight(self.get())
     }
     /// returns a _view_ of the weight whose inner value is a mutable reference to the original
-    pub const fn as_view_mut(&mut self) -> Weight<&mut T> {
+    pub const fn view_mut(&mut self) -> Weight<&mut T> {
         Weight(self.get_mut())
     }
     /// consumes the current instance to create another with the given value
     pub fn with<U>(self, value: U) -> Weight<U> {
         Weight(value)
+    }
+
+    #[deprecated(
+        note = "use `value` instead, this method will be removed in the next major version",
+        since = "0.0.8"
+    )]
+    pub fn into_inner(self) -> T {
+        self.0
+    }
+    #[deprecated(
+        note = "use `view` instead, this method will be removed in the next major version",
+        since = "0.0.8"
+    )]
+    pub const fn as_view(&self) -> Weight<&T> {
+        Weight(self.get())
+    }
+    #[deprecated(
+        note = "use `view_mut` instead, this method will be removed in the next major version",
+        since = "0.0.8"
+    )]
+    pub const fn as_view_mut(&mut self) -> Weight<&mut T> {
+        Weight(self.get_mut())
     }
 }
 

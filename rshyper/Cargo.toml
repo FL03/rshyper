@@ -39,7 +39,6 @@ paste = { workspace = true }
 smart-default = { workspace = true }
 strum = { features = ["derive"], workspace = true }
 # math
-num = { workspace = true }
 num-traits = { workspace = true }
 # random
 getrandom = { optional = true, workspace = true }
@@ -84,7 +83,6 @@ hash_graph = [
 # ************* [FF:Environments] *************
 std = [
     "alloc",
-    "num/std",
     "num-traits/std",
     "rand?/std",
     "rshyper-core/std",
@@ -103,7 +101,6 @@ wasm = [
 ]
 # ************* [FF:Dependencies] *************
 alloc = [
-    "num/alloc",
     "rshyper-core/alloc",
     "scsys/alloc",
     "serde?/alloc",
@@ -125,7 +122,6 @@ json = [
 rand = [
     "dep:rand",
     "dep:rand_distr",
-    "num/rand",
     "rng",
     "rshyper-core/rand",
     "scsys/rand",
@@ -142,7 +138,6 @@ rng = [
 serde = [
     "dep:serde",
     "dep:serde_derive",
-    "num/serde",
     "rand?/serde",
     "rshyper-core/serde",
     "scsys/serde",

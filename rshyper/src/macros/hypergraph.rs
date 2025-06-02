@@ -8,37 +8,33 @@
 #[macro_export]
 macro_rules! hypergraph {
     (
-        [$graph:ident]
-        nodes: {
-            $(
-                let $var:ident$(= $w:expr)?
-            );* $(;)?
-        };
-        edges: {
-            $(
-                $edge:ident: [$($node:ident),*] $(= $weight:expr)?
-            ),* $(,)?
-        };
+        $graph:ident {
+            nodes {$($nodes:tt)*};
+            edges {$($edges:tt)*};
+        }
+
     ) => {
         // insert nodes into the graph
-        $crate::hypernode!($graph { $(let $var $(= $w)?);* });
+        $crate::hypernode!($graph {$($nodes)*});
+        // insert edges into the graph
+        $crate::hyperedge!($graph {$($edges)*});
     };
 }
 
 #[macro_export]
 macro_rules! hyperedge {
-    ($src:ident { $(let $edge:ident = [$($var:ident),*] $(=> $w:expr)?);* $(;)? }) => {
+    ($src:ident { $(let $edge:ident: [$($var:ident),*] $(= $w:expr)?);* $(;)? }) => {
         $(
-            $crate::hyperedge!(@impl let $src.$edge = [$($var),*] $(=> $w)?);
+            $crate::hyperedge!(@impl let $src.$edge: [$($var),*] $(= $w)?);
         )*
     };
-    (@impl let $src:ident.$edge:ident = [$($var:ident),*] $(=> $w:expr)?) => {
+    (@impl let $src:ident.$edge:ident: [$($var:ident),*] $(= $w:expr)?) => {
         $crate::hyperedge!(@new let $src.$edge = [$($var),*] $(=> $w)?);
     };
     (@new let $src:ident.$edge:ident = [$($var:ident),*]) => {
-        let $edge = $src.insert_edge([$($var),*]).expect("Failed to insert edge");
+        let $edge = $src.add_edge([$($var),*]).expect("Failed to insert edge");
     };
     (@new let $src:ident.$edge:ident = [$($var:ident),*] => $w:expr) => {
-        let $edge = $src.insert_edge_with_weight([$($var),*], $w).expect("Failed to insert edge");
+        let $edge = $src.add_edge_with_weight([$($var),*], $w).expect("Failed to insert edge");
     };
 }
