@@ -56,6 +56,36 @@ where
         let _prev = self.add_facet(index, Weight(weight));
         Ok(index)
     }
+    /// add a new hyperedge with the given vertices and weight, returning its ID;
+    pub fn add_surface<I>(&mut self, vertices: I, weight: E) -> crate::Result<EdgeId<Idx>>
+    where
+        I: Clone + IntoIterator<Item = VertexId<Idx>>,
+        E: Eq + core::hash::Hash,
+        Idx: Copy + core::ops::Add<Output = Idx> + One,
+    {
+        // collect the vertices into a HashSet to ensure uniqueness
+        let vset = vertices
+            .into_iter()
+            .map(|v| {
+                // ensure the vertex ID is valid
+                if !self.contains_node(&v) {
+                    return Err(crate::Error::NodeNotFound);
+                }
+                Ok(v)
+            })
+            .filter_map(Result::ok)
+            .collect::<VertexSet<_>>();
+        // fetch the next edge index
+        let edge_id = self.next_edge_id();
+        // handle the case where the edge has no associated vertices
+        if vset.is_empty() {
+            return Err(crate::Error::EmptyHyperedge);
+        }
+        let surface = crate::HyperFacet::new(edge_id, vset, Weight(weight));
+        // insert the new hyperedge into the adjacency map
+        self.surfaces_mut().insert(edge_id, surface);
+        Ok(edge_id)
+    }
     /// add a facet associated with the given edge index
     pub fn add_facet(
         &mut self,
@@ -101,9 +131,9 @@ where
     }
     /// returns the size, or order, of a particular hyperedge
     pub fn find_order_of_edge(&self, index: &EdgeId<Idx>) -> crate::Result<usize> {
-        self.edges()
+        self.surfaces()
             .get(index)
-            .map(|vertices| vertices.len())
+            .map(|edge| edge.len())
             .ok_or(crate::Error::EdgeNotFound)
     }
     /// returns the degree of a given vertex where the degree is the number of hyperedges that
@@ -113,9 +143,9 @@ where
         Q: Eq + core::hash::Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.edges()
+        self.surfaces()
             .values()
-            .filter(|vertices| vertices.contains(index))
+            .filter(|facet| facet.edge().points().contains(index))
             .count()
     }
     /// returns all hyperedges containing a given vertex
@@ -129,10 +159,10 @@ where
         }
         //
         let edges = self
-            .edges()
+            .surfaces()
             .iter()
-            .filter_map(|(&edge_id, vertices)| {
-                if vertices.contains(index) {
+            .filter_map(|(&edge_id, facet)| {
+                if facet.contains_vertex(index) {
                     Some(edge_id)
                 } else {
                     None
@@ -149,6 +179,32 @@ where
     {
         self.facets()
             .get(index)
+            .ok_or_else(|| crate::Error::EdgeNotFound)
+    }
+
+    pub fn get_surface<Q>(
+        &self,
+        index: &Q,
+    ) -> crate::Result<&crate::HyperFacet<E, VertexSet<Idx>, K, Idx>>
+    where
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.surfaces()
+            .get(index)
+            .ok_or_else(|| crate::Error::EdgeNotFound)
+    }
+
+    pub fn get_surface_mut<Q>(
+        &mut self,
+        index: &Q,
+    ) -> crate::Result<&mut crate::HyperFacet<E, VertexSet<Idx>, K, Idx>>
+    where
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.surfaces_mut()
+            .get_mut(index)
             .ok_or_else(|| crate::Error::EdgeNotFound)
     }
     /// retrieves a mutable reference to the facet (hyperedge with an associated weight)
@@ -180,8 +236,9 @@ where
         Q: Eq + core::hash::Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.edges()
+        self.surfaces()
             .get(index)
+            .and_then(|edge| Some(edge.points()))
             .ok_or_else(|| crate::Error::EdgeNotFound)
     }
     /// returns the weight of a particular vertex
@@ -230,9 +287,16 @@ where
         // initialize an empty set to hold the neighbors
         let mut neighbors = VertexSet::new();
         // iterate through all the connections
-        self.edges().values().for_each(|vertices| {
-            if vertices.contains(index) {
-                neighbors.extend(vertices.iter().copied().filter(|v| v != index));
+        self.surfaces().values().for_each(|surface| {
+            if surface.contains_vertex(index) {
+                neighbors.extend(
+                    surface
+                        .edge()
+                        .points()
+                        .iter()
+                        .copied()
+                        .filter(|v| v != index),
+                );
             }
         });
         Ok(neighbors)

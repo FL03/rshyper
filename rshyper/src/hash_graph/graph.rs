@@ -27,6 +27,9 @@ where
     /// the `nodes` of a hypergraph are the vertices, each identified by a `VertexId` and
     /// associated with a weight of type `N`.
     pub(crate) nodes: NodeMap<N, Idx>,
+
+    pub(crate) surfaces: HyperFacetMap<E, K, Idx>,
+
     /// tracks the current position of the hypergraph, which is used to determine the next
     /// available indices for edges and vertices.
     pub(crate) position: IndexCursor<Idx>,
@@ -48,6 +51,7 @@ where
         Idx: Default,
     {
         HashGraph {
+            surfaces: HyperFacetMap::new(),
             facets: FacetMap::new(),
             edges: EdgeMap::new(),
             nodes: NodeMap::new(),
@@ -61,6 +65,7 @@ where
         Idx: Default,
     {
         HashGraph {
+            surfaces: HyperFacetMap::with_capacity(edges),
             facets: FacetMap::with_capacity(edges),
             edges: EdgeMap::with_capacity(edges),
             nodes: NodeMap::with_capacity(nodes),
@@ -68,9 +73,17 @@ where
             _kind: core::marker::PhantomData::<K>,
         }
     }
+
+    pub const fn surfaces(&self) -> &HyperFacetMap<E, K, Idx> {
+        &self.surfaces
+    }
+    pub const fn surfaces_mut(&mut self) -> &mut HyperFacetMap<E, K, Idx> {
+        &mut self.surfaces
+    }
+
     /// returns an immutable reference to the edges of the hypergraph; a mapping of edges to vertices essentially forming a topological space
     /// that enables the data-structure to be traversed, analyzed, and manipulated.
-    pub const fn edges(&self) -> &EdgeMap<Idx> {
+    pub const fn _edges(&self) -> &EdgeMap<Idx> {
         &self.edges
     }
     /// returns a mutable reference to the hyperedges
@@ -177,7 +190,7 @@ where
         Q: Eq + core::hash::Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.edges().contains_key(index)
+        self.surfaces().contains_key(index)
     }
     /// check if a facet with the given id exists; this method is a little heavier since it
     /// checks both the facets and edges fields to ensure the index points to a valid facet.
@@ -186,7 +199,7 @@ where
         Q: Eq + core::hash::Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.facets().contains_key(index) && self.edges().contains_key(index)
+        self.facets().contains_key(index) && self.surfaces().contains_key(index)
     }
     /// check if a vertex with the given id exists
     pub fn contains_node<Q>(&self, index: &Q) -> bool
@@ -198,7 +211,7 @@ where
     }
     /// returns true if the hypergraph is empty, meaning it has no edges, facets, or nodes
     pub fn is_empty(&self) -> bool {
-        self.edges().is_empty() && self.facets().is_empty() && self.nodes().is_empty()
+        self.surfaces().is_empty() && self.facets().is_empty() && self.nodes().is_empty()
     }
     /// returns an [`Entry`](std::collections::hash_map::Entry) for the edge with the given
     /// index, allowing for modifications or insertions to the mapping
@@ -217,11 +230,11 @@ where
     }
     /// returns an iterator over the edges of the hypergraph, yielding pairs of [`EdgeId`] and
     /// the corresponding [`VertexSet`].
-    pub fn edge_iter(&self) -> super::iter::EdgeIter<'_, Idx> {
-        super::iter::EdgeIter {
-            iter: self.edges().iter(),
-        }
-    }
+    // pub fn edge_iter(&self) -> super::iter::EdgeIter<'_, Idx> {
+    //     super::iter::EdgeIter {
+    //         iter: self.edges().iter(),
+    //     }
+    // }
     /// returns an iterator over the facets of the hypergraph, yielding pairs of [`EdgeId`] and
     /// the corresponding weight `E`.
     pub fn facet_iter(&self) -> super::iter::FacetIter<'_, E, Idx> {
@@ -252,7 +265,7 @@ where
     }
     /// returns the total number of hyperedges in the hypergraph
     pub fn total_edges(&self) -> usize {
-        self.edges().len()
+        self.surfaces().len()
     }
     /// returns the total number of facets in the hypergraph
     pub fn total_facets(&self) -> usize {
