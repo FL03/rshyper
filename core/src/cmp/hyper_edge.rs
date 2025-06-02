@@ -93,6 +93,21 @@ where
             _kind: self._kind,
         }
     }
+    /// returns true if the edge contains the given vertex index
+    pub fn contains_vertex(&self, index: &crate::VertexId<Idx>) -> bool
+    where
+        Idx: PartialEq,
+        for<'a> &'a S: IntoIterator<Item = &'a crate::VertexId<Idx>>,
+    {
+        self.points().into_iter().any(|v| v == index)
+    }
+    /// returns the number of vertices in the edge
+    pub fn len(&self) -> usize
+    where
+        S: crate::cmp::RawEdgeStore<Idx>,
+    {
+        self.points().len()
+    }
 }
 
 impl<S, K, Idx> Default for HyperEdge<S, K, Idx>

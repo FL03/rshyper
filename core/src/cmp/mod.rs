@@ -89,7 +89,6 @@ where
     type Store<_T>: ?Sized;
 
     private!();
-
     /// returns the number of vertices associated with the edge.
     fn len(&self) -> usize;
     /// returns true if there are no points.
@@ -267,7 +266,7 @@ impl<'a, Idx> RawEdgeStore<Idx> for &'a [VertexId<Idx>]
 where
     Idx: RawIndex,
 {
-    type Store<_T> = [VertexId<Idx>];
+    type Store<_T> = [_T];
 
     seal!();
 
@@ -284,7 +283,7 @@ impl<'a, Idx> RawEdgeStore<Idx> for &'a mut [VertexId<Idx>]
 where
     Idx: RawIndex,
 {
-    type Store<_T> = [VertexId<Idx>];
+    type Store<_T> = [_T];
 
     seal!();
 
@@ -297,7 +296,7 @@ impl<Idx> RawEdgeStore<Idx> for [VertexId<Idx>]
 where
     Idx: RawIndex,
 {
-    type Store<_T> = [VertexId<Idx>];
+    type Store<_T> = [_T];
 
     seal!();
 
@@ -313,7 +312,7 @@ impl<const N: usize, Idx> RawEdgeStore<Idx> for [VertexId<Idx>; N]
 where
     Idx: RawIndex,
 {
-    type Store<_T> = [VertexId<Idx>; N];
+    type Store<_T> = [_T; N];
 
     seal!();
 

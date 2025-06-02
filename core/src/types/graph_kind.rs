@@ -41,7 +41,7 @@ pub enum GraphKinds {
     Undirected = 0,
 }
 /*
-    ************* Implementations *************
+ ************* Implementations *************
 */
 macro_rules! impl_kind {
     ($(

@@ -3,10 +3,8 @@
     authors: @FL03
 */
 //! this module focuses on implementing a hash-based hypergraph, [`HashGraph`]
-#[allow(unused_imports)]
-pub(crate) use self::aliases::*;
 #[doc(inline)]
-pub use self::{graph::*, iter::*};
+pub use self::{aliases::*, graph::*, iter::*};
 
 pub mod graph;
 pub mod iter;
@@ -25,27 +23,32 @@ pub(crate) mod prelude {
 }
 
 pub(crate) mod aliases {
-    use crate::cmp::HyperNode;
+    use crate::Undirected;
+    use crate::cmp::{HyperEdge, HyperFacet, HyperNode};
     use crate::index::{EdgeId, VertexId};
     use std::collections::{HashMap, HashSet, hash_map};
 
+    pub type HyperEdgeMap<K = Undirected, Idx = usize> =
+        HashMap<EdgeId<Idx>, HyperEdge<VertexSet<Idx>, K, Idx>>;
+
+    pub type HyperFacetMap<E, K = Undirected, Idx = usize> =
+        HashMap<EdgeId<Idx>, HyperFacet<E, VertexSet<Idx>, K, Idx>>;
+
     /// a type alias for a [`HashSet`] of [`VertexId`]
-    pub(crate) type VertexSet<Idx = usize> = HashSet<VertexId<Idx>>;
+    pub type VertexSet<Idx = usize> = HashSet<VertexId<Idx>>;
     /// a type alias for a [`HashMap`] that maps [`EdgeId`] to a [`VertexSet`]
-    pub(crate) type EdgeMap<Idx = usize> = HashMap<EdgeId<Idx>, VertexSet<Idx>>;
+    pub type EdgeMap<Idx = usize> = HashMap<EdgeId<Idx>, VertexSet<Idx>>;
     /// a type alias for a [`HashMap`] that maps [`EdgeId`] to some
     /// weight `E`
-    pub(crate) type FacetMap<Idx, E> = HashMap<EdgeId<Idx>, crate::Weight<E>>;
+    pub type FacetMap<Idx, E> = HashMap<EdgeId<Idx>, crate::Weight<E>>;
     /// a type alias for a [`HashMap`] that maps [`VertexId`] to
     /// [`HyperNode`]
-    pub(crate) type NodeMap<N, Idx = usize> = HashMap<VertexId<Idx>, HyperNode<N, Idx>>;
+    pub type NodeMap<N, Idx = usize> = HashMap<VertexId<Idx>, HyperNode<N, Idx>>;
 
     /// a type alias for a [`Entry`](hash_map::Entry) that maps [`VertexId`] to a [`HyperNode`]
-    pub(crate) type NodeEntry<'a, N, Idx = usize> =
-        hash_map::Entry<'a, VertexId<Idx>, HyperNode<N, Idx>>;
+    pub type NodeEntry<'a, N, Idx = usize> = hash_map::Entry<'a, VertexId<Idx>, HyperNode<N, Idx>>;
     /// a type alias for a [`Entry`](hash_map::Entry) that maps [`EdgeId`] to a [`VertexSet`]
-    pub(crate) type EdgeEntry<'a, Idx = usize> = hash_map::Entry<'a, EdgeId<Idx>, VertexSet<Idx>>;
+    pub type EdgeEntry<'a, Idx = usize> = hash_map::Entry<'a, EdgeId<Idx>, VertexSet<Idx>>;
     /// a type alias for a [`Entry`](hash_map::Entry) that maps [`EdgeId`] to some weight `E`
-    pub(crate) type FacetEntry<'a, E, Idx = usize> =
-        hash_map::Entry<'a, EdgeId<Idx>, crate::Weight<E>>;
+    pub type FacetEntry<'a, E, Idx = usize> = hash_map::Entry<'a, EdgeId<Idx>, crate::Weight<E>>;
 }

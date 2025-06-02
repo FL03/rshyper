@@ -34,12 +34,9 @@ where
     S: RawEdgeStore<Idx>,
 {
     /// create a new instance of the [`HyperFacet`] from the given id, nodes, and weight
-    pub fn new(id: EdgeId<Idx>, nodes: S, weight: T) -> Self {
+    pub fn new(id: EdgeId<Idx>, nodes: S, weight: Weight<T>) -> Self {
         let edge = HyperEdge::new(id, nodes);
-        Self {
-            edge,
-            weight: Weight(weight),
-        }
+        Self { edge, weight }
     }
     /// creates a new edge with the given id
     pub fn from_edge(edge: HyperEdge<S, K, Idx>) -> Self
@@ -88,6 +85,20 @@ where
             edge: HyperEdge::default(),
             weight,
         }
+    }
+
+    pub fn contains_vertex(&self, index: &crate::VertexId<Idx>) -> bool
+    where
+        Idx: PartialEq,
+        for<'a> &'a S: IntoIterator<Item = &'a crate::VertexId<Idx>>,
+    {
+        self.edge().contains_vertex(index)
+    }
+    pub fn len(&self) -> usize
+    where
+        S: crate::cmp::RawEdgeStore<Idx>,
+    {
+        self.edge().len()
     }
     /// returns an immutable reference to the edge
     pub const fn edge(&self) -> &HyperEdge<S, K, Idx> {
