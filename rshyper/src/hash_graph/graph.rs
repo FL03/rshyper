@@ -7,10 +7,14 @@ use super::aliases::*;
 use rshyper_core::GraphKind;
 use rshyper_core::index::{EdgeId, Position, RawIndex, VertexId};
 
+pub type DirectedHashGraph<N, E, Idx = usize> = HashGraph<N, E, crate::Directed, Idx>;
+/// a t
+pub type UndirectedHashGraph<N, E, Idx = usize> = HashGraph<N, E, crate::Undirected, Idx>;
+
 /// A hash-based hypergraph implementation
 #[derive(Clone, Debug, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-pub struct HashGraph<N, E, K = crate::Undirected, Idx = usize>
+pub struct HashGraph<N, E, K, Idx = usize>
 where
     Idx: Eq + RawIndex + core::hash::Hash,
     K: GraphKind,

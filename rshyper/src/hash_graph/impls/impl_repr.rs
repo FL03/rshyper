@@ -3,8 +3,37 @@
     authors: @FL03
 */
 use crate::GraphKind;
-use crate::hash_graph::HashGraph;
-use crate::index::{NumIndex, VertexId};
+use crate::hash_graph::{DirectedHashGraph, HashGraph, UndirectedHashGraph};
+use crate::index::{NumIndex, RawIndex, VertexId};
+
+impl<N, E, Idx> DirectedHashGraph<N, E, Idx>
+where
+    E: Eq + core::hash::Hash,
+    N: Eq + core::hash::Hash,
+    Idx: Eq + RawIndex + core::hash::Hash,
+{
+    /// initialize a new, empty hypergraph
+    pub fn directed() -> Self
+    where
+        Idx: Default,
+    {
+        HashGraph::new()
+    }
+}
+impl<N, E, Idx> UndirectedHashGraph<N, E, Idx>
+where
+    E: Eq + core::hash::Hash,
+    N: Eq + core::hash::Hash,
+    Idx: Eq + RawIndex + core::hash::Hash,
+{
+    /// initialize a new, empty hypergraph
+    pub fn undirected() -> Self
+    where
+        Idx: Default,
+    {
+        HashGraph::new()
+    }
+}
 
 impl<E, K, Idx> HashGraph<(), E, K, Idx>
 where

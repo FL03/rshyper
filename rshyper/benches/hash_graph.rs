@@ -3,11 +3,12 @@
     Contrib: @FL03
 */
 use criterion::{Criterion, criterion_group, criterion_main};
-use rshyper::{HashGraph, VertexId};
+use rshyper::VertexId;
+use rshyper::hash_graph::UndirectedHashGraph as HyperGraph;
 use std::hint::black_box;
 
-fn _init() -> HashGraph<&'static str, usize> {
-    let mut graph = HashGraph::new();
+fn _init() -> HyperGraph<&'static str, usize> {
+    let mut graph = HyperGraph::undirected();
     let a = graph.add_node("A");
     let b = graph.add_node("B");
     let c = graph.add_node("C");

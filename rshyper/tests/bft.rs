@@ -2,11 +2,11 @@
     Appellation: search <test>
     Contrib: @FL03
 */
-use rshyper::HashGraph;
+use rshyper::hash_graph::UndirectedHashGraph as HyperGraph;
 
 #[test]
 fn test_breadth_first_traversal() {
-    let mut graph = HashGraph::<usize, usize>::new();
+    let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Create a simple hypergraph
     // 0 -- 1 -- 3
@@ -42,7 +42,7 @@ fn test_breadth_first_traversal() {
 
 #[test]
 fn test_bft_cyclic_graph() {
-    let mut graph = HashGraph::<usize, usize>::new();
+    let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Create a cyclic hypergraph
     // 0 -- 1 -- 2
@@ -75,7 +75,7 @@ fn test_bft_cyclic_graph() {
 
 #[test]
 fn test_bft_disconnected_graph() {
-    let mut graph = HashGraph::<usize, usize>::new();
+    let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Create a disconnected hypergraph
     // 0 -- 1    2 -- 3
@@ -104,7 +104,7 @@ fn test_bft_disconnected_graph() {
 
 #[test]
 fn test_bft_hyperedge_with_multiple_vertices() {
-    let mut graph = HashGraph::<usize, usize>::new();
+    let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Create a hypergraph with a large hyperedge
     // connecting multiple vertices

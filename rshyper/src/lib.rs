@@ -46,7 +46,7 @@ pub use rshyper_core::*;
 pub use self::binary_graph::BinaryGraph;
 #[doc(inline)]
 #[cfg(feature = "hash_graph")]
-pub use self::hash_graph::HashGraph;
+pub use self::hash_graph::{DirectedHashGraph, HashGraph, UndirectedHashGraph};
 
 /// the `algo` module focuses on implementing algorithms and operators for hypergraphs
 pub mod algo;

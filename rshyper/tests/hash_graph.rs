@@ -3,12 +3,12 @@
     Contrib: @FL03
 */
 use rshyper::Weight;
-use rshyper::hash_graph::HashGraph;
+use rshyper::hash_graph::UndirectedHashGraph as HyperGraph;
 use std::collections::HashSet;
 
 #[test]
 fn test_hash_graph() -> rshyper::Result<()> {
-    let mut graph = HashGraph::<usize, usize>::new();
+    let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Add some vertices
     let v0 = graph.add_vertex();
@@ -41,7 +41,7 @@ fn test_hash_graph() -> rshyper::Result<()> {
 
 #[test]
 fn test_merge_hash_edge() -> rshyper::Result<()> {
-    let mut graph = HashGraph::<usize, usize>::new();
+    let mut graph = HyperGraph::<usize, usize>::undirected();
     let v0 = graph.add_node(10);
     let v1 = graph.add_node(20);
     let v2 = graph.add_node(30);
@@ -59,7 +59,7 @@ fn test_merge_hash_edge() -> rshyper::Result<()> {
 
 #[test]
 fn test_update_hash_node() -> rshyper::Result<()> {
-    let mut graph = HashGraph::<usize, usize>::new();
+    let mut graph = HyperGraph::<usize, usize>::undirected();
     let v0 = graph.add_node(42);
 
     // Check initial weight
@@ -76,7 +76,7 @@ fn test_update_hash_node() -> rshyper::Result<()> {
 
 #[test]
 fn test_remove_hash_edges() -> rshyper::Result<()> {
-    let mut graph = HashGraph::<usize, usize>::new();
+    let mut graph = HyperGraph::<usize, usize>::undirected();
     let v0 = graph.add_node(10);
     let v1 = graph.add_node(20);
     let v2 = graph.add_node(30);
