@@ -96,7 +96,7 @@ impl<'a, N, E, K, Idx> Search<VertexId<Idx>>
     for DepthFirstTraversal<'a, N, E, HashGraph<N, E, K, Idx>>
 where
     N: Default + Eq + core::hash::Hash,
-    E: Eq + core::hash::Hash,
+    E: Default + Eq + core::hash::Hash,
     K: GraphKind,
     Idx: crate::NumIndex,
 {

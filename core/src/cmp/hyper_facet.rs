@@ -2,6 +2,7 @@
     appellation: hyper_facet <module>
     authors: @FL03
 */
+mod impl_hyper_facet;
 use super::{HyperEdge, RawEdgeStore};
 use crate::index::{EdgeId, RawIndex};
 use crate::{GraphKind, Weight};
@@ -41,16 +42,12 @@ where
     /// creates a new edge with the given id
     pub fn from_edge(edge: HyperEdge<S, K, Idx>) -> Self
     where
-        S: Default,
         T: Default,
     {
         Self::from_edge_with_weight(edge, Default::default())
     }
     /// creates a new instance from the given edge and weight
-    pub fn from_edge_with_weight(edge: HyperEdge<S, K, Idx>, weight: Weight<T>) -> Self
-    where
-        S: Default,
-    {
+    pub fn from_edge_with_weight(edge: HyperEdge<S, K, Idx>, weight: Weight<T>) -> Self {
         Self { edge, weight }
     }
     /// creates a new edge with the given id
@@ -167,74 +164,6 @@ where
             edge: self.edge,
             weight,
         }
-    }
-}
-
-impl<T, S, K, Idx> AsRef<Weight<T>> for HyperFacet<T, S, K, Idx>
-where
-    Idx: RawIndex,
-    K: GraphKind,
-    S: RawEdgeStore<Idx>,
-{
-    fn as_ref(&self) -> &Weight<T> {
-        &self.weight
-    }
-}
-
-impl<T, S, K, Idx> AsMut<Weight<T>> for HyperFacet<T, S, K, Idx>
-where
-    Idx: RawIndex,
-    K: GraphKind,
-    S: RawEdgeStore<Idx>,
-{
-    fn as_mut(&mut self) -> &mut Weight<T> {
-        &mut self.weight
-    }
-}
-
-impl<T, S, K, Idx> core::borrow::Borrow<EdgeId<Idx>> for HyperFacet<T, S, K, Idx>
-where
-    Idx: RawIndex,
-    K: GraphKind,
-    S: RawEdgeStore<Idx>,
-{
-    fn borrow(&self) -> &EdgeId<Idx> {
-        self.id()
-    }
-}
-
-impl<T, S, K, Idx> core::borrow::BorrowMut<EdgeId<Idx>> for HyperFacet<T, S, K, Idx>
-where
-    Idx: RawIndex,
-    K: GraphKind,
-    S: RawEdgeStore<Idx>,
-{
-    fn borrow_mut(&mut self) -> &mut EdgeId<Idx> {
-        self.id_mut()
-    }
-}
-
-impl<T, S, K, Idx> core::ops::Deref for HyperFacet<T, S, K, Idx>
-where
-    Idx: RawIndex,
-    K: GraphKind,
-    S: RawEdgeStore<Idx>,
-{
-    type Target = HyperEdge<S, K, Idx>;
-
-    fn deref(&self) -> &Self::Target {
-        self.edge()
-    }
-}
-
-impl<T, S, K, Idx> core::ops::DerefMut for HyperFacet<T, S, K, Idx>
-where
-    Idx: RawIndex,
-    K: GraphKind,
-    S: RawEdgeStore<Idx>,
-{
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        self.edge_mut()
     }
 }
 

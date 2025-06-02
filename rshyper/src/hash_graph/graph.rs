@@ -83,7 +83,7 @@ where
 
     /// returns an immutable reference to the edges of the hypergraph; a mapping of edges to vertices essentially forming a topological space
     /// that enables the data-structure to be traversed, analyzed, and manipulated.
-    pub const fn _edges(&self) -> &EdgeMap<Idx> {
+    pub const fn edges(&self) -> &EdgeMap<Idx> {
         &self.edges
     }
     /// returns a mutable reference to the hyperedges
@@ -185,21 +185,12 @@ where
         Self { position, ..self }
     }
     /// returns true if the hypergraph contains an edge with the given index;
-    pub fn contains_edge<Q>(&self, index: &Q) -> bool
+    pub fn contains_surface<Q>(&self, index: &Q) -> bool
     where
         Q: Eq + core::hash::Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces().contains_key(index)
-    }
-    /// check if a facet with the given id exists; this method is a little heavier since it
-    /// checks both the facets and edges fields to ensure the index points to a valid facet.
-    pub fn contains_facet<Q>(&self, index: &Q) -> bool
-    where
-        Q: Eq + core::hash::Hash,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.facets().contains_key(index) && self.surfaces().contains_key(index)
     }
     /// check if a vertex with the given id exists
     pub fn contains_node<Q>(&self, index: &Q) -> bool
@@ -213,34 +204,11 @@ where
     pub fn is_empty(&self) -> bool {
         self.surfaces().is_empty() && self.facets().is_empty() && self.nodes().is_empty()
     }
-    /// returns an [`Entry`](std::collections::hash_map::Entry) for the edge with the given
-    /// index, allowing for modifications or insertions to the mapping
-    pub fn edge(&mut self, index: EdgeId<Idx>) -> EdgeEntry<'_, Idx> {
-        self.edges_mut().entry(index)
-    }
-    /// returns an [`Entry`](std::collections::hash_map::Entry) for the weight of the edge with
-    /// the given index, allowing for modifications or insertions to the mapping
-    pub fn facet(&mut self, index: EdgeId<Idx>) -> FacetEntry<'_, E, Idx> {
-        self.facets_mut().entry(index)
-    }
+
     /// returns an [`Entry`](std::collections::hash_map::Entry) for the node with the given
     /// index, allowing for modifications or insertions to the mapping
     pub fn node(&mut self, index: VertexId<Idx>) -> NodeEntry<'_, N, Idx> {
         self.nodes_mut().entry(index)
-    }
-    /// returns an iterator over the edges of the hypergraph, yielding pairs of [`EdgeId`] and
-    /// the corresponding [`VertexSet`].
-    // pub fn edge_iter(&self) -> super::iter::EdgeIter<'_, Idx> {
-    //     super::iter::EdgeIter {
-    //         iter: self.edges().iter(),
-    //     }
-    // }
-    /// returns an iterator over the facets of the hypergraph, yielding pairs of [`EdgeId`] and
-    /// the corresponding weight `E`.
-    pub fn facet_iter(&self) -> super::iter::FacetIter<'_, E, Idx> {
-        super::iter::FacetIter {
-            iter: self.facets().iter(),
-        }
     }
     /// returns an iterator over the nodes of the hypergraph, yielding pairs of [`VertexId`] and
     /// the corresponding [`HyperNode`].
@@ -285,9 +253,57 @@ where
         use core::any::TypeId;
         TypeId::of::<K>() == TypeId::of::<crate::Undirected>()
     }
+    #[deprecated(since = "0.9.0", note = "use `contains_surface` instead")]
+    /// returns true if the hypergraph contains an edge with the given index;
+    pub fn contains_edge<Q>(&self, index: &Q) -> bool
+    where
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.surfaces().contains_key(index)
+    }
+    #[deprecated(since = "0.9.0", note = "use `contains_surface` instead")]
+    /// check if a facet with the given id exists; this method is a little heavier since it
+    /// checks both the facets and edges fields to ensure the index points to a valid facet.
+    pub fn contains_facet<Q>(&self, index: &Q) -> bool
+    where
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.facets().contains_key(index) && self.surfaces().contains_key(index)
+    }
+    #[deprecated(since = "0.9.0", note = "use `surface` instead")]
+    /// returns an [`Entry`](std::collections::hash_map::Entry) for the edge with the given
+    /// index, allowing for modifications or insertions to the mapping
+    pub fn edge(&mut self, index: EdgeId<Idx>) -> EdgeEntry<'_, E, K, Idx> {
+        self.surfaces_mut().entry(index)
+    }
+    #[deprecated(since = "0.9.0", note = "use `surface` instead")]
+    /// returns an [`Entry`](std::collections::hash_map::Entry) for the weight of the edge with
+    /// the given index, allowing for modifications or insertions to the mapping
+    pub fn facet(&mut self, index: EdgeId<Idx>) -> FacetEntry<'_, E, Idx> {
+        self.facets_mut().entry(index)
+    }
+    #[deprecated(since = "0.9.0", note = "use `surface_iter` instead")]
+    /// returns an iterator over the edges of the hypergraph, yielding pairs of [`EdgeId`] and
+    /// the corresponding [`VertexSet`].
+    pub fn edge_iter(&self) -> super::iter::EdgeIter<'_, Idx> {
+        super::iter::EdgeIter {
+            iter: self.edges().iter(),
+        }
+    }
+    #[deprecated(since = "0.9.0", note = "use `surface_iter` instead")]
+    /// returns an iterator over the facets of the hypergraph, yielding pairs of [`EdgeId`] and
+    /// the corresponding weight `E`.
+    pub fn facet_iter(&self) -> super::iter::FacetIter<'_, E, Idx> {
+        super::iter::FacetIter {
+            iter: self.facets().iter(),
+        }
+    }
 }
 
 use rshyper_core::{HyperGraph, HyperNode, RawHyperGraph, Weight};
+use serde::de;
 
 impl<N, E, K, Idx> RawHyperGraph<N, E> for HashGraph<N, E, K, Idx>
 where
@@ -303,7 +319,7 @@ where
 impl<N, E, K, Idx> HyperGraph<N, E> for HashGraph<N, E, K, Idx>
 where
     N: Eq + core::hash::Hash + Default,
-    E: Eq + core::hash::Hash,
+    E: Default + Eq + core::hash::Hash,
     K: GraphKind,
     Idx: crate::NumIndex,
 {

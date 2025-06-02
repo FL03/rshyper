@@ -48,7 +48,8 @@ pub(crate) mod aliases {
     /// a type alias for a [`Entry`](hash_map::Entry) that maps [`VertexId`] to a [`HyperNode`]
     pub type NodeEntry<'a, N, Idx = usize> = hash_map::Entry<'a, VertexId<Idx>, HyperNode<N, Idx>>;
     /// a type alias for a [`Entry`](hash_map::Entry) that maps [`EdgeId`] to a [`VertexSet`]
-    pub type EdgeEntry<'a, Idx = usize> = hash_map::Entry<'a, EdgeId<Idx>, VertexSet<Idx>>;
+    pub type EdgeEntry<'a, T, K = Undirected, Idx = usize> =
+        hash_map::Entry<'a, EdgeId<Idx>, HyperFacet<T, VertexSet<Idx>, K, Idx>>;
     /// a type alias for a [`Entry`](hash_map::Entry) that maps [`EdgeId`] to some weight `E`
     pub type FacetEntry<'a, E, Idx = usize> = hash_map::Entry<'a, EdgeId<Idx>, crate::Weight<E>>;
 }

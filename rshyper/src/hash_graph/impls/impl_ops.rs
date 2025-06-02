@@ -27,6 +27,7 @@ where
     pub fn dft(&self) -> search::DepthFirstTraversal<'_, N, E, Self>
     where
         N: Default,
+        E: Default,
         Idx: NumIndex,
     {
         search::DepthFirstTraversal::new(self)
