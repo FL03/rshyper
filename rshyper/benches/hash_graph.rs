@@ -9,6 +9,7 @@ use std::hint::black_box;
 
 fn _init() -> HyperGraph<&'static str, usize> {
     let mut graph = HyperGraph::undirected();
+
     let a = graph.add_node("A");
     let b = graph.add_node("B");
     let c = graph.add_node("C");
@@ -16,6 +17,7 @@ fn _init() -> HyperGraph<&'static str, usize> {
     let _e1 = graph
         .add_edge_with_weight([a, b, c], 0)
         .expect("Failed to insert edge");
+
     graph
 }
 

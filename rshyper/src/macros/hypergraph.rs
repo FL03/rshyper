@@ -23,12 +23,12 @@ macro_rules! hypergraph {
 
 #[macro_export]
 macro_rules! hyperedge {
-    ($src:ident { $(let $edge:ident = [$($var:ident),*] $(=> $w:expr)?);* $(;)? }) => {
+    ($src:ident { $(let $edge:ident: [$($var:ident),*] $(= $w:expr)?);* $(;)? }) => {
         $(
-            $crate::hyperedge!(@impl let $src.$edge = [$($var),*] $(=> $w)?);
+            $crate::hyperedge!(@impl let $src.$edge: [$($var),*] $(= $w)?);
         )*
     };
-    (@impl let $src:ident.$edge:ident = [$($var:ident),*] $(=> $w:expr)?) => {
+    (@impl let $src:ident.$edge:ident: [$($var:ident),*] $(= $w:expr)?) => {
         $crate::hyperedge!(@new let $src.$edge = [$($var),*] $(=> $w)?);
     };
     (@new let $src:ident.$edge:ident = [$($var:ident),*]) => {

@@ -23,9 +23,9 @@ fn main() -> rshyper::Result<()> {
                 let v3 = 4;
             };
             edges {
-                let e0 = [v0, v1, v2] => 10;
-                let e1 = [v1, v2, v3];
-                let e2 = [v2, v3];
+                let e0: [v0, v1, v2] = 10;
+                let e1: [v1, v2, v3];
+                let e2: [v2, v3];
             };
         }
     }
