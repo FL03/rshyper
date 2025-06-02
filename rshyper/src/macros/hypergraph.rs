@@ -8,20 +8,16 @@
 #[macro_export]
 macro_rules! hypergraph {
     (
-        [$graph:ident]
-        nodes: {
-            $(
-                let $var:ident$(= $w:expr)?
-            );* $(;)?
-        };
-        edges: {
-            $(
-                $edge:ident: [$($node:ident),*] $(= $weight:expr)?
-            ),* $(,)?
-        };
+        $graph:ident {
+            nodes {$($nodes:tt)*};
+            edges {$($edges:tt)*};
+        }
+
     ) => {
         // insert nodes into the graph
-        $crate::hypernode!($graph { $(let $var $(= $w)?);* });
+        $crate::hypernode!($graph {$($nodes)*});
+        // insert edges into the graph
+        $crate::hyperedge!($graph {$($edges)*});
     };
 }
 
@@ -42,3 +38,5 @@ macro_rules! hyperedge {
         let $edge = $src.add_edge_with_weight([$($var),*], $w).expect("Failed to insert edge");
     };
 }
+
+

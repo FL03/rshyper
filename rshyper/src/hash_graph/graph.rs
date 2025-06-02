@@ -30,7 +30,8 @@ where
     /// tracks the current position of the hypergraph, which is used to determine the next
     /// available indices for edges and vertices.
     pub(crate) position: Position<Idx>,
-
+    /// the kind of the hypergraph, which can be either directed or undirected
+    #[cfg_attr(feature = "serde", serde(skip))]
     pub(crate) _kind: core::marker::PhantomData<K>,
 }
 
