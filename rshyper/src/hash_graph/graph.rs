@@ -274,9 +274,9 @@ where
     }
 }
 
-use crate::{HyperNode, Weight};
+use rshyper_core::{HyperGraph, HyperNode, RawHyperGraph, Weight};
 
-impl<N, E, K, Idx> rshyper_core::RawHyperGraph<N, E> for HashGraph<N, E, K, Idx>
+impl<N, E, K, Idx> RawHyperGraph<N, E> for HashGraph<N, E, K, Idx>
 where
     N: Eq + core::hash::Hash,
     E: Eq + core::hash::Hash,
@@ -287,14 +287,14 @@ where
     type Kind = K;
 }
 
-impl<N, E, K, Idx> rshyper_core::HyperGraph<N, E> for HashGraph<N, E, K, Idx>
+impl<N, E, K, Idx> HyperGraph<N, E> for HashGraph<N, E, K, Idx>
 where
     N: Eq + core::hash::Hash + Default,
     E: Eq + core::hash::Hash,
     K: GraphKind,
     Idx: crate::NumIndex,
 {
-    fn add_edge<I>(&mut self, iter: I) -> rshyper_core::Result<EdgeId<Self::Idx>>
+    fn add_edge<I>(&mut self, iter: I) -> crate::Result<EdgeId<Self::Idx>>
     where
         I: IntoIterator<Item = VertexId<Self::Idx>>,
     {

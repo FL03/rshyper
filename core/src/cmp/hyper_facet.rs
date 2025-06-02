@@ -68,13 +68,13 @@ where
         }
     }
     /// creates a new edge with the given nodes
-    pub fn from_nodes(nodes: S) -> Self
+    pub fn from_points(nodes: S) -> Self
     where
         Idx: Default,
         T: Default,
     {
         Self {
-            edge: HyperEdge::from_nodes(nodes),
+            edge: HyperEdge::from_points(nodes),
             weight: Weight::default(),
         }
     }
@@ -115,11 +115,11 @@ where
     }
     /// returns an immutable reference to the nodes
     pub const fn nodes(&self) -> &S {
-        self.edge().nodes()
+        self.edge().points()
     }
     /// returns a mutable reference to the nodes
     pub const fn nodes_mut(&mut self) -> &mut S {
-        self.edge_mut().nodes_mut()
+        self.edge_mut().points_mut()
     }
     /// updates the id and returns a mutable reference to the instance
     pub fn set_id(&mut self, id: EdgeId<Idx>) -> &mut Self {
@@ -127,8 +127,8 @@ where
         self
     }
     /// updates the nodes and returns a mutable reference to the instance
-    pub fn set_nodes(&mut self, nodes: S) -> &mut Self {
-        self.edge_mut().set_nodes(nodes);
+    pub fn set_points(&mut self, nodes: S) -> &mut Self {
+        self.edge_mut().set_points(nodes);
         self
     }
     /// updates the weight and returns a mutable reference to the instance
@@ -144,9 +144,9 @@ where
         }
     }
     /// consumes the current instance to create another with the given nodes.
-    pub fn with_nodes<S2: RawEdgeStore<Idx>>(self, nodes: S2) -> HyperFacet<T, S2, K, Idx> {
+    pub fn with_points<S2: RawEdgeStore<Idx>>(self, nodes: S2) -> HyperFacet<T, S2, K, Idx> {
         HyperFacet {
-            edge: self.edge.with_nodes(nodes),
+            edge: self.edge.with_points(nodes),
             weight: self.weight,
         }
     }

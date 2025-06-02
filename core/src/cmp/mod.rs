@@ -70,8 +70,8 @@ pub(crate) mod aliases {
     pub type UnFacetHash<T, Idx = usize> = UndirectedFacet<T, HashSet<VertexId<Idx>>, Idx>;
 }
 
-use crate::Weight;
 use crate::index::{EdgeId, RawIndex, VertexId};
+use crate::{GraphKind, Weight};
 
 /// [`RawEdgeStore`] is a trait that defines the behavior of a store that holds the vertices
 /// associated with a hyperedge or hyperfacet. It is used to abstract over different
@@ -106,41 +106,188 @@ pub trait RawNode<T> {
     fn weight(&self) -> Weight<&T>;
 }
 
-pub trait RawEdge<T> {
+pub trait RawEdge {
     type Idx: RawIndex;
-    type Points<_T>;
+    type Kind: GraphKind;
+    type Store: RawEdgeStore<Self::Idx>;
 
     private!();
 
     /// returns an immutable reference to the edge index
     fn index(&self) -> &EdgeId<Self::Idx>;
     /// Returns an immutable reference to the edge data.
-    fn vertices(&self) -> &Self::Points<VertexId<Self::Idx>>;
+    fn vertices(&self) -> &Self::Store;
+}
+
+pub trait RawFacet<T>: RawEdge {
+    private!();
     /// Returns the index of the edge.
     fn weight(&self) -> Weight<&T>;
 }
 /*
  ************* Implementations *************
 */
-#[cfg(feature = "alloc")]
-use alloc::{collections::BTreeSet, vec::Vec};
-#[cfg(feature = "std")]
-use std::collections::hash_set;
-
-#[cfg(feature = "std")]
-impl<Idx> RawEdgeStore<Idx> for hash_set::HashSet<VertexId<Idx>>
+impl<T, Idx> RawNode<T> for HyperNode<T, Idx>
 where
     Idx: RawIndex,
 {
-    type Store<_T> = hash_set::HashSet<_T>;
+    type Idx = Idx;
+
+    seal!();
+
+    fn index(&self) -> &VertexId<Idx> {
+        &self.index
+    }
+    fn weight(&self) -> Weight<&T> {
+        self.weight().view()
+    }
+}
+
+impl<S, Idx, K> RawEdge for HyperEdge<S, K, Idx>
+where
+    Idx: Copy + RawIndex,
+    K: GraphKind,
+    S: RawEdgeStore<Idx>,
+{
+    type Kind = K;
+    type Idx = Idx;
+    type Store = S;
+
+    seal!();
+
+    fn index(&self) -> &EdgeId<Idx> {
+        self.id()
+    }
+
+    fn vertices(&self) -> &S {
+        self.points()
+    }
+}
+
+impl<T, S, Idx, K> RawEdge for HyperFacet<T, S, K, Idx>
+where
+    Idx: Copy + RawIndex,
+    K: GraphKind,
+    S: RawEdgeStore<Idx>,
+{
+    type Kind = K;
+    type Idx = Idx;
+    type Store = S;
+
+    seal!();
+
+    fn index(&self) -> &EdgeId<Idx> {
+        self.edge().id()
+    }
+
+    fn vertices(&self) -> &S {
+        self.edge().points()
+    }
+}
+
+impl<T, S, Idx, K> RawFacet<T> for HyperFacet<T, S, K, Idx>
+where
+    Idx: Copy + RawIndex,
+    K: GraphKind,
+    S: RawEdgeStore<Idx>,
+{
+    seal!();
+
+    fn weight(&self) -> Weight<&T> {
+        self.weight().view()
+    }
+}
+
+macro_rules! impl_raw_store {
+    (
+        $(
+            $p:ident
+        );* $(;)?
+    ) => {
+        $(
+            impl_raw_store!(@impl $p);
+        )*
+    };
+    (@impl $p:ident) => {
+        impl<Idx> RawEdgeStore<Idx> for $p<VertexId<Idx>>
+        where
+            Idx: RawIndex,
+        {
+            type Store<_T> = $p<_T>;
+
+            seal!();
+
+            fn len(&self) -> usize {
+                <$p<VertexId<Idx>>>::len(self)
+            }
+
+            fn is_empty(&self) -> bool {
+                <$p<VertexId<Idx>>>::is_empty(self)
+            }
+        }
+    };
+    (@impl $($p:ident)::+) => {
+        impl<Idx> RawEdgeStore<Idx> for $($p)::*<VertexId<Idx>>
+        where
+            Idx: RawIndex,
+        {
+            type Store<_T> = $($p)::*<_T>;
+
+            seal!();
+
+            fn len(&self) -> usize {
+                <$($p)::*<VertexId<Idx>>>::len(self)
+            }
+
+            fn is_empty(&self) -> bool {
+                <$($p)::*<VertexId<Idx>>>::is_empty(self)
+            }
+        }
+    };
+}
+#[cfg(feature = "alloc")]
+use alloc::{collections::BTreeSet, vec::Vec};
+#[cfg(feature = "std")]
+use std::collections::HashSet;
+
+#[cfg(feature = "std")]
+impl_raw_store! {
+    HashSet;
+}
+
+#[cfg(feature = "alloc")]
+impl_raw_store! {
+    BTreeSet;
+    Vec;
+}
+
+impl<'a, Idx> RawEdgeStore<Idx> for &'a [VertexId<Idx>]
+where
+    Idx: RawIndex,
+{
+    type Store<_T> = [VertexId<Idx>];
 
     seal!();
 
     fn len(&self) -> usize {
-        self.len()
+        <[VertexId<Idx>]>::len(self)
     }
+
     fn is_empty(&self) -> bool {
-        self.is_empty()
+        <[VertexId<Idx>]>::is_empty(self)
+    }
+}
+
+impl<'a, Idx> RawEdgeStore<Idx> for &'a mut [VertexId<Idx>]
+where
+    Idx: RawIndex,
+{
+    type Store<_T> = [VertexId<Idx>];
+
+    seal!();
+
+    fn len(&self) -> usize {
+        <[VertexId<Idx>]>::len(self)
     }
 }
 
@@ -173,39 +320,5 @@ where
     }
     fn is_empty(&self) -> bool {
         N == 0
-    }
-}
-
-#[cfg(feature = "alloc")]
-impl<Idx> RawEdgeStore<Idx> for BTreeSet<VertexId<Idx>>
-where
-    Idx: RawIndex,
-{
-    type Store<_T> = BTreeSet<VertexId<Idx>>;
-
-    seal!();
-
-    fn len(&self) -> usize {
-        self.len()
-    }
-    fn is_empty(&self) -> bool {
-        self.is_empty()
-    }
-}
-
-#[cfg(feature = "alloc")]
-impl<Idx> RawEdgeStore<Idx> for Vec<VertexId<Idx>>
-where
-    Idx: RawIndex,
-{
-    type Store<_T> = Vec<VertexId<Idx>>;
-
-    seal!();
-
-    fn len(&self) -> usize {
-        self.len()
-    }
-    fn is_empty(&self) -> bool {
-        self.is_empty()
     }
 }

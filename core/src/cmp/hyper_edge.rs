@@ -21,7 +21,7 @@ where
     S: RawEdgeStore<Idx>,
 {
     pub(crate) id: EdgeId<Idx>,
-    pub(crate) nodes: S,
+    pub(crate) points: S,
     pub(crate) _kind: core::marker::PhantomData<K>,
 }
 
@@ -31,10 +31,10 @@ where
     K: GraphKind,
     S: RawEdgeStore<Idx>,
 {
-    pub fn new(id: EdgeId<Idx>, nodes: S) -> Self {
+    pub fn new(id: EdgeId<Idx>, points: S) -> Self {
         Self {
             id,
-            nodes,
+            points,
             _kind: core::marker::PhantomData::<K>,
         }
     }
@@ -46,7 +46,7 @@ where
         Self::new(id, Default::default())
     }
     /// creates a new edge with the given nodes
-    pub fn from_nodes(nodes: S) -> Self
+    pub fn from_points(nodes: S) -> Self
     where
         Idx: Default,
     {
@@ -61,12 +61,12 @@ where
         &mut self.id
     }
     /// returns an immutable reference to the nodes
-    pub const fn nodes(&self) -> &S {
-        &self.nodes
+    pub const fn points(&self) -> &S {
+        &self.points
     }
     /// returns a mutable reference to the nodes
-    pub const fn nodes_mut(&mut self) -> &mut S {
-        &mut self.nodes
+    pub const fn points_mut(&mut self) -> &mut S {
+        &mut self.points
     }
     /// updates the id and returns a mutable reference to the instance
     pub fn set_id(&mut self, id: EdgeId<Idx>) -> &mut Self {
@@ -74,8 +74,8 @@ where
         self
     }
     /// updates the nodes and returns a mutable reference to the instance
-    pub fn set_nodes(&mut self, nodes: S) -> &mut Self {
-        self.nodes = nodes;
+    pub fn set_points(&mut self, nodes: S) -> &mut Self {
+        self.points = nodes;
         self
     }
     /// consumes the current instance to create another with the given id.
@@ -83,10 +83,10 @@ where
         Self { id, ..self }
     }
     /// consumes the current instance to create another with the given nodes.
-    pub fn with_nodes<S2: RawEdgeStore<Idx>>(self, nodes: S2) -> HyperEdge<S2, K, Idx> {
+    pub fn with_points<S2: RawEdgeStore<Idx>>(self, nodes: S2) -> HyperEdge<S2, K, Idx> {
         HyperEdge {
             id: self.id,
-            nodes,
+            points: nodes,
             _kind: self._kind,
         }
     }
@@ -132,7 +132,7 @@ where
     S: RawEdgeStore<Idx>,
 {
     fn as_ref(&self) -> &S {
-        self.nodes()
+        self.points()
     }
 }
 
@@ -143,7 +143,7 @@ where
     S: RawEdgeStore<Idx>,
 {
     fn as_mut(&mut self) -> &mut S {
-        self.nodes_mut()
+        self.points_mut()
     }
 }
 
@@ -200,6 +200,6 @@ where
     S: RawEdgeStore<Idx> + core::fmt::Display,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "(id: {}, nodes: {})", self.id, self.nodes,)
+        write!(f, "(id: {}, nodes: {})", self.id, self.points,)
     }
 }

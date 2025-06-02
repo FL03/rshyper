@@ -18,7 +18,9 @@ pub trait Point: RawPoint {
     /// returns the index of the point as a [`VertexId`].
     fn index(&self) -> &VertexId<Self::Key>;
     /// returns the raw index of the point as a reference to the underlying key type.
-    fn raw_index(&self) -> &Self::Key;
+    fn raw_index(&self) -> &Self::Key {
+        self.index().get()
+    }
 }
 
 pub trait WeightedPoint<T>: Point {
@@ -49,20 +51,23 @@ where
  ************* Implementations *************
 */
 use crate::cmp::HyperNode;
+use crate::index::IndexBase;
 
-impl<T: RawIndex> RawPoint for VertexId<T> {
-    type Key = T;
+impl<X, K> RawPoint for IndexBase<X, K>
+where
+    X: RawIndex,
+{
+    type Key = X;
 
     seal!();
 }
 
-impl<T: RawIndex> Point for VertexId<T> {
+impl<X> Point for VertexId<X>
+where
+    X: RawIndex,
+{
     fn index(&self) -> &VertexId<Self::Key> {
         self
-    }
-
-    fn raw_index(&self) -> &Self::Key {
-        self.get()
     }
 }
 
@@ -77,10 +82,6 @@ impl<T, Idx: RawIndex> RawPoint for HyperNode<T, Idx> {
 impl<T, Idx: RawIndex> Point for HyperNode<T, Idx> {
     fn index(&self) -> &VertexId<Self::Key> {
         self.index()
-    }
-
-    fn raw_index(&self) -> &Self::Key {
-        self.index().get()
     }
 }
 

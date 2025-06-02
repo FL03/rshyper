@@ -99,16 +99,30 @@ impl<T> Weight<T> {
         core::ptr::addr_of_mut!(self.0)
     }
     /// returns a _view_ of the weight whose inner value is a reference to the original.
-    pub const fn as_view(&self) -> Weight<&T> {
+    pub const fn view(&self) -> Weight<&T> {
         Weight(self.get())
     }
     /// returns a _view_ of the weight whose inner value is a mutable reference to the original
-    pub const fn as_view_mut(&mut self) -> Weight<&mut T> {
+    pub const fn view_mut(&mut self) -> Weight<&mut T> {
         Weight(self.get_mut())
     }
     /// consumes the current instance to create another with the given value
     pub fn with<U>(self, value: U) -> Weight<U> {
         Weight(value)
+    }
+    #[deprecated(
+        note = "use `view` instead, this method will be removed in the next major version",
+        since = "0.0.8"
+    )]
+    pub const fn as_view(&self) -> Weight<&T> {
+        Weight(self.get())
+    }
+    #[deprecated(
+        note = "use `view_mut` instead, this method will be removed in the next major version",
+        since = "0.0.8"
+    )]
+    pub const fn as_view_mut(&mut self) -> Weight<&mut T> {
+        Weight(self.get_mut())
     }
 }
 
