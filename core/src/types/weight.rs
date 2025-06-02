@@ -30,13 +30,6 @@ impl<T> Weight<T> {
     pub fn value(self) -> T {
         self.0
     }
-    #[deprecated(
-        note = "use `value` instead, this method will be removed in the next major version",
-        since = "0.0.8"
-    )]
-    pub fn into_inner(self) -> T {
-        self.0
-    }
     /// returns an immutable reference to the inner value.
     pub const fn get(&self) -> &T {
         &self.0
@@ -51,7 +44,17 @@ impl<T> Weight<T> {
     where
         F: FnOnce(T) -> U,
     {
-        Weight(f(self.0))
+        Weight(f(self.value()))
+    }
+    /// apply the function onto a mutable reference to the inner value and return a
+    /// mutable reference to the current instanc storing the updating weight.
+    pub fn map_mut<F>(&mut self, f: F) -> &mut Self
+    where
+        F: FnOnce(&mut T),
+    {
+        // apply the function onto the inner value
+        f(self.get_mut());
+        self
     }
     /// [`replace`](core::mem::replace) the inner value and return the previous value.
     pub const fn replace(&mut self, value: T) -> T {
@@ -109,6 +112,14 @@ impl<T> Weight<T> {
     /// consumes the current instance to create another with the given value
     pub fn with<U>(self, value: U) -> Weight<U> {
         Weight(value)
+    }
+
+    #[deprecated(
+        note = "use `value` instead, this method will be removed in the next major version",
+        since = "0.0.8"
+    )]
+    pub fn into_inner(self) -> T {
+        self.0
     }
     #[deprecated(
         note = "use `view` instead, this method will be removed in the next major version",

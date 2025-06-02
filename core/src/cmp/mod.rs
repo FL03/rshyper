@@ -10,6 +10,8 @@ pub mod hyper_edge;
 pub mod hyper_facet;
 pub mod hyper_node;
 
+mod impls {}
+
 pub(crate) mod prelude {
     #[doc(inline)]
     pub use super::aliases::*;

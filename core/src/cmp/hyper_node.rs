@@ -2,11 +2,13 @@
     Appellation: node <module>
     Contrib: @FL03
 */
+mod impl_hyper_node;
+
 use crate::Weight;
 use crate::index::{RawIndex, VertexId};
 
 /// The [`HyperNode`] implementation generically associates a [`VertexId`] with a [`Weight`].
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize, serde::Serialize),
@@ -95,29 +97,35 @@ where
     }
     /// consumes the current instance and applies the given function onto the weight,
     /// returning a new instance with the same index and the resulting weight.
-    pub fn map<U, F: FnOnce(T) -> U>(self, f: F) -> HyperNode<U, Idx> {
+    pub fn map<U, F>(self, f: F) -> HyperNode<U, Idx>
+    where
+        F: FnOnce(T) -> U,
+    {
         HyperNode {
             index: self.index,
             weight: self.weight.map(f),
         }
     }
-}
-
-impl<T, Idx: RawIndex> AsRef<Weight<T>> for HyperNode<T, Idx> {
-    fn as_ref(&self) -> &Weight<T> {
-        &self.weight
+    /// consumes the current instance and applies the given function onto the weight,
+    pub fn map_mut<F>(&mut self, f: F) -> &mut Self
+    where
+        F: FnOnce(&mut T),
+    {
+        self.weight_mut().map_mut(f);
+        self
     }
 }
 
-impl<T, Idx: RawIndex> AsMut<Weight<T>> for HyperNode<T, Idx> {
-    fn as_mut(&mut self) -> &mut Weight<T> {
-        &mut self.weight
-    }
-}
-
-impl<T, Idx: RawIndex> core::borrow::Borrow<VertexId<Idx>> for HyperNode<T, Idx> {
-    fn borrow(&self) -> &VertexId<Idx> {
-        &self.index
+impl<T, Idx> Default for HyperNode<T, Idx>
+where
+    Idx: RawIndex + Default,
+    T: Default,
+{
+    fn default() -> Self {
+        Self {
+            index: VertexId::default(),
+            weight: Weight::default(),
+        }
     }
 }
 
