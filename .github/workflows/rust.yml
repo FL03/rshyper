@@ -87,7 +87,8 @@ jobs:
         name: Test (all-features)
         run: cargo test -r --locked --workspace --target ${{ matrix.target}} --all-features
       -
-        name: Test (full)
+        if: matrix.features != ('default' || 'all' || 'alloc' || 'no_std')
+        name: Test (${{ matrix.features }})
         run: cargo test -r --locked --workspace --target ${{ matrix.target}} --features ${{ matrix.features }}
       -
         name: Test (alloc)
