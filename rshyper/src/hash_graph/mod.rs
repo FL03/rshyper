@@ -6,10 +6,10 @@
 #[allow(unused_imports)]
 pub(crate) use self::aliases::*;
 #[doc(inline)]
-pub use self::{attrs::*, graph::*};
+pub use self::{graph::*, iter::*};
 
-pub mod attrs;
 pub mod graph;
+pub mod iter;
 
 mod impls {
     pub mod impl_graph;
@@ -19,9 +19,9 @@ mod impls {
 
 pub(crate) mod prelude {
     #[doc(inline)]
-    pub use super::attrs::*;
-    #[doc(inline)]
     pub use super::graph::*;
+    #[doc(inline)]
+    pub use super::iter::*;
 }
 
 pub(crate) mod aliases {

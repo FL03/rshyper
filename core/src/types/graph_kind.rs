@@ -5,7 +5,7 @@
 /// [GraphKind] is a marker trait for graph types.
 ///
 /// **note:** This trait is sealed and cannot be implemented outside of this crate.
-pub trait GraphKind {
+pub trait GraphKind: 'static + Send + Sync + core::fmt::Debug + core::fmt::Display {
     private!();
 }
 
@@ -38,6 +38,16 @@ macro_rules! impl_kind {
         impl_kind!(@kind $kind);
     };
     (@kind $kind:ident) => {
+        unsafe impl Send for $kind {}
+
+        unsafe impl Sync for $kind {}
+
+        impl ::core::fmt::Display for $kind {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                write!(f, "{}", ::core::any::type_name::<Self>())
+            }
+        }
+
         impl GraphKind for $kind {
             seal!();
         }
@@ -78,6 +88,10 @@ pub enum GraphKinds {
     #[default]
     Undirected = 0,
 }
+
+unsafe impl Send for GraphKinds {}
+
+unsafe impl Sync for GraphKinds {}
 
 impl GraphKind for GraphKinds {
     seal!();

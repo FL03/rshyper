@@ -214,6 +214,27 @@ where
     pub fn node(&mut self, index: VertexId<Idx>) -> NodeEntry<'_, N, Idx> {
         self.nodes_mut().entry(index)
     }
+    /// returns an iterator over the edges of the hypergraph, yielding pairs of [`EdgeId`] and
+    /// the corresponding [`VertexSet`].
+    pub fn edge_iter(&self) -> super::iter::EdgeIter<'_, Idx> {
+        super::iter::EdgeIter {
+            iter: self.edges().iter(),
+        }
+    }
+    /// returns an iterator over the facets of the hypergraph, yielding pairs of [`EdgeId`] and
+    /// the corresponding weight `E`.
+    pub fn facet_iter(&self) -> super::iter::FacetIter<'_, E, Idx> {
+        super::iter::FacetIter {
+            iter: self.facets().iter(),
+        }
+    }
+    /// returns an iterator over the nodes of the hypergraph, yielding pairs of [`VertexId`] and
+    /// the corresponding [`HyperNode`].
+    pub fn node_iter(&self) -> super::iter::NodeIter<'_, N, Idx> {
+        super::iter::NodeIter {
+            iter: self.nodes().iter(),
+        }
+    }
     /// get the next edge index and updates the current position
     pub fn next_edge_id(&mut self) -> EdgeId<Idx>
     where
@@ -242,10 +263,12 @@ where
     }
     /// returns true if the hypergraph is directed;
     pub fn is_directed(&self) -> bool {
-        false
+        use core::any::TypeId;
+        TypeId::of::<K>() == TypeId::of::<crate::Directed>()
     }
     /// returns true if the hypergraph is undirected;
     pub fn is_undirected(&self) -> bool {
-        true
+        use core::any::TypeId;
+        TypeId::of::<K>() == TypeId::of::<crate::Undirected>()
     }
 }

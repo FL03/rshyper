@@ -67,10 +67,13 @@ pub mod types {
     #[doc(inline)]
     pub use self::prelude::*;
 
+    pub mod attrs;
     pub mod graph_kind;
     pub mod weight;
 
     pub(crate) mod prelude {
+        #[doc(inline)]
+        pub use super::attrs::*;
         #[doc(inline)]
         pub use super::graph_kind::*;
         #[doc(inline)]
