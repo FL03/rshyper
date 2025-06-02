@@ -90,8 +90,8 @@ fn test_remove_hash_edges() -> rshyper::Result<()> {
     assert!(removed_edge.contains(&v1));
 
     // Check that the removed edge is no longer in the graph
-    assert!(!graph.contains_edge(&e1));
-    assert!(graph.contains_edge(&e2));
+    assert!(!graph.contains_surface(&e1));
+    assert!(graph.contains_surface(&e2));
 
     Ok(())
 }

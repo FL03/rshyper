@@ -303,7 +303,6 @@ where
 }
 
 use rshyper_core::{HyperGraph, HyperNode, RawHyperGraph, Weight};
-use serde::de;
 
 impl<N, E, K, Idx> RawHyperGraph<N, E> for HashGraph<N, E, K, Idx>
 where
@@ -323,19 +322,11 @@ where
     K: GraphKind,
     Idx: crate::NumIndex,
 {
-    fn add_edge<I>(&mut self, iter: I) -> crate::Result<EdgeId<Self::Idx>>
+    fn add_surface<I>(&mut self, iter: I, weight: Weight<E>) -> crate::Result<EdgeId<Self::Idx>>
     where
         I: IntoIterator<Item = VertexId<Self::Idx>>,
     {
-        self.add_edge(iter)
-    }
-
-    fn add_facet(
-        &mut self,
-        index: EdgeId<Self::Idx>,
-        weight: Weight<E>,
-    ) -> crate::Result<Option<Weight<E>>> {
-        self.add_facet(index, weight)
+        self.add_surface(iter, weight)
     }
 
     fn get_edge_vertices<S>(&self, index: &EdgeId<Self::Idx>) -> crate::Result<S>
@@ -359,11 +350,7 @@ where
     }
 
     fn contains_edge(&self, index: &EdgeId<Self::Idx>) -> bool {
-        self.contains_edge(index)
-    }
-
-    fn contains_facet(&self, index: &EdgeId<Self::Idx>) -> bool {
-        self.contains_facet(index)
+        self.contains_surface(index)
     }
 
     fn contains_node(&self, index: &VertexId<Self::Idx>) -> bool {

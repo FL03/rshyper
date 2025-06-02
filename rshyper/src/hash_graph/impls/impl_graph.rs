@@ -46,20 +46,9 @@ where
         Ok(eid)
     }
     /// add a new hyperedge with the given vertices and weight, returning its ID;
-    pub fn add_edge_with_weight<I>(&mut self, vertices: I, weight: E) -> crate::Result<EdgeId<Idx>>
+    pub fn add_surface<I>(&mut self, vertices: I, weight: Weight<E>) -> crate::Result<EdgeId<Idx>>
     where
-        I: Clone + IntoIterator<Item = VertexId<Idx>>,
-        E: Eq + core::hash::Hash,
-        Idx: Copy + core::ops::Add<Output = Idx> + One,
-    {
-        // insert the edge and get its ID
-        let index = self.add_surface(vertices, weight)?;
-        Ok(index)
-    }
-    /// add a new hyperedge with the given vertices and weight, returning its ID;
-    pub fn add_surface<I>(&mut self, vertices: I, weight: E) -> crate::Result<EdgeId<Idx>>
-    where
-        I: Clone + IntoIterator<Item = VertexId<Idx>>,
+        I: IntoIterator<Item = VertexId<Idx>>,
         E: Eq + core::hash::Hash,
         Idx: Copy + core::ops::Add<Output = Idx> + One,
     {
@@ -81,7 +70,7 @@ where
         if vset.is_empty() {
             return Err(crate::Error::EmptyHyperedge);
         }
-        let surface = crate::HyperFacet::new(edge_id, vset, Weight(weight));
+        let surface = crate::HyperFacet::new(edge_id, vset, weight);
         // insert the new hyperedge into the adjacency map
         self.surfaces_mut().insert(edge_id, surface);
         Ok(edge_id)
@@ -375,7 +364,6 @@ where
     {
         self.add_edge(vertices)
     }
-
     #[deprecated(note = "use `add_edge_with_weight", since = "0.0.8")]
     /// insert a new hyperedge with the given vertices and weight, returning its ID;
     pub fn insert_edge_with_weight<I>(
@@ -388,9 +376,22 @@ where
         E: Eq + core::hash::Hash,
         Idx: Copy + core::ops::Add<Output = Idx> + One,
     {
-        self.add_edge_with_weight(vertices, weight)
+        self.add_surface(vertices, Weight(weight))
     }
-    #[deprecated(note = "use `add_facet", since = "0.0.8")]
+    #[deprecated(note = "use `add_surface", since = "0.0.9")]
+    /// add a new hyperedge with the given vertices and weight, returning its ID;
+    pub fn add_edge_with_weight<I>(&mut self, vertices: I, weight: E) -> crate::Result<EdgeId<Idx>>
+    where
+        I: Clone + IntoIterator<Item = VertexId<Idx>>,
+        E: Eq + core::hash::Hash,
+        Idx: Copy + core::ops::Add<Output = Idx> + One,
+    {
+        // insert the edge and get its ID
+        let index = self.add_surface(vertices, Weight(weight))?;
+        Ok(index)
+    }
+    #[allow(deprecated)]
+    #[deprecated(note = "use `add_surface", since = "0.0.8")]
     /// insert a facet associated with the given edge index
     pub fn insert_facet(&mut self, index: EdgeId<Idx>, facet: E) -> crate::Result<EdgeId<Idx>>
     where
