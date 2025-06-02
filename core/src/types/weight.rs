@@ -27,6 +27,13 @@ impl<T> Weight<T> {
         Self(value)
     }
     /// consumes the current instance to return the inner value
+    pub fn value(self) -> T {
+        self.0
+    }
+    #[deprecated(
+        note = "use `value` instead, this method will be removed in the next major version",
+        since = "0.0.8"
+    )]
     pub fn into_inner(self) -> T {
         self.0
     }

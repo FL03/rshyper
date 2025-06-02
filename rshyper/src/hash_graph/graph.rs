@@ -4,31 +4,37 @@
 */
 use super::aliases::*;
 
-use rshyper_core::{EdgeId, Position, RawIndex, VertexId};
+use rshyper_core::GraphKind;
+use rshyper_core::index::{EdgeId, Position, RawIndex, VertexId};
+
 /// A hash-based hypergraph implementation
 #[derive(Clone, Debug, Default)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-pub struct HashGraph<N = (), E = (), Idx = usize>
+pub struct HashGraph<N, E, K = crate::Undirected, Idx = usize>
 where
     Idx: Eq + RawIndex + core::hash::Hash,
+    K: GraphKind,
 {
     /// the `edges` of a hypergraph is a map associating hyperedges (identified by `EdgeId`) to
     /// sets of vertices (identified by `VertexId`).
     pub(crate) edges: EdgeMap<Idx>,
     /// the `facets` of a hypergraph materializes hyperedges by associating them with a weight
-    pub(crate) facets: FacetMap<E, Idx>,
+    pub(crate) facets: FacetMap<Idx, E>,
     /// the `nodes` of a hypergraph are the vertices, each identified by a `VertexId` and
     /// associated with a weight of type `N`.
     pub(crate) nodes: NodeMap<N, Idx>,
     /// tracks the current position of the hypergraph, which is used to determine the next
     /// available indices for edges and vertices.
     pub(crate) position: Position<Idx>,
+
+    pub(crate) _kind: core::marker::PhantomData<K>,
 }
 
-impl<N, E, Idx> HashGraph<N, E, Idx>
+impl<N, E, K, Idx> HashGraph<N, E, K, Idx>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
+    K: GraphKind,
     Idx: Eq + RawIndex + core::hash::Hash,
 {
     /// initialize a new, empty hypergraph
@@ -41,6 +47,7 @@ where
             edges: EdgeMap::new(),
             nodes: NodeMap::new(),
             position: Position::default(),
+            _kind: core::marker::PhantomData::<K>,
         }
     }
     /// creates a new instance of the hypergraph with the given capacity for edges and nodes
@@ -53,6 +60,7 @@ where
             edges: EdgeMap::with_capacity(edges),
             nodes: NodeMap::with_capacity(nodes),
             position: Position::default(),
+            _kind: core::marker::PhantomData::<K>,
         }
     }
     /// returns an immutable reference to the edges of the hypergraph; a mapping of edges to vertices essentially forming a topological space
@@ -66,11 +74,11 @@ where
     }
     /// returns an immutable reference to the facets of the hypergraph; here, a facet is a
     /// hyperedge with an associated weight
-    pub const fn facets(&self) -> &FacetMap<E, Idx> {
+    pub const fn facets(&self) -> &FacetMap<Idx, E> {
         &self.facets
     }
     /// returns a mutable reference to the edges, or facets, of the hypergraph
-    pub const fn facets_mut(&mut self) -> &mut FacetMap<E, Idx> {
+    pub const fn facets_mut(&mut self) -> &mut FacetMap<Idx, E> {
         &mut self.facets
     }
     /// returns am immutable reference to the nodes
@@ -102,7 +110,7 @@ where
     }
     /// overrides the current facets and returns a mutable reference to the hypergraph
     #[inline]
-    pub fn set_facets(&mut self, facets: FacetMap<E, Idx>) -> &mut Self
+    pub fn set_facets(&mut self, facets: FacetMap<Idx, E>) -> &mut Self
     where
         Idx: Default,
     {
@@ -137,7 +145,7 @@ where
     }
     /// consumes the current instance to create another with the given facets
     #[inline]
-    pub fn with_facets(self, facets: FacetMap<E, Idx>) -> Self
+    pub fn with_facets(self, facets: FacetMap<Idx, E>) -> Self
     where
         Idx: Default,
     {
@@ -187,18 +195,18 @@ where
     pub fn is_empty(&self) -> bool {
         self.edges().is_empty() && self.facets().is_empty() && self.nodes().is_empty()
     }
-    /// returns an [`EdgeEntry`] for the edge with the given index, allowing for modifications
-    /// or insertions to the mapping
+    /// returns an [`Entry`](std::collections::hash_map::Entry) for the edge with the given
+    /// index, allowing for modifications or insertions to the mapping
     pub fn edge(&mut self, index: EdgeId<Idx>) -> EdgeEntry<'_, Idx> {
         self.edges_mut().entry(index)
     }
-    /// returns a [`FacetEntry`] for the facet with the given index, allowing for modifications
-    /// or insertions
+    /// returns an [`Entry`](std::collections::hash_map::Entry) for the weight of the edge with
+    /// the given index, allowing for modifications or insertions to the mapping
     pub fn facet(&mut self, index: EdgeId<Idx>) -> FacetEntry<'_, E, Idx> {
         self.facets_mut().entry(index)
     }
-    /// returns a [`NodeEntry`] for the node with the given index, allowing for modifications
-    /// or insertions
+    /// returns an [`Entry`](std::collections::hash_map::Entry) for the node with the given
+    /// index, allowing for modifications or insertions to the mapping
     pub fn node(&mut self, index: VertexId<Idx>) -> NodeEntry<'_, N, Idx> {
         self.nodes_mut().entry(index)
     }
@@ -227,5 +235,13 @@ where
     /// returns the total number of vertices in the hypergraph
     pub fn total_vertices(&self) -> usize {
         self.nodes().len()
+    }
+    /// returns true if the hypergraph is directed;
+    pub fn is_directed(&self) -> bool {
+        false
+    }
+    /// returns true if the hypergraph is undirected;
+    pub fn is_undirected(&self) -> bool {
+        true
     }
 }

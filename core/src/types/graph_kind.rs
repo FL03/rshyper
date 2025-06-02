@@ -3,31 +3,82 @@
     authors: @FL03
 */
 /// [GraphKind] is a marker trait for graph types.
+///
+/// **note:** This trait is sealed and cannot be implemented outside of this crate.
 pub trait GraphKind {
     private!();
 }
 
 macro_rules! impl_kind {
-    ($($kind:ident),* $(,)?) => {
+    ($(
+        $vis:vis $itype:ident $kind:ident
+    );* $(;)?) => {
         $(
-            impl_kind!(@impl $kind);
+            impl_kind!(@impl $vis $itype $kind);
         )*
     };
-    (@impl $kind:ident) => {
+    (@impl $vis:vis struct $kind:ident) => {
         #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Ord, PartialOrd)]
         #[cfg_attr(
             feature = "serde",
-            derive(serde_derive::Deserialize, serde_derive::Serialize)
+            derive(serde::Deserialize, serde::Serialize)
         )]
         pub enum $kind {}
 
+        impl_kind!(@kind $kind);
+    };
+    (@impl $vis:vis enum $kind:ident) => {
+        #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Ord, PartialOrd)]
+        #[cfg_attr(
+            feature = "serde",
+            derive(serde::Deserialize, serde::Serialize)
+        )]
+        pub struct $kind;
+
+        impl_kind!(@kind $kind);
+    };
+    (@kind $kind:ident) => {
         impl GraphKind for $kind {
             seal!();
         }
-    }
+    };
 }
 
 impl_kind! {
-    Directed,
-    Undirected,
+    pub enum Directed;
+    pub enum Undirected;
+}
+
+#[derive(
+    Clone,
+    Copy,
+    Debug,
+    Default,
+    Eq,
+    Hash,
+    PartialEq,
+    Ord,
+    PartialOrd,
+    strum::AsRefStr,
+    strum::Display,
+    strum::EnumCount,
+    strum::EnumIs,
+    strum::EnumIter,
+    strum::EnumString,
+    strum::VariantArray,
+    strum::VariantNames,
+)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize, serde::Serialize),
+    serde(rename_all = "snake_case")
+)]
+pub enum GraphKinds {
+    Directed = 1,
+    #[default]
+    Undirected = 0,
+}
+
+impl GraphKind for GraphKinds {
+    seal!();
 }

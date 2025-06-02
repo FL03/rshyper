@@ -59,7 +59,7 @@ fn test_astar_shortest_path() -> rshyper::Result<()> {
 
 #[test]
 fn test_astar_with_heuristic() -> rshyper::Result<()> {
-    let mut graph = HashGraph::<()>::new();
+    let mut graph = HashGraph::<usize, usize>::new();
 
     // Create a simple grid-like graph
     // 0 -- 1 -- 2
@@ -82,20 +82,20 @@ fn test_astar_with_heuristic() -> rshyper::Result<()> {
     }
 
     // Create horizontal connections
-    graph.insert_edge(vec![v0, v1])?;
-    graph.insert_edge(vec![v1, v2])?;
-    graph.insert_edge(vec![v3, v4])?;
-    graph.insert_edge(vec![v4, v5])?;
-    graph.insert_edge(vec![v6, v7])?;
-    graph.insert_edge(vec![v7, v8])?;
+    graph.add_edge(vec![v0, v1])?;
+    graph.add_edge(vec![v1, v2])?;
+    graph.add_edge(vec![v3, v4])?;
+    graph.add_edge(vec![v4, v5])?;
+    graph.add_edge(vec![v6, v7])?;
+    graph.add_edge(vec![v7, v8])?;
 
     // Create vertical connections
-    graph.insert_edge(vec![v0, v3])?;
-    graph.insert_edge(vec![v3, v6])?;
-    graph.insert_edge(vec![v1, v4])?;
-    graph.insert_edge(vec![v4, v7])?;
-    graph.insert_edge(vec![v2, v5])?;
-    graph.insert_edge(vec![v5, v8])?;
+    graph.add_edge(vec![v0, v3])?;
+    graph.add_edge(vec![v3, v6])?;
+    graph.add_edge(vec![v1, v4])?;
+    graph.add_edge(vec![v4, v7])?;
+    graph.add_edge(vec![v2, v5])?;
+    graph.add_edge(vec![v5, v8])?;
 
     // Define positions for each vertex in a 2D grid
     let positions = vec![
@@ -148,18 +148,18 @@ fn test_astar_with_heuristic() -> rshyper::Result<()> {
 
 #[test]
 fn test_astar_disconnected() -> rshyper::Result<()> {
-    let mut graph = HashGraph::<()>::new();
+    let mut graph = HashGraph::<usize, usize>::new();
 
     // Create two disconnected components
     // 0 -- 1    2 -- 3
 
-    let v0 = graph.insert_vertex();
-    let v1 = graph.insert_vertex();
-    let v2 = graph.insert_vertex();
-    let v3 = graph.insert_vertex();
+    let v0 = graph.add_vertex();
+    let v1 = graph.add_vertex();
+    let v2 = graph.add_vertex();
+    let v3 = graph.add_vertex();
 
-    graph.insert_edge(vec![v0, v1])?;
-    graph.insert_edge(vec![v2, v3])?;
+    graph.add_edge(vec![v0, v1])?;
+    graph.add_edge(vec![v2, v3])?;
 
     // Simple heuristic
     let heuristic = |_: VertexId, _: VertexId| -> f64 { 0.0 };
@@ -177,7 +177,7 @@ fn test_astar_disconnected() -> rshyper::Result<()> {
 
 #[test]
 fn test_astar_complex_paths() -> rshyper::Result<()> {
-    let mut graph = HashGraph::<()>::new();
+    let mut graph = HashGraph::<usize, usize>::new();
 
     // Create a graph with multiple paths of different lengths
     // 0 -- 1 -- 2 -- 3
@@ -186,27 +186,27 @@ fn test_astar_complex_paths() -> rshyper::Result<()> {
     // |         /
     // +-- 6 ---+
 
-    let v0 = graph.insert_vertex();
-    let v1 = graph.insert_vertex();
-    let v2 = graph.insert_vertex();
-    let v3 = graph.insert_vertex();
-    let v4 = graph.insert_vertex();
-    let v5 = graph.insert_vertex();
-    let v6 = graph.insert_vertex();
+    let v0 = graph.add_vertex();
+    let v1 = graph.add_vertex();
+    let v2 = graph.add_vertex();
+    let v3 = graph.add_vertex();
+    let v4 = graph.add_vertex();
+    let v5 = graph.add_vertex();
+    let v6 = graph.add_vertex();
 
     // Path 1: v0 -> v1 -> v2 -> v3 (length 3)
-    graph.insert_edge(vec![v0, v1])?;
-    graph.insert_edge(vec![v1, v2])?;
-    graph.insert_edge(vec![v2, v3])?;
+    graph.add_edge(vec![v0, v1])?;
+    graph.add_edge(vec![v1, v2])?;
+    graph.add_edge(vec![v2, v3])?;
 
     // Path 2: v0 -> v4 -> v5 -> v3 (length 3)
-    graph.insert_edge(vec![v0, v4])?;
-    graph.insert_edge(vec![v4, v5])?;
-    graph.insert_edge(vec![v5, v3])?;
+    graph.add_edge(vec![v0, v4])?;
+    graph.add_edge(vec![v4, v5])?;
+    graph.add_edge(vec![v5, v3])?;
 
     // Path 3: v0 -> v6 -> v5 -> v3 (also length 3)
-    graph.insert_edge(vec![v0, v6])?;
-    graph.insert_edge(vec![v6, v5])?;
+    graph.add_edge(vec![v0, v6])?;
+    graph.add_edge(vec![v6, v5])?;
     // v5 -> v3 already defined
 
     // Simple heuristic

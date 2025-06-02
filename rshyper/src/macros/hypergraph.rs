@@ -36,9 +36,9 @@ macro_rules! hyperedge {
         $crate::hyperedge!(@new let $src.$edge = [$($var),*] $(=> $w)?);
     };
     (@new let $src:ident.$edge:ident = [$($var:ident),*]) => {
-        let $edge = $src.insert_edge([$($var),*]).expect("Failed to insert edge");
+        let $edge = $src.add_edge([$($var),*]).expect("Failed to insert edge");
     };
     (@new let $src:ident.$edge:ident = [$($var:ident),*] => $w:expr) => {
-        let $edge = $src.insert_edge_with_weight([$($var),*], $w).expect("Failed to insert edge");
+        let $edge = $src.add_edge_with_weight([$($var),*], $w).expect("Failed to insert edge");
     };
 }

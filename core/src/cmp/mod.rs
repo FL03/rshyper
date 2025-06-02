@@ -24,73 +24,164 @@ pub(crate) mod prelude {
 pub(crate) mod aliases {
     use super::{HyperEdge, HyperFacet};
     use crate::index::VertexId;
+    use crate::{Directed, Undirected};
     #[cfg(feature = "alloc")]
     use alloc::{collections::BTreeSet, vec::Vec};
     #[cfg(feature = "std")]
     use std::collections::HashSet;
+    /// a type alias for a [`HyperEdge`] whose kind is [`Directed`]
+    pub type DirectedEdge<S, Idx = usize> = HyperEdge<S, Directed, Idx>;
+    /// a type alias for an [`Undirected`] [`HyperEdge`]
+    pub type UndirectedEdge<S, Idx = usize> = HyperEdge<S, Undirected, Idx>;
+    /// a type alias for a [`HyperFacet`] with a [`Directed`] edge
+    pub type DirectedFacet<T, S, Idx = usize> = HyperFacet<T, S, Directed, Idx>;
+    /// a type alias for a [`HyperFacet`] with a [`Undirected`] edge
+    pub type UndirectedFacet<T, S, Idx = usize> = HyperFacet<T, S, Undirected, Idx>;
 
-    /// a type alias for a [`HyperEdge`] whose _vertices_ are stored in an array of fixed size
-    /// with the size defined by the generic parameter `N`.
-    pub type FixedEdge<const N: usize, Idx = usize> = HyperEdge<[VertexId<Idx>; N], Idx>;
-    /// a type alias for a [`HyperFacet`] whose _vertices_ are stored in an array of fixed size
-    /// with the size defined by the generic parameter `N`.
-    pub type FixedFacet<T, const N: usize, Idx = usize> = HyperFacet<T, [VertexId<Idx>; N], Idx>;
-    /// a type alias for a [`HyperEdge`] whose _vertices_ are stored in a slice
-    pub type SliceEdge<'a, Idx = usize> = HyperEdge<&'a [VertexId<Idx>], Idx>;
-    /// a type alias for a [`HyperFacet`] whose _vertices_ are stored in a slice
-    pub type SliceFacet<'a, T, Idx = usize> = HyperFacet<T, &'a [VertexId<Idx>], Idx>;
+    /// a type alias for a [`UndirectedEdge`] whose _vertices_ are stored in an array of fixed
+    /// size with the size defined by the generic parameter `N`.
+    pub type UnEdgeFixed<const N: usize, Idx = usize> = UndirectedEdge<[VertexId<Idx>; N], Idx>;
+    /// a type alias for a [`UndirectedFacet`] whose _vertices_ are stored in an array of fixed
+    /// size with the size defined by the generic parameter `N`.
+    pub type UnFacetFixed<T, const N: usize, Idx = usize> =
+        UndirectedFacet<T, [VertexId<Idx>; N], Idx>;
+    /// a type alias for a [`UndirectedEdge`] whose _vertices_ are stored in a slice
+    pub type UnEdgeSlice<'a, Idx = usize> = UndirectedEdge<&'a [VertexId<Idx>], Idx>;
+    /// a type alias for a [`UndirectedFacet`] whose _vertices_ are stored in a slice
+    pub type UnFacetSlice<'a, T, Idx = usize> = UndirectedFacet<T, &'a [VertexId<Idx>], Idx>;
 
-    /// a type alias for an [`HyperEdge`] whose _vertices_ are stored in a [`Vec`]
+    /// a type alias for an [`UndirectedEdge`] whose _vertices_ are stored in a [`Vec`]
     #[cfg(feature = "alloc")]
-    pub type VecEdge<Idx = usize> = HyperEdge<Vec<VertexId<Idx>>, Idx>;
-    /// a type alias for an [`HyperFacet`] whose _vertices_ are stored in a [`Vec`]
+    pub type UnEdgeVec<Idx = usize> = UndirectedEdge<Vec<VertexId<Idx>>, Idx>;
+    /// a type alias for an [`UndirectedFacet`] whose _vertices_ are stored in a [`Vec`]
     #[cfg(feature = "alloc")]
-    pub type VecFacet<T, Idx = usize> = HyperFacet<T, Vec<VertexId<Idx>>, Idx>;
-    /// a type alias for an [`HyperEdge`] whose _vertices_ are stored in a [`BTreeSet`]
+    pub type VecFacet<T, Idx = usize> = UndirectedFacet<T, Vec<VertexId<Idx>>, Idx>;
+    /// a type alias for an [`UndirectedEdge`] whose _vertices_ are stored in a [`BTreeSet`]
     #[cfg(feature = "alloc")]
-    pub type BinaryEdge<Idx = usize> = HyperEdge<BTreeSet<VertexId<Idx>>, Idx>;
-    /// a type alias for an [`HyperFacet`] whose _vertices_ are stored in a [`BTreeSet`]
+    pub type UnEdgeBTree<Idx = usize> = UndirectedEdge<BTreeSet<VertexId<Idx>>, Idx>;
+    /// a type alias for an [`UndirectedFacet`] whose _vertices_ are stored in a [`BTreeSet`]
     #[cfg(feature = "alloc")]
-    pub type BinaryFacet<T, Idx = usize> = HyperFacet<T, BTreeSet<VertexId<Idx>>, Idx>;
-    /// a type alias for an [`HyperEdge`] whose _vertices_ are stored in a [`HashSet`]
+    pub type UnFacetBTree<T, Idx = usize> = UndirectedFacet<T, BTreeSet<VertexId<Idx>>, Idx>;
+    /// a type alias for an [`UndirectedEdge`] whose _vertices_ are stored in a [`HashSet`]
     #[cfg(feature = "std")]
-    pub type HashEdge<Idx = usize> = HyperEdge<HashSet<VertexId<Idx>>, Idx>;
-    /// a type alias for an [`HyperFacet`] whose _vertices_ are stored in a [`HashSet`]
+    pub type UnEdgeHash<Idx = usize> = UndirectedEdge<HashSet<VertexId<Idx>>, Idx>;
+    /// a type alias for an [`UndirectedFacet`] whose _vertices_ are stored in a [`HashSet`]
     #[cfg(feature = "std")]
-    pub type HashFacet<T, Idx = usize> = HyperFacet<T, HashSet<VertexId<Idx>>, Idx>;
+    pub type UnFacetHash<T, Idx = usize> = UndirectedFacet<T, HashSet<VertexId<Idx>>, Idx>;
 }
 
 use crate::index::{RawIndex, VertexId};
 
-/// A trait denoting a node within the hypergraph.
-pub trait Point<Idx: RawIndex> {
-    fn index(&self) -> &VertexId<Idx>;
-}
+/// [`RawEdgeStore`] is a trait that defines the behavior of a store that holds the vertices
+/// associated with a hyperedge or hyperfacet. It is used to abstract over different
+/// implementations of edge storage, such as arrays, vectors, or sets.
+///
+/// **note:** The trait is sealed to prevent external implementations, ensuring that only the
+/// crate can define how edges are stored. This is to maintain consistency and prevent
+/// misuse of the trait in different contexts.
+pub trait RawEdgeStore<Idx = usize>
+where
+    Idx: RawIndex,
+{
+    type Store<_T>: ?Sized;
 
-/// Extends the base [HyperNode] trait with the [`Eq`] and [`Hash`](core::hash::Hash) traits
-/// for use with hash-related structures.
-pub trait HashPoint<Idx: RawIndex>: Point<Idx> + Eq + core::hash::Hash {
     private!();
+
+    /// returns the number of vertices associated with the edge.
+    fn len(&self) -> usize;
+    /// returns true if there are no points.
+    fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }
 
 /*
  ************* Implementations *************
 */
+#[cfg(feature = "alloc")]
+use alloc::{collections::BTreeSet, vec::Vec};
+#[cfg(feature = "std")]
+use std::collections::hash_set;
 
-impl<T, Idx> HashPoint<Idx> for T
+#[cfg(feature = "std")]
+impl<Idx> RawEdgeStore<Idx> for hash_set::HashSet<VertexId<Idx>>
 where
     Idx: RawIndex,
-    T: Point<Idx> + Eq + core::hash::Hash,
 {
+    type Store<_T> = hash_set::HashSet<_T>;
+
     seal!();
+
+    fn len(&self) -> usize {
+        self.len()
+    }
+    fn is_empty(&self) -> bool {
+        self.is_empty()
+    }
 }
 
-impl<T, Idx> Point<Idx> for T
+impl<Idx> RawEdgeStore<Idx> for [VertexId<Idx>]
 where
     Idx: RawIndex,
-    T: core::borrow::Borrow<VertexId<Idx>>,
 {
-    fn index(&self) -> &VertexId<Idx> {
-        self.borrow()
+    type Store<_T> = [VertexId<Idx>];
+
+    seal!();
+
+    fn len(&self) -> usize {
+        self.len()
+    }
+    fn is_empty(&self) -> bool {
+        self.is_empty()
+    }
+}
+
+impl<const N: usize, Idx> RawEdgeStore<Idx> for [VertexId<Idx>; N]
+where
+    Idx: RawIndex,
+{
+    type Store<_T> = [VertexId<Idx>; N];
+
+    seal!();
+
+    fn len(&self) -> usize {
+        N
+    }
+    fn is_empty(&self) -> bool {
+        N == 0
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl<Idx> RawEdgeStore<Idx> for BTreeSet<VertexId<Idx>>
+where
+    Idx: RawIndex,
+{
+    type Store<_T> = BTreeSet<VertexId<Idx>>;
+
+    seal!();
+
+    fn len(&self) -> usize {
+        self.len()
+    }
+    fn is_empty(&self) -> bool {
+        self.is_empty()
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl<Idx> RawEdgeStore<Idx> for Vec<VertexId<Idx>>
+where
+    Idx: RawIndex,
+{
+    type Store<_T> = Vec<VertexId<Idx>>;
+
+    seal!();
+
+    fn len(&self) -> usize {
+        self.len()
+    }
+    fn is_empty(&self) -> bool {
+        self.is_empty()
     }
 }

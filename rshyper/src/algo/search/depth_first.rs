@@ -4,27 +4,30 @@
 */
 use super::{Search, Traversal};
 use crate::hash_graph::HashGraph;
-use crate::index::{HashIndex, NumIndex, VertexId};
+use rshyper_core::GraphKind;
+use rshyper_core::index::{HashIndex, NumIndex, VertexId};
 use std::collections::HashSet;
 
 /// Depth-First Traversal algorithm for hypergraphs
-pub struct DepthFirstTraversal<'a, N, E, Idx = crate::Udx>
+pub struct DepthFirstTraversal<'a, N, E, K, Idx = crate::Udx>
 where
+    K: GraphKind,
     Idx: HashIndex,
 {
-    pub(crate) graph: &'a HashGraph<N, E, Idx>,
+    pub(crate) graph: &'a HashGraph<N, E, K, Idx>,
     pub(crate) stack: Vec<VertexId<Idx>>,
     pub(crate) visited: HashSet<VertexId<Idx>>,
 }
 
-impl<'a, N, E, Idx> DepthFirstTraversal<'a, N, E, Idx>
+impl<'a, N, E, K, Idx> DepthFirstTraversal<'a, N, E, K, Idx>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
+    K: GraphKind,
     Idx: HashIndex,
 {
     /// Create a new DepthFirstTraversal instance
-    pub(crate) fn new(graph: &'a HashGraph<N, E, Idx>) -> Self {
+    pub(crate) fn new(graph: &'a HashGraph<N, E, K, Idx>) -> Self {
         Self {
             graph,
             stack: Vec::new(),
@@ -75,10 +78,11 @@ where
     }
 }
 
-impl<'a, N, E, Idx> Traversal<VertexId<Idx>> for DepthFirstTraversal<'a, N, E, Idx>
+impl<'a, N, E, K, Idx> Traversal<VertexId<Idx>> for DepthFirstTraversal<'a, N, E, K, Idx>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
+    K: GraphKind,
     Idx: HashIndex,
 {
     type Store<I2> = HashSet<I2>;
@@ -92,10 +96,11 @@ where
     }
 }
 
-impl<'a, N, E, Idx> Search<VertexId<Idx>> for DepthFirstTraversal<'a, N, E, Idx>
+impl<'a, N, E, K, Idx> Search<VertexId<Idx>> for DepthFirstTraversal<'a, N, E, K, Idx>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
+    K: GraphKind,
     Idx: NumIndex,
 {
     type Output = Vec<VertexId<Idx>>;

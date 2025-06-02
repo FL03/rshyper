@@ -13,6 +13,8 @@ pub type Result<T = ()> = core::result::Result<T, Error>;
 /// The error type for this crate
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    #[error("No path found between the two points")]
+    PathNotFound,
     #[error("The edge with the given id does not exist")]
     EdgeNotFound,
     #[error("The node with the given id does not exist")]

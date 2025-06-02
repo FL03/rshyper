@@ -8,12 +8,12 @@ use std::hint::black_box;
 
 fn _init() -> HashGraph<&'static str, usize> {
     let mut graph = HashGraph::new();
-    let a = graph.insert_node("A");
-    let b = graph.insert_node("B");
-    let c = graph.insert_node("C");
+    let a = graph.add_node("A");
+    let b = graph.add_node("B");
+    let c = graph.add_node("C");
 
     let _e1 = graph
-        .insert_edge_with_weight([a, b, c], 0)
+        .add_edge_with_weight([a, b, c], 0)
         .expect("Failed to insert edge");
     graph
 }

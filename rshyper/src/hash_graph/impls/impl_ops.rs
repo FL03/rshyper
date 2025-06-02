@@ -2,37 +2,41 @@
     appellation: impl_ops <module>
     authors: @FL03
 */
+use crate::GraphKind;
 use crate::algo::search;
 use crate::hash_graph::HashGraph;
-use rshyper_core::{EdgeId, HashIndex, HyperNode, Udx, VertexId};
+use rshyper_core::{EdgeId, HashIndex, HyperNode, VertexId};
 
 /// implementations for various algorithms and operators on the hypergraph
-impl<N, E> HashGraph<N, E, Udx>
+impl<N, E, K, Idx> HashGraph<N, E, K, Idx>
 where
     N: Eq + core::hash::Hash,
     E: Eq + core::hash::Hash,
+    K: GraphKind,
+    Idx: HashIndex,
 {
     /// search the hypergraph using the A* algorithm with the given heuristic function
-    pub fn astar<F>(&self, heuristic: F) -> search::AStarSearch<'_, N, E, F>
+    pub fn astar<F>(&self, heuristic: F) -> search::AStarSearch<'_, N, E, F, K, Idx>
     where
-        F: search::astar::HeuristicFunc<VertexId<Udx>, Output = f64>,
+        F: search::astar::HeuristicFunc<Idx, Output = f64>,
     {
         search::AStarSearch::new(self, heuristic)
     }
-    /// search the hypergraph using the breadth-first traversal algorithm
-    pub fn bft(&self) -> search::BreadthFirstTraversal<'_, N, E> {
-        search::BreadthFirstTraversal::from_hypergraph(self)
-    }
     /// search the hypergraph using the depth-first traversal algorithm
-    pub fn dft(&self) -> search::DepthFirstTraversal<'_, N, E> {
+    pub fn dft(&self) -> search::DepthFirstTraversal<'_, N, E, K, Idx> {
         search::DepthFirstTraversal::new(self)
+    }
+    /// search the hypergraph using the breadth-first traversal algorithm
+    pub fn bft(&self) -> search::BreadthFirstTraversal<'_, N, E, K, Idx> {
+        search::BreadthFirstTraversal::from_hypergraph(self)
     }
 }
 
-impl<N, E, Idx> core::ops::Index<&EdgeId<Idx>> for HashGraph<N, E, Idx>
+impl<N, E, K, Idx> core::ops::Index<&EdgeId<Idx>> for HashGraph<N, E, K, Idx>
 where
     N: Eq + core::hash::Hash,
     E: Eq + core::hash::Hash,
+    K: GraphKind,
     Idx: HashIndex,
 {
     type Output = E;
@@ -42,10 +46,11 @@ where
     }
 }
 
-impl<N, E, Idx> core::ops::IndexMut<&EdgeId<Idx>> for HashGraph<N, E, Idx>
+impl<N, E, K, Idx> core::ops::IndexMut<&EdgeId<Idx>> for HashGraph<N, E, K, Idx>
 where
     N: Eq + core::hash::Hash,
     E: Eq + core::hash::Hash,
+    K: GraphKind,
     Idx: HashIndex,
 {
     fn index_mut(&mut self, index: &EdgeId<Idx>) -> &mut Self::Output {
@@ -53,10 +58,11 @@ where
     }
 }
 
-impl<N, E, Idx> core::ops::Index<&VertexId<Idx>> for HashGraph<N, E, Idx>
+impl<N, E, K, Idx> core::ops::Index<&VertexId<Idx>> for HashGraph<N, E, K, Idx>
 where
     N: Eq + core::hash::Hash,
     E: Eq + core::hash::Hash,
+    K: GraphKind,
     Idx: HashIndex,
 {
     type Output = HyperNode<N, Idx>;
@@ -66,10 +72,11 @@ where
     }
 }
 
-impl<N, E, Idx> core::ops::IndexMut<&VertexId<Idx>> for HashGraph<N, E, Idx>
+impl<N, E, K, Idx> core::ops::IndexMut<&VertexId<Idx>> for HashGraph<N, E, K, Idx>
 where
     N: Eq + core::hash::Hash,
     E: Eq + core::hash::Hash,
+    K: GraphKind,
     Idx: HashIndex,
 {
     fn index_mut(&mut self, index: &VertexId<Idx>) -> &mut Self::Output {

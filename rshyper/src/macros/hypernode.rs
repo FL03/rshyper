@@ -42,9 +42,9 @@ macro_rules! hypernode {
         $crate::hypernode!(@new $src[$var] $(= $w)?);
     };
     (@new $src:ident[$var:ident] = $w:expr) => {
-        let $var = $src.insert_node($w);
+        let $var = $src.add_node($w);
     };
     (@new $src:ident[$var:ident]) => {
-        let $var = $src.insert_vertex();
+        let $var = $src.add_vertex();
     };
 }
