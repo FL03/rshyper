@@ -6,7 +6,7 @@
 //! Additional type aliases ([`EdgeId`] and [`VertexId`]) are provided for convenience, as well
 //! as traits that define the behaviour of indices in a hypergraph.
 #[doc(inline)]
-pub use self::{aliases::*, error::*, id::IndexBase, kinds::*, position::Position};
+pub use self::{aliases::*, error::*, id::IndexBase, kinds::*, position::IndexCursor};
 
 pub mod error;
 pub mod id;
@@ -23,18 +23,18 @@ mod impls {
 
 pub(crate) mod prelude {
     #[doc(inline)]
+    pub use super::aliases::*;
+    #[doc(inline)]
     pub use super::error::*;
     #[doc(inline)]
     pub use super::id::*;
     #[doc(inline)]
-    pub use super::kinds::*;
-    #[doc(inline)]
     pub use super::position::*;
     #[doc(inline)]
-    pub use super::{HashIndex, Indexed, NumIndex, RawIndex, aliases::*};
+    pub use super::{HashIndex, Indexed, NumIndex, RawIndex};
 }
 
-pub(crate) mod aliases {
+mod aliases {
     use super::{EdgeIndex, IndexBase, VertexIndex};
     /// a type alias for a [`usize`] used to define the default index type throughout the crate.
     pub type Udx = usize;
@@ -58,12 +58,12 @@ pub trait Indexed<T: RawIndex> {
 pub trait RawIndex: 'static + Send + Sync + core::fmt::Debug + core::fmt::Display {
     private!();
 }
-/// The [`StdIndex`] trait extends the [`RawIndex`] trait to include additional operations and
+/// The [`Index`] trait extends the [`RawIndex`] trait to include additional operations and
 /// behaviours commonly expected from indices in a hypergraph.
 ///
 /// **note:** the trait is automatically implemented for all types that implement [`RawIndex`]
 /// alongside traits including: [Clone], [Default], [PartialEq], and [PartialOrd]
-pub trait StdIndex: RawIndex
+pub trait Index: RawIndex
 where
     Self: Clone + Default + PartialEq + PartialOrd,
 {
@@ -74,7 +74,7 @@ where
 /// **note:** the trait is automatically implemented for all types that implement [`Idx`]
 ///  alongside traits including: [Eq] and [Hash](core::hash::Hash)
 /// implementations.
-pub trait HashIndex: StdIndex
+pub trait HashIndex: Index
 where
     Self: Eq + core::hash::Hash,
 {
@@ -118,9 +118,9 @@ where
  ************* Implementations *************
 */
 
-impl<T> StdIndex for T where T: 'static + RawIndex + Clone + Default + PartialEq + PartialOrd {}
+impl<T> Index for T where T: 'static + RawIndex + Clone + Default + PartialEq + PartialOrd {}
 
-impl<T> HashIndex for T where T: StdIndex + Eq + core::hash::Hash {}
+impl<T> HashIndex for T where T: Index + Eq + core::hash::Hash {}
 
 impl<T> NumIndex for T where
     T: HashIndex

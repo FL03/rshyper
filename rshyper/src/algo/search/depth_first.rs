@@ -4,30 +4,28 @@
 */
 use super::{Search, Traversal};
 use crate::hash_graph::HashGraph;
-use rshyper_core::GraphKind;
 use rshyper_core::index::{HashIndex, NumIndex, VertexId};
+use rshyper_core::{GraphKind, HyperGraph};
 use std::collections::HashSet;
 
 /// Depth-First Traversal algorithm for hypergraphs
-pub struct DepthFirstTraversal<'a, N, E, K, Idx = crate::Udx>
+pub struct DepthFirstTraversal<'a, N, E, H>
 where
-    K: GraphKind,
-    Idx: HashIndex,
+    H: HyperGraph<N, E>,
 {
-    pub(crate) graph: &'a HashGraph<N, E, K, Idx>,
-    pub(crate) stack: Vec<VertexId<Idx>>,
-    pub(crate) visited: HashSet<VertexId<Idx>>,
+    pub(crate) graph: &'a H,
+    pub(crate) stack: Vec<VertexId<H::Idx>>,
+    pub(crate) visited: HashSet<VertexId<H::Idx>>,
 }
 
-impl<'a, N, E, K, Idx> DepthFirstTraversal<'a, N, E, K, Idx>
+impl<'a, N, E, H, K, Idx> DepthFirstTraversal<'a, N, E, H>
 where
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
+    H: HyperGraph<N, E, Kind = K, Idx = Idx>,
     K: GraphKind,
     Idx: HashIndex,
 {
     /// Create a new DepthFirstTraversal instance
-    pub(crate) fn new(graph: &'a HashGraph<N, E, K, Idx>) -> Self {
+    pub(crate) fn new(graph: &'a H) -> Self {
         Self {
             graph,
             stack: Vec::new(),
@@ -78,30 +76,29 @@ where
     }
 }
 
-impl<'a, N, E, K, Idx> Traversal<VertexId<Idx>> for DepthFirstTraversal<'a, N, E, K, Idx>
+impl<'a, N, E, H> Traversal<VertexId<H::Idx>> for DepthFirstTraversal<'a, N, E, H>
 where
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
-    K: GraphKind,
-    Idx: HashIndex,
+    H: HyperGraph<N, E>,
+    H::Idx: Eq + core::hash::Hash,
 {
     type Store<I2> = HashSet<I2>;
 
-    fn has_visited(&self, vertex: &VertexId<Idx>) -> bool {
+    fn has_visited(&self, vertex: &VertexId<H::Idx>) -> bool {
         self.visited().contains(vertex)
     }
 
-    fn visited(&self) -> &Self::Store<VertexId<Idx>> {
+    fn visited(&self) -> &Self::Store<VertexId<H::Idx>> {
         &self.visited
     }
 }
 
-impl<'a, N, E, K, Idx> Search<VertexId<Idx>> for DepthFirstTraversal<'a, N, E, K, Idx>
+impl<'a, N, E, K, Idx> Search<VertexId<Idx>>
+    for DepthFirstTraversal<'a, N, E, HashGraph<N, E, K, Idx>>
 where
+    N: Default + Eq + core::hash::Hash,
     E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
     K: GraphKind,
-    Idx: NumIndex,
+    Idx: crate::NumIndex,
 {
     type Output = Vec<VertexId<Idx>>;
 
@@ -133,7 +130,7 @@ where
                     // Add vertices in reverse order to maintain expected DFS behavior
                     let mut new_vertices = vertices
                         .iter()
-                        .filter(|&v| !self.visited.contains(v))
+                        .filter(|&v| !self.has_visited(v))
                         .copied()
                         .collect::<Vec<_>>();
 

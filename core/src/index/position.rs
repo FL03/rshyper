@@ -4,7 +4,7 @@
 */
 use crate::index::{EdgeId, IndexResult, RawIndex, Udx, VertexId};
 
-/// The [`Position`] implementation is uses to track the current indexes of edges and vertices
+/// The [`IndexCursor`] implementation is uses to track the current indexes of edges and vertices
 /// within a hypergraph.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(
@@ -12,7 +12,7 @@ use crate::index::{EdgeId, IndexResult, RawIndex, Udx, VertexId};
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "lowercase")
 )]
-pub struct Position<T = Udx>
+pub struct IndexCursor<T = Udx>
 where
     T: RawIndex,
 {
@@ -20,7 +20,7 @@ where
     pub(crate) vertex: VertexId<T>,
 }
 
-impl<T> Position<T>
+impl<T> IndexCursor<T>
 where
     T: RawIndex,
 {

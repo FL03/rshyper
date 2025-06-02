@@ -5,7 +5,7 @@
 use super::aliases::*;
 
 use rshyper_core::GraphKind;
-use rshyper_core::index::{EdgeId, Position, RawIndex, VertexId};
+use rshyper_core::index::{EdgeId, IndexCursor, RawIndex, VertexId};
 
 pub type DirectedHashGraph<N, E, Idx = usize> = HashGraph<N, E, crate::Directed, Idx>;
 /// a t
@@ -29,7 +29,7 @@ where
     pub(crate) nodes: NodeMap<N, Idx>,
     /// tracks the current position of the hypergraph, which is used to determine the next
     /// available indices for edges and vertices.
-    pub(crate) position: Position<Idx>,
+    pub(crate) position: IndexCursor<Idx>,
     /// the kind of the hypergraph, which can be either directed or undirected
     #[cfg_attr(feature = "serde", serde(skip))]
     pub(crate) _kind: core::marker::PhantomData<K>,
@@ -51,7 +51,7 @@ where
             facets: FacetMap::new(),
             edges: EdgeMap::new(),
             nodes: NodeMap::new(),
-            position: Position::default(),
+            position: IndexCursor::default(),
             _kind: core::marker::PhantomData::<K>,
         }
     }
@@ -64,7 +64,7 @@ where
             facets: FacetMap::with_capacity(edges),
             edges: EdgeMap::with_capacity(edges),
             nodes: NodeMap::with_capacity(nodes),
-            position: Position::default(),
+            position: IndexCursor::default(),
             _kind: core::marker::PhantomData::<K>,
         }
     }
@@ -97,11 +97,11 @@ where
     /// returns a copy of the position of the hypergraph; here, the [`position`](Position) is
     /// used to track the indices (edge & vertex) and define which ones are next to be used
     /// when inserting new hyperedges or vertices
-    pub const fn position(&self) -> &Position<Idx> {
+    pub const fn position(&self) -> &IndexCursor<Idx> {
         &self.position
     }
     /// returns a mutable reference to the current position of the hypergraph;
-    pub fn position_mut(&mut self) -> &mut Position<Idx> {
+    pub fn position_mut(&mut self) -> &mut IndexCursor<Idx> {
         &mut self.position
     }
     /// overrides the current edges and returns a mutable reference to the hypergraph
@@ -133,7 +133,7 @@ where
     }
     /// overrides the current position and returns a mutable reference to the hypergraph
     #[inline]
-    pub fn set_position(&mut self, position: Position<Idx>) -> &mut Self
+    pub fn set_position(&mut self, position: IndexCursor<Idx>) -> &mut Self
     where
         Idx: Default,
     {
@@ -165,7 +165,7 @@ where
         Self { nodes, ..self }
     }
     /// consumes the current instance to create another with the given position
-    pub fn with_position(self, position: Position<Idx>) -> Self
+    pub fn with_position(self, position: IndexCursor<Idx>) -> Self
     where
         Idx: Default,
     {
@@ -271,5 +271,73 @@ where
     pub fn is_undirected(&self) -> bool {
         use core::any::TypeId;
         TypeId::of::<K>() == TypeId::of::<crate::Undirected>()
+    }
+}
+
+use crate::{HyperNode, Weight};
+
+impl<N, E, K, Idx> rshyper_core::RawHyperGraph<N, E> for HashGraph<N, E, K, Idx>
+where
+    N: Eq + core::hash::Hash,
+    E: Eq + core::hash::Hash,
+    K: GraphKind,
+    Idx: RawIndex + Eq + core::hash::Hash,
+{
+    type Idx = Idx;
+    type Kind = K;
+}
+
+impl<N, E, K, Idx> rshyper_core::HyperGraph<N, E> for HashGraph<N, E, K, Idx>
+where
+    N: Eq + core::hash::Hash + Default,
+    E: Eq + core::hash::Hash,
+    K: GraphKind,
+    Idx: crate::NumIndex,
+{
+    fn add_edge<I>(&mut self, iter: I) -> rshyper_core::Result<EdgeId<Self::Idx>>
+    where
+        I: IntoIterator<Item = VertexId<Self::Idx>>,
+    {
+        self.add_edge(iter)
+    }
+
+    fn add_facet(
+        &mut self,
+        index: EdgeId<Self::Idx>,
+        weight: Weight<E>,
+    ) -> crate::Result<Option<Weight<E>>> {
+        self.add_facet(index, weight)
+    }
+
+    fn get_edge_vertices<S>(&self, index: &EdgeId<Self::Idx>) -> crate::Result<S>
+    where
+        for<'a> S: core::iter::FromIterator<&'a VertexId<Self::Idx>>,
+    {
+        self.get_edge_vertices(index)
+            .map(|v| v.iter().collect::<S>())
+    }
+
+    fn add_node(&mut self, weight: N) -> VertexId<Self::Idx> {
+        self.add_node(weight)
+    }
+
+    fn get_node(&self, index: &VertexId<Self::Idx>) -> crate::Result<&HyperNode<N, Self::Idx>> {
+        self.get_node(index)
+    }
+
+    fn get_facet(&self, index: &EdgeId<Self::Idx>) -> crate::Result<&Weight<E>> {
+        self.get_facet(index)
+    }
+
+    fn contains_edge(&self, index: &EdgeId<Self::Idx>) -> bool {
+        self.contains_edge(index)
+    }
+
+    fn contains_facet(&self, index: &EdgeId<Self::Idx>) -> bool {
+        self.contains_facet(index)
+    }
+
+    fn contains_node(&self, index: &VertexId<Self::Idx>) -> bool {
+        self.contains_node(index)
     }
 }

@@ -70,7 +70,8 @@ pub(crate) mod aliases {
     pub type UnFacetHash<T, Idx = usize> = UndirectedFacet<T, HashSet<VertexId<Idx>>, Idx>;
 }
 
-use crate::index::{RawIndex, VertexId};
+use crate::Weight;
+use crate::index::{EdgeId, RawIndex, VertexId};
 
 /// [`RawEdgeStore`] is a trait that defines the behavior of a store that holds the vertices
 /// associated with a hyperedge or hyperfacet. It is used to abstract over different
@@ -94,7 +95,30 @@ where
         self.len() == 0
     }
 }
+pub trait RawNode<T> {
+    type Idx: RawIndex;
 
+    private!();
+
+    /// returns an immutable reference to the node index
+    fn index(&self) -> &VertexId<Self::Idx>;
+    /// returns an immutable reference to the node data
+    fn weight(&self) -> Weight<&T>;
+}
+
+pub trait RawEdge<T> {
+    type Idx: RawIndex;
+    type Points<_T>;
+
+    private!();
+
+    /// returns an immutable reference to the edge index
+    fn index(&self) -> &EdgeId<Self::Idx>;
+    /// Returns an immutable reference to the edge data.
+    fn vertices(&self) -> &Self::Points<VertexId<Self::Idx>>;
+    /// Returns the index of the edge.
+    fn weight(&self) -> Weight<&T>;
+}
 /*
  ************* Implementations *************
 */

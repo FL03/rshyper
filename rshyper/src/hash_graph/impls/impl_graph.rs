@@ -53,18 +53,22 @@ where
         // insert the edge and get its ID
         let index = self.add_edge(vertices)?;
         // insert the facet with the given weight
-        let _prev = self.add_facet(index, weight);
+        let _prev = self.add_facet(index, Weight(weight));
         Ok(index)
     }
     /// add a facet associated with the given edge index
-    pub fn add_facet(&mut self, index: EdgeId<Idx>, facet: E) -> crate::Result<Option<Weight<E>>>
+    pub fn add_facet(
+        &mut self,
+        index: EdgeId<Idx>,
+        facet: Weight<E>,
+    ) -> crate::Result<Option<Weight<E>>>
     where
         Idx: Copy,
     {
         if !self.contains_edge(&index) {
             return Err(crate::Error::EdgeNotFound);
         }
-        let _prev = self.facets_mut().insert(index, Weight(facet));
+        let _prev = self.facets_mut().insert(index, facet);
         Ok(_prev)
     }
     /// add a new node with the given weight and return its index
@@ -365,7 +369,7 @@ where
     where
         Idx: Copy,
     {
-        self.add_facet(index, facet).map(|_| index)
+        self.add_facet(index, Weight(facet)).map(|_| index)
     }
     #[deprecated(note = "use `add_node", since = "0.0.8")]
     /// insert a new node with the given weight and return its index

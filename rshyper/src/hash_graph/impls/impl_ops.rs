@@ -2,10 +2,11 @@
     appellation: impl_ops <module>
     authors: @FL03
 */
-use crate::GraphKind;
 use crate::algo::search;
 use crate::hash_graph::HashGraph;
-use rshyper_core::{EdgeId, HashIndex, HyperNode, VertexId};
+use rshyper_core::GraphKind;
+use rshyper_core::cmp::HyperNode;
+use rshyper_core::index::{EdgeId, HashIndex, NumIndex, VertexId};
 
 /// implementations for various algorithms and operators on the hypergraph
 impl<N, E, K, Idx> HashGraph<N, E, K, Idx>
@@ -23,7 +24,11 @@ where
         search::AStarSearch::new(self, heuristic)
     }
     /// search the hypergraph using the depth-first traversal algorithm
-    pub fn dft(&self) -> search::DepthFirstTraversal<'_, N, E, K, Idx> {
+    pub fn dft(&self) -> search::DepthFirstTraversal<'_, N, E, Self>
+    where
+        N: Default,
+        Idx: NumIndex,
+    {
         search::DepthFirstTraversal::new(self)
     }
     /// search the hypergraph using the breadth-first traversal algorithm

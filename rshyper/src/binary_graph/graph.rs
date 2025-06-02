@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use alloc::collections::{BTreeMap, BTreeSet};
-use rshyper_core::{EdgeId, HyperNode, Position, RawIndex, VertexId};
+use rshyper_core::{EdgeId, HyperNode, IndexCursor, RawIndex, VertexId};
 
 /// a b-tree based hypergraph implementation
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
@@ -19,7 +19,7 @@ where
     pub(crate) connections: BTreeMap<EdgeId<Idx>, BTreeSet<VertexId<Idx>>>,
     pub(crate) facets: BTreeMap<EdgeId<Idx>, E>,
     pub(crate) nodes: BTreeMap<VertexId<Idx>, HyperNode<N, Idx>>,
-    pub(crate) position: Position<Idx>,
+    pub(crate) position: IndexCursor<Idx>,
 }
 
 impl<N, E, Idx> BinaryGraph<N, E, Idx>
@@ -35,7 +35,7 @@ where
             connections: BTreeMap::new(),
             facets: BTreeMap::new(),
             nodes: BTreeMap::new(),
-            position: Position::default(),
+            position: IndexCursor::default(),
         }
     }
     /// returns an immutable reference to the connections map
@@ -63,11 +63,11 @@ where
         &mut self.nodes
     }
     /// returns an immutable reference to the current position in the graph
-    pub const fn position(&self) -> &Position<Idx> {
+    pub const fn position(&self) -> &IndexCursor<Idx> {
         &self.position
     }
     /// returns a mutable reference to the current position in the graph
-    pub fn position_mut(&mut self) -> &mut Position<Idx> {
+    pub fn position_mut(&mut self) -> &mut IndexCursor<Idx> {
         &mut self.position
     }
     /// Returns the number of edges in the graph

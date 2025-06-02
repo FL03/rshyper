@@ -38,5 +38,3 @@ macro_rules! hyperedge {
         let $edge = $src.add_edge_with_weight([$($var),*], $w).expect("Failed to insert edge");
     };
 }
-
-

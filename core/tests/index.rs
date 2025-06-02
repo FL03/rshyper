@@ -3,7 +3,7 @@
     authors: @FL03
 */
 extern crate rshyper_core as rshyper;
-use rshyper::index::{EdgeId, IndexBase, Position, VertexId, VertexIndex};
+use rshyper::index::{EdgeId, IndexBase, IndexCursor, VertexId, VertexIndex};
 
 #[test]
 fn test_index() -> rshyper::Result<()> {
@@ -35,7 +35,7 @@ fn test_vertex_id() -> rshyper::Result<()> {
 
 #[test]
 fn test_position() -> rshyper::Result<()> {
-    let mut index = Position::<usize>::zero();
+    let mut index = IndexCursor::<usize>::zero();
     // create some edge indices
     let e0 = index.next_edge()?;
     let e1 = index.next_edge()?;
