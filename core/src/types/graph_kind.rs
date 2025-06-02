@@ -9,56 +9,7 @@ pub trait GraphKind: 'static + Send + Sync + core::fmt::Debug + core::fmt::Displ
     private!();
 }
 
-macro_rules! impl_kind {
-    ($(
-        $vis:vis $itype:ident $kind:ident
-    );* $(;)?) => {
-        $(
-            impl_kind!(@impl $vis $itype $kind);
-        )*
-    };
-    (@impl $vis:vis struct $kind:ident) => {
-        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Ord, PartialOrd)]
-        #[cfg_attr(
-            feature = "serde",
-            derive(serde::Deserialize, serde::Serialize)
-        )]
-        pub enum $kind {}
-
-        impl_kind!(@kind $kind);
-    };
-    (@impl $vis:vis enum $kind:ident) => {
-        #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Ord, PartialOrd)]
-        #[cfg_attr(
-            feature = "serde",
-            derive(serde::Deserialize, serde::Serialize)
-        )]
-        pub struct $kind;
-
-        impl_kind!(@kind $kind);
-    };
-    (@kind $kind:ident) => {
-        unsafe impl Send for $kind {}
-
-        unsafe impl Sync for $kind {}
-
-        impl ::core::fmt::Display for $kind {
-            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                write!(f, "{}", ::core::any::type_name::<Self>())
-            }
-        }
-
-        impl GraphKind for $kind {
-            seal!();
-        }
-    };
-}
-
-impl_kind! {
-    pub enum Directed;
-    pub enum Undirected;
-}
-
+/// [`GraphKinds`] enumerates the possible graph variants enabling dynamic dispatch features.
 #[derive(
     Clone,
     Copy,
@@ -69,6 +20,7 @@ impl_kind! {
     PartialEq,
     Ord,
     PartialOrd,
+    scsys::VariantConstructors,
     strum::AsRefStr,
     strum::Display,
     strum::EnumCount,
@@ -88,11 +40,61 @@ pub enum GraphKinds {
     #[default]
     Undirected = 0,
 }
+/*
+    ************* Implementations *************
+*/
+macro_rules! impl_kind {
+    ($(
+        $(#[doc$($doc:tt)*])?
+        $vis:vis $itype:ident $kind:ident
+    );* $(;)?) => {
+        $(
+            impl_kind!(@impl $(#[doc $($doc)*])? $vis $itype $kind);
+            impl_kind!(@display $kind);
+            impl_kind!(@impls $kind);
+        )*
+    };
+    (@impl $(#[doc$($doc:tt)*])? $vis:vis struct $kind:ident) => {
+        $(#[doc $($doc)*])?
+        #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Ord, PartialOrd)]
+        #[cfg_attr(
+            feature = "serde",
+            derive(serde::Deserialize, serde::Serialize)
+        )]
+        pub enum $kind {}
+    };
+    (@impl $(#[doc$($doc:tt)*])? $vis:vis enum $kind:ident) => {
+        $(#[doc $($doc)*])?
+        #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Ord, PartialOrd)]
+        #[cfg_attr(
+            feature = "serde",
+            derive(serde::Deserialize, serde::Serialize)
+        )]
+        pub struct $kind;
+    };
+    (@display $kind:ident) => {
+        impl ::core::fmt::Display for $kind {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                write!(f, "{}", ::core::any::type_name::<Self>())
+            }
+        }
+    };
+    (@impls $kind:ident) => {
+        unsafe impl Send for $kind {}
 
-unsafe impl Send for GraphKinds {}
+        unsafe impl Sync for $kind {}
 
-unsafe impl Sync for GraphKinds {}
-
-impl GraphKind for GraphKinds {
-    seal!();
+        impl GraphKind for $kind {
+            seal!();
+        }
+    };
 }
+
+impl_kind! {
+    #[doc = "Directed graph type"]
+    pub enum Directed;
+    #[doc = "Undirected graph type"]
+    pub enum Undirected;
+}
+
+impl_kind!(@impls GraphKinds);
