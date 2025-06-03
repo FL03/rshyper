@@ -6,8 +6,8 @@ use crate::GraphKind;
 use crate::hash_graph::{HashFacet, HashGraph, VertexSet};
 use num_traits::One;
 use rshyper_core::Weight;
-use rshyper_core::cmp::{HyperEdge, HyperFacet, HyperNode};
-use rshyper_core::index::{EdgeId, HashIndex, RawIndex, VertexId};
+use rshyper_core::cmp::{HyperFacet, HyperNode};
+use rshyper_core::index::{EdgeId, RawIndex, VertexId};
 
 impl<N, E, K, Idx> HashGraph<N, E, K, Idx>
 where
@@ -16,35 +16,15 @@ where
     K: GraphKind,
     Idx: Eq + RawIndex + core::hash::Hash,
 {
-    /// add a new hyperedge with the given vertices and return its ID
+    /// add a new hyperedge composed of the given vertices, using the default weight, and
+    /// returns the corresponding id
     pub fn add_edge<I>(&mut self, vertices: I) -> crate::Result<EdgeId<Idx>>
     where
         I: IntoIterator<Item = VertexId<Idx>>,
         Idx: Copy + core::ops::Add<Output = Idx> + One,
         E: Default,
     {
-        // collect the vertices into a HashSet to ensure uniqueness
-        let vset = vertices
-            .into_iter()
-            .map(|v| {
-                // ensure the vertex ID is valid
-                if !self.contains_node(&v) {
-                    return Err(crate::Error::NodeNotFound);
-                }
-                Ok(v)
-            })
-            .filter_map(Result::ok)
-            .collect::<VertexSet<_>>();
-        // fetch the next edge index
-        let eid = self.next_edge_id();
-        // handle the case where the edge has no associated vertices
-        if vset.is_empty() {
-            return Err(crate::Error::EmptyHyperedge);
-        }
-        let edge = HyperEdge::new(eid, vset);
-        // insert the new hyperedge into the adjacency map
-        self.surfaces_mut().insert(eid, edge.into());
-        Ok(eid)
+        self.add_surface(vertices, Weight(E::default()))
     }
     /// add a new hyperedge with the given vertices and weight, returning its ID;
     pub fn add_surface<I>(&mut self, vertices: I, weight: Weight<E>) -> crate::Result<EdgeId<Idx>>
@@ -315,124 +295,5 @@ where
             })
             .ok_or(crate::Error::NodeNotFound)?;
         Ok(self)
-    }
-}
-
-#[allow(deprecated)]
-impl<N, E, K, Idx> HashGraph<N, E, K, Idx>
-where
-    N: Eq + core::hash::Hash,
-    E: Eq + core::hash::Hash,
-    Idx: HashIndex,
-    K: GraphKind,
-{
-
-    #[deprecated(since = "0.9.0", note = "use `remove_surface` instead")]
-    pub fn remove_edge<Q>(&mut self, index: &Q) -> crate::Result<HashFacet<E, K, Idx>>
-    where
-        Q: Eq + core::hash::Hash,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.surfaces_mut()
-            .remove(index)
-            .ok_or(crate::Error::EdgeNotFound)
-    }
-    #[deprecated(since = "0.9.0", note = "use `get_surface` instead")]
-    pub fn get_facet<Q>(&self, index: &Q) -> crate::Result<&Weight<E>>
-    where
-        Q: Eq + core::hash::Hash,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.facets()
-            .get(index)
-            .ok_or_else(|| crate::Error::EdgeNotFound)
-    }
-    #[deprecated(since = "0.9.0", note = "use `get_surface_mut` instead")]
-    pub fn get_facet_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut Weight<E>>
-    where
-        Q: Eq + core::hash::Hash,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.facets_mut()
-            .get_mut(index)
-            .ok_or_else(|| crate::Error::EdgeNotFound)
-    }
-    #[deprecated(since = "0.9.0", note = "use `add_surface` instead")]
-    /// add a facet associated with the given edge index
-    pub fn add_facet(
-        &mut self,
-        index: EdgeId<Idx>,
-        facet: Weight<E>,
-    ) -> crate::Result<Option<Weight<E>>>
-    where
-        Idx: Copy,
-    {
-        if !self.contains_surface(&index) {
-            return Err(crate::Error::EdgeNotFound);
-        }
-        let _prev = self.facets_mut().insert(index, facet);
-        Ok(_prev)
-    }
-
-    #[deprecated(note = "use `add_edge")]
-    /// add a new hyperedge with the given vertices and return its ID
-    pub fn insert_edge<I>(&mut self, vertices: I) -> crate::Result<EdgeId<Idx>>
-    where
-        I: IntoIterator<Item = VertexId<Idx>>,
-        Idx: Copy + core::ops::Add<Output = Idx> + One,
-        E: Default,
-    {
-        self.add_edge(vertices)
-    }
-    #[deprecated(note = "use `add_edge_with_weight", since = "0.0.8")]
-    /// insert a new hyperedge with the given vertices and weight, returning its ID;
-    pub fn insert_edge_with_weight<I>(
-        &mut self,
-        vertices: I,
-        weight: E,
-    ) -> crate::Result<EdgeId<Idx>>
-    where
-        I: Clone + IntoIterator<Item = VertexId<Idx>>,
-        E: Eq + core::hash::Hash,
-        Idx: Copy + core::ops::Add<Output = Idx> + One,
-    {
-        self.add_surface(vertices, Weight(weight))
-    }
-    #[deprecated(note = "use `add_surface", since = "0.0.9")]
-    /// add a new hyperedge with the given vertices and weight, returning its ID;
-    pub fn add_edge_with_weight<I>(&mut self, vertices: I, weight: E) -> crate::Result<EdgeId<Idx>>
-    where
-        I: Clone + IntoIterator<Item = VertexId<Idx>>,
-        E: Eq + core::hash::Hash,
-        Idx: Copy + core::ops::Add<Output = Idx> + One,
-    {
-        // insert the edge and get its ID
-        let index = self.add_surface(vertices, Weight(weight))?;
-        Ok(index)
-    }
-    #[deprecated(note = "use `add_surface", since = "0.0.8")]
-    /// insert a facet associated with the given edge index
-    pub fn insert_facet(&mut self, index: EdgeId<Idx>, facet: E) -> crate::Result<EdgeId<Idx>>
-    where
-        Idx: Copy,
-    {
-        self.add_facet(index, Weight(facet)).map(|_| index)
-    }
-    #[deprecated(note = "use `add_node", since = "0.0.8")]
-    /// insert a new node with the given weight and return its index
-    pub fn insert_node(&mut self, weight: N) -> VertexId<Idx>
-    where
-        Idx: Copy + core::ops::Add<Output = Idx> + One,
-    {
-        self.add_node(weight)
-    }
-    #[deprecated(note = "use `add_vertex", since = "0.0.8")]
-    /// insert a new vertex with the default weight and return its ID
-    pub fn insert_vertex(&mut self) -> VertexId<Idx>
-    where
-        N: Default,
-        Idx: Copy + core::ops::Add<Output = Idx> + One,
-    {
-        self.add_vertex()
     }
 }

@@ -19,11 +19,6 @@ where
     Idx: Eq + RawIndex + core::hash::Hash,
     K: GraphKind,
 {
-    /// the `edges` of a hypergraph is a map associating hyperedges (identified by `EdgeId`) to
-    /// sets of vertices (identified by `VertexId`).
-    pub(crate) edges: EdgeMap<Idx>,
-    /// the `facets` of a hypergraph materializes hyperedges by associating them with a weight
-    pub(crate) facets: FacetMap<Idx, E>,
     /// the `nodes` of a hypergraph are the vertices, each identified by a `VertexId` and
     /// associated with a weight of type `N`.
     pub(crate) nodes: NodeMap<N, Idx>,
@@ -52,8 +47,6 @@ where
     {
         HashGraph {
             surfaces: HyperFacetMap::new(),
-            facets: FacetMap::new(),
-            edges: EdgeMap::new(),
             nodes: NodeMap::new(),
             position: IndexCursor::default(),
             _kind: core::marker::PhantomData::<K>,
@@ -66,8 +59,6 @@ where
     {
         HashGraph {
             surfaces: HyperFacetMap::with_capacity(edges),
-            facets: FacetMap::with_capacity(edges),
-            edges: EdgeMap::with_capacity(edges),
             nodes: NodeMap::with_capacity(nodes),
             position: IndexCursor::default(),
             _kind: core::marker::PhantomData::<K>,
@@ -215,130 +206,6 @@ where
     }
 }
 
-#[allow(deprecated)]
-impl<N, E, K, Idx> HashGraph<N, E, K, Idx>
-where
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
-    K: GraphKind,
-    Idx: Eq + RawIndex + core::hash::Hash,
-{
-    #[deprecated(
-        since = "0.0.9",
-        note = "use `surfaces` instead; the `edges` & `facets` maps are being combined "
-    )]
-    /// returns an immutable reference to the edges of the hypergraph; a mapping of edges to vertices essentially forming a topological space
-    /// that enables the data-structure to be traversed, analyzed, and manipulated.
-    pub const fn edges(&self) -> &EdgeMap<Idx> {
-        &self.edges
-    }
-    #[deprecated(
-        since = "0.0.9",
-        note = "use `surfaces_mut` instead; the `edges` & `facets` maps are being combined "
-    )]
-    /// returns a mutable reference to the hyperedges
-    pub const fn edges_mut(&mut self) -> &mut EdgeMap<Idx> {
-        &mut self.edges
-    }
-    #[deprecated(
-        since = "0.0.9",
-        note = "use `surfaces` instead; the `edges` & `facets` maps are being combined "
-    )]
-    /// returns an immutable reference to the facets of the hypergraph; here, a facet is a
-    /// hyperedge with an associated weight
-    pub const fn facets(&self) -> &FacetMap<Idx, E> {
-        &self.facets
-    }
-    #[deprecated(
-        since = "0.0.9",
-        note = "use `surfaces_mut` instead; the `edges` & `facets` maps are being combined "
-    )]
-    /// returns a mutable reference to the edges, or facets, of the hypergraph
-    pub const fn facets_mut(&mut self) -> &mut FacetMap<Idx, E> {
-        &mut self.facets
-    }
-    #[deprecated(
-        since = "0.0.9",
-        note = "use `surfaces_mut` instead; the `edges` & `facets` maps are being combined "
-    )]
-    /// overrides the current edges and returns a mutable reference to the hypergraph
-    #[inline]
-    pub fn set_edges(&mut self, edges: EdgeMap<Idx>) -> &mut Self
-    where
-        Idx: Default,
-    {
-        self.edges = edges;
-        self
-    }
-    #[deprecated(
-        since = "0.0.9",
-        note = "use `surfaces_mut` instead; the `edges` & `facets` maps are being combined "
-    )]
-    /// overrides the current facets and returns a mutable reference to the hypergraph
-    #[inline]
-    pub fn set_facets(&mut self, facets: FacetMap<Idx, E>) -> &mut Self
-    where
-        Idx: Default,
-    {
-        self.facets = facets;
-        self
-    }
-    #[deprecated(since = "0.9.0", note = "use `contains_surface` instead")]
-    /// returns true if the hypergraph contains an edge with the given index;
-    pub fn contains_edge<Q>(&self, index: &Q) -> bool
-    where
-        Q: Eq + core::hash::Hash,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.surfaces().contains_key(index)
-    }
-    #[deprecated(since = "0.9.0", note = "use `contains_surface` instead")]
-    /// check if a facet with the given id exists; this method is a little heavier since it
-    /// checks both the facets and edges fields to ensure the index points to a valid facet.
-    pub fn contains_facet<Q>(&self, index: &Q) -> bool
-    where
-        Q: Eq + core::hash::Hash,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.facets().contains_key(index) && self.surfaces().contains_key(index)
-    }
-    #[deprecated(since = "0.9.0", note = "use `surface` instead")]
-    /// returns an [`Entry`](std::collections::hash_map::Entry) for the edge with the given
-    /// index, allowing for modifications or insertions to the mapping
-    pub fn edge(&mut self, index: EdgeId<Idx>) -> EdgeEntry<'_, Idx> {
-        self.edges_mut().entry(index)
-    }
-    #[deprecated(since = "0.9.0", note = "use `surface` instead")]
-    /// returns an [`Entry`](std::collections::hash_map::Entry) for the weight of the edge with
-    /// the given index, allowing for modifications or insertions to the mapping
-    pub fn facet(&mut self, index: EdgeId<Idx>) -> FacetEntry<'_, E, Idx> {
-        self.facets_mut().entry(index)
-    }
-    #[deprecated(since = "0.9.0", note = "use `surface_iter` instead")]
-    /// returns an iterator over the edges of the hypergraph, yielding pairs of [`EdgeId`] and
-    /// the corresponding [`VertexSet`].
-    pub fn edge_iter(&self) -> super::iter::EdgeIter<'_, Idx> {
-        super::iter::EdgeIter {
-            iter: self.edges().iter(),
-        }
-    }
-    #[deprecated(since = "0.9.0", note = "use `surface_iter` instead")]
-    /// returns an iterator over the facets of the hypergraph, yielding pairs of [`EdgeId`] and
-    /// the corresponding weight `E`.
-    pub fn facet_iter(&self) -> super::iter::FacetIter<'_, E, Idx> {
-        super::iter::FacetIter {
-            iter: self.facets().iter(),
-        }
-    }
-    #[deprecated(since = "0.9.0", note = "use `with_surfaces` instead")]
-    #[inline]
-    pub fn with_facets(self, facets: FacetMap<Idx, E>) -> Self
-    where
-        Idx: Default,
-    {
-        Self { facets, ..self }
-    }
-}
 
 use rshyper_core::{HyperGraph, HyperNode, RawHyperGraph, Weight};
 
