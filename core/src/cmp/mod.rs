@@ -140,7 +140,10 @@ pub trait RawNode<T> {
         core::mem::swap(self.weight_mut(), weight)
     }
     /// [`take`](core::mem::take) the weight of the node, replacing it with a default value
-    fn take_weight(&mut self) -> Weight<T> where T: Default {
+    fn take_weight(&mut self) -> Weight<T>
+    where
+        T: Default,
+    {
         core::mem::take(self.weight_mut())
     }
 }
@@ -180,7 +183,10 @@ pub trait RawFacet<T>: RawEdge {
         core::mem::swap(self.weight_mut(), weight)
     }
     /// [`take`](core::mem::take) the weight of the edge, replacing it with a default value
-    fn take_weight(&mut self) -> Weight<T> where T: Default {
+    fn take_weight(&mut self) -> Weight<T>
+    where
+        T: Default,
+    {
         core::mem::take(self.weight_mut())
     }
 }

@@ -2,9 +2,9 @@
     appellation: impl_repr <module>
     authors: @FL03
 */
-use crate::GraphKind;
 use crate::hash_graph::{DirectedHashGraph, HashGraph, UndirectedHashGraph};
 use crate::index::{NumIndex, RawIndex, VertexId};
+use crate::{GraphKind, HyperGraphAttributes};
 
 impl<N, E, Idx> DirectedHashGraph<N, E, Idx>
 where
@@ -35,11 +35,12 @@ where
     }
 }
 
-impl<E, K, Idx> HashGraph<(), E, K, Idx>
+impl<E, K, Idx, A> HashGraph<(), E, A>
 where
     E: Eq + core::hash::Hash,
-    Idx: NumIndex,
+    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
+    Idx: NumIndex,
 {
     pub fn insert_empty_node(&mut self) -> VertexId<Idx>
     where
@@ -49,12 +50,13 @@ where
     }
 }
 
-impl<N, E, K, Idx> HashGraph<Option<N>, E, K, Idx>
+impl<N, E, K, Idx, A> HashGraph<Option<N>, E, A>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
-    Idx: NumIndex,
+    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
+    Idx: NumIndex,
 {
     /// insert [`Some`] vertex with weight `T` and return its ID
     pub fn insert_some_node(&mut self, weight: N) -> VertexId<Idx> {

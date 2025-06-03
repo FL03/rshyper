@@ -13,6 +13,8 @@ mod impls {
     pub mod impl_graph;
     pub mod impl_ops;
     pub mod impl_repr;
+    #[cfg(feature = "serde")]
+    pub mod impl_serde;
 }
 
 pub(crate) mod prelude {

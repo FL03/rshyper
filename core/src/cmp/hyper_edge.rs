@@ -49,7 +49,7 @@ where
 }
 
 /*
-    ************* Implementations *************
+ ************* Implementations *************
 */
 use super::{RawEdge, RawFacet};
 

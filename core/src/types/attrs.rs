@@ -6,68 +6,93 @@ use crate::GraphKind;
 use crate::index::RawIndex;
 use core::marker::PhantomData;
 
-pub trait HyperGraphAttributes {
+/// a type alias for a [directed](crate::Directed) [`GraphAttributes`]
+pub type DirectedAttributes<Idx> = GraphAttributes<Idx, crate::Directed>;
+/// a type alias for an [undirected](crate::Undirected) [`GraphAttributes`]
+pub type UndirectedAttributes<Idx> = GraphAttributes<Idx, crate::Undirected>;
+
+pub trait HyperGraphAttributes: 'static + Send + Sync + core::fmt::Debug {
     type Idx: RawIndex;
     type Kind: GraphKind;
 }
+
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize, serde::Serialize),
     serde(default, rename_all = "snake_case")
 )]
-pub struct Attr<A>
+pub struct GraphAttributes<Idx, K>
 where
-    A: HyperGraphAttributes,
+    Idx: RawIndex,
+    K: GraphKind,
 {
-    pub idx: PhantomData<A::Idx>,
-    pub kind: PhantomData<A::Kind>,
+    pub idx: PhantomData<Idx>,
+    pub kind: PhantomData<K>,
 }
 
-impl<A, I, K> Attr<A>
+impl<I, K> GraphAttributes<I, K>
 where
-    A: HyperGraphAttributes<Idx = I, Kind = K>,
     I: RawIndex,
     K: GraphKind,
 {
     pub fn new() -> Self {
-        Attr {
+        GraphAttributes {
             idx: PhantomData::<I>,
             kind: PhantomData::<K>,
         }
     }
+
+    pub fn with_kind<K2>(self) -> GraphAttributes<I, K2>
+    where
+        K2: GraphKind,
+    {
+        GraphAttributes {
+            idx: self.idx,
+            kind: PhantomData::<K2>,
+        }
+    }
+
+    pub fn with_idx<I2>(self) -> GraphAttributes<I2, K>
+    where
+        I2: RawIndex,
+    {
+        GraphAttributes {
+            idx: PhantomData::<I2>,
+            kind: self.kind,
+        }
+    }
 }
 
-impl<A, I> Attr<A>
+impl<I> GraphAttributes<I, crate::Directed>
 where
-    A: HyperGraphAttributes<Idx = I, Kind = crate::Directed>,
     I: RawIndex,
 {
     pub fn directed() -> Self {
-        Attr {
+        GraphAttributes {
             idx: PhantomData::<I>,
             kind: PhantomData::<crate::Directed>,
         }
     }
 }
 
-impl<A, I> Attr<A>
+impl<I> GraphAttributes<I, crate::Undirected>
 where
-    A: HyperGraphAttributes<Idx = I, Kind = crate::Undirected>,
     I: RawIndex,
 {
     pub fn undirected() -> Self {
-        Attr {
+        GraphAttributes {
             idx: PhantomData::<I>,
             kind: PhantomData::<crate::Undirected>,
         }
     }
 }
 
-impl<A> HyperGraphAttributes for Attr<A>
+impl<I, K> HyperGraphAttributes for GraphAttributes<I, K>
 where
-    A: HyperGraphAttributes,
+    I: RawIndex,
+    K: GraphKind,
 {
-    type Idx = A::Idx;
-    type Kind = A::Kind;
+    type Idx = I;
+    type Kind = K;
 }

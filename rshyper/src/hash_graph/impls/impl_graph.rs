@@ -2,17 +2,18 @@
     appellation: impl_graph <module>
     authors: @FL03
 */
-use crate::GraphKind;
 use crate::hash_graph::{HashFacet, HashGraph, VertexSet};
+use crate::{GraphKind, HyperGraphAttributes};
 use num_traits::One;
 use rshyper_core::Weight;
 use rshyper_core::cmp::{HyperFacet, HyperNode};
 use rshyper_core::index::{EdgeId, RawIndex, VertexId};
 
-impl<N, E, K, Idx> HashGraph<N, E, K, Idx>
+impl<N, E, K, Idx, A> HashGraph<N, E, A>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
+    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
     Idx: Eq + RawIndex + core::hash::Hash,
 {
