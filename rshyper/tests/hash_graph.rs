@@ -61,7 +61,7 @@ fn test_merge_hash_edge() -> rshyper::Result<()> {
     let v2 = graph.add_node(30);
 
     let e1 = graph.add_surface(vec![v0, v1], Weight(10))?;
-    let e2 = graph.add_surface(vec![v1, v2], Weight(10))?;
+    let e2 = graph.add_surface(vec![v1, v2], Weight(20))?;
 
     let merged = graph.merge_edges(&e1, &e2)?;
     let hyperedge = graph.remove_surface(&merged)?;
