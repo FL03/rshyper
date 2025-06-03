@@ -16,13 +16,13 @@ fn main() -> rshyper::Result<()> {
     // use the macro to insert nodes into the graph
     rshyper::hypergraph! {
         graph {
-            nodes {
+            nodes: {
                 let v0;
                 let v1 = 2;
                 let v2 = 3;
                 let v3 = 4;
             };
-            edges {
+            edges: {
                 let e0: [v0, v1, v2] = 10;
                 let e1: [v1, v2, v3];
                 let e2: [v2, v3];

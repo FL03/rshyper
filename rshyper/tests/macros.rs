@@ -11,14 +11,14 @@ fn test_macro_for_hash_graph() -> rshyper::Result<()> {
 
     rshyper::hypergraph! {
         graph {
-            nodes {
+            nodes: {
                 let v0;
                 let v1 = 10;
                 let v2 = 20;
                 let v3 = 30;
 
             };
-            edges {
+            edges: {
                 let e1: [v0, v1, v2];
                 let e2: [v1, v2, v3];
             };

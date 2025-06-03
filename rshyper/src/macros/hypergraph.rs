@@ -3,14 +3,40 @@
     authors: @FL03
 */
 /// the [`hypergraph`] macro works to aide the in the creation of hypergraphs by allowing
-/// users to define nodes in a more structured way.
+/// users to define nodes and edges in a hypergraph in a more declarative way.
+///
+/// ## Example
+///
+/// ### Basic Usage
+///
+/// The `hypergraph` macro allows you to define nodes and edges in a hypergraph
+///
+/// ```rust
+/// use rshyper::HashGraph;
+/// // initialize a new undirected hypergraph
+/// let mut graph = HashGraph::<usize, usize>::undirected();
+/// // use the macro to insert nodes and edges into the graph
+/// rshyper::hypergraph! {
+///     graph {
+///         nodes: {
+///             let v0;
+///             let v1;
+///             let v2 = 10;
+///         };
+///         edges: {
+///             let e0: [v0, v1];
+///             let e1: [v0, v1, v2] = 10;
+///         };
+///     }
+/// }
+/// ```
 #[cfg(feature = "std")]
 #[macro_export]
 macro_rules! hypergraph {
     (
         $graph:ident {
-            nodes {$($nodes:tt)*};
-            edges {$($edges:tt)*};
+            nodes: {$($nodes:tt)*};
+            edges: {$($edges:tt)*};
         }
 
     ) => {
