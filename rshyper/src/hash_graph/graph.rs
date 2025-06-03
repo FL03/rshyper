@@ -28,7 +28,7 @@ where
     /// tracks the current position of the hypergraph, which is used to determine the next
     /// available indices for edges and vertices.
     pub(crate) position: IndexCursor<A::Idx>,
-    /// the kind of the hypergraph, which can be either directed or undirected
+    /// the attributes of a graph define its _kind_ and the type of index used
     pub(crate) _attrs: core::marker::PhantomData<A>,
 }
 
