@@ -60,8 +60,8 @@ fn test_merge_hash_edge() -> rshyper::Result<()> {
     let v1 = graph.add_node(20);
     let v2 = graph.add_node(30);
 
-    let e1 = graph.add_edge(vec![v0, v1])?;
-    let e2 = graph.add_edge(vec![v1, v2])?;
+    let e1 = graph.add_surface(vec![v0, v1], Weight(10))?;
+    let e2 = graph.add_surface(vec![v1, v2], Weight(10))?;
 
     let merged = graph.merge_edges(&e1, &e2)?;
     let hyperedge = graph.remove_surface(&merged)?;
@@ -70,7 +70,7 @@ fn test_merge_hash_edge() -> rshyper::Result<()> {
             && hyperedge.contains_vertex(&v1)
             && hyperedge.contains_vertex(&v2)
     );
-    assert_eq!(hyperedge.weight(), &0);
+    assert_eq!(hyperedge.weight(), &30);
     Ok(())
 }
 
