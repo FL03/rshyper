@@ -55,7 +55,8 @@ lazy_static = { workspace = true }
 tracing-subscriber = { features = ["ansi", "chrono", "serde", "std"], workspace = true }
 
 [features]
-default = [ 
+default = [
+    "macros",
     "std",
     "binary_graph",
     "hash_graph",
@@ -79,6 +80,8 @@ binary_graph = [
 hash_graph = [
     "std"
 ]
+
+macros = []
 
 # ************* [FF:Environments] *************
 std = [
@@ -190,3 +193,7 @@ required-features = ["default"]
 [[test]]
 name = "hash_graph"
 required-features = ["default"]
+
+[[test]]
+name = "macros"
+required-features = ["alloc", "macros"]

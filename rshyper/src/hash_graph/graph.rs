@@ -15,7 +15,7 @@ pub type UndirectedHashGraph<N, E, Idx = usize> = HashGraph<N, E, crate::Undirec
 
 /// A hash-based hypergraph implementation
 #[derive(Clone, Debug, Default)]
-pub struct HashGraph<N, E, A>
+pub struct HashGraph<N = (), E = (), A = crate::UndirectedAttributes<usize>>
 where
     A: HyperGraphAttributes,
     A::Idx: Eq + core::hash::Hash,

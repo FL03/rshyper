@@ -3,25 +3,39 @@
     Contrib: @FL03
 */
 use rshyper::Weight;
-use rshyper::hash_graph::UndirectedHashGraph as HyperGraph;
+use rshyper::hash_graph::HashGraph;
 use std::collections::HashSet;
 
 #[test]
+fn test_hash_graph_error() -> rshyper::Result<()> {
+    let mut graph = HashGraph::<usize, usize>::undirected();
+
+    let e1 = graph.add_edge([]);
+    assert!(e1.is_err(), "Adding an empty edge should return an error");
+    // return
+    Ok(())
+}
+
+#[test]
 fn test_hash_graph() -> rshyper::Result<()> {
-    let mut graph = HyperGraph::<usize, usize>::undirected();
+    let mut graph = HashGraph::<usize, usize>::undirected();
 
-    // Add some vertices
-    let v0 = graph.add_vertex();
-    let v1 = graph.add_vertex();
-    let v2 = graph.add_vertex();
-    let v3 = graph.add_vertex();
+    // use the macro to add some nodes & edges
+    let v0 = graph.add_node(10);
+    let v1 = graph.add_node(20);
+    let v2 = graph.add_node(30);
+    let v3 = graph.add_node(40);
+    // add some edges
+    let _e1 = graph.add_edge(vec![v0, v1])?;
+    let e2 = graph.add_edge(vec![v0, v1, v2])?;
+    let e3 = graph.add_edge(vec![v1, v2, v3])?;
 
-    // Add some hyperedges
-    let e1 = graph.add_edge([v0, v1, v2])?;
-    assert_eq!(graph.find_order_of_edge(&e1)?, 3);
-    let e2 = graph.add_edge(vec![v1, v2, v3])?;
-    assert_eq!(graph.find_order_of_edge(&e2)?, 3);
-    assert_ne!(e1, e2);
+    // the order of both edges should be equivalent
+    assert_eq!(
+        graph.find_order_of_edge(&e2)?,
+        graph.find_order_of_edge(&e3)?
+    );
+    assert_ne!(e2, e3);
 
     // Get neighbors of vertex v1
     let neighbors = graph.neighbors(&v1)?;
@@ -41,7 +55,7 @@ fn test_hash_graph() -> rshyper::Result<()> {
 
 #[test]
 fn test_merge_hash_edge() -> rshyper::Result<()> {
-    let mut graph = HyperGraph::<usize, usize>::undirected();
+    let mut graph = HashGraph::<usize, usize>::undirected();
     let v0 = graph.add_node(10);
     let v1 = graph.add_node(20);
     let v2 = graph.add_node(30);
@@ -61,7 +75,7 @@ fn test_merge_hash_edge() -> rshyper::Result<()> {
 
 #[test]
 fn test_update_hash_node() -> rshyper::Result<()> {
-    let mut graph = HyperGraph::<usize, usize>::undirected();
+    let mut graph = HashGraph::<usize, usize>::undirected();
     let v0 = graph.add_node(42);
 
     // Check initial weight
@@ -78,7 +92,7 @@ fn test_update_hash_node() -> rshyper::Result<()> {
 
 #[test]
 fn test_remove_hash_edges() -> rshyper::Result<()> {
-    let mut graph = HyperGraph::<usize, usize>::undirected();
+    let mut graph = HashGraph::<usize, usize>::undirected();
     let v0 = graph.add_node(10);
     let v1 = graph.add_node(20);
     let v2 = graph.add_node(30);
