@@ -220,8 +220,6 @@ where
 
 use rshyper_core::{HyperGraph, HyperNode, RawHyperGraph, Weight};
 
-#[cfg(feature = "serde")]
-
 impl<N, E, K, Idx, A> RawHyperGraph<N, E> for HashGraph<N, E, A>
 where
     E: Eq + core::hash::Hash,
