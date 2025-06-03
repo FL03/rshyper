@@ -9,8 +9,8 @@ pub(crate) mod priority_node;
 
 use super::{Search, Traversal};
 use crate::hash_graph::{HashGraph, VertexSet};
-use rshyper_core::GraphKind;
 use rshyper_core::index::{NumIndex, RawIndex, VertexId};
+use rshyper_core::{GraphKind, HyperGraphAttributes};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 
 /// A simple trait defining a common interface for heuristic functions compatible with the
@@ -34,31 +34,32 @@ where
 }
 
 /// A* Search algorithm for hypergraphs
-pub struct AStarSearch<'a, N, E, F, K, Idx>
+pub struct AStarSearch<'a, N, E, A, F>
 where
-    F: HeuristicFunc<Idx>,
-    K: GraphKind,
-    Idx: RawIndex + Eq + core::hash::Hash,
+    F: HeuristicFunc<A::Idx>,
+    A: HyperGraphAttributes,
+    A::Idx: Eq + core::hash::Hash,
 {
-    pub(crate) graph: &'a HashGraph<N, E, K, Idx>,
-    pub(crate) open_set: VertexSet<Idx>,
-    pub(crate) closed_set: VertexSet<Idx>,
-    pub(crate) came_from: HashMap<VertexId<Idx>, VertexId<Idx>>,
-    pub(crate) g_score: HashMap<VertexId<Idx>, F::Output>,
-    pub(crate) f_score: HashMap<VertexId<Idx>, F::Output>,
+    pub(crate) graph: &'a HashGraph<N, E, A>,
+    pub(crate) open_set: VertexSet<A::Idx>,
+    pub(crate) closed_set: VertexSet<A::Idx>,
+    pub(crate) came_from: HashMap<VertexId<A::Idx>, VertexId<A::Idx>>,
+    pub(crate) g_score: HashMap<VertexId<A::Idx>, F::Output>,
+    pub(crate) f_score: HashMap<VertexId<A::Idx>, F::Output>,
     pub(crate) heuristic: F,
 }
 
-impl<'a, N, E, F, K, Idx> AStarSearch<'a, N, E, F, K, Idx>
+impl<'a, N, E, A, F, K, Idx> AStarSearch<'a, N, E, A, F>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
+    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
     F: HeuristicFunc<Idx>,
     K: GraphKind,
     Idx: RawIndex + Eq + core::hash::Hash,
 {
     /// Create a new A* search instance with the given heuristic function
-    pub fn new(graph: &'a HashGraph<N, E, K, Idx>, heuristic: F) -> Self {
+    pub fn new(graph: &'a HashGraph<N, E, A>, heuristic: F) -> Self {
         Self {
             graph,
             open_set: VertexSet::new(),
@@ -71,7 +72,7 @@ where
     }
     /// consumes the current instance to create another from the given heuristic function;
     /// **note:** while the functions may be different, the output type of both must match.
-    pub fn with_heuristic<G>(self, heuristic: G) -> AStarSearch<'a, N, E, G, K, Idx>
+    pub fn with_heuristic<G>(self, heuristic: G) -> AStarSearch<'a, N, E, A, G>
     where
         G: HeuristicFunc<Idx, Output = F::Output>,
     {
@@ -191,8 +192,9 @@ where
     }
 }
 
-impl<'a, N, E, F, K, Idx> AStarSearch<'a, N, E, F, K, Idx>
+impl<'a, N, E, F, A, K, Idx> AStarSearch<'a, N, E, A, F>
 where
+    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
     F: HeuristicFunc<Idx, Output = f64>,
@@ -323,29 +325,30 @@ where
     }
 }
 
-impl<'a, N, E, F, K, Idx> Traversal<VertexId<Idx>> for AStarSearch<'a, N, E, F, K, Idx>
+impl<'a, N, E, F, A> Traversal<VertexId<A::Idx>> for AStarSearch<'a, N, E, A, F>
 where
+    A: HyperGraphAttributes,
+    A::Idx: Eq + core::hash::Hash,
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
-    F: HeuristicFunc<Idx, Output = f64>,
-    K: GraphKind,
-    Idx: RawIndex + Eq + core::hash::Hash,
+    F: HeuristicFunc<A::Idx, Output = f64>,
 {
     type Store<U> = HashSet<U>;
 
-    fn has_visited(&self, vertex: &VertexId<Idx>) -> bool {
+    fn has_visited(&self, vertex: &VertexId<A::Idx>) -> bool {
         self.visited().contains(vertex)
     }
 
-    fn visited(&self) -> &Self::Store<VertexId<Idx>> {
+    fn visited(&self) -> &Self::Store<VertexId<A::Idx>> {
         self.closed_set()
     }
 }
 
-impl<'a, N, E, F, K, Idx> Search<VertexId<Idx>> for AStarSearch<'a, N, E, F, K, Idx>
+impl<'a, N, E, F, A, K, Idx> Search<VertexId<Idx>> for AStarSearch<'a, N, E, A, F>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
+    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
     F: HeuristicFunc<Idx, Output = f64>,
     K: GraphKind,
     Idx: NumIndex,

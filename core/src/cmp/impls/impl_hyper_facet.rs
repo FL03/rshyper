@@ -1,37 +1,16 @@
 /*
-    appellation: hyper_facet <module>
+    appellation: impl_hyper_facet <module>
     authors: @FL03
 */
-use super::{HyperEdge, RawEdgeStore};
-use crate::index::{EdgeId, RawIndex};
+use crate::cmp::{HyperEdge, HyperFacet, RawStore};
+use crate::index::{EdgeId, RawIndex, VertexId};
 use crate::{GraphKind, Weight};
-
-/// The [`HyperFacet`] implementation associates some weight with a hyperedge.
-/// Typically, the term **facet** is used to denote the surface of a particular polytope,
-/// however, here it is used to aptly define a _**weighted**_ hyperedge.
-#[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-#[cfg_attr(
-    feature = "serde",
-    derive(serde::Deserialize, serde::Serialize),
-    serde(rename_all = "snake_case")
-)]
-#[repr(C)]
-pub struct HyperFacet<T, S, K, Idx = usize>
-where
-    Idx: RawIndex,
-    K: GraphKind,
-    S: RawEdgeStore<Idx>,
-{
-    #[cfg_attr(feature = "serde", serde(flatten))]
-    pub(crate) edge: HyperEdge<S, K, Idx>,
-    pub(crate) weight: Weight<T>,
-}
 
 impl<T, S, K, Idx> HyperFacet<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
-    S: RawEdgeStore<Idx>,
+    S: RawStore<Idx>,
 {
     /// create a new instance of the [`HyperFacet`] from the given id, nodes, and weight
     pub fn new(id: EdgeId<Idx>, nodes: S, weight: Weight<T>) -> Self {
@@ -41,16 +20,12 @@ where
     /// creates a new edge with the given id
     pub fn from_edge(edge: HyperEdge<S, K, Idx>) -> Self
     where
-        S: Default,
         T: Default,
     {
         Self::from_edge_with_weight(edge, Default::default())
     }
     /// creates a new instance from the given edge and weight
-    pub fn from_edge_with_weight(edge: HyperEdge<S, K, Idx>, weight: Weight<T>) -> Self
-    where
-        S: Default,
-    {
+    pub fn from_edge_with_weight(edge: HyperEdge<S, K, Idx>, weight: Weight<T>) -> Self {
         Self { edge, weight }
     }
     /// creates a new edge with the given id
@@ -87,16 +62,18 @@ where
         }
     }
 
-    pub fn contains_vertex(&self, index: &crate::VertexId<Idx>) -> bool
+    pub fn contains_vertex<Q>(&self, index: &Q) -> bool
     where
+        VertexId<Idx>: core::borrow::Borrow<Q>,
+        Q: PartialEq,
         Idx: PartialEq,
-        for<'a> &'a S: IntoIterator<Item = &'a crate::VertexId<Idx>>,
+        for<'a> &'a S: IntoIterator<Item = &'a VertexId<Idx>>,
     {
         self.edge().contains_vertex(index)
     }
     pub fn len(&self) -> usize
     where
-        S: crate::cmp::RawEdgeStore<Idx>,
+        S: crate::cmp::RawStore<Idx>,
     {
         self.edge().len()
     }
@@ -155,7 +132,7 @@ where
         }
     }
     /// consumes the current instance to create another with the given nodes.
-    pub fn with_points<S2: RawEdgeStore<Idx>>(self, nodes: S2) -> HyperFacet<T, S2, K, Idx> {
+    pub fn with_points<S2: RawStore<Idx>>(self, nodes: S2) -> HyperFacet<T, S2, K, Idx> {
         HyperFacet {
             edge: self.edge.with_points(nodes),
             weight: self.weight,
@@ -170,11 +147,73 @@ where
     }
 }
 
+impl<T, S, K, Idx> Default for HyperFacet<T, S, K, Idx>
+where
+    Idx: Default + RawIndex,
+    K: GraphKind,
+    T: Default,
+    S: RawStore<Idx> + Default,
+{
+    fn default() -> Self {
+        Self {
+            edge: HyperEdge::default(),
+            weight: Weight::default(),
+        }
+    }
+}
+
+impl<T, S, K, Idx> core::fmt::Display for HyperFacet<T, S, K, Idx>
+where
+    Idx: RawIndex,
+    K: GraphKind,
+    T: core::fmt::Display,
+    S: RawStore<Idx> + core::fmt::Display,
+{
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(f, "{{ edge: {}, weight: {} }}", self.edge, self.weight)
+    }
+}
+
+impl<T, S, K, Idx> From<HyperEdge<S, K, Idx>> for HyperFacet<T, S, K, Idx>
+where
+    Idx: RawIndex,
+    K: GraphKind,
+    S: RawStore<Idx>,
+    T: Default,
+{
+    fn from(edge: HyperEdge<S, K, Idx>) -> Self {
+        Self::from_edge(edge)
+    }
+}
+
+impl<T, S, K, Idx> From<HyperFacet<T, S, K, Idx>> for HyperEdge<S, K, Idx>
+where
+    Idx: RawIndex,
+    K: GraphKind,
+    S: RawStore<Idx>,
+{
+    fn from(facet: HyperFacet<T, S, K, Idx>) -> Self {
+        facet.edge
+    }
+}
+
+impl<T, S, K, Idx> From<EdgeId<Idx>> for HyperFacet<T, S, K, Idx>
+where
+    Idx: RawIndex,
+    K: GraphKind,
+    S: Default + RawStore<Idx>,
+    T: Default,
+{
+    fn from(id: EdgeId<Idx>) -> Self {
+        Self::from_id(id)
+    }
+}
+
 impl<T, S, K, Idx> AsRef<Weight<T>> for HyperFacet<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
-    S: RawEdgeStore<Idx>,
+    S: RawStore<Idx>,
 {
     fn as_ref(&self) -> &Weight<T> {
         &self.weight
@@ -185,7 +224,7 @@ impl<T, S, K, Idx> AsMut<Weight<T>> for HyperFacet<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
-    S: RawEdgeStore<Idx>,
+    S: RawStore<Idx>,
 {
     fn as_mut(&mut self) -> &mut Weight<T> {
         &mut self.weight
@@ -196,7 +235,7 @@ impl<T, S, K, Idx> core::borrow::Borrow<EdgeId<Idx>> for HyperFacet<T, S, K, Idx
 where
     Idx: RawIndex,
     K: GraphKind,
-    S: RawEdgeStore<Idx>,
+    S: RawStore<Idx>,
 {
     fn borrow(&self) -> &EdgeId<Idx> {
         self.id()
@@ -207,7 +246,7 @@ impl<T, S, K, Idx> core::borrow::BorrowMut<EdgeId<Idx>> for HyperFacet<T, S, K, 
 where
     Idx: RawIndex,
     K: GraphKind,
-    S: RawEdgeStore<Idx>,
+    S: RawStore<Idx>,
 {
     fn borrow_mut(&mut self) -> &mut EdgeId<Idx> {
         self.id_mut()
@@ -218,7 +257,7 @@ impl<T, S, K, Idx> core::ops::Deref for HyperFacet<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
-    S: RawEdgeStore<Idx>,
+    S: RawStore<Idx>,
 {
     type Target = HyperEdge<S, K, Idx>;
 
@@ -231,21 +270,9 @@ impl<T, S, K, Idx> core::ops::DerefMut for HyperFacet<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
-    S: RawEdgeStore<Idx>,
+    S: RawStore<Idx>,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.edge_mut()
-    }
-}
-
-impl<T, S, K, Idx> core::fmt::Display for HyperFacet<T, S, K, Idx>
-where
-    Idx: RawIndex,
-    K: GraphKind,
-    T: core::fmt::Display,
-    S: RawEdgeStore<Idx> + core::fmt::Display,
-{
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{{ edge: {}, weight: {} }}", self.edge, self.weight)
     }
 }

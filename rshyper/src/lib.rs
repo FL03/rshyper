@@ -1,6 +1,7 @@
-#![cfg_attr(not(feature = "std"), no_std)]
-#![crate_name = "rshyper"]
-#![crate_type = "lib"]
+/*
+    appellation: rshyper <library>
+    authors: @FL03
+*/
 //! # rshyper
 //!
 //! [![crates.io](https://img.shields.io/crates/v/rshyper?style=for-the-badge&logo=rust)](https://crates.io/crates/rshyper)
@@ -9,8 +10,10 @@
 //!
 //! ***
 //!
-//! Welcome to the `rshyper` crate - a Rust package providing a comprehensive framework for creating, manipulating, and analyzing hypergraphs using a myriad of mathematical and algorithmic
-//! techniques. The crate is designed to be flexible and modular enabled via heavy feature-gating throughout the framework.
+//! Welcome to the `rshyper` crate - a Rust package providing a comprehensive framework for
+//! creating, manipulating, and analyzing hypergraphs using a myriad of mathematical and
+//! algorithmic techniques. The crate is designed to be flexible and modular enabled via heavy
+//! feature-gating throughout the framework.
 //!
 //! ## Background
 //!
@@ -31,6 +34,15 @@
 //! many applications such as database design, network analysis, combinatorial optimization,
 //! modeling topological spaces, and more.
 //!
+//! ## Features
+//!
+//! - `hash_graph`: enables the [`HashGraph`] implementation, a hash-based hypergraph structure
+//! - `macros`: enables the implemented macros for streamlining graph management
+//!
+#![cfg_attr(not(feature = "std"), no_std)]
+#![crate_name = "rshyper"]
+#![crate_type = "lib"]
+
 #[cfg(feature = "alloc")]
 extern crate alloc;
 /// declare the macros module for use throughout the crate

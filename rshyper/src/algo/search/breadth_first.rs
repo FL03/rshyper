@@ -3,32 +3,33 @@
     Contrib: @FL03
 */
 use crate::hash_graph::HashGraph;
-use rshyper_core::GraphKind;
 use rshyper_core::index::{NumIndex, RawIndex, VertexId};
+use rshyper_core::{GraphKind, HyperGraphAttributes};
 use std::collections::{HashSet, VecDeque};
 
 use super::{Search, Traversal};
 
 /// Breadth-First Traversal algorithm for hypergraphs
-pub struct BreadthFirstTraversal<'a, N, E, K, Idx = crate::Udx>
+pub struct BreadthFirstTraversal<'a, N, E, A>
 where
-    K: GraphKind,
-    Idx: RawIndex + Eq + core::hash::Hash,
+    A: HyperGraphAttributes,
+    A::Idx: RawIndex + Eq + core::hash::Hash,
 {
-    pub(crate) graph: &'a HashGraph<N, E, K, Idx>,
-    pub(crate) queue: VecDeque<VertexId<Idx>>,
-    pub(crate) visited: HashSet<VertexId<Idx>>,
+    pub(crate) graph: &'a HashGraph<N, E, A>,
+    pub(crate) queue: VecDeque<VertexId<A::Idx>>,
+    pub(crate) visited: HashSet<VertexId<A::Idx>>,
 }
 
-impl<'a, N, E, K, Idx> BreadthFirstTraversal<'a, N, E, K, Idx>
+impl<'a, N, E, A, K, Idx> BreadthFirstTraversal<'a, N, E, A>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
+    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
     Idx: RawIndex + Eq + core::hash::Hash,
 {
     /// create a new instance from a hypergraph
-    pub(crate) fn from_hypergraph(graph: &'a HashGraph<N, E, K, Idx>) -> Self {
+    pub(crate) fn from_hypergraph(graph: &'a HashGraph<N, E, A>) -> Self {
         Self {
             graph,
             queue: VecDeque::new(),
@@ -66,8 +67,9 @@ where
     }
 }
 
-impl<'a, N, E, K, Idx> Search<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, K, Idx>
+impl<'a, N, E, A, K, Idx> Search<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, A>
 where
+    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
     K: GraphKind,
@@ -113,8 +115,9 @@ where
     }
 }
 
-impl<'a, N, E, K, Idx> Traversal<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, K, Idx>
+impl<'a, N, E, A, K, Idx> Traversal<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, A>
 where
+    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
     K: GraphKind,
