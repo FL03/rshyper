@@ -70,6 +70,7 @@ fn test_merge_hash_edge() -> rshyper::Result<()> {
             && hyperedge.contains_vertex(&v1)
             && hyperedge.contains_vertex(&v2)
     );
+    assert_eq!(hyperedge.weight(), &0);
     Ok(())
 }
 
