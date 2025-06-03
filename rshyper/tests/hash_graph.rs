@@ -43,7 +43,7 @@ fn test_hash_graph() -> rshyper::Result<()> {
     assert_eq!(neighbors, exp);
 
     // verify the degree of vertex v1
-    assert_eq!(graph.get_degree_of_node(&v1), 2);
+    assert_eq!(graph.get_degree_of_node(&v1), 3);
     // remove vertex v1
     let _ = graph.remove_vertex(&v2)?;
     // verify the hypergraph does not contain vertex v2
