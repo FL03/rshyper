@@ -47,3 +47,67 @@ where
     pub(crate) edge: HyperEdge<S, K, Idx>,
     pub(crate) weight: Weight<T>,
 }
+
+/*
+    ************* Implementations *************
+*/
+use super::{RawEdge, RawFacet};
+
+impl<S, Idx, K> RawEdge for HyperEdge<S, K, Idx>
+where
+    Idx: RawIndex,
+    K: GraphKind,
+    S: RawStore<Idx>,
+{
+    type Kind = K;
+    type Idx = Idx;
+    type Store = S;
+
+    seal!();
+
+    fn index(&self) -> &EdgeId<Idx> {
+        self.id()
+    }
+
+    fn vertices(&self) -> &S {
+        self.points()
+    }
+}
+
+impl<T, S, Idx, K> RawEdge for HyperFacet<T, S, K, Idx>
+where
+    Idx: RawIndex,
+    K: GraphKind,
+    S: RawStore<Idx>,
+{
+    type Kind = K;
+    type Idx = Idx;
+    type Store = S;
+
+    seal!();
+
+    fn index(&self) -> &EdgeId<Idx> {
+        self.edge().id()
+    }
+
+    fn vertices(&self) -> &S {
+        self.edge().points()
+    }
+}
+
+impl<T, S, Idx, K> RawFacet<T> for HyperFacet<T, S, K, Idx>
+where
+    Idx: RawIndex,
+    K: GraphKind,
+    S: RawStore<Idx>,
+{
+    seal!();
+
+    fn weight(&self) -> &Weight<T> {
+        self.as_ref()
+    }
+
+    fn weight_mut(&mut self) -> &mut Weight<T> {
+        self.as_mut()
+    }
+}

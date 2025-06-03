@@ -112,6 +112,7 @@ where
         self.len() == 0
     }
 }
+/// [`RawNode`] is a trait that defines the behavior of a node in a hypergraph.
 pub trait RawNode<T> {
     type Idx: RawIndex;
 
@@ -120,9 +121,30 @@ pub trait RawNode<T> {
     /// returns an immutable reference to the node index
     fn index(&self) -> &VertexId<Self::Idx>;
     /// returns an immutable reference to the node data
-    fn weight(&self) -> Weight<&T>;
+    fn weight(&self) -> &Weight<T>;
+    /// returns a mutable reference to the node data
+    fn weight_mut(&mut self) -> &mut Weight<T>;
+    /// [`replace`](core::mem::replace) the weight of the node with a new one, returning the
+    /// previous value
+    fn replace_weight(&mut self, weight: Weight<T>) -> Weight<T> {
+        core::mem::replace(self.weight_mut(), weight)
+    }
+    /// overwrites the weight of the node with a new one and returns a mutable reference to
+    /// the edge.
+    fn set_weight(&mut self, weight: T) -> &mut Self {
+        self.weight_mut().set(weight);
+        self
+    }
+    /// [`swap`](core::mem::swap) the weight of the node with another weight
+    fn swap_weight(&mut self, weight: &mut Weight<T>) {
+        core::mem::swap(self.weight_mut(), weight)
+    }
+    /// [`take`](core::mem::take) the weight of the node, replacing it with a default value
+    fn take_weight(&mut self) -> Weight<T> where T: Default {
+        core::mem::take(self.weight_mut())
+    }
 }
-
+/// [`RawEdge`] is a trait that defines the behavior of an edge in a hypergraph.
 pub trait RawEdge {
     type Idx: RawIndex;
     type Kind: GraphKind;
@@ -135,11 +157,32 @@ pub trait RawEdge {
     /// Returns an immutable reference to the edge data.
     fn vertices(&self) -> &Self::Store;
 }
-
+/// [`RawFacet`] extends the behaviour of a [`RawEdge`] to include a weight
 pub trait RawFacet<T>: RawEdge {
     private!();
     /// Returns the index of the edge.
-    fn weight(&self) -> Weight<&T>;
+    fn weight(&self) -> &Weight<T>;
+    /// returns a mutable reference to the edge data.
+    fn weight_mut(&mut self) -> &mut Weight<T>;
+    /// [`replace`](core::mem::replace) the weight of the edge with a new one, returning the
+    /// previous value
+    fn replace_weight(&mut self, weight: Weight<T>) -> Weight<T> {
+        core::mem::replace(self.weight_mut(), weight)
+    }
+    /// overwrites the weight of the edge with a new one and returns a mutable reference to
+    /// the edge.
+    fn set_weight(&mut self, weight: T) -> &mut Self {
+        self.weight_mut().set(weight);
+        self
+    }
+    /// [`swap`](core::mem::swap) the weight of the edge with another weight
+    fn swap_weight(&mut self, weight: &mut Weight<T>) {
+        core::mem::swap(self.weight_mut(), weight)
+    }
+    /// [`take`](core::mem::take) the weight of the edge, replacing it with a default value
+    fn take_weight(&mut self) -> Weight<T> where T: Default {
+        core::mem::take(self.weight_mut())
+    }
 }
 /*
  ************* Implementations *************
@@ -155,63 +198,11 @@ where
     fn index(&self) -> &VertexId<Idx> {
         &self.index
     }
-    fn weight(&self) -> Weight<&T> {
-        self.weight().view()
+    fn weight(&self) -> &Weight<T> {
+        self.weight()
     }
-}
-
-impl<S, Idx, K> RawEdge for HyperEdge<S, K, Idx>
-where
-    Idx: Copy + RawIndex,
-    K: GraphKind,
-    S: RawStore<Idx>,
-{
-    type Kind = K;
-    type Idx = Idx;
-    type Store = S;
-
-    seal!();
-
-    fn index(&self) -> &EdgeId<Idx> {
-        self.id()
-    }
-
-    fn vertices(&self) -> &S {
-        self.points()
-    }
-}
-
-impl<T, S, Idx, K> RawEdge for HyperFacet<T, S, K, Idx>
-where
-    Idx: Copy + RawIndex,
-    K: GraphKind,
-    S: RawStore<Idx>,
-{
-    type Kind = K;
-    type Idx = Idx;
-    type Store = S;
-
-    seal!();
-
-    fn index(&self) -> &EdgeId<Idx> {
-        self.edge().id()
-    }
-
-    fn vertices(&self) -> &S {
-        self.edge().points()
-    }
-}
-
-impl<T, S, Idx, K> RawFacet<T> for HyperFacet<T, S, K, Idx>
-where
-    Idx: Copy + RawIndex,
-    K: GraphKind,
-    S: RawStore<Idx>,
-{
-    seal!();
-
-    fn weight(&self) -> Weight<&T> {
-        self.weight().view()
+    fn weight_mut(&mut self) -> &mut Weight<T> {
+        self.weight_mut()
     }
 }
 
