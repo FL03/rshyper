@@ -7,8 +7,9 @@ use super::aliases::*;
 use rshyper_core::GraphKind;
 use rshyper_core::index::{EdgeId, IndexCursor, RawIndex, VertexId};
 
+/// a type alias for a [directed](crate::Directed) [`HashGraph`]
 pub type DirectedHashGraph<N, E, Idx = usize> = HashGraph<N, E, crate::Directed, Idx>;
-/// a t
+/// a type alias for an [undirected](crate::Undirected) [`HashGraph`]
 pub type UndirectedHashGraph<N, E, Idx = usize> = HashGraph<N, E, crate::Undirected, Idx>;
 
 /// A hash-based hypergraph implementation
@@ -22,9 +23,8 @@ where
     /// the `nodes` of a hypergraph are the vertices, each identified by a `VertexId` and
     /// associated with a weight of type `N`.
     pub(crate) nodes: NodeMap<N, Idx>,
-
-    pub(crate) surfaces: HyperFacetMap<E, K, Idx>,
-
+    /// `surfaces` represent the hyperedges of the hypergraph, each identified by an `EdgeId`
+    pub(crate) surfaces: SurfaceMap<E, K, Idx>,
     /// tracks the current position of the hypergraph, which is used to determine the next
     /// available indices for edges and vertices.
     pub(crate) position: IndexCursor<Idx>,
@@ -46,7 +46,7 @@ where
         Idx: Default,
     {
         HashGraph {
-            surfaces: HyperFacetMap::new(),
+            surfaces: SurfaceMap::new(),
             nodes: NodeMap::new(),
             position: IndexCursor::default(),
             _kind: core::marker::PhantomData::<K>,
@@ -58,18 +58,11 @@ where
         Idx: Default,
     {
         HashGraph {
-            surfaces: HyperFacetMap::with_capacity(edges),
+            surfaces: SurfaceMap::with_capacity(edges),
             nodes: NodeMap::with_capacity(nodes),
             position: IndexCursor::default(),
             _kind: core::marker::PhantomData::<K>,
         }
-    }
-
-    pub const fn surfaces(&self) -> &HyperFacetMap<E, K, Idx> {
-        &self.surfaces
-    }
-    pub const fn surfaces_mut(&mut self) -> &mut HyperFacetMap<E, K, Idx> {
-        &mut self.surfaces
     }
     /// returns am immutable reference to the nodes
     pub const fn nodes(&self) -> &NodeMap<N, Idx> {
@@ -89,7 +82,14 @@ where
     pub fn position_mut(&mut self) -> &mut IndexCursor<Idx> {
         &mut self.position
     }
-
+    /// returns an immutable reference to the surfaces of the hypergraph
+    pub const fn surfaces(&self) -> &SurfaceMap<E, K, Idx> {
+        &self.surfaces
+    }
+    /// returns a mutable reference to the surfaces of the hypergraph
+    pub const fn surfaces_mut(&mut self) -> &mut SurfaceMap<E, K, Idx> {
+        &mut self.surfaces
+    }
     /// overrides the current nodes and returns a mutable reference to the hypergraph
     #[inline]
     pub fn set_nodes(&mut self, nodes: NodeMap<N, Idx>) -> &mut Self
@@ -110,7 +110,7 @@ where
     }
     #[inline]
     /// overrides the current surfaces and returns a mutable reference to the hypergraph
-    pub fn set_surfaces(&mut self, surfaces: HyperFacetMap<E, K, Idx>) -> &mut Self
+    pub fn set_surfaces(&mut self, surfaces: SurfaceMap<E, K, Idx>) -> &mut Self
     where
         Idx: Default,
     {
@@ -134,19 +134,11 @@ where
     }
     /// consumes the current instance to create another with the given edges
     #[inline]
-    pub fn with_surfaces(self, surfaces: HyperFacetMap<E, K, Idx>) -> Self
+    pub fn with_surfaces(self, surfaces: SurfaceMap<E, K, Idx>) -> Self
     where
         Idx: Default,
     {
         Self { surfaces, ..self }
-    }
-    /// returns true if the hypergraph contains an edge with the given index;
-    pub fn contains_surface<Q>(&self, index: &Q) -> bool
-    where
-        Q: Eq + core::hash::Hash,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.surfaces().contains_key(index)
     }
     /// check if a vertex with the given id exists
     pub fn contains_node<Q>(&self, index: &Q) -> bool
@@ -156,20 +148,50 @@ where
     {
         self.nodes().contains_key(index)
     }
+    /// returns true if the hypergraph contains an edge with the given index;
+    pub fn contains_surface<Q>(&self, index: &Q) -> bool
+    where
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.surfaces().contains_key(index)
+    }
     /// returns true if the hypergraph is empty, meaning it has no edges, facets, or nodes
     pub fn is_empty(&self) -> bool {
         self.surfaces().is_empty() && self.nodes().is_empty()
+    }
+    /// returns true if the hypergraph is directed;
+    pub fn is_directed(&self) -> bool {
+        use core::any::TypeId;
+        TypeId::of::<K>() == TypeId::of::<crate::Directed>()
+    }
+    /// returns true if the hypergraph is undirected;
+    pub fn is_undirected(&self) -> bool {
+        use core::any::TypeId;
+        TypeId::of::<K>() == TypeId::of::<crate::Undirected>()
     }
     /// returns an [`Entry`](std::collections::hash_map::Entry) for the node with the given
     /// index, allowing for modifications or insertions to the mapping
     pub fn node(&mut self, index: VertexId<Idx>) -> NodeEntry<'_, N, Idx> {
         self.nodes_mut().entry(index)
     }
+    /// returns a [`SurfaceEntry`] for the surface with the given index, allowing for in-place
+    /// mutations to the value associated with the index
+    pub fn surface(&mut self, index: EdgeId<Idx>) -> SurfaceEntry<'_, E, K, Idx> {
+        self.surfaces_mut().entry(index)
+    }
     /// returns an iterator over the nodes of the hypergraph, yielding pairs of [`VertexId`] and
     /// the corresponding [`HyperNode`].
     pub fn node_iter(&self) -> super::iter::NodeIter<'_, N, Idx> {
         super::iter::NodeIter {
             iter: self.nodes().iter(),
+        }
+    }
+    /// returns an iterator over the surfaces of the hypergraph, yielding pairs of [`EdgeId`]
+    /// and the corresponding [`HashFacet`].
+    pub fn surface_iter(&self) -> super::iter::SurfaceIter<'_, E, K, Idx> {
+        super::iter::SurfaceIter {
+            iter: self.surfaces().iter(),
         }
     }
     /// get the next edge index and updates the current position
@@ -194,18 +216,7 @@ where
     pub fn total_vertices(&self) -> usize {
         self.nodes().len()
     }
-    /// returns true if the hypergraph is directed;
-    pub fn is_directed(&self) -> bool {
-        use core::any::TypeId;
-        TypeId::of::<K>() == TypeId::of::<crate::Directed>()
-    }
-    /// returns true if the hypergraph is undirected;
-    pub fn is_undirected(&self) -> bool {
-        use core::any::TypeId;
-        TypeId::of::<K>() == TypeId::of::<crate::Undirected>()
-    }
 }
-
 
 use rshyper_core::{HyperGraph, HyperNode, RawHyperGraph, Weight};
 

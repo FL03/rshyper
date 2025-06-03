@@ -14,9 +14,7 @@ fn _init() -> HyperGraph<&'static str, usize> {
     let b = graph.add_node("B");
     let c = graph.add_node("C");
 
-    let _e1 = graph
-        .add_edge([a, b, c])
-        .expect("Failed to insert edge");
+    let _e1 = graph.add_edge([a, b, c]).expect("Failed to insert edge");
 
     graph
 }

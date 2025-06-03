@@ -51,7 +51,11 @@ fn test_merge_hash_edge() -> rshyper::Result<()> {
 
     let merged = graph.merge_edges(&e1, &e2)?;
     let hyperedge = graph.remove_surface(&merged)?;
-    assert!(hyperedge.contains_vertex(&v0) && hyperedge.contains_vertex(&v1) && hyperedge.contains_vertex(&v2));
+    assert!(
+        hyperedge.contains_vertex(&v0)
+            && hyperedge.contains_vertex(&v1)
+            && hyperedge.contains_vertex(&v2)
+    );
     Ok(())
 }
 

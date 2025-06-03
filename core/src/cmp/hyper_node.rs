@@ -2,8 +2,6 @@
     Appellation: node <module>
     Contrib: @FL03
 */
-mod impl_hyper_node;
-
 use crate::Weight;
 use crate::index::{RawIndex, VertexId};
 

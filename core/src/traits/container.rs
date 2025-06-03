@@ -18,22 +18,18 @@ pub unsafe trait RawData {
 }
 
 pub trait RawContainer<T> {
-    type Repr<U>: RawData<Item = U> + ?Sized;
+    type Data<U>: RawData<Item = U> + ?Sized;
 }
 
-pub trait RawStore {
-    type Data<T>: RawData<Item = T> + ?Sized;
-}
-
-pub trait RawStoreMut: RawStore {
-    fn as_mut<T>(&mut self) -> &mut Self::Data<T>;
+pub trait RawContainerMut<T>: RawContainer<T> {
+    fn as_mut(&mut self) -> &mut Self::Data<T>;
 }
 
 pub trait Container<T>: RawContainer<T> {
     /// returns an immutable reference to the container
-    fn as_ref(&self) -> &Self::Repr<T>;
+    fn as_ref(&self) -> &Self::Data<T>;
     /// returns a mutable reference to the container
-    fn as_mut(&mut self) -> &mut Self::Repr<T>;
+    fn as_mut(&mut self) -> &mut Self::Data<T>;
     /// returns a reference to the container as a slice
     fn as_slice(&self) -> &[T];
     /// returns a mutable slice of the container
@@ -60,10 +56,6 @@ macro_rules! raw_store {
         }
 
         impl<$T> RawContainer<$T> for $($name)::*<$T> {
-            type Repr<_T> = $($name)::*<_T>;
-        }
-
-        impl<$T> RawStore for $($name)::*<$T> {
             type Data<_T> = $($name)::*<_T>;
         }
     };
@@ -108,13 +100,6 @@ impl<T> RawContainer<T> for [T]
 where
     T: Sized,
 {
-    type Repr<U> = [U];
-}
-
-impl<T> RawStore for [T]
-where
-    T: Sized,
-{
     type Data<U> = [U];
 }
 
@@ -122,11 +107,11 @@ impl<T> Container<T> for [T]
 where
     T: Sized,
 {
-    fn as_ref(&self) -> &Self::Repr<T> {
+    fn as_ref(&self) -> &Self::Data<T> {
         self
     }
 
-    fn as_mut(&mut self) -> &mut Self::Repr<T> {
+    fn as_mut(&mut self) -> &mut Self::Data<T> {
         self
     }
 
