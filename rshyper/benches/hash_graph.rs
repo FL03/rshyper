@@ -15,7 +15,7 @@ fn _init() -> HyperGraph<&'static str, usize> {
     let c = graph.add_node("C");
 
     let _e1 = graph
-        .add_edge_with_weight([a, b, c], 0)
+        .add_edge([a, b, c])
         .expect("Failed to insert edge");
 
     graph

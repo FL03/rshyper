@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use crate::algo::search;
-use crate::hash_graph::HashGraph;
+use crate::hash_graph::{HashFacet, HashGraph};
 use rshyper_core::GraphKind;
 use rshyper_core::cmp::HyperNode;
 use rshyper_core::index::{EdgeId, HashIndex, NumIndex, VertexId};
@@ -45,10 +45,10 @@ where
     K: GraphKind,
     Idx: HashIndex,
 {
-    type Output = E;
+    type Output = HashFacet<E, K, Idx>;
 
     fn index(&self, index: &EdgeId<Idx>) -> &Self::Output {
-        self.get_facet(index).expect("Edge not found")
+        self.get_surface(index).expect("Edge not found")
     }
 }
 
@@ -60,7 +60,7 @@ where
     Idx: HashIndex,
 {
     fn index_mut(&mut self, index: &EdgeId<Idx>) -> &mut Self::Output {
-        self.get_facet_mut(index).expect("Edge not found")
+        self.get_surface_mut(index).expect("Edge not found")
     }
 }
 

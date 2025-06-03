@@ -50,10 +50,8 @@ fn test_merge_hash_edge() -> rshyper::Result<()> {
     let e2 = graph.add_edge(vec![v1, v2])?;
 
     let merged = graph.merge_edges(&e1, &e2)?;
-    let hyperedge = graph.remove_edge(&merged)?;
-    assert!(hyperedge.contains(&v0));
-    assert!(hyperedge.contains(&v1));
-    assert!(hyperedge.contains(&v2));
+    let hyperedge = graph.remove_surface(&merged)?;
+    assert!(hyperedge.contains_vertex(&v0) && hyperedge.contains_vertex(&v1) && hyperedge.contains_vertex(&v2));
     Ok(())
 }
 
@@ -85,9 +83,8 @@ fn test_remove_hash_edges() -> rshyper::Result<()> {
     let e2 = graph.add_edge(vec![v1, v2])?;
 
     // Remove hyperedge e1
-    let removed_edge = graph.remove_edge(&e1)?;
-    assert!(removed_edge.contains(&v0));
-    assert!(removed_edge.contains(&v1));
+    let removed_edge = graph.remove_surface(&e1)?;
+    assert!(removed_edge.contains_vertex(&v0) && removed_edge.contains_vertex(&v1));
 
     // Check that the removed edge is no longer in the graph
     assert!(!graph.contains_surface(&e1));

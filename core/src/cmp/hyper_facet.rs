@@ -4,7 +4,7 @@
 */
 mod impl_hyper_facet;
 use super::{HyperEdge, RawEdgeStore};
-use crate::index::{EdgeId, RawIndex};
+use crate::index::{EdgeId, RawIndex, VertexId};
 use crate::{GraphKind, Weight};
 
 /// The [`HyperFacet`] implementation associates some weight with a hyperedge.
@@ -84,10 +84,12 @@ where
         }
     }
 
-    pub fn contains_vertex(&self, index: &crate::VertexId<Idx>) -> bool
+    pub fn contains_vertex<Q>(&self, index: &Q) -> bool
     where
+        VertexId<Idx>: core::borrow::Borrow<Q>,
+        Q: PartialEq,
         Idx: PartialEq,
-        for<'a> &'a S: IntoIterator<Item = &'a crate::VertexId<Idx>>,
+        for<'a> &'a S: IntoIterator<Item = &'a VertexId<Idx>>,
     {
         self.edge().contains_vertex(index)
     }

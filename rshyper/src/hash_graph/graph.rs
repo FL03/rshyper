@@ -80,25 +80,6 @@ where
     pub const fn surfaces_mut(&mut self) -> &mut HyperFacetMap<E, K, Idx> {
         &mut self.surfaces
     }
-
-    /// returns an immutable reference to the edges of the hypergraph; a mapping of edges to vertices essentially forming a topological space
-    /// that enables the data-structure to be traversed, analyzed, and manipulated.
-    pub const fn edges(&self) -> &EdgeMap<Idx> {
-        &self.edges
-    }
-    /// returns a mutable reference to the hyperedges
-    pub const fn edges_mut(&mut self) -> &mut EdgeMap<Idx> {
-        &mut self.edges
-    }
-    /// returns an immutable reference to the facets of the hypergraph; here, a facet is a
-    /// hyperedge with an associated weight
-    pub const fn facets(&self) -> &FacetMap<Idx, E> {
-        &self.facets
-    }
-    /// returns a mutable reference to the edges, or facets, of the hypergraph
-    pub const fn facets_mut(&mut self) -> &mut FacetMap<Idx, E> {
-        &mut self.facets
-    }
     /// returns am immutable reference to the nodes
     pub const fn nodes(&self) -> &NodeMap<N, Idx> {
         &self.nodes
@@ -117,24 +98,7 @@ where
     pub fn position_mut(&mut self) -> &mut IndexCursor<Idx> {
         &mut self.position
     }
-    /// overrides the current edges and returns a mutable reference to the hypergraph
-    #[inline]
-    pub fn set_edges(&mut self, edges: EdgeMap<Idx>) -> &mut Self
-    where
-        Idx: Default,
-    {
-        self.edges = edges;
-        self
-    }
-    /// overrides the current facets and returns a mutable reference to the hypergraph
-    #[inline]
-    pub fn set_facets(&mut self, facets: FacetMap<Idx, E>) -> &mut Self
-    where
-        Idx: Default,
-    {
-        self.facets = facets;
-        self
-    }
+
     /// overrides the current nodes and returns a mutable reference to the hypergraph
     #[inline]
     pub fn set_nodes(&mut self, nodes: NodeMap<N, Idx>) -> &mut Self
@@ -153,21 +117,14 @@ where
         self.position = position;
         self
     }
-    /// consumes the current instance to create another with the given edges
     #[inline]
-    pub fn with_edges(self, edges: EdgeMap<Idx>) -> Self
+    /// overrides the current surfaces and returns a mutable reference to the hypergraph
+    pub fn set_surfaces(&mut self, surfaces: HyperFacetMap<E, K, Idx>) -> &mut Self
     where
         Idx: Default,
     {
-        Self { edges, ..self }
-    }
-    /// consumes the current instance to create another with the given facets
-    #[inline]
-    pub fn with_facets(self, facets: FacetMap<Idx, E>) -> Self
-    where
-        Idx: Default,
-    {
-        Self { facets, ..self }
+        self.surfaces = surfaces;
+        self
     }
     /// consumes the current instance to create another with the given nodes
     #[inline]
@@ -183,6 +140,14 @@ where
         Idx: Default,
     {
         Self { position, ..self }
+    }
+    /// consumes the current instance to create another with the given edges
+    #[inline]
+    pub fn with_surfaces(self, surfaces: HyperFacetMap<E, K, Idx>) -> Self
+    where
+        Idx: Default,
+    {
+        Self { surfaces, ..self }
     }
     /// returns true if the hypergraph contains an edge with the given index;
     pub fn contains_surface<Q>(&self, index: &Q) -> bool
@@ -202,9 +167,8 @@ where
     }
     /// returns true if the hypergraph is empty, meaning it has no edges, facets, or nodes
     pub fn is_empty(&self) -> bool {
-        self.surfaces().is_empty() && self.facets().is_empty() && self.nodes().is_empty()
+        self.surfaces().is_empty() && self.nodes().is_empty()
     }
-
     /// returns an [`Entry`](std::collections::hash_map::Entry) for the node with the given
     /// index, allowing for modifications or insertions to the mapping
     pub fn node(&mut self, index: VertexId<Idx>) -> NodeEntry<'_, N, Idx> {
@@ -235,10 +199,6 @@ where
     pub fn total_edges(&self) -> usize {
         self.surfaces().len()
     }
-    /// returns the total number of facets in the hypergraph
-    pub fn total_facets(&self) -> usize {
-        self.facets().len()
-    }
     /// returns the total number of vertices in the hypergraph
     pub fn total_vertices(&self) -> usize {
         self.nodes().len()
@@ -252,6 +212,76 @@ where
     pub fn is_undirected(&self) -> bool {
         use core::any::TypeId;
         TypeId::of::<K>() == TypeId::of::<crate::Undirected>()
+    }
+}
+
+#[allow(deprecated)]
+impl<N, E, K, Idx> HashGraph<N, E, K, Idx>
+where
+    E: Eq + core::hash::Hash,
+    N: Eq + core::hash::Hash,
+    K: GraphKind,
+    Idx: Eq + RawIndex + core::hash::Hash,
+{
+    #[deprecated(
+        since = "0.0.9",
+        note = "use `surfaces` instead; the `edges` & `facets` maps are being combined "
+    )]
+    /// returns an immutable reference to the edges of the hypergraph; a mapping of edges to vertices essentially forming a topological space
+    /// that enables the data-structure to be traversed, analyzed, and manipulated.
+    pub const fn edges(&self) -> &EdgeMap<Idx> {
+        &self.edges
+    }
+    #[deprecated(
+        since = "0.0.9",
+        note = "use `surfaces_mut` instead; the `edges` & `facets` maps are being combined "
+    )]
+    /// returns a mutable reference to the hyperedges
+    pub const fn edges_mut(&mut self) -> &mut EdgeMap<Idx> {
+        &mut self.edges
+    }
+    #[deprecated(
+        since = "0.0.9",
+        note = "use `surfaces` instead; the `edges` & `facets` maps are being combined "
+    )]
+    /// returns an immutable reference to the facets of the hypergraph; here, a facet is a
+    /// hyperedge with an associated weight
+    pub const fn facets(&self) -> &FacetMap<Idx, E> {
+        &self.facets
+    }
+    #[deprecated(
+        since = "0.0.9",
+        note = "use `surfaces_mut` instead; the `edges` & `facets` maps are being combined "
+    )]
+    /// returns a mutable reference to the edges, or facets, of the hypergraph
+    pub const fn facets_mut(&mut self) -> &mut FacetMap<Idx, E> {
+        &mut self.facets
+    }
+    #[deprecated(
+        since = "0.0.9",
+        note = "use `surfaces_mut` instead; the `edges` & `facets` maps are being combined "
+    )]
+    /// overrides the current edges and returns a mutable reference to the hypergraph
+    #[inline]
+    pub fn set_edges(&mut self, edges: EdgeMap<Idx>) -> &mut Self
+    where
+        Idx: Default,
+    {
+        self.edges = edges;
+        self
+    }
+    #[deprecated(
+        since = "0.0.9",
+        note = "use `surfaces_mut` instead; the `edges` & `facets` maps are being combined "
+    )]
+    /// overrides the current facets and returns a mutable reference to the hypergraph
+    #[inline]
+    pub fn set_facets(&mut self, facets: FacetMap<Idx, E>) -> &mut Self
+    where
+        Idx: Default,
+    {
+        self.facets = facets;
+        self
     }
     #[deprecated(since = "0.9.0", note = "use `contains_surface` instead")]
     /// returns true if the hypergraph contains an edge with the given index;
@@ -275,8 +305,8 @@ where
     #[deprecated(since = "0.9.0", note = "use `surface` instead")]
     /// returns an [`Entry`](std::collections::hash_map::Entry) for the edge with the given
     /// index, allowing for modifications or insertions to the mapping
-    pub fn edge(&mut self, index: EdgeId<Idx>) -> EdgeEntry<'_, E, K, Idx> {
-        self.surfaces_mut().entry(index)
+    pub fn edge(&mut self, index: EdgeId<Idx>) -> EdgeEntry<'_, Idx> {
+        self.edges_mut().entry(index)
     }
     #[deprecated(since = "0.9.0", note = "use `surface` instead")]
     /// returns an [`Entry`](std::collections::hash_map::Entry) for the weight of the edge with
@@ -299,6 +329,14 @@ where
         super::iter::FacetIter {
             iter: self.facets().iter(),
         }
+    }
+    #[deprecated(since = "0.9.0", note = "use `with_surfaces` instead")]
+    #[inline]
+    pub fn with_facets(self, facets: FacetMap<Idx, E>) -> Self
+    where
+        Idx: Default,
+    {
+        Self { facets, ..self }
     }
 }
 
@@ -346,7 +384,7 @@ where
     }
 
     fn get_facet(&self, index: &EdgeId<Self::Idx>) -> crate::Result<&Weight<E>> {
-        self.get_facet(index)
+        self.get_surface(index).map(|s| s.weight())
     }
 
     fn contains_edge(&self, index: &EdgeId<Self::Idx>) -> bool {

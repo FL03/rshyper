@@ -7,7 +7,7 @@ mod impl_edge;
 
 use super::RawEdgeStore;
 use crate::GraphKind;
-use crate::index::{EdgeId, RawIndex};
+use crate::index::{EdgeId, RawIndex, VertexId};
 
 /// [`HyperEdge`] is a type representing a hyperedge in a hypergraph.
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -94,12 +94,15 @@ where
         }
     }
     /// returns true if the edge contains the given vertex index
-    pub fn contains_vertex(&self, index: &crate::VertexId<Idx>) -> bool
+    pub fn contains_vertex<Q>(&self, index: &Q) -> bool
     where
+        VertexId<Idx>: core::borrow::Borrow<Q>,
+        Q: PartialEq,
         Idx: PartialEq,
-        for<'a> &'a S: IntoIterator<Item = &'a crate::VertexId<Idx>>,
+        for<'a> &'a S: IntoIterator<Item = &'a VertexId<Idx>>,
     {
-        self.points().into_iter().any(|v| v == index)
+        use core::borrow::Borrow;
+        self.points().into_iter().any(|v| v.borrow() == index)
     }
     /// returns the number of vertices in the edge
     pub fn len(&self) -> usize

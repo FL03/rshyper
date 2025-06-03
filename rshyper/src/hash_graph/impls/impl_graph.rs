@@ -3,10 +3,11 @@
     authors: @FL03
 */
 use crate::GraphKind;
-use crate::hash_graph::{HashGraph, VertexSet};
+use crate::hash_graph::{HashFacet, HashGraph, VertexSet};
 use num_traits::One;
+use rshyper_core::Weight;
+use rshyper_core::cmp::{HyperEdge, HyperFacet, HyperNode};
 use rshyper_core::index::{EdgeId, HashIndex, RawIndex, VertexId};
-use rshyper_core::prelude::{HyperEdge, HyperNode, Weight};
 
 impl<N, E, K, Idx> HashGraph<N, E, K, Idx>
 where
@@ -100,7 +101,6 @@ where
     /// reset the hypergraph by clearing all nodes, edges, and facets
     pub fn clear(&mut self) -> &mut Self {
         self.surfaces_mut().clear();
-        self.facets_mut().clear();
         self.nodes_mut().clear();
         self
     }
@@ -146,17 +146,8 @@ where
             .collect::<Vec<_>>();
         Ok(edges)
     }
-    /// retrieves a reference to the facet (hyperedge with an associated weight)
-    pub fn get_facet<Q>(&self, index: &Q) -> crate::Result<&Weight<E>>
-    where
-        Q: Eq + core::hash::Hash,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.facets()
-            .get(index)
-            .ok_or_else(|| crate::Error::EdgeNotFound)
-    }
 
+    /// returns an immutable reference to the hyperedge
     pub fn get_surface<Q>(
         &self,
         index: &Q,
@@ -182,24 +173,16 @@ where
             .get_mut(index)
             .ok_or_else(|| crate::Error::EdgeNotFound)
     }
-    /// retrieves a mutable reference to the facet (hyperedge with an associated weight)
-    pub fn get_facet_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut Weight<E>>
-    where
-        Q: Eq + core::hash::Hash,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.facets_mut()
-            .get_mut(index)
-            .ok_or_else(|| crate::Error::EdgeNotFound)
-    }
+
     /// retrieves the set of nodes composing the given edge
     pub fn get_edge_nodes<Q>(&self, index: &Q) -> crate::Result<Vec<&HyperNode<N, Idx>>>
     where
         Q: Eq + core::hash::Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        let vertices = self.get_edge_vertices(&index)?;
-        let nodes = vertices
+        let surface = self.get_surface(&index)?;
+        let nodes = surface
+            .points()
             .iter()
             .map(|v| self.get_node(&v).expect("vertex not found"))
             .collect::<Vec<_>>();
@@ -211,10 +194,7 @@ where
         Q: Eq + core::hash::Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.surfaces()
-            .get(index)
-            .and_then(|edge| Some(edge.points()))
-            .ok_or_else(|| crate::Error::EdgeNotFound)
+        self.get_surface(index).map(|edge| edge.points())
     }
     /// returns the weight of a particular vertex
     #[cfg_attr(feature = "tracing", tracing::instrument(skip(self)))]
@@ -231,11 +211,15 @@ where
             .get_mut(index)
             .ok_or(crate::Error::NodeNotFound)
     }
-    /// merges two hyperedges into one (combining their vertices)
+    /// merges two hyperedges into one (combining their vertices;
+    ///
+    /// **note:** the method requires the edge types `E` to implement the [`Add`](core::ops::Add)
+    /// trait
     pub fn merge_edges<Q>(&mut self, e1: &Q, e2: &Q) -> crate::Result<EdgeId<Idx>>
     where
         Idx: Copy + core::ops::Add<Output = Idx> + One,
         Q: Eq + core::hash::Hash,
+        E: Clone + core::ops::Add<Output = E>,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         let set1 = self
@@ -251,8 +235,12 @@ where
             .union(set2.points())
             .copied()
             .collect::<VertexSet<_>>();
+
+        let weight = set1.weight().clone() + set2.weight().clone();
         let new_edge = self.next_edge_id();
-        self.edges_mut().insert(new_edge, merged);
+        // initialize a new facet using the merged vertices, new index, and source weight
+        let merged_facet = HyperFacet::new(new_edge, merged, weight);
+        self.surfaces_mut().insert(new_edge, merged_facet);
         Ok(new_edge)
     }
     /// returns a set of vertices that are in the hyperedge with the given id
@@ -283,12 +271,12 @@ where
     /// remove the hyperedge with the given id
     #[cfg_attr(feature = "tracing", tracing::instrument(skip(self, index)))]
     #[inline]
-    pub fn remove_edge<Q>(&mut self, index: &Q) -> crate::Result<VertexSet<Idx>>
+    pub fn remove_surface<Q>(&mut self, index: &Q) -> crate::Result<HashFacet<E, K, Idx>>
     where
         Q: Eq + core::hash::Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.edges_mut()
+        self.surfaces_mut()
             .remove(index)
             .ok_or(crate::Error::EdgeNotFound)
     }
@@ -306,8 +294,8 @@ where
             .remove(index)
             .map(|node| {
                 // Remove all hyperedges containing this vertex
-                self.edges_mut()
-                    .retain(|_, vertices| !vertices.contains(index));
+                self.surfaces_mut()
+                    .retain(|_, facet| !facet.contains_vertex(index));
                 node
             })
             .ok_or(crate::Error::NodeNotFound)
@@ -330,6 +318,7 @@ where
     }
 }
 
+#[allow(deprecated)]
 impl<N, E, K, Idx> HashGraph<N, E, K, Idx>
 where
     N: Eq + core::hash::Hash,
@@ -337,6 +326,37 @@ where
     Idx: HashIndex,
     K: GraphKind,
 {
+
+    #[deprecated(since = "0.9.0", note = "use `remove_surface` instead")]
+    pub fn remove_edge<Q>(&mut self, index: &Q) -> crate::Result<HashFacet<E, K, Idx>>
+    where
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.surfaces_mut()
+            .remove(index)
+            .ok_or(crate::Error::EdgeNotFound)
+    }
+    #[deprecated(since = "0.9.0", note = "use `get_surface` instead")]
+    pub fn get_facet<Q>(&self, index: &Q) -> crate::Result<&Weight<E>>
+    where
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.facets()
+            .get(index)
+            .ok_or_else(|| crate::Error::EdgeNotFound)
+    }
+    #[deprecated(since = "0.9.0", note = "use `get_surface_mut` instead")]
+    pub fn get_facet_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut Weight<E>>
+    where
+        Q: Eq + core::hash::Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.facets_mut()
+            .get_mut(index)
+            .ok_or_else(|| crate::Error::EdgeNotFound)
+    }
     #[deprecated(since = "0.9.0", note = "use `add_surface` instead")]
     /// add a facet associated with the given edge index
     pub fn add_facet(
@@ -390,7 +410,6 @@ where
         let index = self.add_surface(vertices, Weight(weight))?;
         Ok(index)
     }
-    #[allow(deprecated)]
     #[deprecated(note = "use `add_surface", since = "0.0.8")]
     /// insert a facet associated with the given edge index
     pub fn insert_facet(&mut self, index: EdgeId<Idx>, facet: E) -> crate::Result<EdgeId<Idx>>
