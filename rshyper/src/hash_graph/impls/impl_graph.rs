@@ -57,7 +57,6 @@ where
         self.surfaces_mut().insert(edge_id, surface);
         Ok(edge_id)
     }
-
     /// add a new node with the given weight and return its index
     pub fn add_node(&mut self, weight: N) -> VertexId<Idx>
     where
@@ -85,27 +84,8 @@ where
         self.nodes_mut().clear();
         self
     }
-    /// returns the size, or order, of a particular hyperedge
-    pub fn find_order_of_edge(&self, index: &EdgeId<Idx>) -> crate::Result<usize> {
-        self.surfaces()
-            .get(index)
-            .map(|edge| edge.len())
-            .ok_or(crate::Error::EdgeNotFound)
-    }
-    /// returns the degree of a given vertex where the degree is the number of hyperedges that
-    /// contain the vertex
-    pub fn get_degree_of_node<Q>(&self, index: &Q) -> usize
-    where
-        Q: Eq + Hash,
-        VertexId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.surfaces()
-            .values()
-            .filter(|facet| facet.edge().points().contains(index))
-            .count()
-    }
     /// returns all hyperedges containing a given vertex
-    pub fn get_edges_with_vertex(&self, index: &VertexId<Idx>) -> crate::Result<Vec<EdgeId<Idx>>>
+    pub fn find_edges_with_node(&self, index: &VertexId<Idx>) -> crate::Result<Vec<EdgeId<Idx>>>
     where
         Idx: Copy,
     {
@@ -127,34 +107,6 @@ where
             .collect::<Vec<_>>();
         Ok(edges)
     }
-
-    /// returns an immutable reference to the hyperedge
-    pub fn get_surface<Q>(
-        &self,
-        index: &Q,
-    ) -> crate::Result<&crate::HyperFacet<E, VertexSet<Idx>, K, Idx>>
-    where
-        Q: Eq + Hash,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.surfaces()
-            .get(index)
-            .ok_or_else(|| crate::Error::EdgeNotFound)
-    }
-
-    pub fn get_surface_mut<Q>(
-        &mut self,
-        index: &Q,
-    ) -> crate::Result<&mut crate::HyperFacet<E, VertexSet<Idx>, K, Idx>>
-    where
-        Q: Eq + Hash,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.surfaces_mut()
-            .get_mut(index)
-            .ok_or_else(|| crate::Error::EdgeNotFound)
-    }
-
     /// retrieves the set of nodes composing the given edge
     pub fn get_edge_nodes<Q>(&self, index: &Q) -> crate::Result<Vec<&HyperNode<N, Idx>>>
     where
@@ -165,9 +117,13 @@ where
         let nodes = surface
             .points()
             .iter()
-            .map(|v| self.get_node(&v).expect("vertex not found"))
+            .map(|v| self.get_node(v).expect("vertex not found"))
             .collect::<Vec<_>>();
         Ok(nodes)
+    }
+    /// returns the number of vertices, or order, composing the hyperedge with the given id
+    pub fn get_edge_order(&self, index: &EdgeId<Idx>) -> crate::Result<usize> {
+        self.get_surface(index).map(|edge| edge.len())
     }
     /// returns the set of vertices composing the given edge
     pub fn get_edge_vertices<Q>(&self, index: &Q) -> crate::Result<&VertexSet<Idx>>
@@ -177,9 +133,49 @@ where
     {
         self.get_surface(index).map(|edge| edge.points())
     }
+    /// returns a mutable reference to the set of vertices composing the given edge
+    pub fn get_edge_vertices_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut VertexSet<Idx>>
+    where
+        Q: Eq + Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.get_surface_mut(index).map(|edge| edge.points_mut())
+    }
+    /// returns an immutable reference to the weight of a hyperedge
+    pub fn get_edge_weight<Q>(&self, index: &Q) -> crate::Result<&Weight<E>>
+    where
+        Q: Eq + Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.get_surface(index).map(|edge| edge.weight())
+    }
+    /// returns a mutable reference to the weight of a hyperedge
+    pub fn get_edge_weight_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut Weight<E>>
+    where
+        Q: Eq + Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.get_surface_mut(index).map(|edge| edge.weight_mut())
+    }
+    /// returns the degree of a given vertex where the degree is the number of hyperedges that
+    /// contain the vertex
+    pub fn get_node_degree<Q>(&self, index: &Q) -> usize
+    where
+        Q: Eq + Hash,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.surfaces()
+            .values()
+            .filter(|facet| facet.edge().points().contains(index))
+            .count()
+    }
     /// returns the weight of a particular vertex
-    #[cfg_attr(feature = "tracing", tracing::instrument(skip(self)))]
-    pub fn get_node(&self, index: &VertexId<Idx>) -> crate::Result<&HyperNode<N, Idx>> {
+    #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
+    pub fn get_node<Q>(&self, index: &Q) -> crate::Result<&HyperNode<N, Idx>>
+    where
+        Q: Eq + Hash,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
+    {
         self.nodes().get(index).ok_or(crate::Error::NodeNotFound)
     }
     /// returns a mutable reference to the weight of a vertex
@@ -192,6 +188,42 @@ where
             .get_mut(index)
             .ok_or(crate::Error::NodeNotFound)
     }
+    /// returns an immutable reference to the weight of a vertex
+    pub fn get_node_weight<Q>(&self, index: &Q) -> crate::Result<&Weight<N>>
+    where
+        Q: Eq + Hash,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.get_node(index).map(|node| node.weight())
+    }
+    /// returns a mutable reference to the weight of a vertex
+    pub fn get_node_weight_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut Weight<N>>
+    where
+        Q: Eq + Hash,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.get_node_mut(index).map(|node| node.weight_mut())
+    }
+    /// returns an immutable reference to the [`HashFacet`] associated with the given index
+    pub fn get_surface<Q>(&self, index: &Q) -> crate::Result<&HashFacet<E, K, Idx>>
+    where
+        Q: Eq + Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.surfaces()
+            .get(index)
+            .ok_or_else(|| crate::Error::EdgeNotFound)
+    }
+    /// returns a mutable reference to the [`HashFacet`] associated with the given index
+    pub fn get_surface_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut HashFacet<E, K, Idx>>
+    where
+        Q: Eq + Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.surfaces_mut()
+            .get_mut(index)
+            .ok_or_else(|| crate::Error::EdgeNotFound)
+    }
     /// merges two hyperedges into one (combining their vertices;
     ///
     /// **note:** the method requires the edge types `E` to implement the [`Add`](core::ops::Add)
@@ -200,29 +232,28 @@ where
     where
         Idx: Copy + core::ops::Add<Output = Idx> + One,
         Q: Eq + Hash,
-        E: Clone + core::ops::Add<Output = E>,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
+        for<'a> &'a E: core::ops::Add<Output = E>,
     {
-        let set1 = self
-            .surfaces_mut()
-            .remove(e1)
-            .ok_or(crate::Error::EdgeNotFound)?;
-        let set2 = self
-            .surfaces_mut()
-            .remove(e2)
-            .ok_or(crate::Error::EdgeNotFound)?;
-        let merged = set1
+        // remove the edges from the surfaces map
+        let set1 = self.remove_surface(e1)?;
+        let set2 = self.remove_surface(e2)?;
+        // merge the vertices of the two edges
+        let vertices = set1
             .points()
             .union(set2.points())
             .copied()
             .collect::<VertexSet<_>>();
-
-        let weight = set1.weight().clone() + set2.weight().clone();
-        let new_edge = self.next_edge_id();
+        // sum the weights of the two edges
+        let weight = set1.weight().view() + set2.weight().view();
+        // generate a new edge index
+        let edge_id = self.next_edge_id();
         // initialize a new facet using the merged vertices, new index, and source weight
-        let merged_facet = HyperFacet::new(new_edge, merged, weight);
-        self.surfaces_mut().insert(new_edge, merged_facet);
-        Ok(new_edge)
+        let surface = HyperFacet::new(edge_id, vertices, weight);
+        // insert the new hyperedge into the surfaces map
+        self.surfaces_mut().insert(edge_id, surface);
+        // return the new edge ID
+        Ok(edge_id)
     }
     /// returns a set of vertices that are in the hyperedge with the given id
     pub fn neighbors(&self, index: &VertexId<Idx>) -> crate::Result<VertexSet<Idx>>
@@ -296,5 +327,26 @@ where
             })
             .ok_or(crate::Error::NodeNotFound)?;
         Ok(self)
+    }
+}
+
+#[allow(deprecated)]
+impl<N, E, A, K, Idx> HashGraph<N, E, A>
+where
+    E: Eq + Hash,
+    N: Eq + Hash,
+    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    K: GraphKind,
+    Idx: Eq + RawIndex + Hash,
+{
+    #[deprecated(
+        note = "use `find_edges_with_node` instead, as it is more descriptive",
+        since = "0.6.0"
+    )]
+    pub fn get_edges_with_vertex(&self, index: &VertexId<Idx>) -> crate::Result<Vec<EdgeId<Idx>>>
+    where
+        Idx: Copy,
+    {
+        self.find_edges_with_node(index)
     }
 }

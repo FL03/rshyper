@@ -133,8 +133,8 @@ fn test_astar_with_heuristic() -> rshyper::Result<()> {
         let next = path[i + 1];
 
         // Check if these vertices are connected by any hyperedge
-        let current_edges = graph.get_edges_with_vertex(&current)?;
-        let next_edges = graph.get_edges_with_vertex(&next)?;
+        let current_edges = graph.find_edges_with_node(&current)?;
+        let next_edges = graph.find_edges_with_node(&next)?;
 
         // There should be at least one common edge between current and next
         let has_connection = current_edges
@@ -223,8 +223,8 @@ fn test_astar_complex_paths() -> rshyper::Result<()> {
 
     // Verify this is actually a valid path in the graph
     for i in 0..path.len() - 1 {
-        let current_edges = graph.get_edges_with_vertex(&path[i])?;
-        let next_edges = graph.get_edges_with_vertex(&path[i + 1])?;
+        let current_edges = graph.find_edges_with_node(&path[i])?;
+        let next_edges = graph.find_edges_with_node(&path[i + 1])?;
 
         let has_connection = current_edges
             .iter()

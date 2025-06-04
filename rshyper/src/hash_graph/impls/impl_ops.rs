@@ -47,6 +47,7 @@ where
     N: Eq + Hash,
     K: GraphKind,
     Idx: NumIndex,
+    for<'a> &'a E: core::ops::Add<Output = E>,
 {
     type Output = EdgeId<Idx>;
 
@@ -58,10 +59,11 @@ where
 impl<'a, N, E, A, K, Idx> Combine<&'a EdgeId<Idx>, &'a EdgeId<Idx>> for HashGraph<N, E, A>
 where
     A: HyperGraphAttributes<Idx = Idx, Kind = K>,
-    E: Clone + Eq + Hash + core::ops::Add<Output = E>,
+    E: Eq + Hash,
     N: Eq + Hash,
     K: GraphKind,
     Idx: NumIndex,
+    for<'b> &'b E: core::ops::Add<Output = E>,
 {
     type Output = EdgeId<Idx>;
 

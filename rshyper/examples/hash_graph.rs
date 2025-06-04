@@ -25,23 +25,28 @@ fn main() -> rshyper::Result<()> {
             edges: {
                 let e0: [v0, v1, v2] = 10;
                 let e1: [v1, v2, v3];
-                let e2: [v2, v3];
+                let _e2: [v2, v3];
             };
         }
     }
     tracing::info!("Initial graph state: {:?}", graph);
-    // Add some hyperedges
-    println!("Added hyperedge {e0}: {:?}", [v0, v1, v2]);
-    println!("Added hyperedge {e1}: {:?}", [v1, v2, v3]);
-    println!("Added hyperedge {e2}: {:?}", [v2, v3]);
+
+    let order_e1 = graph.get_edge_order(&e1)?;
+    tracing::info!("Edge {e1} has order {order_e1}");
+
+    let e0_weight = graph.get_edge_weight(&e0)?;
+    tracing::info!("Edge {e0} has weight {e0_weight}");
 
     // Get neighbors of vertex v1
     let neighbors = graph.neighbors(&v1)?;
-    println!("Neighbors of {}: {:?}", v1, neighbors);
+    tracing::info!(
+        "found {n} neighbors of {v1}: {neighbors:?}",
+        n = neighbors.len()
+    );
 
     // Get degree of vertex v1
-    let degree = graph.get_degree_of_node(&v1);
-    println!("Degree of {v1}: {degree}");
+    let degree = graph.get_node_degree(&v1);
+    println!("vertex {v1} has a degree of {degree}");
 
     // Remove a vertex
     graph.remove_vertex(&v2)?;

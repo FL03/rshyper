@@ -31,10 +31,7 @@ fn test_hash_graph() -> rshyper::Result<()> {
     let e3 = graph.add_edge(vec![v1, v2, v3])?;
 
     // the order of both edges should be equivalent
-    assert_eq!(
-        graph.find_order_of_edge(&e2)?,
-        graph.find_order_of_edge(&e3)?
-    );
+    assert_eq!(graph.get_edge_order(&e2)?, graph.get_edge_order(&e3)?);
     assert_ne!(e2, e3);
 
     // Get neighbors of vertex v1
@@ -43,12 +40,12 @@ fn test_hash_graph() -> rshyper::Result<()> {
     assert_eq!(neighbors, exp);
 
     // verify the degree of vertex v1
-    assert_eq!(graph.get_degree_of_node(&v1), 3);
+    assert_eq!(graph.get_node_degree(&v1), 3);
     // remove vertex v1
     let _ = graph.remove_vertex(&v1)?;
     // verify the hypergraph does not contain vertex v2
     assert!(!graph.contains_node(&v1));
-    assert_eq!(graph.get_degree_of_node(&v1), 0);
+    assert_eq!(graph.get_node_degree(&v1), 0);
     // return
     Ok(())
 }
@@ -62,14 +59,19 @@ fn test_merge_hash_edge() -> rshyper::Result<()> {
 
     let e1 = graph.add_surface(vec![v0, v1], Weight(10))?;
     let e2 = graph.add_surface(vec![v1, v2], Weight(20))?;
-
-    let merged = graph.merge_edges(&e1, &e2)?;
-    let hyperedge = graph.remove_surface(&merged)?;
+    // merge the two edges
+    let em = graph.merge_edges(&e1, &e2)?;
+    // verify that the two edges used to merge are no longer in the graph
+    assert!(!graph.contains_surface(&e1) && !graph.contains_surface(&e2));
+    // get the merged edge
+    let hyperedge = graph.get_surface(&em)?;
+    // check the edge contains all vertices
     assert!(
         hyperedge.contains_vertex(&v0)
             && hyperedge.contains_vertex(&v1)
             && hyperedge.contains_vertex(&v2)
     );
+    // check that the merged edge has a weight equal to the sum of the weights of the two edges
     assert_eq!(hyperedge.weight(), &30);
     Ok(())
 }

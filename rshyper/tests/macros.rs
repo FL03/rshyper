@@ -30,8 +30,8 @@ fn test_macro_for_hash_graph() -> rshyper::Result<()> {
     assert_eq!(graph.get_node(&v2)?.weight(), &20);
     assert_eq!(graph.get_node(&v3)?.weight(), &30);
 
-    assert_eq!(graph.find_order_of_edge(&e1)?, 3);
-    assert_eq!(graph.find_order_of_edge(&e2)?, 3);
+    assert_eq!(graph.get_edge_order(&e1)?, 3);
+    assert_eq!(graph.get_edge_order(&e2)?, 3);
 
     Ok(())
 }

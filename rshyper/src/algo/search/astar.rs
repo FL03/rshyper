@@ -256,7 +256,7 @@ where
             self.move_open_to_closed(&current);
 
             // Get all hyperedges containing the current vertex
-            let edges = self.graph.get_edges_with_vertex(&current)?;
+            let edges = self.graph.find_edges_with_node(&current)?;
 
             edges.iter().for_each(|edge_id| {
                 // Get all vertices in this hyperedge
