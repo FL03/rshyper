@@ -4,8 +4,8 @@
 */
 use crate::algo::search;
 use crate::hash_graph::{HashFacet, HashGraph};
-use rshyper_core::cmp::HyperNode;
 use rshyper_core::index::{EdgeId, NumIndex, RawIndex, VertexId};
+use rshyper_core::node::HyperNode;
 use rshyper_core::{GraphKind, HyperGraphAttributes};
 
 /// implementations for various algorithms and operators on the hypergraph

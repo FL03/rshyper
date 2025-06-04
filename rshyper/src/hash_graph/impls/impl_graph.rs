@@ -5,9 +5,8 @@
 use crate::hash_graph::{HashFacet, HashGraph, VertexSet};
 use crate::{GraphKind, HyperGraphAttributes};
 use num_traits::One;
-use rshyper_core::Weight;
-use rshyper_core::cmp::{HyperFacet, HyperNode};
 use rshyper_core::index::{EdgeId, RawIndex, VertexId};
+use rshyper_core::{HyperFacet, HyperNode, Weight};
 
 impl<N, E, K, Idx, A> HashGraph<N, E, A>
 where

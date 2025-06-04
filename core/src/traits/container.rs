@@ -3,22 +3,16 @@
     authors: @FL03
 */
 
-/// [`Contains`] defines a common interface for types able to verify if they contain a given
-/// key or index;
-pub trait Contains<T> {
-    type Q;
-    /// checks if the container contains the given index
-    fn contains(&self, key: &Self::Q) -> bool
-    where
-        T: core::borrow::Borrow<Self::Q>;
-}
-
 pub unsafe trait RawData {
     type Item;
+
+    private!();
 }
 
 pub trait RawContainer<T> {
     type Data<U>: RawData<Item = U> + ?Sized;
+
+    private!();
 }
 
 pub trait RawContainerMut<T>: RawContainer<T> {
@@ -45,40 +39,44 @@ pub trait Container<T>: RawContainer<T> {
 }
 
 macro_rules! raw_store {
-    ($($($name:ident)::*<$T:ident>),* $(,)?) => {
+    ($($($name:ident)::*<$T:ident> $(where $($rest:tt)*)?);* $(;)?) => {
         $(
-            raw_store!(@impl $($name)::*<$T>);
+            raw_store!(@impl impl<$T> $($name)::*<$T> $(where $($rest)*)?);
         )*
     };
-    (@impl $($name:ident)::*<$T:ident>) => {
-        unsafe impl<$T> RawData for $($name)::*<$T> {
+    (@impl impl<$($A:ident),*> $($name:ident)::*<$T:ident> $(where $($rest:tt)*)?) => {
+        unsafe impl<$($A),*> RawData for $($name)::*<$T> $(where $($rest)*)? {
             type Item = $T;
+
+            seal!();
         }
 
-        impl<$T> RawContainer<$T> for $($name)::*<$T> {
+        impl<$($A),*> RawContainer<$T> for $($name)::*<$T>  $(where $($rest)*)? {
             type Data<_T> = $($name)::*<_T>;
+
+            seal!();
         }
     };
 }
 
 raw_store! {
-    crate::Weight<T>,
+    crate::Weight<T>;
 }
 
 #[cfg(feature = "alloc")]
 raw_store! {
-    alloc::boxed::Box<T>,
-    alloc::collections::BTreeSet<T>,
-    alloc::collections::LinkedList<T>,
-    alloc::rc::Rc<T>,
-    alloc::sync::Arc<T>,
-    alloc::vec::Vec<T>,
+    alloc::boxed::Box<T>;
+    alloc::collections::BTreeSet<T>;
+    alloc::collections::LinkedList<T>;
+    alloc::rc::Rc<T>;
+    alloc::sync::Arc<T>;
+    alloc::vec::Vec<T>;
 }
 
 #[cfg(feature = "std")]
 raw_store! {
-    std::cell::Cell<T>,
-    std::collections::HashSet<K>,
+    std::cell::Cell<T>;
+    std::collections::HashSet<K>;
 }
 
 unsafe impl<T> RawData for [T]
@@ -86,14 +84,20 @@ where
     T: Sized,
 {
     type Item = T;
+
+    seal!();
 }
 
 unsafe impl<'a, T> RawData for &'a [T] {
     type Item = T;
+
+    seal!();
 }
 
 unsafe impl<'a, T> RawData for &'a mut [T] {
     type Item = T;
+
+    seal!();
 }
 
 impl<T> RawContainer<T> for [T]
@@ -101,6 +105,8 @@ where
     T: Sized,
 {
     type Data<U> = [U];
+
+    seal!();
 }
 
 impl<T> Container<T> for [T]

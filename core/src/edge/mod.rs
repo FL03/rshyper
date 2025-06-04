@@ -1,27 +1,27 @@
 /*
-    appellation: cmp <module>
+    appellation: edges <module>
     authors: @FL03
 */
-//! this module contains the various components that makeup a hypergraph.
+//! this module contains the [`HyperEdge`] and [`HyperFacet`] implementations, which are
+//! respectively used to represent unweighted and weighted hyperedges in a hypergraph.
 #[doc(inline)]
-pub use self::prelude::*;
+pub use self::{aliases::*, hyper_edge::*, hyper_facet::*};
 
 pub mod hyper_edge;
-pub mod hyper_node;
+pub mod hyper_facet;
 
 mod impls {
     pub mod impl_hyper_edge;
     pub mod impl_hyper_facet;
-    pub mod impl_hyper_node;
 }
 
 pub(crate) mod prelude {
     #[doc(inline)]
-    pub use super::aliases::*;
-    #[doc(inline)]
     pub use super::hyper_edge::*;
     #[doc(inline)]
-    pub use super::hyper_node::*;
+    pub use super::hyper_facet::*;
+    #[doc(inline)]
+    pub use super::{RawEdge, RawFacet, RawStore};
 }
 
 pub(crate) mod aliases {
@@ -59,7 +59,7 @@ pub(crate) mod aliases {
     #[cfg(feature = "alloc")]
     mod use_alloc {
         use crate::VertexId;
-        use crate::cmp::{HyperEdge, HyperFacet};
+        use crate::edge::{HyperEdge, HyperFacet};
         use alloc::collections::BTreeSet;
         use alloc::vec::Vec;
 
@@ -77,7 +77,7 @@ pub(crate) mod aliases {
     }
     #[cfg(feature = "std")]
     mod use_std {
-        use crate::cmp::{HyperEdge, HyperFacet};
+        use crate::edge::{HyperEdge, HyperFacet};
         use std::collections::HashSet;
 
         pub type VertexHSet<Idx = usize> = HashSet<crate::VertexId<Idx>>;
@@ -110,41 +110,6 @@ where
     /// returns true if there are no points.
     fn is_empty(&self) -> bool {
         self.len() == 0
-    }
-}
-/// [`RawNode`] is a trait that defines the behavior of a node in a hypergraph.
-pub trait RawNode<T> {
-    type Idx: RawIndex;
-
-    private!();
-
-    /// returns an immutable reference to the node index
-    fn index(&self) -> &VertexId<Self::Idx>;
-    /// returns an immutable reference to the node data
-    fn weight(&self) -> &Weight<T>;
-    /// returns a mutable reference to the node data
-    fn weight_mut(&mut self) -> &mut Weight<T>;
-    /// [`replace`](core::mem::replace) the weight of the node with a new one, returning the
-    /// previous value
-    fn replace_weight(&mut self, weight: Weight<T>) -> Weight<T> {
-        core::mem::replace(self.weight_mut(), weight)
-    }
-    /// overwrites the weight of the node with a new one and returns a mutable reference to
-    /// the edge.
-    fn set_weight(&mut self, weight: T) -> &mut Self {
-        self.weight_mut().set(weight);
-        self
-    }
-    /// [`swap`](core::mem::swap) the weight of the node with another weight
-    fn swap_weight(&mut self, weight: &mut Weight<T>) {
-        core::mem::swap(self.weight_mut(), weight)
-    }
-    /// [`take`](core::mem::take) the weight of the node, replacing it with a default value
-    fn take_weight(&mut self) -> Weight<T>
-    where
-        T: Default,
-    {
-        core::mem::take(self.weight_mut())
     }
 }
 /// [`RawEdge`] is a trait that defines the behavior of an edge in a hypergraph.
@@ -193,24 +158,6 @@ pub trait RawFacet<T>: RawEdge {
 /*
  ************* Implementations *************
 */
-impl<T, Idx> RawNode<T> for HyperNode<T, Idx>
-where
-    Idx: RawIndex,
-{
-    type Idx = Idx;
-
-    seal!();
-
-    fn index(&self) -> &VertexId<Idx> {
-        &self.index
-    }
-    fn weight(&self) -> &Weight<T> {
-        self.weight()
-    }
-    fn weight_mut(&mut self) -> &mut Weight<T> {
-        self.weight_mut()
-    }
-}
 
 macro_rules! impl_raw_store {
     (

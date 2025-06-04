@@ -14,6 +14,10 @@ pub type UndirectedAttributes<Idx> = Attributes<Idx, crate::Undirected>;
 pub trait HyperGraphAttributes: 'static + Send + Sync + core::fmt::Debug {
     type Idx: RawIndex;
     type Kind: GraphKind;
+
+    fn new() -> Self
+    where
+        Self: Sized;
 }
 
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -95,4 +99,8 @@ where
 {
     type Idx = I;
     type Kind = K;
+
+    fn new() -> Self {
+        Attributes::new()
+    }
 }

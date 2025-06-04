@@ -2,7 +2,7 @@
     appellation: impl_hyper_facet <module>
     authors: @FL03
 */
-use crate::cmp::{HyperEdge, HyperFacet, RawStore};
+use crate::edge::{HyperEdge, HyperFacet, RawStore};
 use crate::index::{EdgeId, RawIndex, VertexId};
 use crate::{GraphKind, Weight};
 
@@ -61,7 +61,7 @@ where
             weight,
         }
     }
-
+    /// returns true if the edge contains the given vertex
     pub fn contains_vertex<Q>(&self, index: &Q) -> bool
     where
         VertexId<Idx>: core::borrow::Borrow<Q>,
@@ -71,10 +71,8 @@ where
     {
         self.edge().contains_vertex(index)
     }
-    pub fn len(&self) -> usize
-    where
-        S: crate::cmp::RawStore<Idx>,
-    {
+    /// returns the number of nodes in the edge
+    pub fn len(&self) -> usize {
         self.edge().len()
     }
     /// returns an immutable reference to the edge

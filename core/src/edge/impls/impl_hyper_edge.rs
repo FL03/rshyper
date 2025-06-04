@@ -2,7 +2,7 @@
     appellation: impl_edge <module>
     authors: @FL03
 */
-use crate::cmp::{HyperEdge, RawStore};
+use crate::edge::{HyperEdge, RawStore};
 use crate::index::{EdgeId, RawIndex, VertexId};
 use crate::{Directed, GraphKind, Undirected};
 
@@ -85,7 +85,7 @@ where
     /// returns the number of vertices in the edge
     pub fn len(&self) -> usize
     where
-        S: crate::cmp::RawStore<Idx>,
+        S: RawStore<Idx>,
     {
         self.points().len()
     }
