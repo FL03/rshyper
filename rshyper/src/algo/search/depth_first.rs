@@ -5,7 +5,7 @@
 use super::{Search, Traversal};
 use crate::hash_graph::HashGraph;
 use rshyper_core::index::{HashIndex, NumIndex, VertexId};
-use rshyper_core::{GraphKind, HyperGraph, HyperGraphAttributes};
+use rshyper_core::{GraphKind, HyperGraph, GraphAttributes};
 use std::collections::HashSet;
 
 /// Depth-First Traversal algorithm for hypergraphs
@@ -95,7 +95,7 @@ where
 impl<'a, N, E, A, K, Idx> Search<VertexId<Idx>>
     for DepthFirstTraversal<'a, N, E, HashGraph<N, E, A>>
 where
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     N: Default + Eq + core::hash::Hash,
     E: Default + Eq + core::hash::Hash,
     K: GraphKind,

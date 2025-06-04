@@ -7,12 +7,12 @@ use crate::hash_graph::{HashFacet, HashGraph};
 use core::hash::Hash;
 use rshyper_core::index::{EdgeId, NumIndex, RawIndex, VertexId};
 use rshyper_core::node::HyperNode;
-use rshyper_core::{Combine, GraphKind, HyperGraphAttributes};
+use rshyper_core::{Combine, GraphAttributes, GraphKind};
 
 /// implementations for various algorithms and operators on the hypergraph
 impl<N, E, A, K, Idx> HashGraph<N, E, A>
 where
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     E: Eq + Hash,
     N: Eq + Hash,
     K: GraphKind,
@@ -42,7 +42,7 @@ where
 
 impl<N, E, A, K, Idx> Combine<EdgeId<Idx>, EdgeId<Idx>> for HashGraph<N, E, A>
 where
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     E: Clone + Eq + Hash + core::ops::Add<Output = E>,
     N: Eq + Hash,
     K: GraphKind,
@@ -58,7 +58,7 @@ where
 
 impl<'a, N, E, A, K, Idx> Combine<&'a EdgeId<Idx>, &'a EdgeId<Idx>> for HashGraph<N, E, A>
 where
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     E: Eq + Hash,
     N: Eq + Hash,
     K: GraphKind,
@@ -78,7 +78,7 @@ where
 
 impl<N, E, A, K, Idx> core::ops::Index<&EdgeId<Idx>> for HashGraph<N, E, A>
 where
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     E: Eq + Hash,
     N: Eq + Hash,
     K: GraphKind,
@@ -93,7 +93,7 @@ where
 
 impl<N, E, A, K, Idx> core::ops::IndexMut<&EdgeId<Idx>> for HashGraph<N, E, A>
 where
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     E: Eq + Hash,
     N: Eq + Hash,
     K: GraphKind,
@@ -106,7 +106,7 @@ where
 
 impl<N, E, A, K, Idx> core::ops::Index<&VertexId<Idx>> for HashGraph<N, E, A>
 where
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     E: Eq + Hash,
     N: Eq + Hash,
     K: GraphKind,
@@ -121,7 +121,7 @@ where
 
 impl<N, E, A, K, Idx> core::ops::IndexMut<&VertexId<Idx>> for HashGraph<N, E, A>
 where
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     E: Eq + Hash,
     N: Eq + Hash,
     K: GraphKind,

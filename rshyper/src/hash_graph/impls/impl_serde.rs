@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use crate::hash_graph::HashGraph;
-use crate::{GraphKind, HyperGraphAttributes, RawIndex};
+use crate::{GraphKind, GraphAttributes, RawIndex};
 use core::hash::Hash;
 use serde::de::{Deserialize, DeserializeOwned, MapAccess, Visitor};
 use serde::ser::Serialize;
@@ -12,7 +12,7 @@ const FIELDS: &'static [&'static str] = &["nodes", "surfaces", "position", "_att
 
 impl<'a, N, E, A, K, Idx> Deserialize<'a> for HashGraph<N, E, A>
 where
-    A: HyperGraphAttributes<Kind = K, Idx = Idx> + DeserializeOwned,
+    A: GraphAttributes<Kind = K, Idx = Idx> + DeserializeOwned,
     N: DeserializeOwned + Eq + Hash,
     E: DeserializeOwned + Eq + Hash,
     Idx: Eq + Hash + RawIndex + DeserializeOwned,
@@ -34,7 +34,7 @@ where
 
 impl<N, E, A, K, Idx> Serialize for HashGraph<N, E, A>
 where
-    A: HyperGraphAttributes<Kind = K, Idx = Idx> + Serialize,
+    A: GraphAttributes<Kind = K, Idx = Idx> + Serialize,
     N: Serialize + Eq + Hash,
     E: Serialize + Eq + Hash,
     Idx: Eq + Hash + RawIndex + Serialize,
@@ -60,7 +60,7 @@ struct HashGraphVisitor<N, E, A> {
 
 impl<'de, N, E, A, K, Idx> Visitor<'de> for HashGraphVisitor<N, E, A>
 where
-    A: HyperGraphAttributes<Kind = K, Idx = Idx> + DeserializeOwned,
+    A: GraphAttributes<Kind = K, Idx = Idx> + DeserializeOwned,
     N: DeserializeOwned + Eq + Hash,
     E: DeserializeOwned + Eq + Hash,
     Idx: Eq + Hash + RawIndex + DeserializeOwned,

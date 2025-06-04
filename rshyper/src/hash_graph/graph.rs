@@ -6,7 +6,7 @@ use super::aliases::*;
 
 use rshyper_core::GraphKind;
 use rshyper_core::index::{EdgeId, IndexCursor, RawIndex, VertexId};
-use rshyper_core::{HyperGraphAttributes, NumIndex};
+use rshyper_core::{GraphAttributes, NumIndex};
 
 /// a type alias for a [directed](crate::Directed) [`HashGraph`]
 pub type DirectedHashGraph<N, E, Idx = usize> = HashGraph<N, E, crate::DirectedAttributes<Idx>>;
@@ -17,7 +17,7 @@ pub type UndirectedHashGraph<N, E, Idx = usize> = HashGraph<N, E, crate::Undirec
 #[derive(Clone, Debug, Default)]
 pub struct HashGraph<N = (), E = (), A = crate::UndirectedAttributes<usize>>
 where
-    A: HyperGraphAttributes,
+    A: GraphAttributes,
     A::Idx: Eq + core::hash::Hash,
 {
     /// the `nodes` of a hypergraph are the vertices, each identified by a `VertexId` and
@@ -36,7 +36,7 @@ impl<N, E, K, Idx, A> HashGraph<N, E, A>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
     Idx: Eq + RawIndex + core::hash::Hash,
 {
@@ -224,7 +224,7 @@ impl<N, E, K, Idx, A> RawHyperGraph<N, E> for HashGraph<N, E, A>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
     Idx: Eq + RawIndex + core::hash::Hash,
 {
@@ -236,7 +236,7 @@ impl<N, E, K, Idx, A> HyperGraph<N, E> for HashGraph<N, E, A>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
     Idx: NumIndex,
 {

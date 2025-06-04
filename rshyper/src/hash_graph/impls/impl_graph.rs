@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use crate::hash_graph::{HashFacet, HashGraph, VertexSet};
-use crate::{GraphKind, HyperGraphAttributes};
+use crate::{GraphKind, GraphAttributes};
 use core::hash::Hash;
 use num_traits::One;
 use rshyper_core::index::{EdgeId, RawIndex, VertexId};
@@ -13,7 +13,7 @@ impl<N, E, A, K, Idx> HashGraph<N, E, A>
 where
     E: Eq + Hash,
     N: Eq + Hash,
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
     Idx: RawIndex + Eq + Hash,
 {
@@ -352,7 +352,7 @@ impl<N, E, A, K, Idx> HashGraph<N, E, A>
 where
     E: Eq + Hash,
     N: Eq + Hash,
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
     Idx: Eq + RawIndex + Hash,
 {

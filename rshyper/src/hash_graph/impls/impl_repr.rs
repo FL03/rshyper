@@ -4,7 +4,7 @@
 */
 use crate::hash_graph::{DirectedHashGraph, HashGraph, UndirectedHashGraph};
 use crate::index::{RawIndex, VertexId};
-use crate::{GraphKind, HyperGraphAttributes};
+use crate::{GraphKind, GraphAttributes};
 use core::hash::Hash;
 
 impl<N, E, Idx> DirectedHashGraph<N, E, Idx>
@@ -38,7 +38,7 @@ where
 
 impl<E, A> HashGraph<(), E, A>
 where
-    A: HyperGraphAttributes,
+    A: GraphAttributes,
     E: Eq + Hash,
     A::Idx: Eq + Hash,
 {
@@ -52,7 +52,7 @@ where
 
 impl<N, E, A, K, Idx> HashGraph<Option<N>, E, A>
 where
-    A: HyperGraphAttributes<Kind = K, Idx = Idx>,
+    A: GraphAttributes<Kind = K, Idx = Idx>,
     E: Eq + Hash,
     N: Eq + Hash,
     K: GraphKind,

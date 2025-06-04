@@ -4,7 +4,7 @@
 */
 use crate::hash_graph::HashGraph;
 use rshyper_core::index::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphKind, HyperGraphAttributes};
+use rshyper_core::{GraphKind, GraphAttributes};
 use std::collections::{HashSet, VecDeque};
 
 use super::{Search, Traversal};
@@ -12,7 +12,7 @@ use super::{Search, Traversal};
 /// Breadth-First Traversal algorithm for hypergraphs
 pub struct BreadthFirstTraversal<'a, N, E, A>
 where
-    A: HyperGraphAttributes,
+    A: GraphAttributes,
     A::Idx: RawIndex + Eq + core::hash::Hash,
 {
     pub(crate) graph: &'a HashGraph<N, E, A>,
@@ -24,7 +24,7 @@ impl<'a, N, E, A, K, Idx> BreadthFirstTraversal<'a, N, E, A>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
     Idx: RawIndex + Eq + core::hash::Hash,
 {
@@ -69,7 +69,7 @@ where
 
 impl<'a, N, E, A, K, Idx> Search<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, A>
 where
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
     K: GraphKind,
@@ -117,7 +117,7 @@ where
 
 impl<'a, N, E, A, K, Idx> Traversal<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, A>
 where
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
     K: GraphKind,

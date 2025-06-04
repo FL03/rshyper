@@ -10,7 +10,7 @@ pub(crate) mod priority_node;
 use super::{Search, Traversal};
 use crate::hash_graph::{HashGraph, VertexSet};
 use rshyper_core::index::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphKind, HyperGraphAttributes};
+use rshyper_core::{GraphKind, GraphAttributes};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 
 /// A simple trait defining a common interface for heuristic functions compatible with the
@@ -37,7 +37,7 @@ where
 pub struct AStarSearch<'a, N, E, A, F>
 where
     F: HeuristicFunc<A::Idx>,
-    A: HyperGraphAttributes,
+    A: GraphAttributes,
     A::Idx: Eq + core::hash::Hash,
 {
     pub(crate) graph: &'a HashGraph<N, E, A>,
@@ -53,7 +53,7 @@ impl<'a, N, E, A, F, K, Idx> AStarSearch<'a, N, E, A, F>
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     F: HeuristicFunc<Idx>,
     K: GraphKind,
     Idx: RawIndex + Eq + core::hash::Hash,
@@ -194,7 +194,7 @@ where
 
 impl<'a, N, E, F, A, K, Idx> AStarSearch<'a, N, E, A, F>
 where
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
     F: HeuristicFunc<Idx, Output = f64>,
@@ -327,7 +327,7 @@ where
 
 impl<'a, N, E, F, A> Traversal<VertexId<A::Idx>> for AStarSearch<'a, N, E, A, F>
 where
-    A: HyperGraphAttributes,
+    A: GraphAttributes,
     A::Idx: Eq + core::hash::Hash,
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
@@ -348,7 +348,7 @@ impl<'a, N, E, F, A, K, Idx> Search<VertexId<Idx>> for AStarSearch<'a, N, E, A, 
 where
     E: Eq + core::hash::Hash,
     N: Eq + core::hash::Hash,
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     F: HeuristicFunc<Idx, Output = f64>,
     K: GraphKind,
     Idx: NumIndex,
