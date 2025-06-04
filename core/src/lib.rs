@@ -42,7 +42,6 @@ pub mod traits {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    pub mod container;
     pub mod contains;
     pub mod convert;
     pub mod hyper_graph;
@@ -50,8 +49,6 @@ pub mod traits {
     pub mod weighted;
 
     pub(crate) mod prelude {
-        #[doc(inline)]
-        pub use super::container::*;
         #[doc(inline)]
         pub use super::contains::*;
         #[doc(inline)]

@@ -163,64 +163,42 @@ pub trait RawFacet<T>: RawEdge {
 macro_rules! impl_raw_store {
     (
         $(
-            $p:ident
-        );* $(;)?
+            $($p:ident)::+
+        ),* $(,)?
     ) => {
         $(
-            impl_raw_store!(@impl $p);
+            impl_raw_store!(@impl $($p)::+);
         )*
     };
-    (@impl $p:ident) => {
-        impl<Idx> RawStore<Idx> for $p<VertexId<Idx>>
-        where
-            Idx: RawIndex,
-        {
-            type Store<_T> = $p<_T>;
-
-            seal!();
-
-            fn len(&self) -> usize {
-                <$p<VertexId<Idx>>>::len(self)
-            }
-
-            fn is_empty(&self) -> bool {
-                <$p<VertexId<Idx>>>::is_empty(self)
-            }
-        }
-    };
     (@impl $($p:ident)::+) => {
-        impl<Idx> RawStore<Idx> for $($p)::*<VertexId<Idx>>
+        impl<Idx> RawStore<Idx> for $($p)::+<VertexId<Idx>>
         where
             Idx: RawIndex,
         {
-            type Store<_T> = $($p)::*<_T>;
+            type Store<_T> = $($p)::+<_T>;
 
             seal!();
 
             fn len(&self) -> usize {
-                <$($p)::*<VertexId<Idx>>>::len(self)
+                <$($p)::+<VertexId<Idx>>>::len(self)
             }
 
             fn is_empty(&self) -> bool {
-                <$($p)::*<VertexId<Idx>>>::is_empty(self)
+                <$($p)::+<VertexId<Idx>>>::is_empty(self)
             }
         }
     };
 }
-#[cfg(feature = "alloc")]
-use alloc::{collections::BTreeSet, vec::Vec};
-#[cfg(feature = "std")]
-use std::collections::HashSet;
 
 #[cfg(feature = "std")]
 impl_raw_store! {
-    HashSet;
+    std::collections::HashSet
 }
 
 #[cfg(feature = "alloc")]
 impl_raw_store! {
-    BTreeSet;
-    Vec;
+    alloc::collections::BTreeSet,
+    alloc::vec::Vec,
 }
 
 impl<'a, Idx> RawStore<Idx> for &'a [VertexId<Idx>]
