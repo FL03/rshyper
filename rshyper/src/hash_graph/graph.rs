@@ -29,7 +29,7 @@ where
     /// available indices for edges and vertices.
     pub(crate) position: IndexCursor<A::Idx>,
     /// the attributes of a graph define its _kind_ and the type of index used
-    pub(crate) _attrs: core::marker::PhantomData<A>,
+    pub(crate) _attrs: A,
 }
 
 impl<N, E, K, Idx, A> HashGraph<N, E, A>
@@ -49,7 +49,7 @@ where
             surfaces: SurfaceMap::new(),
             nodes: NodeMap::new(),
             position: IndexCursor::default(),
-            _attrs: core::marker::PhantomData::<A>,
+            _attrs: A::new(),
         }
     }
     /// creates a new instance of the hypergraph with the given capacity for edges and nodes
@@ -61,7 +61,7 @@ where
             surfaces: SurfaceMap::with_capacity(edges),
             nodes: NodeMap::with_capacity(nodes),
             position: IndexCursor::default(),
-            _attrs: core::marker::PhantomData::<A>,
+            _attrs: A::new(),
         }
     }
     /// returns am immutable reference to the nodes

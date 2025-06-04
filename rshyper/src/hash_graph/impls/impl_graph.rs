@@ -15,7 +15,7 @@ where
     N: Eq + Hash,
     A: HyperGraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
-    Idx: Eq + RawIndex + Hash,
+    Idx: RawIndex + Eq + Hash,
 {
     /// add a new hyperedge composed of the given vertices, using the default weight, and
     /// returns the corresponding id
@@ -228,6 +228,7 @@ where
     ///
     /// **note:** the method requires the edge types `E` to implement the [`Add`](core::ops::Add)
     /// trait
+    #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
     pub fn merge_edges<Q>(&mut self, e1: &Q, e2: &Q) -> crate::Result<EdgeId<Idx>>
     where
         Idx: Copy + core::ops::Add<Output = Idx> + One,
@@ -256,6 +257,7 @@ where
         Ok(edge_id)
     }
     /// returns a set of vertices that are in the hyperedge with the given id
+    #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
     pub fn neighbors(&self, index: &VertexId<Idx>) -> crate::Result<VertexSet<Idx>>
     where
         Idx: Copy,
@@ -281,8 +283,8 @@ where
         Ok(neighbors)
     }
     /// remove the hyperedge with the given id
-    #[cfg_attr(feature = "tracing", tracing::instrument(skip(self, index)))]
     #[inline]
+    #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
     pub fn remove_surface<Q>(&mut self, index: &Q) -> crate::Result<HashFacet<E, K, Idx>>
     where
         Q: Eq + Hash,
@@ -293,8 +295,8 @@ where
             .ok_or(crate::Error::EdgeNotFound)
     }
     /// removes the vertex with the given id and all of its associated hyperedges
-    #[cfg_attr(feature = "tracing", tracing::instrument(skip(self, index)))]
     #[inline]
+    #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
     pub fn remove_vertex<Q>(&mut self, index: &Q) -> crate::Result<HyperNode<N, Idx>>
     where
         Q: Eq + core::fmt::Debug + Hash,
@@ -312,20 +314,35 @@ where
             })
             .ok_or(crate::Error::NodeNotFound)
     }
+    /// update the weight of a given edge
+    #[inline]
+    #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
+    pub fn set_edge_weight<Q>(&mut self, index: &Q, weight: Weight<E>) -> crate::Result<&mut Self>
+    where
+        Q: Eq + Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.get_edge_weight_mut(index)
+            .map(|w| {
+                *w = weight;
+            })
+            .map_err(|_| crate::Error::EdgeNotFound)?;
+        Ok(self)
+    }
     /// update the weight of a given vertex
     #[inline]
-    pub fn set_vertex_weight<Q>(&mut self, index: &Q, weight: N) -> crate::Result<&mut Self>
+    #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
+    pub fn set_node_weight<Q>(&mut self, index: &Q, weight: Weight<N>) -> crate::Result<&mut Self>
     where
         Q: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         let _ = self
-            .nodes_mut()
-            .get_mut(index)
-            .map(|node| {
-                node.set_weight(weight);
+            .get_node_weight_mut(index)
+            .map(|w| {
+                *w = weight;
             })
-            .ok_or(crate::Error::NodeNotFound)?;
+            .map_err(|_| crate::Error::NodeNotFound)?;
         Ok(self)
     }
 }
@@ -340,13 +357,24 @@ where
     Idx: Eq + RawIndex + Hash,
 {
     #[deprecated(
-        note = "use `find_edges_with_node` instead, as it is more descriptive",
-        since = "0.6.0"
+        note = "use `find_edges_with_node` instead; this method will be removed in a future release",
+        since = "0.0.10"
     )]
     pub fn get_edges_with_vertex(&self, index: &VertexId<Idx>) -> crate::Result<Vec<EdgeId<Idx>>>
     where
         Idx: Copy,
     {
         self.find_edges_with_node(index)
+    }
+    #[deprecated(
+        note = "use `set_node_weight` instead, as it is more descriptive",
+        since = "0.0.10"
+    )]
+    pub fn update_vertex_weight<Q>(&mut self, index: &Q, weight: N) -> crate::Result<&mut Self>
+    where
+        Q: Eq + Hash,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.set_node_weight(index, Weight(weight))
     }
 }
