@@ -4,17 +4,18 @@
 */
 use crate::hash_graph::{HashFacet, HashGraph, VertexSet};
 use crate::{GraphKind, HyperGraphAttributes};
+use core::hash::Hash;
 use num_traits::One;
 use rshyper_core::index::{EdgeId, RawIndex, VertexId};
 use rshyper_core::{HyperFacet, HyperNode, Weight};
 
-impl<N, E, K, Idx, A> HashGraph<N, E, A>
+impl<N, E, A, K, Idx> HashGraph<N, E, A>
 where
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
+    E: Eq + Hash,
+    N: Eq + Hash,
     A: HyperGraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
-    Idx: Eq + RawIndex + core::hash::Hash,
+    Idx: Eq + RawIndex + Hash,
 {
     /// add a new hyperedge composed of the given vertices, using the default weight, and
     /// returns the corresponding id
@@ -30,7 +31,7 @@ where
     pub fn add_surface<I>(&mut self, vertices: I, weight: Weight<E>) -> crate::Result<EdgeId<Idx>>
     where
         I: IntoIterator<Item = VertexId<Idx>>,
-        E: Eq + core::hash::Hash,
+        E: Eq + Hash,
         Idx: Copy + core::ops::Add<Output = Idx> + One,
     {
         // collect the vertices into a HashSet to ensure uniqueness
@@ -95,7 +96,7 @@ where
     /// contain the vertex
     pub fn get_degree_of_node<Q>(&self, index: &Q) -> usize
     where
-        Q: Eq + core::hash::Hash,
+        Q: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces()
@@ -133,7 +134,7 @@ where
         index: &Q,
     ) -> crate::Result<&crate::HyperFacet<E, VertexSet<Idx>, K, Idx>>
     where
-        Q: Eq + core::hash::Hash,
+        Q: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces()
@@ -146,7 +147,7 @@ where
         index: &Q,
     ) -> crate::Result<&mut crate::HyperFacet<E, VertexSet<Idx>, K, Idx>>
     where
-        Q: Eq + core::hash::Hash,
+        Q: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces_mut()
@@ -157,7 +158,7 @@ where
     /// retrieves the set of nodes composing the given edge
     pub fn get_edge_nodes<Q>(&self, index: &Q) -> crate::Result<Vec<&HyperNode<N, Idx>>>
     where
-        Q: Eq + core::hash::Hash,
+        Q: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         let surface = self.get_surface(&index)?;
@@ -171,7 +172,7 @@ where
     /// returns the set of vertices composing the given edge
     pub fn get_edge_vertices<Q>(&self, index: &Q) -> crate::Result<&VertexSet<Idx>>
     where
-        Q: Eq + core::hash::Hash,
+        Q: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_surface(index).map(|edge| edge.points())
@@ -184,7 +185,7 @@ where
     /// returns a mutable reference to the weight of a vertex
     pub fn get_node_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut HyperNode<N, Idx>>
     where
-        Q: Eq + core::hash::Hash,
+        Q: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.nodes_mut()
@@ -198,7 +199,7 @@ where
     pub fn merge_edges<Q>(&mut self, e1: &Q, e2: &Q) -> crate::Result<EdgeId<Idx>>
     where
         Idx: Copy + core::ops::Add<Output = Idx> + One,
-        Q: Eq + core::hash::Hash,
+        Q: Eq + Hash,
         E: Clone + core::ops::Add<Output = E>,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
@@ -253,7 +254,7 @@ where
     #[inline]
     pub fn remove_surface<Q>(&mut self, index: &Q) -> crate::Result<HashFacet<E, K, Idx>>
     where
-        Q: Eq + core::hash::Hash,
+        Q: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces_mut()
@@ -265,7 +266,7 @@ where
     #[inline]
     pub fn remove_vertex<Q>(&mut self, index: &Q) -> crate::Result<HyperNode<N, Idx>>
     where
-        Q: Eq + core::fmt::Debug + core::hash::Hash,
+        Q: Eq + core::fmt::Debug + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         #[cfg(feature = "tracing")]
@@ -284,7 +285,7 @@ where
     #[inline]
     pub fn set_vertex_weight<Q>(&mut self, index: &Q, weight: N) -> crate::Result<&mut Self>
     where
-        Q: Eq + core::hash::Hash,
+        Q: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         let _ = self

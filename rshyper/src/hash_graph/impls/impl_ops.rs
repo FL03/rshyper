@@ -4,18 +4,19 @@
 */
 use crate::algo::search;
 use crate::hash_graph::{HashFacet, HashGraph};
+use core::hash::Hash;
 use rshyper_core::index::{EdgeId, NumIndex, RawIndex, VertexId};
 use rshyper_core::node::HyperNode;
-use rshyper_core::{GraphKind, HyperGraphAttributes};
+use rshyper_core::{Combine, GraphKind, HyperGraphAttributes};
 
 /// implementations for various algorithms and operators on the hypergraph
-impl<N, E, K, Idx, A> HashGraph<N, E, A>
+impl<N, E, A, K, Idx> HashGraph<N, E, A>
 where
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
     A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    E: Eq + Hash,
+    N: Eq + Hash,
     K: GraphKind,
-    Idx: Eq + RawIndex + core::hash::Hash,
+    Idx: Eq + RawIndex + Hash,
 {
     /// search the hypergraph using the A* algorithm with the given heuristic function
     pub fn astar<F>(&self, heuristic: F) -> search::AStarSearch<'_, N, E, A, F>
@@ -39,13 +40,47 @@ where
     }
 }
 
-impl<N, E, K, Idx, A> core::ops::Index<&EdgeId<Idx>> for HashGraph<N, E, A>
+impl<N, E, A, K, Idx> Combine<EdgeId<Idx>, EdgeId<Idx>> for HashGraph<N, E, A>
 where
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
     A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    E: Clone + Eq + Hash + core::ops::Add<Output = E>,
+    N: Eq + Hash,
     K: GraphKind,
-    Idx: Eq + RawIndex + core::hash::Hash,
+    Idx: NumIndex,
+{
+    type Output = EdgeId<Idx>;
+
+    fn combine(&mut self, src: EdgeId<Idx>, tgt: EdgeId<Idx>) -> crate::Result<Self::Output> {
+        self.merge_edges(&src, &tgt)
+    }
+}
+
+impl<'a, N, E, A, K, Idx> Combine<&'a EdgeId<Idx>, &'a EdgeId<Idx>> for HashGraph<N, E, A>
+where
+    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    E: Clone + Eq + Hash + core::ops::Add<Output = E>,
+    N: Eq + Hash,
+    K: GraphKind,
+    Idx: NumIndex,
+{
+    type Output = EdgeId<Idx>;
+
+    fn combine(
+        &mut self,
+        src: &'a EdgeId<Idx>,
+        tgt: &'a EdgeId<Idx>,
+    ) -> crate::Result<Self::Output> {
+        self.merge_edges(src, tgt)
+    }
+}
+
+impl<N, E, A, K, Idx> core::ops::Index<&EdgeId<Idx>> for HashGraph<N, E, A>
+where
+    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    E: Eq + Hash,
+    N: Eq + Hash,
+    K: GraphKind,
+    Idx: Eq + RawIndex + Hash,
 {
     type Output = HashFacet<E, K, Idx>;
 
@@ -54,26 +89,26 @@ where
     }
 }
 
-impl<N, E, K, Idx, A> core::ops::IndexMut<&EdgeId<Idx>> for HashGraph<N, E, A>
+impl<N, E, A, K, Idx> core::ops::IndexMut<&EdgeId<Idx>> for HashGraph<N, E, A>
 where
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
     A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    E: Eq + Hash,
+    N: Eq + Hash,
     K: GraphKind,
-    Idx: Eq + RawIndex + core::hash::Hash,
+    Idx: Eq + RawIndex + Hash,
 {
     fn index_mut(&mut self, index: &EdgeId<Idx>) -> &mut Self::Output {
         self.get_surface_mut(index).expect("Edge not found")
     }
 }
 
-impl<N, E, K, Idx, A> core::ops::Index<&VertexId<Idx>> for HashGraph<N, E, A>
+impl<N, E, A, K, Idx> core::ops::Index<&VertexId<Idx>> for HashGraph<N, E, A>
 where
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
     A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    E: Eq + Hash,
+    N: Eq + Hash,
     K: GraphKind,
-    Idx: Eq + RawIndex + core::hash::Hash,
+    Idx: Eq + RawIndex + Hash,
 {
     type Output = HyperNode<N, Idx>;
 
@@ -82,13 +117,13 @@ where
     }
 }
 
-impl<N, E, K, Idx, A> core::ops::IndexMut<&VertexId<Idx>> for HashGraph<N, E, A>
+impl<N, E, A, K, Idx> core::ops::IndexMut<&VertexId<Idx>> for HashGraph<N, E, A>
 where
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
     A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    E: Eq + Hash,
+    N: Eq + Hash,
     K: GraphKind,
-    Idx: Eq + RawIndex + core::hash::Hash,
+    Idx: Eq + RawIndex + Hash,
 {
     fn index_mut(&mut self, index: &VertexId<Idx>) -> &mut Self::Output {
         self.get_node_mut(index).expect("Node not found")

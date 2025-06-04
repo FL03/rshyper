@@ -45,6 +45,7 @@ pub mod traits {
     pub mod contains;
     pub mod convert;
     pub mod hyper_graph;
+    pub mod merge;
     pub mod transform;
     pub mod weighted;
 
@@ -56,6 +57,8 @@ pub mod traits {
         #[doc(inline)]
         pub use super::hyper_graph::*;
         #[doc(inline)]
+        pub use super::merge::*;
+        #[doc(inline)]
         pub use super::transform::*;
         #[doc(inline)]
         pub use super::weighted::*;
@@ -63,7 +66,7 @@ pub mod traits {
 }
 
 pub mod types {
-    //! this module contains various types
+    //! this module provides various primitive types used throughout the library such as [Weight]
     #[doc(inline)]
     pub use self::prelude::*;
 
