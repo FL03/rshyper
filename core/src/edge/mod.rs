@@ -77,10 +77,11 @@ pub(crate) mod aliases {
     }
     #[cfg(feature = "std")]
     mod use_std {
+        use crate::VertexId;
         use crate::edge::{HyperEdge, HyperFacet};
         use std::collections::HashSet;
 
-        pub type VertexHSet<Idx = usize> = HashSet<crate::VertexId<Idx>>;
+        pub type VertexHSet<Idx = usize> = HashSet<VertexId<Idx>>;
         /// a type alias for an [`HyperEdge`] whose _vertices_ are stored in a [`HashSet`]
         pub type EdgeHashSet<K, Idx = usize> = HyperEdge<VertexHSet<Idx>, K, Idx>;
         /// a type alias for an [`HyperFacet`] whose _vertices_ are stored in a [`HashSet`]
