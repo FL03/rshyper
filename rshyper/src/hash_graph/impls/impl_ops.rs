@@ -26,7 +26,7 @@ where
         search::AStarSearch::new(self, heuristic)
     }
     /// search the hypergraph using the depth-first traversal algorithm
-    pub fn dft(&self) -> search::DepthFirstTraversal<'_, N, E, Self>
+    pub fn dft(&self) -> search::DepthFirstTraversal<'_, N, E, A, Self>
     where
         N: Default,
         E: Default,
@@ -35,7 +35,12 @@ where
         search::DepthFirstTraversal::new(self)
     }
     /// search the hypergraph using the breadth-first traversal algorithm
-    pub fn bft(&self) -> search::BreadthFirstTraversal<'_, N, E, A> {
+    pub fn bft(&self) -> search::BreadthFirstTraversal<'_, N, E, A, Self>
+    where
+        N: Default,
+        E: Default,
+        Idx: NumIndex,
+    {
         search::BreadthFirstTraversal::from_hypergraph(self)
     }
 }

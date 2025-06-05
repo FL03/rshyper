@@ -14,9 +14,10 @@ _**Warning: The library is currently in the early stages of development and is n
 
 Before diving in to the technical side of things, let's start by defining several terms commonly used in the definition and implementation of hypergraphs.
 
-- **edge**: an edge is a connection between two or more vertices.
+- **edge**: here, we consider a hyperedge to specifically define
 - **facet**: a facet materializes a hyperedge by associating some weight with the edge.
 - **node**: a node is a complete _vertex_ in that it is considered to be weighted.
+- **surface**:here, the terms surface and facet are used interchangeably, and they refer to the same concept of a hyperedge with an associated weight.
 - **vertex**: a vertex can be understood as a _point_ in space that is used to define edges within a hypergraph.
 
 ### Hypergraphs
@@ -28,9 +29,14 @@ Formally, a hypergraph is defined as a pair $H = (V, E)$ where:
 - $V$ is a set of vertices (or nodes).
 - $E$ is a set of hyperedges, where each hyperedge is a subset of $V$ that can contain one or more vertices.
 
+#### Properties
+
+- **Non-binary edges**: Unlike traditional graphs where edges connect exactly two vertices, hyperedges can connect any number of vertices.
+- **Flexibility**: Hypergraphs can represent complex relationships and structures that are not easily captured by binary graphs.
+
 ## Features
 
-- [x] `hash` - A hash-based hypergraph implementation.
+- [x] `hash_graph` - A hash-based hypergraph implementation.
 
 ## Usage
 
@@ -38,7 +44,10 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies.rshyper]
-features = []
+features = [
+    "hash_graph",
+    "macros",
+]
 version = "0.0.x"
 ```
 

@@ -3,37 +3,42 @@
     Contrib: @FL03
 */
 use crate::hash_graph::HashGraph;
+use rshyper_core::edge::RawEdge;
 use rshyper_core::index::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphAttributes, GraphKind};
+use rshyper_core::{GraphAttributes, GraphKind, HyperGraph};
 use std::collections::{HashSet, VecDeque};
 
 use super::{Search, Traversal};
 
 /// Breadth-First Traversal algorithm for hypergraphs
-pub struct BreadthFirstTraversal<'a, N, E, A>
+pub struct BreadthFirstTraversal<'a, N, E, A, H = HashGraph<N, E>>
 where
     A: GraphAttributes,
+    H: HyperGraph<N, E, A>,
     A::Idx: RawIndex + Eq + core::hash::Hash,
 {
-    pub(crate) graph: &'a HashGraph<N, E, A>,
+    pub(crate) graph: &'a H,
     pub(crate) queue: VecDeque<VertexId<A::Idx>>,
     pub(crate) visited: HashSet<VertexId<A::Idx>>,
+    _edge: core::marker::PhantomData<E>,
+    _node: core::marker::PhantomData<N>,
 }
 
-impl<'a, N, E, A, K, Idx> BreadthFirstTraversal<'a, N, E, A>
+impl<'a, N, E, A, H, K, Idx> BreadthFirstTraversal<'a, N, E, A, H>
 where
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
     A: GraphAttributes<Idx = Idx, Kind = K>,
+    H: HyperGraph<N, E, A>,
     K: GraphKind,
     Idx: RawIndex + Eq + core::hash::Hash,
 {
     /// create a new instance from a hypergraph
-    pub(crate) fn from_hypergraph(graph: &'a HashGraph<N, E, A>) -> Self {
+    pub(crate) fn from_hypergraph(graph: &'a H) -> Self {
         Self {
             graph,
             queue: VecDeque::new(),
             visited: HashSet::new(),
+            _edge: core::marker::PhantomData::<E>,
+            _node: core::marker::PhantomData::<N>,
         }
     }
     /// returns an immutable reference to the queue
@@ -62,18 +67,19 @@ where
     pub fn search(&mut self, start: VertexId<Idx>) -> crate::Result<Vec<VertexId<Idx>>>
     where
         Idx: NumIndex,
+        <H::Edge<E> as RawEdge>::Store: Clone + IntoIterator<Item = VertexId<Idx>>,
     {
         Search::search(self, start)
     }
 }
 
-impl<'a, N, E, A, K, Idx> Search<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, A>
+impl<'a, N, E, A, H, K, Idx> Search<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, A, H>
 where
     A: GraphAttributes<Idx = Idx, Kind = K>,
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
+    H: HyperGraph<N, E, A>,
     K: GraphKind,
     Idx: NumIndex,
+    <H::Edge<E> as RawEdge>::Store: Clone + IntoIterator<Item = VertexId<Idx>>,
 {
     type Output = Vec<VertexId<Idx>>;
 
@@ -101,7 +107,7 @@ where
             if let Ok(edges) = self.graph.find_edges_with_node(&current) {
                 // visit all vertices within each edge that haven't been visited yet
                 for edge_id in edges {
-                    for &vertex in self.graph.get_edge_vertices(&edge_id)? {
+                    for vertex in self.graph.get_edge_vertices(&edge_id)?.clone().into_iter() {
                         if !self.has_visited(&vertex) {
                             self.queue.push_back(vertex);
                             self.visited.insert(vertex);
@@ -115,11 +121,10 @@ where
     }
 }
 
-impl<'a, N, E, A, K, Idx> Traversal<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, A>
+impl<'a, N, E, A, H, K, Idx> Traversal<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, A, H>
 where
     A: GraphAttributes<Idx = Idx, Kind = K>,
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
+    H: HyperGraph<N, E, A>,
     K: GraphKind,
     Idx: RawIndex + Eq + core::hash::Hash,
 {
