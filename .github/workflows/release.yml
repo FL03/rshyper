@@ -32,7 +32,8 @@ jobs:
       - name: Trigger target workflow
         uses: peter-evans/repository-dispatch@v3 
         with:
-          event-type: crates-io
+          event-type: crates-io          
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
           token: ${{ github.token }}
   release:
     needs: publish    
