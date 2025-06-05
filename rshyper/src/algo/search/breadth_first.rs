@@ -4,7 +4,7 @@
 */
 use crate::hash_graph::HashGraph;
 use rshyper_core::index::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphKind, GraphAttributes};
+use rshyper_core::{GraphAttributes, GraphKind};
 use std::collections::{HashSet, VecDeque};
 
 use super::{Search, Traversal};

@@ -57,6 +57,12 @@ pub trait Indexed<T: RawIndex> {
 /// **note:** the trait is sealed to prevent external implementations.
 pub trait RawIndex: 'static + Send + Sync + core::fmt::Debug + core::fmt::Display {
     private!();
+
+    #[cfg(feature = "alloc")]
+    /// converts the index to a string representation.
+    fn to_string(&self) -> alloc::string::String {
+        format!("{self:?}")
+    }
 }
 /// The [`Index`] trait extends the [`RawIndex`] trait to include additional operations and
 /// behaviours commonly expected from indices in a hypergraph.

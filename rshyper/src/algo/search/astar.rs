@@ -10,7 +10,7 @@ pub(crate) mod priority_node;
 use super::{Search, Traversal};
 use crate::hash_graph::{HashGraph, VertexSet};
 use rshyper_core::index::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphKind, GraphAttributes};
+use rshyper_core::{GraphAttributes, GraphKind};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 
 /// A simple trait defining a common interface for heuristic functions compatible with the

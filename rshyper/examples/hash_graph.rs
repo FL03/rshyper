@@ -7,9 +7,9 @@ use rshyper::hash_graph::UndirectedHashGraph as HyperGraph;
 
 fn main() -> rshyper::Result<()> {
     tracing_subscriber::fmt()
+        .with_line_number(false)
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .with_max_level(tracing::Level::TRACE)
-        .with_span_events(tracing_subscriber::fmt::format::FmtSpan::ACTIVE)
         .init();
     // initialize a new instance of a hypergraph
     let mut graph: HyperGraph<usize, usize> = HashGraph::undirected();
@@ -25,11 +25,18 @@ fn main() -> rshyper::Result<()> {
             edges: {
                 let e0: [v0, v1, v2] = 10;
                 let e1: [v1, v2, v3];
-                let _e2: [v2, v3];
+                let e2: [v0, v1] = 20;
+                let e3: [v1, v2] = 25;
             };
         }
     }
     tracing::info!("Initial graph state: {:?}", graph);
+
+    let e23 = graph.merge_edges(&e2, &e3)?;
+    tracing::info!(
+        "Merged edges {e2} and {e3} into {e23} with a weight of {weight}",
+        weight = graph.get_edge_weight(&e23)?
+    );
 
     let order_e1 = graph.get_edge_order(&e1)?;
     tracing::info!("Edge {e1} has order {order_e1}");
@@ -38,7 +45,7 @@ fn main() -> rshyper::Result<()> {
     tracing::info!("Edge {e0} has weight {e0_weight}");
 
     // Get neighbors of vertex v1
-    let neighbors = graph.neighbors(&v1)?;
+    let neighbors = graph.find_node_neighbors(&v1)?;
     tracing::info!(
         "found {n} neighbors of {v1}: {neighbors:?}",
         n = neighbors.len()
@@ -46,11 +53,11 @@ fn main() -> rshyper::Result<()> {
 
     // Get degree of vertex v1
     let degree = graph.get_node_degree(&v1);
-    println!("vertex {v1} has a degree of {degree}");
+    tracing::info!("vertex {v} has a degree of {d}", v = v1, d = degree);
 
     // Remove a vertex
-    graph.remove_vertex(&v2)?;
-    tracing::info!("removed vertex {v2}...");
+    graph.remove_node(&v2)?;
+    tracing::info!("removed vertex {v}...", v = v2);
 
     tracing::info!("Final graph state: {:?}", graph);
     Ok(())

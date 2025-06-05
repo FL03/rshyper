@@ -4,7 +4,7 @@
 */
 use crate::hash_graph::{DirectedHashGraph, HashGraph, UndirectedHashGraph};
 use crate::index::{RawIndex, VertexId};
-use crate::{GraphKind, GraphAttributes};
+use crate::{GraphAttributes, GraphKind};
 use core::hash::Hash;
 
 impl<N, E, Idx> DirectedHashGraph<N, E, Idx>

@@ -4,21 +4,24 @@
 */
 use super::aliases::*;
 
-use rshyper_core::GraphKind;
-use rshyper_core::index::{EdgeId, IndexCursor, RawIndex, VertexId};
-use rshyper_core::{GraphAttributes, NumIndex};
+use rshyper_core::attrs::{DirectedAttributes, GraphAttributes, UndirectedAttributes};
+use rshyper_core::index::{EdgeId, IndexCursor, NumIndex, RawIndex, VertexId};
+use rshyper_core::node::HyperNode;
+use rshyper_core::{GraphKind, HyperGraph, RawHyperGraph, Weight};
+
+use core::hash::Hash;
 
 /// a type alias for a [directed](crate::Directed) [`HashGraph`]
-pub type DirectedHashGraph<N, E, Idx = usize> = HashGraph<N, E, crate::DirectedAttributes<Idx>>;
+pub type DirectedHashGraph<N, E, Idx = usize> = HashGraph<N, E, DirectedAttributes<Idx>>;
 /// a type alias for an [undirected](crate::Undirected) [`HashGraph`]
-pub type UndirectedHashGraph<N, E, Idx = usize> = HashGraph<N, E, crate::UndirectedAttributes<Idx>>;
+pub type UndirectedHashGraph<N, E, Idx = usize> = HashGraph<N, E, UndirectedAttributes<Idx>>;
 
 /// A hash-based hypergraph implementation
 #[derive(Clone, Debug, Default)]
-pub struct HashGraph<N = (), E = (), A = crate::UndirectedAttributes<usize>>
+pub struct HashGraph<N = (), E = (), A = UndirectedAttributes<usize>>
 where
     A: GraphAttributes,
-    A::Idx: Eq + core::hash::Hash,
+    A::Idx: Eq + Hash,
 {
     /// the `nodes` of a hypergraph are the vertices, each identified by a `VertexId` and
     /// associated with a weight of type `N`.
@@ -34,11 +37,11 @@ where
 
 impl<N, E, K, Idx, A> HashGraph<N, E, A>
 where
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
+    E: Eq + Hash,
+    N: Eq + Hash,
     A: GraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
-    Idx: Eq + RawIndex + core::hash::Hash,
+    Idx: Eq + RawIndex + Hash,
 {
     /// initialize a new, empty hypergraph
     pub fn new() -> Self
@@ -143,7 +146,7 @@ where
     /// check if a vertex with the given id exists
     pub fn contains_node<Q>(&self, index: &Q) -> bool
     where
-        Q: Eq + core::hash::Hash,
+        Q: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.nodes().contains_key(index)
@@ -151,7 +154,7 @@ where
     /// returns true if the hypergraph contains an edge with the given index;
     pub fn contains_surface<Q>(&self, index: &Q) -> bool
     where
-        Q: Eq + core::hash::Hash,
+        Q: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces().contains_key(index)
@@ -218,15 +221,31 @@ where
     }
 }
 
-use rshyper_core::{HyperGraph, HyperNode, RawHyperGraph, Weight};
+impl<N, E, A, K, Idx> core::fmt::Display for HashGraph<N, E, A>
+where
+    E: core::fmt::Display + Eq + Hash,
+    N: core::fmt::Display + Eq + Hash,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
+    K: GraphKind,
+    Idx: NumIndex,
+{
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        write!(
+            f,
+            "{{ nodes: {}, edges: {} }}",
+            self.total_vertices(),
+            self.total_edges()
+        )
+    }
+}
 
 impl<N, E, K, Idx, A> RawHyperGraph<N, E> for HashGraph<N, E, A>
 where
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
+    E: Eq + Hash,
+    N: Eq + Hash,
     A: GraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
-    Idx: Eq + RawIndex + core::hash::Hash,
+    Idx: Eq + RawIndex + Hash,
 {
     type Idx = Idx;
     type Kind = K;
@@ -234,8 +253,8 @@ where
 
 impl<N, E, K, Idx, A> HyperGraph<N, E> for HashGraph<N, E, A>
 where
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
+    E: Eq + Hash,
+    N: Eq + Hash,
     A: GraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
     Idx: NumIndex,

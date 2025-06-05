@@ -35,14 +35,14 @@ fn test_hash_graph() -> rshyper::Result<()> {
     assert_ne!(e2, e3);
 
     // Get neighbors of vertex v1
-    let neighbors = graph.neighbors(&v1)?;
+    let neighbors = graph.find_node_neighbors(&v1)?;
     let exp = HashSet::from_iter([v0, v2, v3]);
     assert_eq!(neighbors, exp);
 
     // verify the degree of vertex v1
     assert_eq!(graph.get_node_degree(&v1), 3);
     // remove vertex v1
-    let _ = graph.remove_vertex(&v1)?;
+    let _ = graph.remove_node(&v1)?;
     // verify the hypergraph does not contain vertex v2
     assert!(!graph.contains_node(&v1));
     assert_eq!(graph.get_node_degree(&v1), 0);

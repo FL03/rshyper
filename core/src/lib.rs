@@ -23,6 +23,7 @@ pub(crate) mod macros {
 
 #[doc(inline)]
 pub use self::{
+    attrs::{Attributes, GraphAttributes},
     edge::{HyperEdge, HyperFacet},
     error::{Error, Result},
     index::prelude::*,
@@ -31,6 +32,7 @@ pub use self::{
     types::prelude::*,
 };
 
+pub mod attrs;
 pub mod edge;
 pub mod error;
 pub mod index;
@@ -69,14 +71,10 @@ pub mod types {
     //! this module provides various primitive types used throughout the library such as [Weight]
     #[doc(inline)]
     pub use self::prelude::*;
-
-    pub mod attributes;
     pub mod graph_kind;
     pub mod weight;
 
     pub(crate) mod prelude {
-        #[doc(inline)]
-        pub use super::attributes::*;
         #[doc(inline)]
         pub use super::graph_kind::*;
         #[doc(inline)]
@@ -89,6 +87,8 @@ pub mod prelude {
     #[doc(no_inline)]
     pub use crate::error::*;
 
+    #[doc(inline)]
+    pub use crate::attrs::prelude::*;
     #[doc(no_inline)]
     pub use crate::edge::prelude::*;
     #[doc(no_inline)]

@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use crate::hash_graph::HashGraph;
-use crate::{GraphKind, GraphAttributes, RawIndex};
+use crate::{GraphAttributes, GraphKind, RawIndex};
 use core::hash::Hash;
 use serde::de::{Deserialize, DeserializeOwned, MapAccess, Visitor};
 use serde::ser::Serialize;

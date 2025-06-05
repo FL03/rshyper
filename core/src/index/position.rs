@@ -108,7 +108,7 @@ where
     }
     /// increments the current edge index by one and returns the previous value; see
     /// [`step`](crate::index::IndexBase::step) for more details.
-    pub fn next_edge(&mut self) -> IndexResult<EdgeId<T>, T>
+    pub fn next_edge(&mut self) -> IndexResult<EdgeId<T>>
     where
         T: Copy + core::ops::Add<T, Output = T> + num_traits::One,
     {
@@ -116,7 +116,7 @@ where
     }
     /// increments the current vertex index by one and returns the previous value; see
     /// [`step`](crate::index::IndexBase::step) for more details.
-    pub fn next_vertex(&mut self) -> IndexResult<VertexId<T>, T>
+    pub fn next_vertex(&mut self) -> IndexResult<VertexId<T>>
     where
         T: Copy + core::ops::Add<T, Output = T> + num_traits::One,
     {

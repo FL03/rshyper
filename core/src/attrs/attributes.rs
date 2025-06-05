@@ -2,27 +2,10 @@
     appellation: attrs <module>
     authors: @FL03
 */
+use super::GraphAttributes;
 use crate::index::RawIndex;
 use crate::{Directed, GraphKind, Undirected};
 use core::marker::PhantomData;
-
-/// a type alias for graph [`Attributes`] configured with a [`Directed`] graph type.
-pub type DirectedAttributes<Idx> = Attributes<Idx, Directed>;
-/// a type alias for graph [`Attributes`] configured with an [`Undirected`] graph type.
-pub type UndirectedAttributes<Idx> = Attributes<Idx, Undirected>;
-
-/// The [`GraphAttributes`] trait abstracts several generic types used to define a hyper graph
-/// into a single entity.
-pub trait GraphAttributes: 'static + Copy + Send + Sync {
-    type Idx: RawIndex;
-    type Kind: GraphKind;
-
-    private!();
-
-    fn new() -> Self
-    where
-        Self: Sized;
-}
 
 /// [`Attributes`] is a generic implementation of the [`GraphAttributes`] trait enabling the
 /// definition of hypergraphs with different index types and graph kinds (directed or
@@ -39,7 +22,7 @@ where
     K: GraphKind,
 {
     /// the inner type of index used by the graph
-    pub(crate) idx: PhantomData<Idx>,
+    pub(crate) index: PhantomData<Idx>,
     /// the kind of graph, either directed or undirected
     pub(crate) kind: PhantomData<K>,
 }
@@ -49,31 +32,47 @@ where
     I: RawIndex,
     K: GraphKind,
 {
+    /// returns a new instance of [`Attributes`] initialized with the given index and kind.
     pub fn new() -> Self {
         Attributes {
-            idx: PhantomData::<I>,
+            index: PhantomData::<I>,
             kind: PhantomData::<K>,
         }
     }
-
+    /// consumes the current instance to create another with the given kind
     pub fn with_kind<K2>(self) -> Attributes<I, K2>
     where
         K2: GraphKind,
     {
         Attributes {
-            idx: self.idx,
+            index: self.index,
             kind: PhantomData::<K2>,
         }
     }
-
-    pub fn with_idx<I2>(self) -> Attributes<I2, K>
+    /// consumes the current instance to create another with the given index type
+    pub fn with_index<I2>(self) -> Attributes<I2, K>
     where
         I2: RawIndex,
     {
         Attributes {
-            idx: PhantomData::<I2>,
+            index: PhantomData::<I2>,
             kind: self.kind,
         }
+    }
+    /// returns true if the current kind `K` is the same as the given kind `K2`
+    pub fn is_kind<K2>(&self) -> bool
+    where
+        K2: GraphKind,
+    {
+        core::any::TypeId::of::<K2>() == core::any::TypeId::of::<K>()
+    }
+
+    /// returns true if the current index type `I` is the same as the given index type `I2`
+    pub fn is_index<I2>(&self) -> bool
+    where
+        I2: RawIndex,
+    {
+        core::any::TypeId::of::<I2>() == core::any::TypeId::of::<I>()
     }
 }
 
@@ -83,7 +82,7 @@ where
 {
     pub fn directed() -> Self {
         Attributes {
-            idx: PhantomData::<I>,
+            index: PhantomData::<I>,
             kind: PhantomData::<Directed>,
         }
     }
@@ -95,7 +94,7 @@ where
 {
     pub fn undirected() -> Self {
         Attributes {
-            idx: PhantomData::<I>,
+            index: PhantomData::<I>,
             kind: PhantomData::<Undirected>,
         }
     }
