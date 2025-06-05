@@ -9,9 +9,9 @@ on:
     branches: [ main, master ]
     types: [ opened, reopened, synchronize ]
     paths:
-      - /**/clippy.yml
-      - /**/*.rs
-      - /**/Cargo.*
+      - "**/rust.yml"
+      - "**/*.rs"
+      - "**/Cargo.*"
   push:
     branches: [ main, master ]
     tags: [ v*.*.*, "*-nightly" ]
