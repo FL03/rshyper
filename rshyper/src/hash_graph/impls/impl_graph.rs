@@ -99,7 +99,7 @@ where
             .surfaces()
             .iter()
             .filter_map(|(&edge_id, facet)| {
-                if facet.contains_vertex(index) {
+                if facet.contains(index) {
                     Some(edge_id)
                 } else {
                     None
@@ -126,7 +126,7 @@ where
         let mut neighbors = VertexSet::new();
         // iterate through all the connections
         self.surfaces().values().for_each(|surface| {
-            if surface.contains_vertex(index) {
+            if surface.contains(index) {
                 neighbors.extend(
                     surface
                         .edge()
@@ -152,7 +152,7 @@ where
         VertexId<Idx>: core::borrow::Borrow<Q2>,
     {
         if let Some(surface) = self.surfaces().get(index) {
-            return surface.contains_vertex(vertex);
+            return surface.contains(vertex);
         }
         false
     }
@@ -346,7 +346,7 @@ where
             .remove(index)
             .map(|node| {
                 // Remove all hyperedges containing this vertex
-                self.retain_surfaces(|_, facet| !facet.contains_vertex(index));
+                self.retain_surfaces(|_, facet| !facet.contains(index));
                 node
             })
             .ok_or(crate::Error::NodeNotFound)

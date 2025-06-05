@@ -77,11 +77,7 @@ fn test_merge_hash_edge() -> rshyper::Result<()> {
     // get the merged edge
     let hyperedge = graph.get_surface(&em)?;
     // check the edge contains all vertices
-    assert!(
-        hyperedge.contains_vertex(&v0)
-            && hyperedge.contains_vertex(&v1)
-            && hyperedge.contains_vertex(&v2)
-    );
+    assert!(hyperedge.contains(&v0) && hyperedge.contains(&v1) && hyperedge.contains(&v2));
     // check that the merged edge has a weight equal to the sum of the weights of the two edges
     assert_eq!(hyperedge.weight(), &30);
     Ok(())
@@ -116,7 +112,7 @@ fn test_remove_hash_edges() -> rshyper::Result<()> {
 
     // Remove hyperedge e1
     let removed_edge = graph.remove_surface(&e1)?;
-    assert!(removed_edge.contains_vertex(&v0) && removed_edge.contains_vertex(&v1));
+    assert!(removed_edge.contains(&v0) && removed_edge.contains(&v1));
 
     // Check that the removed edge is no longer in the graph
     assert!(!graph.contains_surface(&e1));

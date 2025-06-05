@@ -168,7 +168,7 @@ pub trait RawFacet<T>: RawEdge {
 /*
  ************* Implementations *************
 */
-impl<'a, I> RawStore<I> for &'a [VertexId<I>]
+impl<I> RawStore<I> for &[VertexId<I>]
 where
     I: RawIndex,
 {

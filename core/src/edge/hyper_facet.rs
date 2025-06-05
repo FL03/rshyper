@@ -82,20 +82,6 @@ where
             weight,
         }
     }
-    /// returns true if the edge contains the given vertex
-    pub fn contains_vertex<Q>(&self, index: &Q) -> bool
-    where
-        VertexId<Idx>: core::borrow::Borrow<Q>,
-        Q: PartialEq,
-        Idx: PartialEq,
-        for<'a> &'a S: IntoIterator<Item = &'a VertexId<Idx>>,
-    {
-        self.edge().contains_vertex(index)
-    }
-    /// returns the number of nodes in the edge
-    pub fn len(&self) -> usize {
-        self.edge().len()
-    }
     /// returns an immutable reference to the edge
     pub const fn edge(&self) -> &HyperEdge<S, K, Idx> {
         &self.edge
@@ -163,6 +149,24 @@ where
             edge: self.edge,
             weight,
         }
+    }
+    /// returns true if the edge contains the given vertex
+    pub fn contains<Q>(&self, index: &Q) -> bool
+    where
+        VertexId<Idx>: core::borrow::Borrow<Q>,
+        Q: PartialEq,
+        Idx: PartialEq,
+        for<'a> &'a S: IntoIterator<Item = &'a VertexId<Idx>>,
+    {
+        self.edge().contains(index)
+    }
+    /// returns true if the edge is empty
+    pub fn is_empty(&self) -> bool {
+        self.edge().is_empty()
+    }
+    /// returns the number of nodes in the edge
+    pub fn len(&self) -> usize {
+        self.edge().len()
     }
 }
 
