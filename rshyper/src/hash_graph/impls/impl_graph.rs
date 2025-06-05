@@ -273,8 +273,10 @@ where
     {
         // remove the edges from the surfaces map
         let s1 = self.remove_surface(e1)?;
+        #[cfg(feature = "tracing")]
         tracing::debug!("removed edge {e1:?} with vertices {ep:?}", ep = s1.points());
         let s2 = self.remove_surface(e2)?;
+        #[cfg(feature = "tracing")]
         tracing::debug!("removed edge {e2:?} with vertices {ep:?}", ep = s2.points());
         // merge the vertices of the two edges
         let vertices = s1
