@@ -131,4 +131,8 @@ where
     fn vertices(&self) -> &S {
         self.points()
     }
+
+    fn vertices_mut(&mut self) -> &mut S {
+        self.points_mut()
+    }
 }

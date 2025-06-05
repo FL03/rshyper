@@ -103,6 +103,10 @@ pub trait RawStore<Idx = usize>
 where
     Idx: RawIndex,
 {
+    type Iter<'a, _T>: Iterator<Item = &'a _T>
+    where
+        _T: 'a,
+        Self: 'a;
     type Store<_T>: ?Sized;
 
     private!();
@@ -112,6 +116,8 @@ where
     fn is_empty(&self) -> bool {
         self.len() == 0
     }
+
+    fn iter(&self) -> Self::Iter<'_, VertexId<Idx>>;
 }
 /// [`RawEdge`] is a trait that defines the behavior of an edge in a hypergraph.
 pub trait RawEdge {
@@ -123,8 +129,10 @@ pub trait RawEdge {
 
     /// returns an immutable reference to the edge index
     fn index(&self) -> &EdgeId<Self::Idx>;
-    /// Returns an immutable reference to the edge data.
+    /// returns an immutable reference to the edge data.
     fn vertices(&self) -> &Self::Store;
+    /// returns a mutable reference to the edge data.
+    fn vertices_mut(&mut self) -> &mut Self::Store;
 }
 /// [`RawFacet`] extends the behaviour of a [`RawEdge`] to include a weight
 pub trait RawFacet<T>: RawEdge {
@@ -156,109 +164,181 @@ pub trait RawFacet<T>: RawEdge {
         core::mem::take(self.weight_mut())
     }
 }
+
 /*
  ************* Implementations *************
 */
-
-macro_rules! impl_raw_store {
-    (
-        $(
-            $($p:ident)::+
-        ),* $(,)?
-    ) => {
-        $(
-            impl_raw_store!(@impl $($p)::+);
-        )*
-    };
-    (@impl $($p:ident)::+) => {
-        impl<Idx> RawStore<Idx> for $($p)::+<VertexId<Idx>>
-        where
-            Idx: RawIndex,
-        {
-            type Store<_T> = $($p)::+<_T>;
-
-            seal!();
-
-            fn len(&self) -> usize {
-                <$($p)::+<VertexId<Idx>>>::len(self)
-            }
-
-            fn is_empty(&self) -> bool {
-                <$($p)::+<VertexId<Idx>>>::is_empty(self)
-            }
-        }
-    };
-}
-
-#[cfg(feature = "std")]
-impl_raw_store! {
-    std::collections::HashSet
-}
-
-#[cfg(feature = "alloc")]
-impl_raw_store! {
-    alloc::collections::BTreeSet,
-    alloc::vec::Vec,
-}
-
-impl<'a, Idx> RawStore<Idx> for &'a [VertexId<Idx>]
+impl<'a, I> RawStore<I> for &'a [VertexId<I>]
 where
-    Idx: RawIndex,
+    I: RawIndex,
 {
+    type Iter<'b, _T: 'b>
+        = core::slice::Iter<'b, _T>
+    where
+        Self: 'b;
     type Store<_T> = [_T];
 
     seal!();
 
     fn len(&self) -> usize {
-        <[VertexId<Idx>]>::len(self)
+        <Self::Store<VertexId<I>>>::len(self)
     }
 
     fn is_empty(&self) -> bool {
-        <[VertexId<Idx>]>::is_empty(self)
+        <Self::Store<VertexId<I>>>::is_empty(self)
+    }
+
+    fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
+        <Self::Store<VertexId<I>>>::iter(self)
     }
 }
 
-impl<'a, Idx> RawStore<Idx> for &'a mut [VertexId<Idx>]
+impl<I> RawStore<I> for [VertexId<I>]
 where
-    Idx: RawIndex,
+    I: RawIndex,
 {
+    type Iter<'a, _T: 'a> = core::slice::Iter<'a, _T>;
     type Store<_T> = [_T];
 
     seal!();
 
     fn len(&self) -> usize {
-        <[VertexId<Idx>]>::len(self)
+        <Self::Store<VertexId<I>>>::len(self)
     }
-}
 
-impl<Idx> RawStore<Idx> for [VertexId<Idx>]
-where
-    Idx: RawIndex,
-{
-    type Store<_T> = [_T];
-
-    seal!();
-
-    fn len(&self) -> usize {
-        self.len()
-    }
     fn is_empty(&self) -> bool {
-        self.is_empty()
+        <Self::Store<VertexId<I>>>::is_empty(self)
+    }
+
+    fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
+        <Self::Store<VertexId<I>>>::iter(self)
     }
 }
 
-impl<const N: usize, Idx> RawStore<Idx> for [VertexId<Idx>; N]
+impl<const N: usize, I> RawStore<I> for [VertexId<I>; N]
 where
-    Idx: RawIndex,
+    I: RawIndex,
 {
+    type Iter<'a, _T: 'a> = core::slice::Iter<'a, _T>;
     type Store<_T> = [_T; N];
 
     seal!();
 
     fn len(&self) -> usize {
-        N
+        <[VertexId<I>]>::len(self)
     }
+
     fn is_empty(&self) -> bool {
-        N == 0
+        <[VertexId<I>]>::is_empty(self)
+    }
+
+    fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
+        <[VertexId<I>]>::iter(self)
+    }
+}
+
+#[cfg(feature = "alloc")]
+mod impl_alloc {
+    use super::RawStore;
+    use crate::index::{RawIndex, VertexId};
+    use alloc::collections::{
+        btree_set::{self, BTreeSet},
+        vec_deque::{self, VecDeque},
+    };
+    use alloc::vec::Vec;
+
+    impl<I> RawStore<I> for BTreeSet<VertexId<I>>
+    where
+        I: RawIndex,
+    {
+        type Iter<'a, _T: 'a> = btree_set::Iter<'a, _T>;
+        type Store<_T> = BTreeSet<_T>;
+
+        seal!();
+
+        fn len(&self) -> usize {
+            <Self::Store<VertexId<I>>>::len(self)
+        }
+
+        fn is_empty(&self) -> bool {
+            <Self::Store<VertexId<I>>>::is_empty(self)
+        }
+
+        fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
+            <Self::Store<VertexId<I>>>::iter(self)
+        }
+    }
+
+    impl<I> RawStore<I> for Vec<VertexId<I>>
+    where
+        I: RawIndex,
+    {
+        type Iter<'a, _T: 'a> = core::slice::Iter<'a, _T>;
+        type Store<_T> = Vec<_T>;
+
+        seal!();
+
+        fn len(&self) -> usize {
+            <Self::Store<VertexId<I>>>::len(self)
+        }
+
+        fn is_empty(&self) -> bool {
+            <Self::Store<VertexId<I>>>::is_empty(self)
+        }
+
+        fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
+            self.as_slice().iter()
+        }
+    }
+
+    impl<I> RawStore<I> for VecDeque<VertexId<I>>
+    where
+        I: RawIndex,
+    {
+        type Iter<'a, _T: 'a> = vec_deque::Iter<'a, _T>;
+        type Store<_T> = VecDeque<_T>;
+
+        seal!();
+
+        fn len(&self) -> usize {
+            <Self::Store<VertexId<I>>>::len(self)
+        }
+
+        fn is_empty(&self) -> bool {
+            <Self::Store<VertexId<I>>>::is_empty(self)
+        }
+
+        fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
+            <Self::Store<VertexId<I>>>::iter(self)
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+mod impl_std {
+    use super::RawStore;
+    use crate::index::{RawIndex, VertexId};
+    use std::collections::hash_set::{self, HashSet};
+
+    impl<I> RawStore<I> for HashSet<VertexId<I>>
+    where
+        I: RawIndex,
+    {
+        type Iter<'a, _T: 'a> = hash_set::Iter<'a, _T>;
+        type Store<_T> = HashSet<_T>;
+
+        seal!();
+
+        fn len(&self) -> usize {
+            <Self::Store<VertexId<I>>>::len(self)
+        }
+
+        fn is_empty(&self) -> bool {
+            <Self::Store<VertexId<I>>>::is_empty(self)
+        }
+
+        fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
+            <Self::Store<VertexId<I>>>::iter(self)
+        }
     }
 }

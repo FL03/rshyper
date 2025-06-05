@@ -185,6 +185,10 @@ where
     fn vertices(&self) -> &S {
         self.edge().points()
     }
+
+    fn vertices_mut(&mut self) -> &mut S {
+        self.edge_mut().points_mut()
+    }
 }
 
 impl<T, S, Idx, K> RawFacet<T> for HyperFacet<T, S, K, Idx>

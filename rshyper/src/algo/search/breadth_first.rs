@@ -67,7 +67,8 @@ where
     pub fn search(&mut self, start: VertexId<Idx>) -> crate::Result<Vec<VertexId<Idx>>>
     where
         Idx: NumIndex,
-        <H::Edge<E> as RawEdge>::Store: Clone + IntoIterator<Item = VertexId<Idx>>,
+        E: 'static,
+        for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<Idx>>,
     {
         Search::search(self, start)
     }
@@ -76,10 +77,11 @@ where
 impl<'a, N, E, A, H, K, Idx> Search<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, A, H>
 where
     A: GraphAttributes<Idx = Idx, Kind = K>,
+    E: 'static,
     H: HyperGraph<N, E, A>,
     K: GraphKind,
     Idx: NumIndex,
-    <H::Edge<E> as RawEdge>::Store: Clone + IntoIterator<Item = VertexId<Idx>>,
+    for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<Idx>>,
 {
     type Output = Vec<VertexId<Idx>>;
 
@@ -107,7 +109,7 @@ where
             if let Ok(edges) = self.graph.find_edges_with_node(&current) {
                 // visit all vertices within each edge that haven't been visited yet
                 for edge_id in edges {
-                    for vertex in self.graph.get_edge_vertices(&edge_id)?.clone().into_iter() {
+                    for &vertex in self.graph.get_edge_vertices(&edge_id)? {
                         if !self.has_visited(&vertex) {
                             self.queue.push_back(vertex);
                             self.visited.insert(vertex);

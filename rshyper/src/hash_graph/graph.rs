@@ -270,20 +270,36 @@ where
         self.add_surface(iter, weight)
     }
 
-    fn get_node(&self, index: &VertexId<Idx>) -> crate::Result<&HyperNode<N, Idx>> {
-        self.get_node(index)
-    }
-
     fn get_edge_vertices(&self, index: &EdgeId<Idx>) -> crate::Result<&VertexSet<Idx>> {
         self.get_edge_vertices(index)
     }
 
+    fn get_edge_vertices_mut(&mut self, index: &EdgeId<Idx>) -> crate::Result<&mut VertexSet<Idx>> {
+        self.get_edge_vertices_mut(index)
+    }
+
     fn get_edge_weight(&self, index: &EdgeId<Idx>) -> crate::Result<&Weight<E>> {
-        self.get_surface(index).map(|s| s.weight())
+        self.get_edge_weight(index)
+    }
+
+    fn get_edge_weight_mut(&mut self, index: &EdgeId<Idx>) -> crate::Result<&mut Weight<E>> {
+        self.get_edge_weight_mut(index)
+    }
+
+    fn get_node(&self, index: &VertexId<Idx>) -> crate::Result<&HyperNode<N, Idx>> {
+        self.get_node(index)
+    }
+
+    fn get_node_mut(&mut self, index: &VertexId<Idx>) -> crate::Result<&mut HyperNode<N, Idx>> {
+        self.get_node_mut(index)
     }
 
     fn get_surface(&self, index: &EdgeId<Idx>) -> crate::Result<&HashFacet<E, K, Idx>> {
         self.get_surface(index)
+    }
+
+    fn get_surface_mut(&mut self, index: &EdgeId<Idx>) -> crate::Result<&mut HashFacet<E, K, Idx>> {
+        self.get_surface_mut(index)
     }
 
     fn contains_edge(&self, index: &EdgeId<Idx>) -> bool {
