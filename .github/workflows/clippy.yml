@@ -9,46 +9,46 @@ on:
     branches: [ main, master ]
     types: [ opened, reopened, synchronize ]
     paths:
-      - /**/clippy.yml
-      - /**/*.rs
-      - /**/Cargo.*
+      - "**/clippy.yml"
+      - "**/*.rs"
+      - "**/Cargo.*"
   push:
     branches: [ main, master ]
-    tags: [ v*.*.*, "*-nightly" ]
+    tags: [ latest, v*.*.*, "*-nightly" ]
     paths:
-      - /**/clippy.yml
-      - /**/*.rs
-      - /**/Cargo.*
+      - "**/clippy.yml"
+      - "**/*.rs"
+      - "**/Cargo.*"
+  release:
+    types: [ created, edited ]
   repository_dispatch:
     types: [ clippy ]
   workflow_dispatch:
 
-
+permissions:
+  actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status 
+  contents: read
+  security-events: write
+  statuses: write
 
 jobs:
   clippy:
-    permissions:
-      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status 
-      contents: read
-      security-events: write
-      statuses: write
     runs-on: ubuntu-latest
     steps:
       - 
-        name: checkout
+        name: Checkout
         uses: actions/checkout@v4
       -
-        name: setup rustup
+        name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          cache-workspaces: true
           components: clippy, rustfmt
       - 
-        name: setup cargo
+        name: Setup the for sarif output
         run: cargo install clippy-sarif sarif-fmt
       - 
-        name: clippy
+        name: Run Clippy
         run:
           cargo clippy
           --all-features

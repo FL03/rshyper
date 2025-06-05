@@ -10,10 +10,10 @@ fn test_depth_first_traversal() -> rshyper::Result<()> {
     let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Create a simple hypergraph
-    let v0 = graph.add_vertex();
-    let v1 = graph.add_vertex();
-    let v2 = graph.add_vertex();
-    let v3 = graph.add_vertex();
+    let v0 = graph.add_vertex()?;
+    let v1 = graph.add_vertex()?;
+    let v2 = graph.add_vertex()?;
+    let v3 = graph.add_vertex()?;
 
     let _e1 = graph.add_edge(vec![v0, v1])?;
     let _e2 = graph.add_edge(vec![v1, v2])?;
@@ -48,11 +48,11 @@ fn test_dft_branching_graph() -> rshyper::Result<()> {
     //     \
     //      3
 
-    let v0 = graph.add_vertex();
-    let v1 = graph.add_vertex();
-    let v2 = graph.add_vertex();
-    let v3 = graph.add_vertex();
-    let v4 = graph.add_vertex();
+    let v0 = graph.add_vertex()?;
+    let v1 = graph.add_vertex()?;
+    let v2 = graph.add_vertex()?;
+    let v3 = graph.add_vertex()?;
+    let v4 = graph.add_vertex()?;
 
     let _e1 = graph.add_edge(vec![v0, v1])?;
     let _e2 = graph.add_edge(vec![v0, v2])?;
@@ -84,10 +84,10 @@ fn test_dft_cyclic_graph() -> rshyper::Result<()> {
     // |         |
     // +----3----+
 
-    let v0 = graph.add_vertex();
-    let v1 = graph.add_vertex();
-    let v2 = graph.add_vertex();
-    let v3 = graph.add_vertex();
+    let v0 = graph.add_vertex()?;
+    let v1 = graph.add_vertex()?;
+    let v2 = graph.add_vertex()?;
+    let v3 = graph.add_vertex()?;
 
     let _e1 = graph.add_edge(vec![v0, v1])?;
     let _e2 = graph.add_edge(vec![v1, v2])?;
@@ -117,9 +117,9 @@ fn test_dft_isolated_vertex() -> rshyper::Result<()> {
     // Create a graph with an isolated vertex
     // 0 -- 1    2
 
-    let v0 = graph.add_vertex();
-    let v1 = graph.add_vertex();
-    let v2 = graph.add_vertex(); // isolated
+    let v0 = graph.add_vertex()?;
+    let v1 = graph.add_vertex()?;
+    let v2 = graph.add_vertex()?; // isolated
 
     let _e1 = graph.add_edge(vec![v0, v1])?;
     // create a new dft instance

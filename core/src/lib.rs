@@ -23,16 +23,20 @@ pub(crate) mod macros {
 
 #[doc(inline)]
 pub use self::{
-    cmp::{HyperEdge, HyperFacet, HyperNode},
+    attrs::{Attributes, GraphAttributes},
+    edge::{HyperEdge, HyperFacet},
     error::{Error, Result},
     index::prelude::*,
+    node::HyperNode,
     traits::prelude::*,
     types::prelude::*,
 };
 
-pub mod cmp;
+pub mod attrs;
+pub mod edge;
 pub mod error;
 pub mod index;
+pub mod node;
 
 pub mod traits {
     //! this module contains various traits used throughout to establish common interfaces and
@@ -40,40 +44,37 @@ pub mod traits {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    pub mod container;
+    pub mod contains;
     pub mod convert;
     pub mod hyper_graph;
-    pub mod points;
+    pub mod merge;
     pub mod transform;
     pub mod weighted;
 
     pub(crate) mod prelude {
         #[doc(inline)]
-        pub use super::container::*;
+        pub use super::contains::*;
         #[doc(inline)]
         pub use super::convert::*;
         #[doc(inline)]
         pub use super::hyper_graph::*;
         #[doc(inline)]
-        pub use super::points::*;
+        pub use super::merge::*;
         #[doc(inline)]
         pub use super::transform::*;
         #[doc(inline)]
         pub use super::weighted::*;
     }
 }
+
 pub mod types {
-    //! this module contains various types
+    //! this module provides various primitive types used throughout the library such as [Weight]
     #[doc(inline)]
     pub use self::prelude::*;
-
-    pub mod attrs;
     pub mod graph_kind;
     pub mod weight;
 
     pub(crate) mod prelude {
-        #[doc(inline)]
-        pub use super::attrs::*;
         #[doc(inline)]
         pub use super::graph_kind::*;
         #[doc(inline)]
@@ -86,10 +87,14 @@ pub mod prelude {
     #[doc(no_inline)]
     pub use crate::error::*;
 
+    #[doc(inline)]
+    pub use crate::attrs::prelude::*;
     #[doc(no_inline)]
-    pub use crate::cmp::prelude::*;
+    pub use crate::edge::prelude::*;
     #[doc(no_inline)]
     pub use crate::index::prelude::*;
+    #[doc(no_inline)]
+    pub use crate::node::prelude::*;
     #[doc(no_inline)]
     pub use crate::traits::prelude::*;
     #[doc(no_inline)]

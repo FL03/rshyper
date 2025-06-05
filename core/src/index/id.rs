@@ -2,7 +2,9 @@
     Appellation: index <module>
     Contrib: @FL03
 */
-use super::{GraphIndex, IndexError, IndexResult, RawIndex};
+use super::{GraphIndex, IndexResult, RawIndex};
+use num_traits::{One, Zero};
+
 /// A generic [`IndexBase`] implementation used to represent various [_kinds_](GraphIndex) of
 /// indices
 #[derive(Clone, Copy, Eq, Hash, PartialEq, Ord, PartialOrd)]
@@ -24,6 +26,13 @@ where
             _type: core::marker::PhantomData::<K>,
         }
     }
+    /// creates a new instance of [`Index`] using the given function to generate the value
+    pub fn create<F>(index: F) -> Self
+    where
+        F: FnOnce() -> T,
+    {
+        Self::new(index())
+    }
     /// initializes a new instance of [`Index`] using the logical default for the type `T`
     pub fn default() -> Self
     where
@@ -31,17 +40,17 @@ where
     {
         Self::new(T::default())
     }
-    /// creates a new index with a value of [`one`](num_traits::One)
+    /// creates a new index with a value of [`one`](One::one)
     pub fn one() -> Self
     where
-        T: num_traits::One,
+        T: One,
     {
         Self::new(T::one())
     }
-    /// creates a new index with a value of [`zero`](num_traits::Zero)
+    /// creates a new index with a value of [`zero`](Zero::zero)
     pub fn zero() -> Self
     where
-        T: num_traits::Zero,
+        T: Zero,
     {
         Self::new(T::zero())
     }
@@ -53,11 +62,6 @@ where
     pub fn as_mut_ptr(&mut self) -> *mut T {
         core::ptr::from_mut(&mut self.value)
     }
-    /// consumes the index returning the inner value
-    #[inline]
-    pub fn into_inner(self) -> T {
-        self.value
-    }
     /// returns an immutable reference to the inner value
     pub const fn get(&self) -> &T {
         &self.value
@@ -66,6 +70,11 @@ where
     pub const fn get_mut(&mut self) -> &mut T {
         &mut self.value
     }
+    /// consumes the current instance to return the inner value
+    #[inline]
+    pub fn value(self) -> T {
+        self.value
+    }
     /// apply a function to the inner value and returns a new Index wrapping the result
     #[inline]
     pub fn map<U, F>(self, f: F) -> IndexBase<U, K>
@@ -73,22 +82,22 @@ where
         F: FnOnce(T) -> U,
         U: RawIndex,
     {
-        IndexBase::new(f(self.value))
+        IndexBase::new(f(self.value()))
     }
     /// [`replace`](core::mem::replace) and return the old value after replacing it with the
     /// given value
     pub const fn replace(&mut self, index: T) -> T {
-        core::mem::replace(&mut self.value, index)
+        core::mem::replace(self.get_mut(), index)
     }
     /// set the index to the given value
     #[inline]
     pub fn set(&mut self, value: T) -> &mut Self {
-        self.value = value;
+        *self.get_mut() = value;
         self
     }
     /// [`swap`](core::mem::swap) the values of two indices
     pub const fn swap(&mut self, other: &mut Self) {
-        core::mem::swap(&mut self.value, &mut other.value)
+        core::mem::swap(self.get_mut(), other.get_mut())
     }
     /// [`take`](core::mem::take) the value and replace it with the default value
     #[inline]
@@ -96,7 +105,7 @@ where
     where
         T: Default,
     {
-        core::mem::take(&mut self.value)
+        core::mem::take(self.get_mut())
     }
     /// consumes the current index to create another with the given value
     #[inline]
@@ -106,40 +115,40 @@ where
             _type: core::marker::PhantomData::<K>,
         }
     }
-    /// decrements the index value by [one](num_traits::One) and returns a new instance
+    /// decrements the index value by [one](One) and returns a new instance
     #[inline]
     pub fn dec(self) -> IndexBase<<T as core::ops::Sub>::Output, K>
     where
-        T: core::ops::Sub + num_traits::One,
+        T: core::ops::Sub + One,
         <T as core::ops::Sub>::Output: RawIndex,
     {
         let value = self.value - T::one();
         IndexBase::new(value)
     }
-    /// mutably decrements the index value by [one](num_traits::One)
+    /// mutably decrements the index value by [one](One)
     #[inline]
     pub fn dec_inplace(&mut self)
     where
-        T: core::ops::SubAssign + num_traits::One,
+        T: core::ops::SubAssign + One,
     {
         self.value -= T::one();
     }
-    /// increments the index value by [one](num_traits::One) and consumes the current instance
+    /// increments the index value by [one](One) and consumes the current instance
     /// to create another with the new value.
     #[inline]
     pub fn inc(self) -> IndexBase<<T as core::ops::Add>::Output, K>
     where
-        T: core::ops::Add + num_traits::One,
+        T: core::ops::Add + One,
         <T as core::ops::Add>::Output: RawIndex,
     {
-        let value = self.value + T::one();
-        IndexBase::new(value)
+        self.next_with(|prev| prev + T::one())
+            .expect("Failed to increment index")
     }
-    /// mutably increments the index value by [one](num_traits::One)
+    /// mutably increments the index value by [one](One)
     #[inline]
     pub fn inc_inplace(&mut self)
     where
-        T: Copy + core::ops::AddAssign + num_traits::One,
+        T: Copy + core::ops::AddAssign + One,
     {
         self.value += T::one();
     }
@@ -156,11 +165,41 @@ where
     ///     assert_eq!(e2.get(), &2);
     /// ```
     #[inline]
-    pub fn step(&mut self) -> IndexResult<Self, T>
+    pub fn step(&mut self) -> IndexResult<Self>
     where
-        T: Copy + core::ops::Add<T, Output = T> + num_traits::One,
+        T: Copy + core::ops::Add<T, Output = T> + One,
     {
-        self.next().ok_or(IndexError::IndexOutOfBounds(*self.get()))
+        self.step_with(|&prev| prev + T::one())
+    }
+    /// replaces the current value with the next one computed using the provided function and
+    /// returns the previous instance of the index.
+    pub fn step_with<F>(&mut self, f: F) -> IndexResult<Self>
+    where
+        F: FnOnce(&T) -> T,
+    {
+        // compute the next value using the provided function
+        let next = f(self.get());
+        // replace the current value with the next one
+        let prev = self.replace(next);
+        // return the previous instance
+        Ok(Self::new(prev))
+    }
+    /// similar to [`step_with`](IndexBase::step_with), however, rather than replacing the
+    /// current value with the computed value, it returns a new instance of the index
+    /// containing the computed value.
+    pub fn next_with<U, F>(self, f: F) -> IndexResult<IndexBase<U, K>>
+    where
+        F: FnOnce(T) -> U,
+        U: RawIndex,
+    {
+        // compute the next value using the provided function
+        let next = f(self.value);
+        // return the previous instance
+        Ok(IndexBase::new(next))
+    }
+    #[deprecated(since = "0.0.10", note = "use `value` instead")]
+    pub fn into_inner(self) -> T {
+        self.value
     }
 }
 
@@ -206,7 +245,7 @@ where
 impl<T, K> Default for IndexBase<T, K>
 where
     K: GraphIndex,
-    T: Default + RawIndex,
+    T: RawIndex + Default,
 {
     fn default() -> Self {
         Self {
@@ -229,7 +268,7 @@ where
 impl<T, K> PartialEq<T> for IndexBase<T, K>
 where
     K: GraphIndex,
-    T: PartialEq + RawIndex,
+    T: RawIndex + PartialEq,
 {
     fn eq(&self, other: &T) -> bool {
         &self.value == other
@@ -239,17 +278,12 @@ where
 impl<T, K> core::iter::Iterator for IndexBase<T, K>
 where
     K: GraphIndex,
-    T: Copy + RawIndex + core::ops::Add<T, Output = T> + num_traits::One,
+    T: RawIndex + Copy + core::ops::Add<T, Output = T> + One,
 {
     type Item = IndexBase<T, K>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // compute the next value
-        let next = self.value + T::one();
-        // replace the current value with the next one
-        let prev = core::mem::replace(&mut self.value, next);
-        // return the previous instance
-        Some(Self::new(prev))
+        self.step().ok()
     }
 }
 

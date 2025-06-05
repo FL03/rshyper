@@ -2,7 +2,8 @@
     Appellation: algo <module>
     Contrib: @FL03
 */
-//! this module implements various algorithms for hypergraphs
+//! the [`algo`](crate::algo) module focuses on implementing algorithms and operators for
+//! hypergraphs.
 #[doc(inline)]
 pub use self::prelude::*;
 

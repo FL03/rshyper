@@ -6,12 +6,9 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_BACKTRACE: 1
-  RUSTC_VERSION: 1.86.0
+  RUST_BACKTRACE: full
 
 on:
-  release:
-    types: [ published ]
   repository_dispatch:
     types: [ crates-io ]
   workflow_dispatch:
@@ -21,14 +18,15 @@ on:
         description: 'Publish the crate(s) to crates.io?'
         type: boolean
 
+permissions:
+  contents: read
+  deployments: write
+
 jobs:
   crates-io:    
     environment:
       name: crates-io
-      url: https://crates.io/crates/${{ matrix.package }}
-    permissions:
-      contents: read
-      deployments: write
+      url: https://crates.io/crates/rshyper
     env:
       CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
     runs-on: ubuntu-latest
@@ -46,7 +44,6 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          cache-workspaces: true
       - 
         name: Publish (${{ matrix.package }})
-        run: cargo publish -q --locked --package ${{ matrix.package }}
+        run: cargo publish --locked --package ${{ matrix.package }}

@@ -20,15 +20,18 @@ impl<T> Weight<T> {
     where
         T: Default,
     {
-        Self(Default::default())
+        Self::create(Default::default)
+    }
+    /// generates a new instance of the [`Weight`] using the provided function
+    pub fn create<F>(value: F) -> Self
+    where
+        F: FnOnce() -> T,
+    {
+        Self(value())
     }
     /// returns a new instance of the [`Weight`] created from the given value.
     pub fn from_value(value: T) -> Self {
         Self(value)
-    }
-    /// consumes the current instance to return the inner value
-    pub fn value(self) -> T {
-        self.0
     }
     /// returns an immutable reference to the inner value.
     pub const fn get(&self) -> &T {
@@ -38,8 +41,14 @@ impl<T> Weight<T> {
     pub const fn get_mut(&mut self) -> &mut T {
         &mut self.0
     }
+    /// consumes the current instance to return the inner value
+    #[inline]
+    pub fn value(self) -> T {
+        self.0
+    }
     /// applies the provided function onto the inner value and returns a new [`Weight`] with
     /// the result.
+    #[inline]
     pub fn map<U, F>(self, f: F) -> Weight<U>
     where
         F: FnOnce(T) -> U,
@@ -48,6 +57,7 @@ impl<T> Weight<T> {
     }
     /// apply the function onto a mutable reference to the inner value and return a
     /// mutable reference to the current instanc storing the updating weight.
+    #[inline]
     pub fn map_mut<F>(&mut self, f: F) -> &mut Self
     where
         F: FnOnce(&mut T),
@@ -62,6 +72,7 @@ impl<T> Weight<T> {
     }
     /// updates the inner value with the provided value and returns a mutable reference to the
     /// current instance.
+    #[inline]
     pub fn set(&mut self, value: T) -> &mut Self {
         *self.get_mut() = value;
         self
@@ -71,6 +82,7 @@ impl<T> Weight<T> {
         core::mem::swap(self.get_mut(), other.get_mut());
     }
     /// [`take`](core::mem::take) the inner value, leaving the logical default in its place.
+    #[inline]
     pub fn take(&mut self) -> T
     where
         T: Default,
@@ -78,6 +90,7 @@ impl<T> Weight<T> {
         core::mem::take(self.get_mut())
     }
     /// returns a new [`Weight`] with the inner value cloned.
+    #[inline]
     pub fn cloned(&self) -> Weight<T>
     where
         T: Clone,
@@ -85,6 +98,7 @@ impl<T> Weight<T> {
         Weight(self.get().clone())
     }
     /// copies the inner value and returns a new weight with the copied value
+    #[inline]
     pub fn copied(&self) -> Weight<T>
     where
         T: Copy,
@@ -93,11 +107,13 @@ impl<T> Weight<T> {
     }
     /// returns a constant pointer to the inner value; see [`core::ptr::addr_of!`] for more
     /// information
+    #[inline]
     pub fn as_ptr(&self) -> *const T {
         core::ptr::addr_of!(self.0)
     }
     /// returns a mutable pointer to the inner value; see [`core::ptr::addr_of_mut!`] for more
     /// information
+    #[inline]
     pub fn as_mut_ptr(&mut self) -> *mut T {
         core::ptr::addr_of_mut!(self.0)
     }

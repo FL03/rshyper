@@ -3,9 +3,8 @@
     authors: @FL03
 */
 use super::HashFacet;
-use rshyper_core::GraphKind;
-use rshyper_core::cmp::HyperNode;
 use rshyper_core::index::{EdgeId, RawIndex, VertexId};
+use rshyper_core::{GraphKind, HyperNode};
 use std::collections::hash_map;
 
 /// [`SurfaceIter`] is an iterator over the edges of a hypergraph, yielding pairs of

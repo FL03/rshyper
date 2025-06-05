@@ -2,21 +2,21 @@
     appellation: impl_serde <module>
     authors: @FL03
 */
-use crate::HyperGraphAttributes;
 use crate::hash_graph::HashGraph;
+use crate::{GraphAttributes, GraphKind, RawIndex};
 use core::hash::Hash;
 use serde::de::{Deserialize, DeserializeOwned, MapAccess, Visitor};
 use serde::ser::Serialize;
 
 const FIELDS: &'static [&'static str] = &["nodes", "surfaces", "position", "_attrs"];
 
-impl<'a, N, E, A> Deserialize<'a> for HashGraph<N, E, A>
+impl<'a, N, E, A, K, Idx> Deserialize<'a> for HashGraph<N, E, A>
 where
+    A: GraphAttributes<Kind = K, Idx = Idx> + DeserializeOwned,
     N: DeserializeOwned + Eq + Hash,
     E: DeserializeOwned + Eq + Hash,
-    A: HyperGraphAttributes + DeserializeOwned,
-    A::Idx: Eq + Hash + DeserializeOwned,
-    A::Kind: DeserializeOwned,
+    Idx: Eq + Hash + RawIndex + DeserializeOwned,
+    K: GraphKind + DeserializeOwned,
 {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -32,13 +32,13 @@ where
     }
 }
 
-impl<N, E, A> Serialize for HashGraph<N, E, A>
+impl<N, E, A, K, Idx> Serialize for HashGraph<N, E, A>
 where
+    A: GraphAttributes<Kind = K, Idx = Idx> + Serialize,
     N: Serialize + Eq + Hash,
     E: Serialize + Eq + Hash,
-    A: HyperGraphAttributes + Serialize,
-    A::Idx: Eq + Hash + Serialize,
-    A::Kind: Serialize,
+    Idx: Eq + Hash + RawIndex + Serialize,
+    K: GraphKind + Serialize,
 {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -58,13 +58,13 @@ struct HashGraphVisitor<N, E, A> {
     _marker: core::marker::PhantomData<(N, E, A)>,
 }
 
-impl<'de, N, E, A> Visitor<'de> for HashGraphVisitor<N, E, A>
+impl<'de, N, E, A, K, Idx> Visitor<'de> for HashGraphVisitor<N, E, A>
 where
+    A: GraphAttributes<Kind = K, Idx = Idx> + DeserializeOwned,
     N: DeserializeOwned + Eq + Hash,
     E: DeserializeOwned + Eq + Hash,
-    A: HyperGraphAttributes + DeserializeOwned,
-    A::Idx: Eq + Hash + DeserializeOwned,
-    A::Kind: DeserializeOwned,
+    Idx: Eq + Hash + RawIndex + DeserializeOwned,
+    K: GraphKind + DeserializeOwned,
 {
     type Value = HashGraph<N, E, A>;
 

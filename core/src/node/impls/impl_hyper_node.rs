@@ -3,8 +3,8 @@
     authors: @FL03
 */
 use crate::Weight;
-use crate::cmp::HyperNode;
 use crate::index::{RawIndex, VertexId};
+use crate::node::HyperNode;
 
 impl<T, Idx> AsRef<Weight<T>> for HyperNode<T, Idx>
 where

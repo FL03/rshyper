@@ -25,9 +25,8 @@ pub(crate) mod prelude {
 }
 
 pub(crate) mod aliases {
-    use crate::Undirected;
-    use crate::cmp::{HyperEdge, HyperFacet, HyperNode};
-    use crate::index::{EdgeId, VertexId};
+    use rshyper_core::index::{EdgeId, VertexId};
+    use rshyper_core::{HyperEdge, HyperFacet, HyperNode, Undirected};
     use std::collections::{HashMap, HashSet, hash_map};
 
     /// a type alias for a [`HashSet`] of [`VertexId`]

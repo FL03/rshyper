@@ -1,14 +1,5 @@
 name: release
 
-concurrency:   
-  cancel-in-progress: false
-  group: ${{ github.workflow }}-${{ github.ref }}
-
-env:
-  CARGO_TERM_COLOR: always
-  RUST_BACKTRACE: 1
-  RUSTC_VERSION: 1.86.0
-
 on:
   release:
     types: [ published ]
@@ -16,39 +7,50 @@ on:
     types: [ release ]
   workflow_dispatch:
     inputs:
-      environment:
-        default: 'production'
-        description: 'Deployment environment (e.g., production, staging)?'
-        type: environment
       draft:
         default: false
-        description: 'Create a draft release?'
+        description: 'Create a draft release'
+        required: true
         type: boolean
       prerelease:
         default: false
-        description: 'Create a pre-release?'
+        description: 'Create a prerelease'
+        required: true
         type: boolean
+
+permissions:
+  contents: write
+  discussions: write
+
 jobs:
-  release:
-    permissions:
-      contents: read
-      deployments: write
-    env:
-      CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+  publish:
+    environment:
+      name: crates-io
+      url: https://crates.io/crates/rshyper
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      max-parallel: 1
-      matrix:
-        package:  [ rshyper-core, rshyper ]
+    steps:
+      - name: Trigger target workflow
+        uses: peter-evans/repository-dispatch@v3 
+        with:
+          event-type: crates-io
+          token: ${{ github.token }}
+  release:
+    needs: publish    
+    env:
+      IS_PRERELEASE: ${{ github.event.inputs.prerelease || false }}
+      IS_DRAFT: ${{ github.event.inputs.draft || false }}
+    runs-on: ubuntu-latest
     steps:
       - 
         name: Checkout
         uses: actions/checkout@v4
       - 
-        name: Setup Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        name: Create release
+        uses: softprops/action-gh-release@v1
         with:
-          cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          cache-workspaces: true
-
+          append_body: false
+          draft: ${{ env.IS_DRAFT }}
+          prerelease: ${{ env.IS_PRERELEASE }}
+          tag_name: ${{ github.event.release.tag_name }}
+          body: |
+            ${{ github.event.release.body }}

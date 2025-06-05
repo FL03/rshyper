@@ -5,22 +5,26 @@
 use super::{Search, Traversal};
 use crate::hash_graph::HashGraph;
 use rshyper_core::index::{HashIndex, NumIndex, VertexId};
-use rshyper_core::{GraphKind, HyperGraph, HyperGraphAttributes};
+use rshyper_core::{GraphAttributes, GraphKind, HyperGraph};
 use std::collections::HashSet;
 
 /// Depth-First Traversal algorithm for hypergraphs
-pub struct DepthFirstTraversal<'a, N, E, H>
+pub struct DepthFirstTraversal<'a, N, E, A, H>
 where
-    H: HyperGraph<N, E>,
+    A: GraphAttributes,
+    H: HyperGraph<N, E, A>,
 {
     pub(crate) graph: &'a H,
-    pub(crate) stack: Vec<VertexId<H::Idx>>,
-    pub(crate) visited: HashSet<VertexId<H::Idx>>,
+    pub(crate) stack: Vec<VertexId<A::Idx>>,
+    pub(crate) visited: HashSet<VertexId<A::Idx>>,
+    _node: core::marker::PhantomData<N>,
+    _edge: core::marker::PhantomData<E>,
 }
 
-impl<'a, N, E, H, K, Idx> DepthFirstTraversal<'a, N, E, H>
+impl<'a, N, E, H, A, K, Idx> DepthFirstTraversal<'a, N, E, A, H>
 where
-    H: HyperGraph<N, E, Kind = K, Idx = Idx>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
+    H: HyperGraph<N, E, A>,
     K: GraphKind,
     Idx: HashIndex,
 {
@@ -30,6 +34,8 @@ where
             graph,
             stack: Vec::new(),
             visited: HashSet::new(),
+            _node: core::marker::PhantomData::<N>,
+            _edge: core::marker::PhantomData::<E>,
         }
     }
     /// returns an immutable reference to the stack
@@ -76,26 +82,27 @@ where
     }
 }
 
-impl<'a, N, E, H> Traversal<VertexId<H::Idx>> for DepthFirstTraversal<'a, N, E, H>
+impl<'a, N, E, A, H> Traversal<VertexId<A::Idx>> for DepthFirstTraversal<'a, N, E, A, H>
 where
-    H: HyperGraph<N, E>,
-    H::Idx: Eq + core::hash::Hash,
+    A: GraphAttributes,
+    H: HyperGraph<N, E, A>,
+    A::Idx: Eq + core::hash::Hash,
 {
     type Store<I2> = HashSet<I2>;
 
-    fn has_visited(&self, vertex: &VertexId<H::Idx>) -> bool {
+    fn has_visited(&self, vertex: &VertexId<A::Idx>) -> bool {
         self.visited().contains(vertex)
     }
 
-    fn visited(&self) -> &Self::Store<VertexId<H::Idx>> {
+    fn visited(&self) -> &Self::Store<VertexId<A::Idx>> {
         &self.visited
     }
 }
 
 impl<'a, N, E, A, K, Idx> Search<VertexId<Idx>>
-    for DepthFirstTraversal<'a, N, E, HashGraph<N, E, A>>
+    for DepthFirstTraversal<'a, N, E, A, HashGraph<N, E, A>>
 where
-    A: HyperGraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Idx = Idx, Kind = K>,
     N: Default + Eq + core::hash::Hash,
     E: Default + Eq + core::hash::Hash,
     K: GraphKind,
@@ -123,7 +130,7 @@ where
             path.push(current);
 
             // Get all hyperedges containing the current vertex
-            if let Ok(edges) = self.graph.get_edges_with_vertex(&current) {
+            if let Ok(edges) = self.graph.find_edges_with_node(&current) {
                 // For each hyperedge, visit all vertices that haven't been visited yet
                 for edge_id in edges {
                     let vertices = self.graph.get_edge_vertices(&edge_id)?;

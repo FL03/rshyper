@@ -16,8 +16,9 @@ impl<K: GraphIndex> IndexBase<usize, K> {
         Self::new(INDEX_COUNTER.fetch_add(1, Ordering::Relaxed))
     }
     /// consumes the current index and returns a new, atomic index.
-    pub fn atomic_next(self) -> Self {
-        Self::atomic()
+    pub fn atomic_next(&mut self) -> Self {
+        let prev = self.replace(INDEX_COUNTER.fetch_add(1, Ordering::Relaxed));
+        Self::new(prev)
     }
 }
 
