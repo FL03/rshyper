@@ -223,8 +223,8 @@ where
 
 impl<N, E, A, K, Idx> core::fmt::Display for HashGraph<N, E, A>
 where
-    E: core::fmt::Display + Eq + Hash,
-    N: core::fmt::Display + Eq + Hash,
+    E: core::fmt::Debug + Eq + Hash,
+    N: core::fmt::Debug + Eq + Hash,
     A: GraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
     Idx: NumIndex,
@@ -232,9 +232,9 @@ where
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(
             f,
-            "{{ nodes: {}, edges: {} }}",
-            self.total_vertices(),
-            self.total_edges()
+            "{{ nodes: {n:?}, edges: {e:?} }}",
+            n = self.nodes(),
+            e = self.surfaces()
         )
     }
 }

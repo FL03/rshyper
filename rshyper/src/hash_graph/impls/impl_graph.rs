@@ -139,6 +139,23 @@ where
         });
         Ok(neighbors)
     }
+    /// returns true if the vertex is contained in the hyperedge with the given id
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, name = "is_vertex_in_edge", target = "hash_graph")
+    )]
+    pub fn is_vertex_in_edge<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
+    where
+        Q: Eq + Hash,
+        Q2: Eq + Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+        VertexId<Idx>: core::borrow::Borrow<Q2>,
+    {
+        if let Some(surface) = self.surfaces().get(index) {
+            return surface.contains_vertex(vertex);
+        }
+        false
+    }
     /// retrieves the set of nodes composing the given edge
     pub fn get_edge_nodes<Q>(&self, index: &Q) -> crate::Result<Vec<&HyperNode<N, Idx>>>
     where
@@ -256,9 +273,8 @@ where
             .get_mut(index)
             .ok_or_else(|| crate::Error::EdgeNotFound)
     }
-    /// merges two hyperedges into one (combining their vertices;
-    ///
-    /// **note:** the method requires the edge types `E` to implement the [`Add`](core::ops::Add)
+    /// merge two edges within the hypergraph into one by combining their vertices and using
+    /// the [`Add`](core::ops::Add) trait to merge their weights;
     /// trait
     #[cfg_attr(
         feature = "tracing",
@@ -270,6 +286,24 @@ where
         Q: Eq + Hash + core::fmt::Debug,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
         for<'a> &'a E: core::ops::Add<Output = E>,
+    {
+        self.merge_edges_with(e1, e2, |w1, w2| {
+            // use the `Add` trait to merge the weights of the two edges
+            w1 + w2
+        })
+    }
+    /// merge two edges within the hypergraph into one by combining their vertices and using
+    /// the provided function to merge their weights;
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, target = "hash_graph", name = "merge_edges")
+    )]
+    pub fn merge_edges_with<Q, F>(&mut self, e1: &Q, e2: &Q, f: F) -> crate::Result<EdgeId<Idx>>
+    where
+        Idx: Copy + core::ops::Add<Output = Idx> + One,
+        Q: Eq + Hash + core::fmt::Debug,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+        F: FnOnce(&E, &E) -> E,
     {
         // remove the edges from the surfaces map
         let s1 = self.remove_surface(e1)?;
@@ -284,32 +318,16 @@ where
             .union(s2.points())
             .copied()
             .collect::<VertexSet<_>>();
-        // sum the weights of the two edges
-        let weight = s1.weight().view() + s2.weight().view();
+        // merge the two weights using the provided function
+        let weight = f(s1.weight().view().value(), s2.weight().view().value());
         // generate a new edge index
         let edge_id = self.next_edge_id();
         // initialize a new facet using the merged vertices, new index, and source weight
-        let surface = HyperFacet::new(edge_id, vertices, weight);
+        let surface = HyperFacet::new(edge_id, vertices, Weight(weight));
         // insert the new hyperedge into the surfaces map
         self.surfaces_mut().insert(edge_id, surface);
         // return the new edge ID
         Ok(edge_id)
-    }
-
-    /// remove the hyperedge with the given id
-    #[inline]
-    #[cfg_attr(
-        feature = "tracing",
-        tracing::instrument(skip_all, name = "remove_surface", target = "hash_graph")
-    )]
-    pub fn remove_surface<Q>(&mut self, index: &Q) -> crate::Result<HashFacet<E, K, Idx>>
-    where
-        Q: Eq + Hash,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.surfaces_mut()
-            .remove(index)
-            .ok_or(crate::Error::EdgeNotFound)
     }
     /// removes the vertex with the given id and all of its associated hyperedges
     #[inline]
@@ -333,13 +351,20 @@ where
             })
             .ok_or(crate::Error::NodeNotFound)
     }
-    /// returns a mutable reference to the set of hyperedges
-    pub fn retain_surfaces<F>(&mut self, f: F) -> &mut Self
+    /// remove the [`HyperFacet`] with the given index from the hypergraph
+    #[inline]
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, name = "remove_surface", target = "hash_graph")
+    )]
+    pub fn remove_surface<Q>(&mut self, index: &Q) -> crate::Result<HashFacet<E, K, Idx>>
     where
-        F: FnMut(&EdgeId<Idx>, &mut HashFacet<E, K, Idx>) -> bool,
+        Q: Eq + Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.surfaces_mut().retain(f);
-        self
+        self.surfaces_mut()
+            .remove(index)
+            .ok_or(crate::Error::EdgeNotFound)
     }
     /// retain nodes in the hypergraph based on a predicate;
     ///
@@ -354,6 +379,14 @@ where
         F: FnMut(&VertexId<Idx>, &mut HyperNode<N, Idx>) -> bool,
     {
         self.nodes_mut().retain(f);
+        self
+    }
+    /// retain surfaces in the hypergraph based on a predicate;
+    pub fn retain_surfaces<F>(&mut self, f: F) -> &mut Self
+    where
+        F: FnMut(&EdgeId<Idx>, &mut HashFacet<E, K, Idx>) -> bool,
+    {
+        self.surfaces_mut().retain(f);
         self
     }
     /// update the weight of an edge with the given index

@@ -26,10 +26,16 @@ where
     Idx: RawIndex,
     K: GraphKind,
     T: core::fmt::Display,
-    S: RawStore<Idx> + core::fmt::Display,
+    S: RawStore<Idx> + core::fmt::Debug,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{{ edge: {}, weight: {} }}", self.edge, self.weight)
+        write!(
+            f,
+            "{{ id: {}, points: {:?}, weight: {} }}",
+            self.edge().id(),
+            self.edge().points(),
+            self.weight()
+        )
     }
 }
 

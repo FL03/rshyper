@@ -4,8 +4,14 @@
 */
 use crate::index::{EdgeId, IndexResult, RawIndex, Udx, VertexId};
 
-/// The [`IndexCursor`] implementation is uses to track the current indexes of edges and vertices
-/// within a hypergraph.
+/// The [`IndexCursor`] stores the current edge and vertex indices in a hypergraph, allowing
+/// for efficient traversal and manipulation of the hypergraph structure. It is designed to
+/// be used in conjunction with hypergraph operations that require knowledge of the current
+/// position within the hypergraph, such as adding or removing edges and vertices, or
+/// iterating over the hypergraph's elements. The cursor is generic over the index type `T`,
+/// which must implement the [`RawIndex`] trait. This allows for flexibility in the choice of
+/// index representation, enabling the use of different types of indices (e.g., [`Udx`]
+/// or some custom index types) while maintaining the same interface for the cursor.
 #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Ord, PartialOrd)]
 #[cfg_attr(
     feature = "serde",

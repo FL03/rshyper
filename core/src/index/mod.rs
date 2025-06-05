@@ -58,10 +58,10 @@ pub trait Indexed<T: RawIndex> {
 pub trait RawIndex: 'static + Send + Sync + core::fmt::Debug + core::fmt::Display {
     private!();
 
-    #[cfg(feature = "alloc")]
     /// converts the index to a string representation.
+    #[cfg(feature = "alloc")]
     fn to_string(&self) -> alloc::string::String {
-        format!("{self:?}")
+        alloc::format!("{self}")
     }
 }
 /// The [`Index`] trait extends the [`RawIndex`] trait to include additional operations and

@@ -2,7 +2,7 @@
     Appellation: index <module>
     Contrib: @FL03
 */
-use super::{GraphIndex, IndexError, IndexResult, RawIndex};
+use super::{GraphIndex, IndexResult, RawIndex};
 use num_traits::{One, Zero};
 
 /// A generic [`IndexBase`] implementation used to represent various [_kinds_](GraphIndex) of
@@ -141,8 +141,8 @@ where
         T: core::ops::Add + One,
         <T as core::ops::Add>::Output: RawIndex,
     {
-        let value = self.value + T::one();
-        IndexBase::new(value)
+        self.next_with(|prev| prev + T::one())
+            .expect("Failed to increment index")
     }
     /// mutably increments the index value by [one](One)
     #[inline]
@@ -169,9 +169,34 @@ where
     where
         T: Copy + core::ops::Add<T, Output = T> + One,
     {
-        self.next().ok_or(IndexError::IndexOutOfBounds)
+        self.step_with(|&prev| prev + T::one())
     }
-
+    /// replaces the current value with the next one computed using the provided function and
+    /// returns the previous instance of the index.
+    pub fn step_with<F>(&mut self, f: F) -> IndexResult<Self>
+    where
+        F: FnOnce(&T) -> T,
+    {
+        // compute the next value using the provided function
+        let next = f(self.get());
+        // replace the current value with the next one
+        let prev = self.replace(next);
+        // return the previous instance
+        Ok(Self::new(prev))
+    }
+    /// similar to [`step_with`](IndexBase::step_with), however, rather than replacing the
+    /// current value with the computed value, it returns a new instance of the index
+    /// containing the computed value.
+    pub fn next_with<U, F>(self, f: F) -> IndexResult<IndexBase<U, K>>
+    where
+        F: FnOnce(T) -> U,
+        U: RawIndex,
+    {
+        // compute the next value using the provided function
+        let next = f(self.value);
+        // return the previous instance
+        Ok(IndexBase::new(next))
+    }
     #[deprecated(since = "0.0.10", note = "use `value` instead")]
     pub fn into_inner(self) -> T {
         self.value
@@ -258,12 +283,7 @@ where
     type Item = IndexBase<T, K>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // compute the next value
-        let next = self.value + T::one();
-        // replace the current value with the next one
-        let prev = core::mem::replace(&mut self.value, next);
-        // return the previous instance
-        Some(Self::new(prev))
+        self.step().ok()
     }
 }
 

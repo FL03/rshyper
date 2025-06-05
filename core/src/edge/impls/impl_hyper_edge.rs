@@ -43,10 +43,10 @@ impl<S, K, Idx> core::fmt::Display for HyperEdge<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
-    S: RawStore<Idx> + core::fmt::Display,
+    S: RawStore<Idx> + core::fmt::Debug,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "(id: {}, nodes: {})", self.id, self.points,)
+        write!(f, "{{ id: {}, points: {:?} }}", self.id(), self.points())
     }
 }
 

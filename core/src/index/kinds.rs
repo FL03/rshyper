@@ -11,26 +11,42 @@ pub trait GraphIndex:
 }
 
 macro_rules! impl_type_kind {
-    ($($vis:vis $i:ident $kind:ident);* $(;)?) => {
+    ($($(#[doc $($doc:tt)*])? $vis:vis $i:ident $kind:ident);* $(;)?) => {
         $(
-            impl_type_kind!(@impl $vis $i $kind);
+            impl_type_kind!(@impl $(#[doc $($doc)*])? $vis $i $kind);
         )*
     };
-    (@impl $vis:vis enum $kind:ident) => {
+    (@impl $(#[doc $($doc:tt)*])? $vis:vis enum $kind:ident) => {
+        $(#[doc $($doc)*])?
         #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Ord, PartialOrd)]
         #[cfg_attr(
             feature = "serde",
             derive(serde_derive::Deserialize, serde_derive::Serialize),
         )]
         #[repr(transparent)]
-        pub enum $kind {};
+        $vis enum $kind {};
 
-        impl GraphIndex for $kind {
+        impl_type_kind!(@impls $kind);
+    };
+    (@impl $(#[doc $($doc:tt)*])? $vis:vis struct $kind:ident) => {
+        $(#[doc $($doc)*])?
+        #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Ord, PartialOrd)]
+        #[cfg_attr(
+            feature = "serde",
+            derive(serde_derive::Deserialize, serde_derive::Serialize),
+        )]
+        #[repr(transparent)]
+        $vis struct $kind;
+
+        impl_type_kind!(@impls $kind);
+    };
+    (@impls $kind:ident) => {
+        impl $crate::index::GraphIndex for $kind {
             seal!();
         }
 
         impl ::core::fmt::Display for $kind {
-            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
                 // stringify the ident of the kind
                 let tag = stringify!($kind);
                 // write the tag in lowercase
@@ -38,31 +54,11 @@ macro_rules! impl_type_kind {
             }
         }
     };
-    (@impl $vis:vis struct $kind:ident) => {
-        #[derive(Clone, Copy, Debug, Default, Eq, Hash, PartialEq, Ord, PartialOrd)]
-        #[cfg_attr(
-            feature = "serde",
-            derive(serde_derive::Deserialize, serde_derive::Serialize),
-        )]
-        #[repr(transparent)]
-        pub struct $kind;
-
-        impl GraphIndex for $kind {
-            seal!();
-        }
-
-        impl ::core::fmt::Display for $kind {
-            fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-                // stringify the ident of the kind
-                let tag = stringify!($kind);
-                // write the tag in lowercase
-                write!(f, "{}", tag.to_lowercase())
-            }
-        }
-    }
 }
 
 impl_type_kind! {
+    #[doc = "A kind of index for edges in a graph"]
     pub struct EdgeIndex;
+    #[doc = "A kind of index for vertices in a graph"]
     pub struct VertexIndex;
 }
