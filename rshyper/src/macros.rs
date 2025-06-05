@@ -8,8 +8,5 @@
 #[cfg(feature = "macros")]
 #[macro_use]
 pub mod hypergraph;
-#[cfg(feature = "macros")]
-#[macro_use]
-pub mod hypernode;
 #[macro_use]
 pub mod seal;

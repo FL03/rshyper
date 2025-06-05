@@ -26,9 +26,9 @@ pub trait HyperGraph<N, E>: RawHyperGraph<N, E> {
     where
         I: IntoIterator<Item = VertexId<Self::Idx>>;
     /// add a new node to the graph with the given weight and return its index
-    fn add_node(&mut self, weight: N) -> VertexId<Self::Idx>;
+    fn add_node(&mut self, weight: N) -> crate::Result<VertexId<Self::Idx>>;
     /// add a new default node to the graph and return its index
-    fn add_vertex(&mut self) -> VertexId<Self::Idx>
+    fn add_vertex(&mut self) -> crate::Result<VertexId<Self::Idx>>
     where
         N: Default,
     {

@@ -21,10 +21,10 @@ fn test_hash_graph() -> rshyper::Result<()> {
     let mut graph = HashGraph::<usize, usize>::undirected();
 
     // use the macro to add some nodes & edges
-    let v0 = graph.add_node(10);
-    let v1 = graph.add_node(20);
-    let v2 = graph.add_node(30);
-    let v3 = graph.add_node(40);
+    let v0 = graph.add_node(10)?;
+    let v1 = graph.add_node(20)?;
+    let v2 = graph.add_node(30)?;
+    let v3 = graph.add_node(40)?;
     // add some edges
     let _e1 = graph.add_edge(vec![v0, v1])?;
     let e2 = graph.add_edge(vec![v0, v1, v2])?;
@@ -53,9 +53,9 @@ fn test_hash_graph() -> rshyper::Result<()> {
 #[test]
 fn test_merge_hash_edge() -> rshyper::Result<()> {
     let mut graph = HashGraph::<usize, usize>::undirected();
-    let v0 = graph.add_node(10);
-    let v1 = graph.add_node(20);
-    let v2 = graph.add_node(30);
+    let v0 = graph.add_node(10)?;
+    let v1 = graph.add_node(20)?;
+    let v2 = graph.add_node(30)?;
 
     let e1 = graph.add_surface(vec![v0, v1], Weight(10))?;
     let e2 = graph.add_surface(vec![v1, v2], Weight(20))?;
@@ -79,7 +79,7 @@ fn test_merge_hash_edge() -> rshyper::Result<()> {
 #[test]
 fn test_update_hash_node() -> rshyper::Result<()> {
     let mut graph = HashGraph::<usize, usize>::undirected();
-    let v0 = graph.add_node(42);
+    let v0 = graph.add_node(42)?;
 
     // Check initial weight
     let initial_weight = graph.get_node(&v0)?;
@@ -96,9 +96,9 @@ fn test_update_hash_node() -> rshyper::Result<()> {
 #[test]
 fn test_remove_hash_edges() -> rshyper::Result<()> {
     let mut graph = HashGraph::<usize, usize>::undirected();
-    let v0 = graph.add_node(10);
-    let v1 = graph.add_node(20);
-    let v2 = graph.add_node(30);
+    let v0 = graph.add_node(10)?;
+    let v1 = graph.add_node(20)?;
+    let v2 = graph.add_node(30)?;
 
     let e1 = graph.add_edge(vec![v0, v1])?;
     let e2 = graph.add_edge(vec![v1, v2])?;

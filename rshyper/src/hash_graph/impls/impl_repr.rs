@@ -36,15 +36,16 @@ where
     }
 }
 
-impl<E, A> HashGraph<(), E, A>
+impl<E, A, K, Idx> HashGraph<(), E, A>
 where
-    A: GraphAttributes,
+    A: GraphAttributes<Kind = K, Idx = Idx>,
     E: Eq + Hash,
-    A::Idx: Eq + Hash,
+    Idx: RawIndex + Eq + Hash,
+    K: GraphKind,
 {
-    pub fn insert_empty_node(&mut self) -> VertexId<A::Idx>
+    pub fn insert_empty_node(&mut self) -> crate::Result<VertexId<Idx>>
     where
-        A::Idx: Copy + core::ops::Add<Output = A::Idx> + num_traits::One,
+        Idx: Copy + core::ops::Add<Output = A::Idx> + num_traits::One,
     {
         self.add_node(())
     }
@@ -59,16 +60,16 @@ where
     Idx: RawIndex + Eq + Hash,
 {
     /// insert [`Some`] vertex with weight `T` and return its ID
-    pub fn insert_some_node(&mut self, weight: N) -> VertexId<A::Idx>
+    pub fn insert_some_node(&mut self, weight: N) -> crate::Result<VertexId<Idx>>
     where
-        A::Idx: Copy + core::ops::Add<Output = A::Idx> + num_traits::One,
+        A::Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
     {
         self.add_node(Some(weight))
     }
-
-    pub fn insert_empty_node(&mut self) -> VertexId<A::Idx>
+    /// insert [`None`] vertex with weight `T` and return its ID
+    pub fn add_none_node(&mut self) -> crate::Result<VertexId<Idx>>
     where
-        A::Idx: Copy + core::ops::Add<Output = A::Idx> + num_traits::One,
+        A::Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
     {
         self.add_node(None)
     }

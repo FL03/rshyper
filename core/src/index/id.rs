@@ -169,8 +169,7 @@ where
     where
         T: Copy + core::ops::Add<T, Output = T> + One,
     {
-        self.next()
-            .ok_or(IndexError::IndexOutOfBounds)
+        self.next().ok_or(IndexError::IndexOutOfBounds)
     }
 
     #[deprecated(since = "0.0.10", note = "use `value` instead")]

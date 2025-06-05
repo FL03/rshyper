@@ -7,22 +7,22 @@ use rshyper::VertexId;
 use rshyper::hash_graph::UndirectedHashGraph as HyperGraph;
 use std::hint::black_box;
 
-fn _init() -> HyperGraph<&'static str, usize> {
+fn _init() -> rshyper::Result<HyperGraph<&'static str, usize>> {
     let mut graph = HyperGraph::undirected();
 
-    let a = graph.add_node("A");
-    let b = graph.add_node("B");
-    let c = graph.add_node("C");
+    let a = graph.add_node("A")?;
+    let b = graph.add_node("B")?;
+    let c = graph.add_node("C")?;
 
-    let _e1 = graph.add_edge([a, b, c]).expect("Failed to insert edge");
+    let _e1 = graph.add_edge([a, b, c])?;
 
-    graph
+    Ok(graph)
 }
 
 fn bench_hash_graph_depth_first(c: &mut Criterion) {
     c.bench_function("hash_graph_dft", |b| {
         b.iter(|| {
-            let graph = _init();
+            let graph = _init().expect("Failed to initialize graph");
             black_box(graph.dft().search(VertexId::from(0)).unwrap());
         })
     });

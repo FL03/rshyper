@@ -59,7 +59,7 @@ where
         Ok(edge_id)
     }
     /// add a new node with the given weight and return its index
-    pub fn add_node(&mut self, weight: N) -> VertexId<Idx>
+    pub fn add_node(&mut self, weight: N) -> crate::Result<VertexId<Idx>>
     where
         Idx: Copy + core::ops::Add<Output = Idx> + One,
     {
@@ -69,10 +69,10 @@ where
         let node = HyperNode::new(idx, Weight(weight));
         // insert the new node into the vertices map
         self.nodes_mut().insert(idx, node);
-        idx
+        Ok(idx)
     }
     /// add a new vertex with the default weight and return its ID
-    pub fn add_vertex(&mut self) -> VertexId<Idx>
+    pub fn add_vertex(&mut self) -> crate::Result<VertexId<Idx>>
     where
         N: Default,
         Idx: Copy + core::ops::Add<Output = Idx> + One,

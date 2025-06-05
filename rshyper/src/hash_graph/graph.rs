@@ -274,7 +274,7 @@ where
             .map(|v| v.iter().collect::<S>())
     }
 
-    fn add_node(&mut self, weight: N) -> VertexId<Idx> {
+    fn add_node(&mut self, weight: N) -> crate::Result<VertexId<Idx>> {
         self.add_node(weight)
     }
 
