@@ -48,6 +48,7 @@ pub mod traits {
     pub mod convert;
     pub mod hyper_graph;
     pub mod merge;
+    pub mod step;
     pub mod transform;
     pub mod weighted;
 
@@ -60,6 +61,8 @@ pub mod traits {
         pub use super::hyper_graph::*;
         #[doc(inline)]
         pub use super::merge::*;
+        #[doc(inline)]
+        pub use super::step::*;
         #[doc(inline)]
         pub use super::transform::*;
         #[doc(inline)]

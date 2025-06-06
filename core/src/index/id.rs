@@ -2,7 +2,7 @@
     Appellation: index <module>
     Contrib: @FL03
 */
-use super::{GraphIndex, IndexResult, RawIndex};
+use super::{GraphIndex, IndexError, RawIndex};
 use num_traits::{One, Zero};
 
 /// A generic [`IndexBase`] implementation used to represent various [_kinds_](GraphIndex) of
@@ -165,7 +165,7 @@ where
     ///     assert_eq!(e2.get(), &2);
     /// ```
     #[inline]
-    pub fn step(&mut self) -> IndexResult<Self>
+    pub fn step(&mut self) -> Result<Self, IndexError>
     where
         T: Copy + core::ops::Add<T, Output = T> + One,
     {
@@ -173,21 +173,16 @@ where
     }
     /// replaces the current value with the next one computed using the provided function and
     /// returns the previous instance of the index.
-    pub fn step_with<F>(&mut self, f: F) -> IndexResult<Self>
+    pub fn step_with<F>(&mut self, f: F) -> Result<Self, IndexError>
     where
         F: FnOnce(&T) -> T,
     {
-        // compute the next value using the provided function
-        let next = f(self.get());
-        // replace the current value with the next one
-        let prev = self.replace(next);
-        // return the previous instance
-        Ok(Self::new(prev))
+        crate::StepWith::step_with(self, f).ok_or_else(|| IndexError::IndexOutOfBounds)
     }
     /// similar to [`step_with`](IndexBase::step_with), however, rather than replacing the
     /// current value with the computed value, it returns a new instance of the index
     /// containing the computed value.
-    pub fn next_with<U, F>(self, f: F) -> IndexResult<IndexBase<U, K>>
+    pub fn next_with<U, F>(self, f: F) -> Result<IndexBase<U, K>, IndexError>
     where
         F: FnOnce(T) -> U,
         U: RawIndex,
@@ -200,6 +195,26 @@ where
     #[deprecated(since = "0.0.10", note = "use `value` instead")]
     pub fn into_inner(self) -> T {
         self.value
+    }
+}
+
+impl<T, K> crate::StepWith<T> for IndexBase<T, K>
+where
+    K: GraphIndex,
+    T: RawIndex,
+{
+    type Output = IndexBase<T, K>;
+
+    fn step_with<F>(&mut self, f: F) -> Option<Self::Output>
+    where
+        F: FnOnce(&T) -> T,
+    {
+        // compute the next value using the provided function
+        let next = f(self.get());
+        // replace the current value with the next one
+        let prev = self.replace(next);
+        // return the previous instance
+        Some(Self::new(prev))
     }
 }
 

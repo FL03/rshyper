@@ -151,6 +151,23 @@ where
     {
         self.nodes().contains_key(index)
     }
+    /// returns true if the vertex is contained in the hyperedge with the given id
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, name = "is_vertex_in_edge", target = "hash_graph")
+    )]
+    pub fn contains_node_in_edge<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
+    where
+        Q: Eq + Hash,
+        Q2: Eq + Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+        VertexId<Idx>: core::borrow::Borrow<Q2>,
+    {
+        if let Some(surface) = self.surfaces().get(index) {
+            return surface.contains(vertex);
+        }
+        false
+    }
     /// returns true if the hypergraph contains an edge with the given index;
     pub fn contains_surface<Q>(&self, index: &Q) -> bool
     where
