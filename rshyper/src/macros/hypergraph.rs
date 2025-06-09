@@ -69,7 +69,7 @@ macro_rules! hypergraph {
 ///
 /// ```rust
 /// use rshyper::{HashGraph, Weight};
-/// 
+///
 /// fn main() -> rshyper::Result<()> {
 ///     // initialize a new undirected hypergraph
 ///     let mut graph = HashGraph::<usize, usize>::undirected();
@@ -90,7 +90,7 @@ macro_rules! hypergraph {
 ///     // verify the weights of the edges
 ///     assert_eq!(graph.get_edge_weight(&e0)?, &<usize>::default());
 ///     assert_eq!(graph.get_edge_weight(&e1)?, &10);
-/// 
+///
 ///     Ok(())
 /// }
 /// ```

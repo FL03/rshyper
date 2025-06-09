@@ -36,6 +36,7 @@ jobs:
           client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
           token: ${{ github.token }}
   release:
+    continue-on-error: true
     needs: publish    
     env:
       IS_PRERELEASE: ${{ github.event.inputs.prerelease || false }}
@@ -55,3 +56,5 @@ jobs:
           tag_name: ${{ github.event.release.tag_name }}
           body: |
             ${{ github.event.release.body }}
+          files: |
+            target/criterion/report/index.html
