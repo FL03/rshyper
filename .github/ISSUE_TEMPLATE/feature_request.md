@@ -1,9 +1,9 @@
 ---
-name: Feature request
 about: Suggest an idea for this project
-title: ''
 assignees: [ FL03 ]
 labels: [ enhancement ]
+name: Feature request
+title: 'rshyper-[000xxx]: '
 type: feature
 ---
 

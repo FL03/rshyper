@@ -21,7 +21,7 @@ where
     /// search the hypergraph using the A* algorithm with the given heuristic function
     pub fn astar<F>(&self, heuristic: F) -> search::AStarSearch<'_, N, E, A, F>
     where
-        F: search::astar::HeuristicFunc<Idx, Output = f64>,
+        F: search::Heuristic<Idx, Output = f64>,
     {
         search::AStarSearch::new(self, heuristic)
     }
@@ -41,7 +41,7 @@ where
         E: Default,
         Idx: NumIndex,
     {
-        search::BreadthFirstTraversal::from_hypergraph(self)
+        search::BreadthFirstTraversal::new(self)
     }
 }
 

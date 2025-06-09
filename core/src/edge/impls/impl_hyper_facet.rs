@@ -16,7 +16,7 @@ where
     fn default() -> Self {
         Self {
             edge: HyperEdge::default(),
-            weight: Weight::default(),
+            weight: Weight::init(),
         }
     }
 }

@@ -43,6 +43,7 @@ mod aliases {
     /// a type alias for an [`Index`] whose _kind_ is [`VertexIndex`]
     pub type VertexId<T = Udx> = IndexBase<T, VertexIndex>;
 }
+
 ///[`Indexed`] describes a common interface for all types which are aware of some associated
 /// index. The trait is generic over a type `T` which implements the [`RawIndex`] trait,
 /// allowing for flexibility in the type of index used while ensuring that the index type is
@@ -64,23 +65,23 @@ pub trait RawIndex: 'static + Send + Sync + core::fmt::Debug + core::fmt::Displa
         alloc::format!("{self}")
     }
 }
-/// The [`Index`] trait extends the [`RawIndex`] trait to include additional operations and
+/// The [`StdIndex`] trait extends the [`RawIndex`] trait to include additional operations and
 /// behaviours commonly expected from indices in a hypergraph.
 ///
 /// **note:** the trait is automatically implemented for all types that implement [`RawIndex`]
 /// alongside traits including: [Clone], [Default], [PartialEq], and [PartialOrd]
-pub trait Index: RawIndex
+pub trait StdIndex: RawIndex
 where
     Self: Clone + Default + PartialEq + PartialOrd,
 {
 }
-/// The [`HashIndex`] trait extends the [`Index`] trait to include additional operations and
+/// The [`HashIndex`] trait extends the [`StdIndex`] trait to include additional operations and
 /// behaviours commonly expected from indices in a hypergraph.
 ///
 /// **note:** the trait is automatically implemented for all types that implement [`Idx`]
 ///  alongside traits including: [Eq] and [Hash](core::hash::Hash)
 /// implementations.
-pub trait HashIndex: Index
+pub trait HashIndex: StdIndex
 where
     Self: Eq + core::hash::Hash,
 {
@@ -124,9 +125,9 @@ where
  ************* Implementations *************
 */
 
-impl<T> Index for T where T: 'static + RawIndex + Clone + Default + PartialEq + PartialOrd {}
+impl<T> StdIndex for T where T: 'static + RawIndex + Clone + Default + PartialEq + PartialOrd {}
 
-impl<T> HashIndex for T where T: Index + Eq + core::hash::Hash {}
+impl<T> HashIndex for T where T: StdIndex + Eq + core::hash::Hash {}
 
 impl<T> NumIndex for T where
     T: HashIndex

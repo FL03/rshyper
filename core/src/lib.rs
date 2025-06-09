@@ -1,16 +1,22 @@
-/*
-    appellation: rshyper-core <library>
-    authors: @FL03
-*/
 //! # rshyper-core
 //!
 //! This crate provides the core functionality for the rshyper library, implementing various
 //! primitives and utilities for working with hypergraphs.
 //!
+//! ## Features
 //!
+//! - `alloc`: enables the use of the `alloc` crate, allowing for dynamic memory allocation.
+//! - `std`: enables the use of the standard library, providing additional functionality and
+//!   types.
+//!
+#![allow(
+    clippy::should_implement_trait,
+    clippy::module_inception,
+    clippy::missing_safety_doc
+)]
+#![cfg_attr(not(feature = "std"), no_std)]
 #![crate_name = "rshyper_core"]
 #![crate_type = "lib"]
-#![cfg_attr(not(feature = "std"), no_std)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -30,6 +36,7 @@ pub use self::{
     node::HyperNode,
     traits::prelude::*,
     types::prelude::*,
+    weight::prelude::*,
 };
 
 pub mod attrs;
@@ -37,6 +44,7 @@ pub mod edge;
 pub mod error;
 pub mod index;
 pub mod node;
+pub mod weight;
 
 pub mod traits {
     //! this module contains various traits used throughout to establish common interfaces and
@@ -48,6 +56,7 @@ pub mod traits {
     pub mod convert;
     pub mod hyper_graph;
     pub mod merge;
+    pub mod step;
     pub mod transform;
     pub mod weighted;
 
@@ -61,6 +70,8 @@ pub mod traits {
         #[doc(inline)]
         pub use super::merge::*;
         #[doc(inline)]
+        pub use super::step::*;
+        #[doc(inline)]
         pub use super::transform::*;
         #[doc(inline)]
         pub use super::weighted::*;
@@ -71,14 +82,12 @@ pub mod types {
     //! this module provides various primitive types used throughout the library such as [Weight]
     #[doc(inline)]
     pub use self::prelude::*;
+
     pub mod graph_kind;
-    pub mod weight;
 
     pub(crate) mod prelude {
         #[doc(inline)]
         pub use super::graph_kind::*;
-        #[doc(inline)]
-        pub use super::weight::*;
     }
 }
 
@@ -99,4 +108,6 @@ pub mod prelude {
     pub use crate::traits::prelude::*;
     #[doc(no_inline)]
     pub use crate::types::prelude::*;
+    #[doc(no_inline)]
+    pub use crate::weight::prelude::*;
 }

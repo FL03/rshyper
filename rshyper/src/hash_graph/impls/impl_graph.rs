@@ -59,17 +59,35 @@ where
         Ok(edge_id)
     }
     /// add a new node with the given weight and return its index
-    pub fn add_node(&mut self, weight: N) -> crate::Result<VertexId<Idx>>
+    pub fn add_node(&mut self, weight: Weight<N>) -> crate::Result<VertexId<Idx>>
     where
         Idx: Copy + core::ops::Add<Output = Idx> + One,
     {
-        // generate a new vertex ID
-        let idx = self.next_vertex_id();
+        // generate a new index to identify the new node
+        let ndx = self.next_vertex_id();
+        #[cfg(feature = "tracing")]
+        tracing::info!("adding a new node with index {ndx}");
         // initialize a new node with the given weight & index
-        let node = HyperNode::new(idx, Weight(weight));
+        let node = HyperNode::new(ndx, weight);
         // insert the new node into the vertices map
-        self.nodes_mut().insert(idx, node);
-        Ok(idx)
+        self.nodes_mut().insert(ndx, node);
+        Ok(ndx)
+    }
+    /// add multiple nodes with the given weights and return their indices
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, level = "trace", target = "hash_graph")
+    )]
+    pub fn add_nodes<I>(&mut self, weights: I) -> crate::Result<Vec<VertexId<Idx>>>
+    where
+        I: IntoIterator<Item = N>,
+        Idx: Copy + core::ops::Add<Output = Idx> + One,
+    {
+        let ids = weights
+            .into_iter()
+            .filter_map(|weight| self.add_node(Weight(weight)).ok())
+            .collect::<Vec<_>>();
+        Ok(ids)
     }
     /// add a new vertex with the default weight and return its ID
     pub fn add_vertex(&mut self) -> crate::Result<VertexId<Idx>>
@@ -77,7 +95,7 @@ where
         N: Default,
         Idx: Copy + core::ops::Add<Output = Idx> + One,
     {
-        self.add_node(N::default())
+        self.add_node(Default::default())
     }
     /// reset the hypergraph by clearing all nodes, edges, and facets
     pub fn clear(&mut self) -> &mut Self {
@@ -139,30 +157,17 @@ where
         });
         Ok(neighbors)
     }
-    /// returns true if the vertex is contained in the hyperedge with the given id
+    /// returns a set of [`HyperNode`]s that are associated with the given edge id
     #[cfg_attr(
         feature = "tracing",
-        tracing::instrument(skip_all, name = "is_vertex_in_edge", target = "hash_graph")
+        tracing::instrument(skip_all, level = "trace", target = "hash_graph")
     )]
-    pub fn is_vertex_in_edge<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
-    where
-        Q: Eq + Hash,
-        Q2: Eq + Hash,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-        VertexId<Idx>: core::borrow::Borrow<Q2>,
-    {
-        if let Some(surface) = self.surfaces().get(index) {
-            return surface.contains(vertex);
-        }
-        false
-    }
-    /// retrieves the set of nodes composing the given edge
     pub fn get_edge_nodes<Q>(&self, index: &Q) -> crate::Result<Vec<&HyperNode<N, Idx>>>
     where
         Q: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        let surface = self.get_surface(&index)?;
+        let surface = self.get_surface(index)?;
         let nodes = surface
             .points()
             .iter()
@@ -335,7 +340,7 @@ where
         feature = "tracing",
         tracing::instrument(skip_all, name = "remove_node", target = "hash_graph")
     )]
-    pub fn remove_node<Q>(&mut self, index: &Q) -> crate::Result<HyperNode<N, Idx>>
+    pub fn remove_edge<Q>(&mut self, index: &Q) -> crate::Result<HyperNode<N, Idx>>
     where
         Q: Eq + core::fmt::Debug + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
@@ -344,12 +349,19 @@ where
         tracing::debug!("removing the vertex {index:?} from the hypergraph...");
         self.nodes_mut()
             .remove(index)
-            .map(|node| {
+            .ok_or(crate::Error::NodeNotFound)
+            .inspect(|_node| {
+                #[cfg(feature = "tracing")]
+                tracing::trace!(
+                    "successfully removed the node; removing edges that contained the vertex..."
+                );
                 // Remove all hyperedges containing this vertex
                 self.retain_surfaces(|_, facet| !facet.contains(index));
-                node
+                #[cfg(feature = "tracing")]
+                tracing::trace!(
+                    "successfully removed the edges containing the removed vertex {index:?}..."
+                );
             })
-            .ok_or(crate::Error::NodeNotFound)
     }
     /// remove the [`HyperFacet`] with the given index from the hypergraph
     #[inline]
@@ -412,8 +424,7 @@ where
         Q: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
-        let _ = self
-            .get_node_weight_mut(index)
+        self.get_node_weight_mut(index)
             .map(|w| {
                 *w = weight;
             })
@@ -431,6 +442,22 @@ where
     K: GraphKind,
     Idx: Eq + RawIndex + Hash,
 {
+    #[deprecated(
+        note = "use `contains_node_in_edge` instead; this method will be removed in a future release",
+        since = "0.0.10"
+    )]
+    pub fn is_vertex_in_edge<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
+    where
+        Q: Eq + Hash,
+        Q2: Eq + Hash,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+        VertexId<Idx>: core::borrow::Borrow<Q2>,
+    {
+        if let Some(surface) = self.surfaces().get(index) {
+            return surface.contains(vertex);
+        }
+        false
+    }
     #[deprecated(
         note = "use `find_edges_with_node` instead; this method will be removed in a future release",
         since = "0.0.10"
@@ -460,7 +487,7 @@ where
         Q: Eq + core::fmt::Debug + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.remove_node(index)
+        self.remove_edge(index)
     }
     #[deprecated(
         note = "use `set_node_weight` instead; this method will be removed in a future release",

@@ -15,6 +15,7 @@
 //! algorithmic techniques. The crate is designed to be flexible and modular enabled via heavy
 //! feature-gating throughout the framework.
 //!
+//!
 //! ## Background
 //!
 //! Before diving in to the technical side of things, let's start by defining several terms
@@ -23,7 +24,8 @@
 //! ### Terminology
 //!
 //! - **edge**: an edge is a connection between two or more vertices.
-//! - **facet**: a facet materializes a hyperedge by associating some weight with the edge.
+//! - **facet**: a facet, often called a surface, materializes a hyperedge by associating some
+//!   weight with the edge.
 //! - **node**: a node is a complete _vertex_ in that it is considered to be weighted.
 //! - **vertex**: a vertex is an _unweighted_ node defining a point within the hypergraph.
 //!
@@ -39,6 +41,24 @@
 //! - `hash_graph`: enables the [`HashGraph`] implementation, a hash-based hypergraph structure
 //! - `macros`: enables the implemented macros for streamlining graph management
 //!
+//! ### _Dependencies_
+//!
+//! **Note:** While the `alloc` and `std` libraries are feature-gated, they are required for
+//! anything useful in this crate; both are enabled by default.
+//!
+//! - `anyhow`: enables the use of the `anyhow` crate for error handling
+//! - `rayon`: enables parallel processing capabilities using the `rayon` crate
+//! - `serde`: enables serialization and deserialization of hypergraphs using the `serde` crate
+//!
+//! ## Examples
+//!
+//! For more detailed examples, please refer to the [examples directory](https://github.com/FL03/rshyper/blob/main/rshyper/examples).
+//!
+#![allow(
+    clippy::should_implement_trait,
+    clippy::module_inception,
+    clippy::missing_safety_doc
+)]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![crate_name = "rshyper"]
 #![crate_type = "lib"]
@@ -62,7 +82,6 @@ pub use self::hash_graph::{DirectedHashGraph, HashGraph, UndirectedHashGraph};
 
 /// the `algo` module focuses on implementing algorithms and operators for hypergraphs
 pub mod algo;
-#[doc(hidden)]
 #[cfg(feature = "binary_graph")]
 pub mod binary_graph;
 /// this module contains the [`HashGraph`], a hash-based hypergraph implementation
@@ -70,7 +89,6 @@ pub mod binary_graph;
 pub mod hash_graph;
 
 /// the prelude module for the crate contains all commonly used traits, types, and functions
-#[doc(hidden)]
 #[allow(missing_docs)]
 pub mod prelude {
     #[doc(no_inline)]
@@ -78,7 +96,6 @@ pub mod prelude {
 
     #[doc(no_inline)]
     pub use crate::algo::prelude::*;
-    #[doc(hidden)]
     #[cfg(feature = "binary_graph")]
     pub use crate::binary_graph::prelude::*;
     #[cfg(feature = "hash_graph")]

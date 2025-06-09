@@ -53,7 +53,7 @@ fn test_hash_graph() -> rshyper::Result<()> {
     // verify the degree of vertex v1
     assert_eq!(graph.get_node_degree(&v1), 3);
     // remove vertex v1
-    let _ = graph.remove_node(&v1)?;
+    let _ = graph.remove_edge(&v1)?;
     // verify the hypergraph does not contain vertex v2
     assert!(!graph.contains_node(&v1));
     assert_eq!(graph.get_node_degree(&v1), 0);
@@ -64,9 +64,9 @@ fn test_hash_graph() -> rshyper::Result<()> {
 #[test]
 fn test_merge_hash_edge() -> rshyper::Result<()> {
     let mut graph = HashGraph::<usize, usize>::undirected();
-    let v0 = graph.add_node(10)?;
-    let v1 = graph.add_node(20)?;
-    let v2 = graph.add_node(30)?;
+    let v0 = graph.add_node(Weight(10))?;
+    let v1 = graph.add_node(Weight(20))?;
+    let v2 = graph.add_node(Weight(30))?;
 
     let e1 = graph.add_surface(vec![v0, v1], Weight(10))?;
     let e2 = graph.add_surface(vec![v1, v2], Weight(20))?;
@@ -86,7 +86,7 @@ fn test_merge_hash_edge() -> rshyper::Result<()> {
 #[test]
 fn test_update_hash_node() -> rshyper::Result<()> {
     let mut graph = HashGraph::<usize, usize>::undirected();
-    let v0 = graph.add_node(42)?;
+    let v0 = graph.add_node(Weight(42))?;
 
     // Check initial weight
     let initial_weight = graph.get_node(&v0)?;
@@ -103,9 +103,9 @@ fn test_update_hash_node() -> rshyper::Result<()> {
 #[test]
 fn test_remove_hash_edges() -> rshyper::Result<()> {
     let mut graph = HashGraph::<usize, usize>::undirected();
-    let v0 = graph.add_node(10)?;
-    let v1 = graph.add_node(20)?;
-    let v2 = graph.add_node(30)?;
+    let v0 = graph.add_node(Weight(10))?;
+    let v1 = graph.add_node(Weight(20))?;
+    let v2 = graph.add_node(Weight(30))?;
 
     let e1 = graph.add_edge(vec![v0, v1])?;
     let e2 = graph.add_edge(vec![v1, v2])?;
@@ -117,6 +117,51 @@ fn test_remove_hash_edges() -> rshyper::Result<()> {
     // Check that the removed edge is no longer in the graph
     assert!(!graph.contains_surface(&e1));
     assert!(graph.contains_surface(&e2));
+
+    Ok(())
+}
+
+#[ignore = "ignore this test for now, details aren't flushed out yet."]
+#[test]
+fn test_hash_graph_iter() -> rshyper::Result<()> {
+    fn scaled(a: usize, b: usize) -> usize {
+        a + a * b
+    }
+
+    let mut graph = HashGraph::<usize, usize>::undirected();
+
+    rshyper::hypergraph! {
+        graph {
+            nodes: {
+                let v0 = 10;
+                let v1 = 20;
+                let v2 = 30;
+                let v3 = 40;
+            };
+            edges: {
+                let _e0: [v0, v1] = 0;
+                let _e1: [v0, v1] = 1;
+                let _e2: [v1, v2] = 2;
+                let _e3: [v2, v3] = 3;
+            };
+        }
+    }
+
+    // Iterate over nodes
+    assert!(
+        graph
+            .node_iter()
+            .enumerate()
+            .all(|(i, (id, node))| id == node.index() && node.weight() == &scaled(10, i))
+    );
+
+    // Iterate over edges
+    assert!(
+        graph
+            .surface_iter()
+            .enumerate()
+            .all(|(i, (id, facet))| id == facet.id() && facet.weight() == &i)
+    );
 
     Ok(())
 }

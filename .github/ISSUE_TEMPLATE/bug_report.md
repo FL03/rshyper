@@ -1,17 +1,21 @@
 ---
-name: Bug report
 about: Create a report to help us improve
-title: 'Bug Report: '
-labels: [ bug ]
 assignees: [ FL03 ]
-
+labels: [ bug ]
+name: Bug report
+title: 'Bug Report: '
+type: bug
 ---
 
-**A clear and concise description of the bug.**
+_**A clear and concise description of the bug.**_
 
-## Report
+## Methods
 
-### Steps to reproduce the bug
+<!-- A detailed breakdown of the bug -->
+
+### Reproducing the Bug
+
+<!-- How can we reproduce the bug? -->
 
 1. Step 1)
 2. Step 2)
@@ -19,8 +23,8 @@ assignees: [ FL03 ]
 
 ### Expectations
 
-_**What was supposed to happen?**_
+_**What were you expecting to happen?**_
 
-### Actual Results
+### Outcome
 
 _**What actually happened?**_

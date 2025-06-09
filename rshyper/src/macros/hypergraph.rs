@@ -57,7 +57,7 @@ macro_rules! hypergraph {
 /// is used to define the edge consituents. Optionally, a weight may be specified for the
 /// hyperedge by appending `= <weight>` immediately after the desired edge statement.
 ///
-/// ```no_run
+/// ```ignore
 /// hyperedge! {
 ///     ${graph} {
 ///         let ${edge_name}: [${vertex1}, ${vertex2}, ...] $(= ${weight})?;
@@ -69,25 +69,30 @@ macro_rules! hypergraph {
 ///
 /// ```rust
 /// use rshyper::{HashGraph, Weight};
-/// // initialize a new undirected hypergraph
-/// let mut graph = HashGraph::<usize, usize>::undirected();
-/// // insert some vertices
-/// let v0 = graph.add_node(Weight(1)).expect("Failed to insert node");
-/// let v1 = graph.add_node(Weight(2)).expect("Failed to insert node");
-/// let v2 = graph.add_node(Weight(3)).expect("Failed to insert node");
-/// // use the macro to insert edges into the graph
-/// rshyper::hyperedge! {
-///     graph {
-///         let e0: [v0, v1];
-///         let e1: [v0, v1, v2] = 10;
+///
+/// fn main() -> rshyper::Result<()> {
+///     // initialize a new undirected hypergraph
+///     let mut graph = HashGraph::<usize, usize>::undirected();
+///     // insert some vertices
+///     let v0 = graph.add_node(Weight(1))?;
+///     let v1 = graph.add_node(Weight(2))?;
+///     let v2 = graph.add_node(Weight(3))?;
+///     // use the macro to insert edges into the graph
+///     rshyper::hyperedge! {
+///         graph {
+///             let e0: [v0, v1];
+///             let e1: [v0, v1, v2] = 10;
+///         }
 ///     }
+///     // verify the order of the edges
+///     assert_eq!(graph.get_edge_order(&e0)?, 2);
+///     assert_eq!(graph.get_edge_order(&e1)?, 3);
+///     // verify the weights of the edges
+///     assert_eq!(graph.get_edge_weight(&e0)?, &<usize>::default());
+///     assert_eq!(graph.get_edge_weight(&e1)?, &10);
+///
+///     Ok(())
 /// }
-/// // verify the order of the edges
-/// assert_eq!(graph.get_edge_order(&e0), 2);
-/// assert_eq!(graph.get_edge_order(&e1), 3);
-/// // verify the weights of the edges
-/// assert_eq!(graph.get_edge_weight(&e0), &<usize>::default());
-/// assert_eq!(graph.get_edge_weight(&e1), &10);
 /// ```
 #[cfg(feature = "macros")]
 #[macro_export]
@@ -116,9 +121,9 @@ macro_rules! hyperedge {
 /// statement within a block, where each statement defines the identifier of a node.
 /// Optionally, a weight may be specified for the hypernode by appending `= <weight>`.
 ///
-/// ```no_run
+/// ```ignore
 /// hypernode! {
-///     $source: {
+///     $graph: {
 ///         let $var:ident $(= $w:expr)?;
 ///     }
 /// }
@@ -152,7 +157,7 @@ macro_rules! hypernode {
         $crate::hypernode!(@new $src.$var $(= $w)?);
     };
     (@new $src:ident.$var:ident = $w:expr) => {
-        let $var = $src.add_node($w).expect("Failed to insert node");
+        let $var = $src.add_node($crate::Weight($w)).expect("Failed to insert node");
     };
     (@new $src:ident.$var:ident) => {
         let $var = $src.add_vertex().expect("Failed to insert node");

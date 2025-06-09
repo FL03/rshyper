@@ -8,7 +8,7 @@ use core::hash::Hash;
 use serde::de::{Deserialize, DeserializeOwned, MapAccess, Visitor};
 use serde::ser::Serialize;
 
-const FIELDS: &'static [&'static str] = &["nodes", "surfaces", "position", "_attrs"];
+const FIELDS: &[&str] = &["nodes", "surfaces", "position", "_attrs"];
 
 impl<'a, N, E, A, K, Idx> Deserialize<'a> for HashGraph<N, E, A>
 where

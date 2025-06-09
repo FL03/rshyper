@@ -1,12 +1,14 @@
 /*
-    appellation: cmp <module>
+    appellation: node <module>
     authors: @FL03
 */
-//! this module implements the [`RawNode`] trait for the [`HyperNode`] type, providing
-//! the necessary methods to access and manipulate the node's index and weight.
+//! this module provides the [`HyperNode`] implmenetation alongisde the several traits such as
+//! [`RawNode`] and [`RawPoint`] focused on establishing a common, well-defined interface for
+//! weighted and unweighted "points" within a hypergraph.
 #[doc(inline)]
 pub use self::prelude::*;
 
+/// this module defines the [`HyperNode`] type
 pub mod hyper_node;
 
 mod impls {
@@ -15,9 +17,9 @@ mod impls {
 
 pub(crate) mod prelude {
     #[doc(inline)]
-    pub use super::RawNode;
-    #[doc(inline)]
     pub use super::hyper_node::*;
+    #[doc(inline)]
+    pub use super::{Node, Point, RawNode, RawPoint};
 }
 
 use crate::Weight;
@@ -25,12 +27,15 @@ use crate::index::{RawIndex, VertexId};
 
 /// [`RawNode`] is a trait that defines the behavior of a node in a hypergraph.
 pub trait RawNode<T> {
-    type Idx: RawIndex;
+    type Key: RawIndex;
 
     private!();
-
+}
+/// The [`Node`] trait extends the [`RawNode`] trait to provide additional functionality for
+/// nodes in a hypergraph, such as accessing the index and weight of the node.
+pub trait Node<T>: RawNode<T> {
     /// returns an immutable reference to the node index
-    fn index(&self) -> &VertexId<Self::Idx>;
+    fn index(&self) -> &VertexId<Self::Key>;
     /// returns an immutable reference to the node data
     fn weight(&self) -> &Weight<T>;
     /// returns a mutable reference to the node data
@@ -58,7 +63,6 @@ pub trait RawNode<T> {
         core::mem::take(self.weight_mut())
     }
 }
-
 /// A [`RawPoint`] is used to defines the base representation of any given point within a
 /// hypergraph.
 pub trait RawPoint {
@@ -86,10 +90,15 @@ impl<T, Idx> RawNode<T> for HyperNode<T, Idx>
 where
     Idx: RawIndex,
 {
-    type Idx = Idx;
+    type Key = Idx;
 
     seal!();
+}
 
+impl<T, Idx> Node<T> for HyperNode<T, Idx>
+where
+    Idx: RawIndex,
+{
     fn index(&self) -> &VertexId<Idx> {
         &self.index
     }

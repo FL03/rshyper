@@ -57,7 +57,7 @@ where
     {
         Self {
             edge: HyperEdge::from_id(id),
-            weight: Weight::default(),
+            weight: Weight::init(),
         }
     }
     /// creates a new edge with the given nodes
@@ -68,7 +68,7 @@ where
     {
         Self {
             edge: HyperEdge::from_points(nodes),
-            weight: Weight::default(),
+            weight: Weight::init(),
         }
     }
     /// creates a new instance from the given value

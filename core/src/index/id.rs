@@ -2,7 +2,7 @@
     Appellation: index <module>
     Contrib: @FL03
 */
-use super::{GraphIndex, IndexResult, RawIndex};
+use super::{GraphIndex, IndexError, RawIndex};
 use num_traits::{One, Zero};
 
 /// A generic [`IndexBase`] implementation used to represent various [_kinds_](GraphIndex) of
@@ -19,40 +19,33 @@ where
     K: GraphIndex,
     T: RawIndex,
 {
-    /// returns a new instance of [`Index`] with the given value.
+    /// returns a new instance of [`IndexBase`] with the given value.
     pub fn new(index: T) -> Self {
         Self {
             value: index,
             _type: core::marker::PhantomData::<K>,
         }
     }
-    /// creates a new instance of [`Index`] using the given function to generate the value
-    pub fn create<F>(index: F) -> Self
+    /// creates a new instance of [`IndexBase`] using the given function to generate the value
+    pub fn new_with<F>(index: F) -> Self
     where
         F: FnOnce() -> T,
     {
         Self::new(index())
-    }
-    /// initializes a new instance of [`Index`] using the logical default for the type `T`
-    pub fn default() -> Self
-    where
-        T: Default,
-    {
-        Self::new(T::default())
     }
     /// creates a new index with a value of [`one`](One::one)
     pub fn one() -> Self
     where
         T: One,
     {
-        Self::new(T::one())
+        Self::new_with(T::one)
     }
     /// creates a new index with a value of [`zero`](Zero::zero)
     pub fn zero() -> Self
     where
         T: Zero,
     {
-        Self::new(T::zero())
+        Self::new_with(T::zero)
     }
     /// returns a pointer to the inner value
     pub const fn as_ptr(&self) -> *const T {
@@ -144,7 +137,7 @@ where
         self.next_with(|prev| prev + T::one())
             .expect("Failed to increment index")
     }
-    /// mutably increments the index value by [one](One)
+    /// mutably increments the index value by [`1`](One)
     #[inline]
     pub fn inc_inplace(&mut self)
     where
@@ -165,7 +158,7 @@ where
     ///     assert_eq!(e2.get(), &2);
     /// ```
     #[inline]
-    pub fn step(&mut self) -> IndexResult<Self>
+    pub fn step(&mut self) -> Result<Self, IndexError>
     where
         T: Copy + core::ops::Add<T, Output = T> + One,
     {
@@ -173,21 +166,16 @@ where
     }
     /// replaces the current value with the next one computed using the provided function and
     /// returns the previous instance of the index.
-    pub fn step_with<F>(&mut self, f: F) -> IndexResult<Self>
+    pub fn step_with<F>(&mut self, f: F) -> Result<Self, IndexError>
     where
         F: FnOnce(&T) -> T,
     {
-        // compute the next value using the provided function
-        let next = f(self.get());
-        // replace the current value with the next one
-        let prev = self.replace(next);
-        // return the previous instance
-        Ok(Self::new(prev))
+        crate::StepWith::step_with(self, f).ok_or(IndexError::IndexOutOfBounds)
     }
     /// similar to [`step_with`](IndexBase::step_with), however, rather than replacing the
     /// current value with the computed value, it returns a new instance of the index
     /// containing the computed value.
-    pub fn next_with<U, F>(self, f: F) -> IndexResult<IndexBase<U, K>>
+    pub fn next_with<U, F>(self, f: F) -> Result<IndexBase<U, K>, IndexError>
     where
         F: FnOnce(T) -> U,
         U: RawIndex,
@@ -200,6 +188,26 @@ where
     #[deprecated(since = "0.0.10", note = "use `value` instead")]
     pub fn into_inner(self) -> T {
         self.value
+    }
+}
+
+impl<T, K> crate::StepWith<T> for IndexBase<T, K>
+where
+    K: GraphIndex,
+    T: RawIndex,
+{
+    type Output = IndexBase<T, K>;
+
+    fn step_with<F>(&mut self, f: F) -> Option<Self::Output>
+    where
+        F: FnOnce(&T) -> T,
+    {
+        // compute the next value using the provided function
+        let next = f(self.get());
+        // replace the current value with the next one
+        let prev = self.replace(next);
+        // return the previous instance
+        Some(Self::new(prev))
     }
 }
 
@@ -265,17 +273,7 @@ where
     }
 }
 
-impl<T, K> PartialEq<T> for IndexBase<T, K>
-where
-    K: GraphIndex,
-    T: RawIndex + PartialEq,
-{
-    fn eq(&self, other: &T) -> bool {
-        &self.value == other
-    }
-}
-
-impl<T, K> core::iter::Iterator for IndexBase<T, K>
+impl<T, K> Iterator for IndexBase<T, K>
 where
     K: GraphIndex,
     T: RawIndex + Copy + core::ops::Add<T, Output = T> + One,
