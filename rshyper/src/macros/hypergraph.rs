@@ -89,7 +89,7 @@ macro_rules! hypergraph {
 ///     assert_eq!(graph.get_edge_order(&e1)?, 3);
 ///     // verify the weights of the edges
 ///     assert_eq!(graph.get_edge_weight(&e0)?, &<usize>::default());
-///     assert_eq!(graph.get_edge_weight(&e1)>, &10);
+///     assert_eq!(graph.get_edge_weight(&e1)?, &10);
 /// 
 ///     Ok(())
 /// }
