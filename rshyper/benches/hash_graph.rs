@@ -3,9 +3,8 @@
     Contrib: @FL03
 */
 use criterion::{BatchSize, BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
-use rshyper::hash_graph::UndirectedHashGraph as HyperGraph;
-use rshyper::hash_graph::VertexSet;
-use rshyper::{EdgeId, VertexId, Weight};
+use rshyper::hash_graph::{UndirectedHashGraph as HyperGraph, VertexSet};
+use rshyper::{VertexId, Weight};
 use std::hint::black_box;
 
 fn _init() -> HyperGraph<usize, usize> {
@@ -50,7 +49,7 @@ lazy_static::lazy_static! {
 }
 
 /// benchmark for adding edges
-fn bench_hash_graph_edge_add(c: &mut Criterion) {
+fn hash_graph_bench_edge_add(c: &mut Criterion) {
     c.bench_function("hash_graph_add_edge", |b| {
         b.iter_batched(
             || GRAPH.clone(),
@@ -73,20 +72,25 @@ fn bench_hash_graph_edge_add(c: &mut Criterion) {
     });
 }
 /// benchmark for removing edges
-fn bench_hash_graph_edge_remove(c: &mut Criterion) {
+fn hash_graph_bench_edge_remove(c: &mut Criterion) {
     c.bench_function("hash_graph_remove_edge", |b| {
         b.iter_batched(
-            || _init(),
+            || {
+                let graph = GRAPH.clone();
+                graph
+            },
             |mut graph| {
-                let e = EdgeId::from(0);
-                black_box(graph.remove_surface(&e).unwrap());
+                // Use the next value from the iterator as the weight
+                for id in 0..5 {
+                    black_box(graph.remove_edge(&id).expect("failed to remove node"));
+                }
             },
             BatchSize::SmallInput,
         )
     });
 }
 /// benchmark for adding nodes to the graph
-fn bench_hash_graph_node_add(c: &mut Criterion) {
+fn hash_graph_bench_node_add(c: &mut Criterion) {
     c.bench_function("hash_graph_node_add", |b| {
         b.iter_batched(
             || GRAPH.clone(),
@@ -103,7 +107,7 @@ fn bench_hash_graph_node_add(c: &mut Criterion) {
     });
 }
 /// benchmark calculating the degree of a node
-fn bench_hash_graph_node_degree(c: &mut Criterion) {
+fn hash_graph_bench_node_degree(c: &mut Criterion) {
     let graph = GRAPH.clone();
     let compute = |id: usize| {
         // Simulate some operation with the graph
@@ -120,7 +124,7 @@ fn bench_hash_graph_node_degree(c: &mut Criterion) {
     group.finish();
 }
 
-fn bench_hash_graph_node_neighbors(c: &mut Criterion) {
+fn hash_graph_bench_node_neighbors(c: &mut Criterion) {
     let graph = GRAPH.clone();
     let compute = |id: usize| -> VertexSet {
         // Simulate some operation with the graph
@@ -139,7 +143,7 @@ fn bench_hash_graph_node_neighbors(c: &mut Criterion) {
     group.finish();
 }
 
-fn bench_hash_graph_node_remove(c: &mut Criterion) {
+fn hash_graph_bench_node_add_and_remove(c: &mut Criterion) {
     c.bench_function("hash_graph_remove_node", |b| {
         b.iter_batched(
             || GRAPH.clone(),
@@ -148,7 +152,7 @@ fn bench_hash_graph_node_remove(c: &mut Criterion) {
                 for w in 10..20 {
                     let weight = Weight::new(w);
                     let v = graph.add_node(weight).expect("failed to add node");
-                    black_box(graph.remove_node(&v).expect("failed to remove node"));
+                    black_box(graph.remove_edge(&v).expect("failed to remove node"));
                 }
             },
             BatchSize::SmallInput,
@@ -156,7 +160,7 @@ fn bench_hash_graph_node_remove(c: &mut Criterion) {
     });
 }
 
-fn bench_hash_graph_search_bft(c: &mut Criterion) {
+fn hash_graph_bench_search_bft(c: &mut Criterion) {
     let graph = GRAPH.clone();
     let search = |tgt: usize| {
         // search the graph for some target vertex
@@ -172,7 +176,7 @@ fn bench_hash_graph_search_bft(c: &mut Criterion) {
     group.finish();
 }
 
-fn bench_hash_graph_search_dft(c: &mut Criterion) {
+fn hash_graph_bench_search_dft(c: &mut Criterion) {
     let graph = GRAPH.clone();
     let search = |tgt: usize| {
         // search the graph for some target vertex
@@ -190,13 +194,13 @@ fn bench_hash_graph_search_dft(c: &mut Criterion) {
 
 criterion_group! {
     benches,
-    bench_hash_graph_edge_add,
-    bench_hash_graph_edge_remove,
-    bench_hash_graph_node_add,
-    bench_hash_graph_node_degree,
-    bench_hash_graph_node_neighbors,
-    bench_hash_graph_node_remove,
-    bench_hash_graph_search_bft,
-    bench_hash_graph_search_dft,
+    hash_graph_bench_edge_add,
+    hash_graph_bench_edge_remove,
+    hash_graph_bench_node_add,
+    hash_graph_bench_node_degree,
+    hash_graph_bench_node_neighbors,
+    hash_graph_bench_node_add_and_remove,
+    hash_graph_bench_search_bft,
+    hash_graph_bench_search_dft,
 }
 criterion_main!(benches);

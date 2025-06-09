@@ -55,7 +55,6 @@ jobs:
         name: Build the workspace
         run: cargo build --release --locked --workspace --all-features --target ${{ matrix.target }}
   benchmark: 
-    if: github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch' && github.event.inputs.benchmark == 'true'
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -76,7 +75,7 @@ jobs:
           cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       -
         name: Benchmark (${{ matrix.package }})
-        run: cargo bench -v --locked --workspace --features full --package ${{ matrix.package }} --
+        run: cargo bench --locked --workspace --features full --package ${{ matrix.package }} --verbose --
       - 
         name: Upload the benchmarks
         uses: actions/upload-artifact@v4
@@ -84,7 +83,7 @@ jobs:
           name: benchmarks-${{ matrix.package }})@${{ github.ref }}
           if-no-files-found: error
           overwrite: true
-          path: target/criterion/report/index.html
+          path: target/criterion/
   test:
     needs: build
     runs-on: ubuntu-latest
