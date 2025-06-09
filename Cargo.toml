@@ -37,7 +37,7 @@ version = "0.1.0"
 rshyper = { default-features = false, path = "rshyper", version = "0.1.0" }
 rshyper-core = { default-features = false, path = "core", version = "0.1.0" }
 # custom
-scsys = { default-features = false, features = ["derive"], version = "0.2.8" }
+scsys = { default-features = false, features = ["derive"], version = "0.2.9" }
 # benchmarking
 criterion = { version = "0.6" }
 # error-handling

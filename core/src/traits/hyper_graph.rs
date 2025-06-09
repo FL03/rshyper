@@ -14,7 +14,7 @@ where
     A: GraphAttributes,
 {
     type Edge<E>: RawFacet<E, Idx = A::Idx, Kind = A::Kind>;
-    type Node<N>: RawNode<N, Idx = A::Idx>;
+    type Node<N>: RawNode<N, Key = A::Idx>;
 }
 
 pub trait HyperGraph<N, E, A>: RawHyperGraph<A>

@@ -31,6 +31,9 @@ pub enum Error {
     #[cfg(feature = "alloc")]
     #[error(transparent)]
     BoxError(#[from] Box<dyn core::error::Error + Send + Sync + 'static>),
+    #[cfg(feature = "serde")]
+    #[error(transparent)]
+    DeserializeError(#[from] serde::de::value::Error),
     #[error(transparent)]
     FmtError(#[from] core::fmt::Error),
     #[cfg(feature = "std")]

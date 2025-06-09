@@ -76,8 +76,9 @@ where
     }
     /// [`replace`](core::mem::replace) the weight of the current instance with the given weight,
     /// returning the previous weight.
-    pub fn replace_weight(&mut self, weight: T) -> T {
-        self.weight_mut().replace(weight)
+    pub const fn replace_weight(&mut self, weight: T) -> Weight<T> {
+        let prev = self.weight_mut().replace(weight);
+        Weight(prev)
     }
     /// [`swap`](core::mem::swap) the weight of the current instance with the weight of
     /// another instance.
@@ -113,7 +114,7 @@ where
     fn default() -> Self {
         Self {
             index: VertexId::default(),
-            weight: Weight::default(),
+            weight: Weight::init(),
         }
     }
 }

@@ -19,40 +19,40 @@ where
     K: GraphIndex,
     T: RawIndex,
 {
-    /// returns a new instance of [`Index`] with the given value.
+    /// returns a new instance of [`IndexBase`] with the given value.
     pub fn new(index: T) -> Self {
         Self {
             value: index,
             _type: core::marker::PhantomData::<K>,
         }
     }
-    /// creates a new instance of [`Index`] using the given function to generate the value
-    pub fn create<F>(index: F) -> Self
+    /// creates a new instance of [`IndexBase`] using the given function to generate the value
+    pub fn new_with<F>(index: F) -> Self
     where
         F: FnOnce() -> T,
     {
         Self::new(index())
     }
-    /// initializes a new instance of [`Index`] using the logical default for the type `T`
+    /// initializes a new instance of [`IndexBase`] using the logical default for the type `T`
     pub fn default() -> Self
     where
         T: Default,
     {
-        Self::new(T::default())
+        Self::new_with(Default::default)
     }
     /// creates a new index with a value of [`one`](One::one)
     pub fn one() -> Self
     where
         T: One,
     {
-        Self::new(T::one())
+        Self::new_with(T::one)
     }
     /// creates a new index with a value of [`zero`](Zero::zero)
     pub fn zero() -> Self
     where
         T: Zero,
     {
-        Self::new(T::zero())
+        Self::new_with(T::zero)
     }
     /// returns a pointer to the inner value
     pub const fn as_ptr(&self) -> *const T {
@@ -144,7 +144,7 @@ where
         self.next_with(|prev| prev + T::one())
             .expect("Failed to increment index")
     }
-    /// mutably increments the index value by [one](One)
+    /// mutably increments the index value by [`1`](One)
     #[inline]
     pub fn inc_inplace(&mut self)
     where
