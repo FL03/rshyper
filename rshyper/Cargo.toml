@@ -83,7 +83,6 @@ full = [
 ]
 
 # ************* [FF:Flags] *************
-
 binary_graph = [
     "alloc"
 ]
@@ -95,7 +94,6 @@ hash_graph = [
 macros = []
 
 # ************* [FF:Environments] *************
-
 std = [
     "alloc",
     "num-traits/std",
@@ -123,7 +121,6 @@ wasm = [
 ]
 
 # ************* [FF:Dependencies] *************
-
 alloc = [
     "rshyper-core/alloc",
     "scsys/alloc",
@@ -191,12 +188,16 @@ wasm-bindgen = [
 [[bench]]
 harness = false
 name = "hash_graph"
-required-features = ["hash_graph", "macros", "std"]
+required-features = [
+    "hash_graph", 
+    "macros", 
+    "std"
+]
 
 # ************* [Examples] *************
 [[example]]
 name = "hash_graph"
-required-features = ["hash_graph", "macros", "std", "tracing"]
+required-features = ["full"]
 
 # ************* [Tests] *************
 [[test]]
@@ -204,19 +205,35 @@ name = "default"
 
 [[test]]
 name = "astar"
-required-features = ["default"]
+required-features = [
+    "hash_graph", 
+    "macros", 
+    "std"
+]
 
 [[test]]
 name = "bft"
-required-features = ["default"]
+required-features = [
+    "hash_graph", 
+    "macros", 
+    "std"
+]
 
 [[test]]
 name = "dft"
-required-features = ["default"]
+required-features = [
+    "hash_graph", 
+    "macros", 
+    "std"
+]
 
 [[test]]
 name = "hash_graph"
-required-features = ["default"]
+required-features = [
+    "hash_graph", 
+    "macros", 
+    "std"
+]
 
 [[test]]
 name = "macros"
