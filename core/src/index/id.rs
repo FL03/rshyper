@@ -33,13 +33,6 @@ where
     {
         Self::new(index())
     }
-    /// initializes a new instance of [`IndexBase`] using the logical default for the type `T`
-    pub fn default() -> Self
-    where
-        T: Default,
-    {
-        Self::new_with(Default::default)
-    }
     /// creates a new index with a value of [`one`](One::one)
     pub fn one() -> Self
     where
@@ -177,7 +170,7 @@ where
     where
         F: FnOnce(&T) -> T,
     {
-        crate::StepWith::step_with(self, f).ok_or_else(|| IndexError::IndexOutOfBounds)
+        crate::StepWith::step_with(self, f).ok_or(IndexError::IndexOutOfBounds)
     }
     /// similar to [`step_with`](IndexBase::step_with), however, rather than replacing the
     /// current value with the computed value, it returns a new instance of the index
@@ -280,17 +273,7 @@ where
     }
 }
 
-impl<T, K> PartialEq<T> for IndexBase<T, K>
-where
-    K: GraphIndex,
-    T: RawIndex + PartialEq,
-{
-    fn eq(&self, other: &T) -> bool {
-        &self.value == other
-    }
-}
-
-impl<T, K> core::iter::Iterator for IndexBase<T, K>
+impl<T, K> Iterator for IndexBase<T, K>
 where
     K: GraphIndex,
     T: RawIndex + Copy + core::ops::Add<T, Output = T> + One,

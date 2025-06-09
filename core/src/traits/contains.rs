@@ -34,7 +34,7 @@ where
     where
         Self::Key: core::borrow::Borrow<Q>,
     {
-        self.contains(&query)
+        self.contains(query)
     }
 }
 
@@ -52,6 +52,6 @@ where
     where
         Self::Key: core::borrow::Borrow<Q>,
     {
-        self.contains(&query)
+        self.contains(query)
     }
 }

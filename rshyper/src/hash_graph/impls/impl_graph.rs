@@ -167,7 +167,7 @@ where
         Q: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        let surface = self.get_surface(&index)?;
+        let surface = self.get_surface(index)?;
         let nodes = surface
             .points()
             .iter()
@@ -349,12 +349,19 @@ where
         tracing::debug!("removing the vertex {index:?} from the hypergraph...");
         self.nodes_mut()
             .remove(index)
-            .map(|node| {
+            .ok_or(crate::Error::NodeNotFound)
+            .inspect(|_node| {
+                #[cfg(feature = "tracing")]
+                tracing::trace!(
+                    "successfully removed the node; removing edges that contained the vertex..."
+                );
                 // Remove all hyperedges containing this vertex
                 self.retain_surfaces(|_, facet| !facet.contains(index));
-                node
+                #[cfg(feature = "tracing")]
+                tracing::trace!(
+                    "successfully removed the edges containing the removed vertex {index:?}..."
+                );
             })
-            .ok_or(crate::Error::NodeNotFound)
     }
     /// remove the [`HyperFacet`] with the given index from the hypergraph
     #[inline]
@@ -417,8 +424,7 @@ where
         Q: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
-        let _ = self
-            .get_node_weight_mut(index)
+        self.get_node_weight_mut(index)
             .map(|w| {
                 *w = weight;
             })

@@ -14,32 +14,37 @@ repository.workspace = true
 rust-version.workspace = true
 version.workspace = true
 
+[package.metadata.docs.rs]
+all-features = false
+features = ["full"]
+rustc-args = ["--cfg", "docsrs" ]
+version = "v{{version}}"
+
+[package.metadata.release]
+no-dev-version = true
+tag-name = "{{version}}"
+
 [lib]
-crate-type = [ 
-    "cdylib", 
-    "rlib" 
+crate-type = [
+    "cdylib",
+    "rlib"
 ]
 bench = false
 doc = true
 doctest = false
 test = true
 
-[package.metadata.docs.rs]
-all-features = false
-features = ["full"]
-rustc-args = [ "--cfg", "docsrs" ]
-
-
 [dependencies]
 # custom
 scsys = { workspace = true }
+# concurrency & parallelism
+rayon = { optional = true, workspace = true }
 # error handling
 anyhow = { optional = true, workspace = true }
 thiserror = { workspace = true }
 # math
 num-traits = { workspace = true }
 # random
-getrandom = { optional = true, workspace = true }
 rand = { optional = true, workspace = true }
 rand_distr = { optional = true, workspace = true }
 # serialization
@@ -52,12 +57,14 @@ smart-default = { workspace = true }
 strum = { features = ["derive"], workspace = true }
 # logging
 tracing = { features = ["attributes"], optional = true, workspace = true }
+# wasm
+wasm-bindgen = { optional = true, workspace = true }
 
 [dev-dependencies]
 lazy_static = { workspace = true }
 
 [features]
-default = [ 
+default = [
     "std",
 ]
 
@@ -83,10 +90,16 @@ std = [
     "thiserror/std",
 ]
 
+wasi = [
+    "alloc",
+    "scsys/wasi",
+]
+
 wasm = [
     "alloc",
-    "getrandom?/wasm_js",
+    "rayon?/web_spin_lock",
     "scsys/wasm",
+    "wasm-bindgen",
 ]
 # ************* [FF:Dependencies] *************
 alloc = [
@@ -113,10 +126,11 @@ rand = [
     "scsys/rand",
 ]
 
+rayon = ["dep:rayon"]
+
 rng = [
-    "dep:getrandom",
-    "rand/small_rng",
-    "rand/thread_rng",
+    "rand?/small_rng",
+    "rand?/thread_rng",
     "scsys/rng",
 ]
 
@@ -133,6 +147,8 @@ tracing = [
     "dep:tracing",
     "scsys/tracing",
 ]
+
+wasm-bindgen = ["dep:wasm-bindgen"]
 
 # ************* [Tests] *************
 [[test]]

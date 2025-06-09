@@ -48,10 +48,12 @@ features = [
     "hash_graph",
     "macros",
 ]
-version = "0.0.x"
+version = "0.1.x"
 ```
 
 ### Examples
+
+For more detailed examples, please refer to the [examples directory](https://github.com/FL03/rshyper/blob/main/rshyper/examples).
 
 #### _Example #1:_ Basic Usage
 

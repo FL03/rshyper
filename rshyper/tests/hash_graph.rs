@@ -129,6 +129,7 @@ fn test_hash_graph_iter() -> rshyper::Result<()> {
     let v0 = graph.add_node(10)?;
     let v1 = graph.add_node(20)?;
     let v2 = graph.add_node(30)?;
+    assert!(v0 == 0 && v1 == 1 && v2 == 2);
 
     // Add some edges
     let e0 = graph.add_edge(vec![v0, v1])?;
@@ -137,12 +138,13 @@ fn test_hash_graph_iter() -> rshyper::Result<()> {
     // Iterate over nodes
     let nodes = graph.node_iter();
     assert!(nodes.enumerate().all(|(i, (&id, node))| {
-        match i {
-            0 => id == v0 && node.weight() == &Weight(10),
-            1 => id == v1 && node.weight() == &Weight(20),
-            2 => id == v2 && node.weight() == &Weight(30),
+        let is_id = match i {
+            0 => id == v0,
+            1 => id == v1,
+            2 => id == v2,
             _ => false,
-        }
+        };
+        is_id && node.weight() == &Weight(10 + 10 * i)
     }));
 
     // Iterate over edges

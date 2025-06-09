@@ -2,14 +2,10 @@
 default-members = [
     "rshyper"
 ]
-
-exclude = [ ]
-
 members = [
     "rshyper",
     "core",
 ]
-
 resolver = "3"
 
 [workspace.package]
@@ -42,6 +38,10 @@ rshyper-core = { default-features = false, path = "core", version = "0.1.0" }
 scsys = { default-features = false, features = ["derive"], version = "0.2.9" }
 # benchmarking
 criterion = { version = "0.6" }
+# concurrency & parallelism
+crossbeam = { default-features = false, version = "0.8" }
+rayon = { default-features = false, version = "1" }
+rayon-core = { default-features = false, version = "1" }
 # error-handling
 anyhow = { default-features = false, version = "1" }
 thiserror = { default-features = false, version = "2" }
@@ -64,19 +64,23 @@ smart-default = { version = "0.7" }
 strum = { default-features = false, features = ["derive"], version = "0.27" }
 # logging
 tracing = { default-features = false, features = ["attributes"], version = "0.1" }
-tracing-subscriber = { default-features = false, features = ["env-filter", "fmt"], version = "0.3" }
+tracing-subscriber = { default-features = false, features = ["ansi", "env-filter", "fmt"], version = "0.3" }
+# wasm
+wasm-bindgen = { default-features = false, version = "0.2" }
+
+# ************* [Profiles] *************
 
 [profile.dev]
 codegen-units = 256
 debug = true
 debug-assertions = true
 incremental = true
-lto = 'thin'
-panic = 'abort'
+lto  ="thin"
+panic = "abort"
 rpath = true
 opt-level = 2
 overflow-checks = true
-strip = 'none'
+strip = "none"
 
 [profile.release]
 codegen-units = 16
@@ -84,8 +88,8 @@ debug = false
 debug-assertions = false
 incremental = false
 lto = true
-panic = 'abort'
+panic = "abort"
 rpath = false
 opt-level = 0
 overflow-checks = false
-strip = 'debuginfo'
+strip = "debuginfo"

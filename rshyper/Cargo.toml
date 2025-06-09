@@ -14,26 +14,36 @@ repository.workspace = true
 rust-version.workspace = true
 version.workspace = true
 
-[lib]
-bench = true
-crate-type = [ "cdylib", "rlib" ]
-doc = true
-doctest = false
-test = true
-
 [package.metadata.docs.rs]
 all-features = false
 features = ["full"]
-rustc-args = [ "--cfg", "docsrs" ]
+rustc-args = ["--cfg", "docsrs" ]
+version = "v{{version}}"
+
+[package.metadata.release]
+no-dev-version = true
+tag-name = "{{version}}"
+
+[lib]
+crate-type = [
+    "cdylib",
+    "rlib",
+]
+bench = true
+doc = true
+doctest = true
+test = true
 
 [dependencies]
 rshyper-core = { workspace = true }
 # custom
 scsys = { workspace = true }
+# concurrency & parallelism
+rayon = { optional = true, workspace = true }
 # error handling
 thiserror = { workspace = true }
 # logging
-tracing = { features = ["attributes"], optional = true, workspace = true }
+tracing = { optional = true, workspace = true }
 # macros
 paste = { workspace = true }
 smart-default = { workspace = true }
@@ -41,13 +51,14 @@ strum = { features = ["derive"], workspace = true }
 # math
 num-traits = { workspace = true }
 # random
-getrandom = { optional = true, workspace = true }
 rand = { optional = true, workspace = true }
 rand_distr = { optional = true, workspace = true }
 # serialization
 serde = { features = ["derive"], optional = true, workspace = true }
 serde_derive = { optional = true, workspace = true }
 serde_json = { optional = true, workspace = true }
+# wasm
+wasm-bindgen = { optional = true, workspace = true }
 
 [dev-dependencies]
 criterion = { workspace = true }
@@ -84,6 +95,7 @@ hash_graph = [
 macros = []
 
 # ************* [FF:Environments] *************
+
 std = [
     "alloc",
     "num-traits/std",
@@ -96,13 +108,22 @@ std = [
     "thiserror/std",
 ]
 
+wasi = [
+    "alloc",
+    "rshyper-core/wasi",
+    "scsys/wasi",
+]
+
 wasm = [
     "alloc",
-    "getrandom?/wasm_js",
+    "rayon?/web_spin_lock",
     "rshyper-core/wasm",
     "scsys/wasm",
+    "wasm-bindgen",
 ]
+
 # ************* [FF:Dependencies] *************
+
 alloc = [
     "rshyper-core/alloc",
     "scsys/alloc",
@@ -130,10 +151,14 @@ rand = [
     "scsys/rand",
 ]
 
+rayon = [
+    "dep:rayon",
+    "rshyper-core/rayon",
+]
+
 rng = [
-    "dep:getrandom",
-    "rand/small_rng",
-    "rand/thread_rng",
+    "rand?/small_rng",
+    "rand?/thread_rng",
     "rshyper-core/rng",
     "scsys/rng",
 ]
@@ -155,6 +180,11 @@ tracing = [
     "dep:tracing",
     "rshyper-core/tracing",
     "scsys/tracing",
+]
+
+wasm-bindgen = [
+    "dep:wasm-bindgen",
+    "rshyper-core/wasm-bindgen",
 ]
 
 # ************* [Benchmarks] *************

@@ -3,6 +3,68 @@
     authors: @FL03
 */
 use crate::index::{GraphIndex, IndexBase, RawIndex};
+use core::cmp::Ordering;
+use num_traits::{Num, One, Zero};
+
+impl<T, K> PartialEq<T> for IndexBase<T, K>
+where
+    K: GraphIndex,
+    T: RawIndex + PartialEq,
+{
+    fn eq(&self, other: &T) -> bool {
+        self.get() == other
+    }
+}
+
+impl<'a, T, K> PartialEq<&'a T> for IndexBase<T, K>
+where
+    K: GraphIndex,
+    T: RawIndex + PartialEq,
+{
+    fn eq(&self, other: &&'a T) -> bool {
+        self.get() == *other
+    }
+}
+
+impl<'a, T, K> PartialEq<&'a mut T> for IndexBase<T, K>
+where
+    K: GraphIndex,
+    T: RawIndex + PartialEq,
+{
+    fn eq(&self, other: &&'a mut T) -> bool {
+        self.get() == *other
+    }
+}
+
+impl<T, K> PartialOrd<T> for IndexBase<T, K>
+where
+    K: GraphIndex,
+    T: RawIndex + PartialOrd,
+{
+    fn partial_cmp(&self, other: &T) -> Option<Ordering> {
+        self.get().partial_cmp(other)
+    }
+}
+
+impl<'a, T, K> PartialOrd<&'a T> for IndexBase<T, K>
+where
+    K: GraphIndex,
+    T: RawIndex + PartialOrd,
+{
+    fn partial_cmp(&self, other: &&'a T) -> Option<Ordering> {
+        self.get().partial_cmp(*other)
+    }
+}
+
+impl<'a, T, K> PartialOrd<&'a mut T> for IndexBase<T, K>
+where
+    K: GraphIndex,
+    T: RawIndex + PartialOrd,
+{
+    fn partial_cmp(&self, other: &&'a mut T) -> Option<Ordering> {
+        self.get().partial_cmp(*other)
+    }
+}
 
 impl<T, K> core::ops::Deref for IndexBase<T, K>
 where
@@ -52,20 +114,20 @@ where
     }
 }
 
-impl<T, K> num_traits::One for IndexBase<T, K>
+impl<T, K> One for IndexBase<T, K>
 where
     K: GraphIndex,
-    T: RawIndex + num_traits::One,
+    T: RawIndex + One,
 {
     fn one() -> Self {
         Self::new(T::one())
     }
 }
 
-impl<T, K> num_traits::Zero for IndexBase<T, K>
+impl<T, K> Zero for IndexBase<T, K>
 where
     K: GraphIndex,
-    T: RawIndex + num_traits::Zero,
+    T: RawIndex + Zero,
 {
     fn zero() -> Self {
         Self::new(T::zero())
@@ -76,10 +138,10 @@ where
     }
 }
 
-impl<T, K> num_traits::Num for IndexBase<T, K>
+impl<T, K> Num for IndexBase<T, K>
 where
     K: GraphIndex + Eq,
-    T: RawIndex + num_traits::Num,
+    T: RawIndex + Num,
 {
     type FromStrRadixErr = T::FromStrRadixErr;
 

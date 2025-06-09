@@ -51,7 +51,7 @@ fn test_astar_shortest_path() -> rshyper::Result<()> {
     // A* should find the shortest path (v0 -> v1 -> v3)
     assert_eq!(
         path,
-        vec![v0, v1, v3],
+        [v0, v1, v3],
         "Path should start with v0, go through v1, and end with v3"
     );
 
@@ -83,39 +83,41 @@ fn test_astar_with_heuristic() -> rshyper::Result<()> {
     }
 
     // Create horizontal connections
-    graph.add_edge(vec![v0, v1])?;
-    graph.add_edge(vec![v1, v2])?;
-    graph.add_edge(vec![v3, v4])?;
-    graph.add_edge(vec![v4, v5])?;
-    graph.add_edge(vec![v6, v7])?;
-    graph.add_edge(vec![v7, v8])?;
+    graph.add_edge([v0, v1])?;
+    graph.add_edge([v1, v2])?;
+    graph.add_edge([v3, v4])?;
+    graph.add_edge([v4, v5])?;
+    graph.add_edge([v6, v7])?;
+    graph.add_edge([v7, v8])?;
 
     // Create vertical connections
-    graph.add_edge(vec![v0, v3])?;
-    graph.add_edge(vec![v3, v6])?;
-    graph.add_edge(vec![v1, v4])?;
-    graph.add_edge(vec![v4, v7])?;
-    graph.add_edge(vec![v2, v5])?;
-    graph.add_edge(vec![v5, v8])?;
+    graph.add_edge([v0, v3])?;
+    graph.add_edge([v3, v6])?;
+    graph.add_edge([v1, v4])?;
+    graph.add_edge([v4, v7])?;
+    graph.add_edge([v2, v5])?;
+    graph.add_edge([v5, v8])?;
 
     // Define positions for each vertex in a 2D grid
-    let positions = vec![
-        (0f64, 0f64), // v0
-        (1.0, 0.0),   // v1
-        (2.0, 0.0),   // v2
-        (0.0, 1.0),   // v3
-        (1.0, 1.0),   // v4
-        (2.0, 1.0),   // v5
-        (0.0, 2.0),   // v6
-        (1.0, 2.0),   // v7
-        (2.0, 2.0),   // v8
+    let positions: [(f64, f64); 9] = [
+        (0.0, 0.0), // v0
+        (1.0, 0.0), // v1
+        (2.0, 0.0), // v2
+        (0.0, 1.0), // v3
+        (1.0, 1.0), // v4
+        (2.0, 1.0), // v5
+        (0.0, 2.0), // v6
+        (1.0, 2.0), // v7
+        (2.0, 2.0), // v8
     ];
 
     // Manhattan distance heuristic
     let heuristic = move |from: VertexId, to: VertexId| -> f64 {
-        let (from_x, from_y) = positions[*from];
-        let (to_x, to_y) = positions[*to];
-        ((from_x - to_x).abs() + (from_y - to_y).abs()) as f64
+        // deconstruct the expected values using the positions array
+        let (x1, y1) = positions[*from];
+        let (x2, y2) = positions[*to];
+        // Calculate Manhattan distance
+        (x1 - x2).abs() + (y1 - y2).abs()
     };
 
     // Find path from v0 to v8 (diagonal corners)
@@ -137,9 +139,7 @@ fn test_astar_with_heuristic() -> rshyper::Result<()> {
         let next_edges = graph.find_edges_with_node(&next)?;
 
         // There should be at least one common edge between current and next
-        let has_connection = current_edges
-            .iter()
-            .any(|&e1| next_edges.iter().any(|&e2| e1 == e2));
+        let has_connection = current_edges.iter().any(|&e1| next_edges.contains(&e1));
 
         assert!(has_connection, "Vertices in path must be connected");
     }
@@ -159,8 +159,8 @@ fn test_astar_disconnected() -> rshyper::Result<()> {
     let v2 = graph.add_vertex()?;
     let v3 = graph.add_vertex()?;
 
-    graph.add_edge(vec![v0, v1])?;
-    graph.add_edge(vec![v2, v3])?;
+    graph.add_edge([v0, v1])?;
+    graph.add_edge([v2, v3])?;
 
     // Simple heuristic
     let heuristic = |_: VertexId, _: VertexId| -> f64 { 0.0 };
@@ -196,18 +196,18 @@ fn test_astar_complex_paths() -> rshyper::Result<()> {
     let v6 = graph.add_vertex()?;
 
     // Path 1: v0 -> v1 -> v2 -> v3 (length 3)
-    graph.add_edge(vec![v0, v1])?;
-    graph.add_edge(vec![v1, v2])?;
-    graph.add_edge(vec![v2, v3])?;
+    graph.add_edge([v0, v1])?;
+    graph.add_edge([v1, v2])?;
+    graph.add_edge([v2, v3])?;
 
     // Path 2: v0 -> v4 -> v5 -> v3 (length 3)
-    graph.add_edge(vec![v0, v4])?;
-    graph.add_edge(vec![v4, v5])?;
-    graph.add_edge(vec![v5, v3])?;
+    graph.add_edge([v0, v4])?;
+    graph.add_edge([v4, v5])?;
+    graph.add_edge([v5, v3])?;
 
     // Path 3: v0 -> v6 -> v5 -> v3 (also length 3)
-    graph.add_edge(vec![v0, v6])?;
-    graph.add_edge(vec![v6, v5])?;
+    graph.add_edge([v0, v6])?;
+    graph.add_edge([v6, v5])?;
     // v5 -> v3 already defined
 
     // Simple heuristic
@@ -226,9 +226,7 @@ fn test_astar_complex_paths() -> rshyper::Result<()> {
         let current_edges = graph.find_edges_with_node(&path[i])?;
         let next_edges = graph.find_edges_with_node(&path[i + 1])?;
 
-        let has_connection = current_edges
-            .iter()
-            .any(|&e1| next_edges.iter().any(|&e2| e1 == e2));
+        let has_connection = current_edges.iter().any(|&e1| next_edges.contains(&e1));
 
         assert!(has_connection, "Found an invalid path");
     }

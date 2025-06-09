@@ -31,19 +31,8 @@ where
     T: RawIndex,
 {
     /// returns a new [`Position`] instance with the given edge and vertex indices.
-    pub fn new(edge: EdgeId<T>, vertex: VertexId<T>) -> Self {
+    pub const fn new(edge: EdgeId<T>, vertex: VertexId<T>) -> Self {
         Self { edge, vertex }
-    }
-    /// initialize a new [`Position`] using the logical default for both the edge and vertex
-    /// indices.
-    pub fn default() -> Self
-    where
-        T: Default,
-    {
-        Self {
-            edge: EdgeId::default(),
-            vertex: VertexId::default(),
-        }
     }
     /// initializes a new [`Position`] instance with [`one`](num_traits::One) values for both
     /// edge and vertex indices.
@@ -89,10 +78,12 @@ where
         }
     }
     /// consumes the current instance to create another with the given edge index
+    #[inline]
     pub fn with_edge(self, edge: EdgeId<T>) -> Self {
         Self { edge, ..self }
     }
     /// consumes the current instance to create another with the given vertex index
+    #[inline]
     pub fn with_vertex(self, vertex: VertexId<T>) -> Self {
         Self { vertex, ..self }
     }
@@ -105,11 +96,11 @@ where
         &mut self.edge
     }
     /// returns an immutable reference to the current vertex index
-    pub fn vertex(&self) -> &VertexId<T> {
+    pub const fn vertex(&self) -> &VertexId<T> {
         &self.vertex
     }
     /// returns a mutable reference to the current vertex index
-    pub fn vertex_mut(&mut self) -> &mut VertexId<T> {
+    pub const fn vertex_mut(&mut self) -> &mut VertexId<T> {
         &mut self.vertex
     }
     /// increments the current edge index by one and returns the previous value; see

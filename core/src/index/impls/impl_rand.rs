@@ -2,8 +2,6 @@
     appellation: impl_rand <module>
     authors: @FL03
 */
-#![cfg(feature = "rand")]
-
 use crate::index::{GraphIndex, IndexBase, RawIndex};
 use rand_distr::{Distribution, StandardUniform};
 

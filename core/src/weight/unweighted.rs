@@ -42,7 +42,7 @@ impl<T> UnWeighted<T> {
 }
 
 impl<T> Unweighted<T> {
-    ///
+    /// returns a new unweighted instance of type `T`
     pub const fn unweighted() -> Self {
         Self::new(UnWeighted::new())
     }
