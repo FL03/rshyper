@@ -138,13 +138,7 @@ fn test_hash_graph_iter() -> rshyper::Result<()> {
     // Iterate over nodes
     let nodes = graph.node_iter();
     assert!(nodes.enumerate().all(|(i, (&id, node))| {
-        let is_id = match i {
-            0 => id == v0,
-            1 => id == v1,
-            2 => id == v2,
-            _ => false,
-        };
-        is_id && node.weight() == &Weight(10 + 10 * i)
+        node.weight() == 10 + 10 * i && (id == v0 || id == v1 || id == v2)
     }));
 
     // Iterate over edges
