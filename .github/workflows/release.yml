@@ -55,6 +55,4 @@ jobs:
           prerelease: ${{ env.IS_PRERELEASE }}
           tag_name: ${{ github.event.release.tag_name }}
           body: |
-            ${{ github.event.release.body }}
-          files: |
-            target/criterion/report/index.html
+            ${{ github.event.release.body }}            

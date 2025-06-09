@@ -40,8 +40,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: # [ x86_64-unknown-linux-gnu, x86_64-apple-darwin, x86_64-pc-windows-msvc, wasm32-unknown-unknown, wasm32-wasip1, wasm32-wasip2 ]
-          - x86_64-unknown-linux-gnu
+        target: [ x86_64-unknown-linux-gnu ]
     steps:
       -
         name: Checkout
@@ -55,14 +54,16 @@ jobs:
       -
         name: Build the workspace
         run: cargo build --release --locked --workspace --all-features --target ${{ matrix.target }}
-  test:
-    needs: build
+  benchmark: # github.event_name == 'repository_dispatch' || github.event_name == 'workflow_dispatch' && github.event.inputs.benchmark == 'true'
+    if: true 
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      checks: write
     strategy:
       fail-fast: false
       matrix:
-        features:  [ all, default, full ]
-        target: [ x86_64-unknown-linux-gnu ] # [ x86_64-unknown-linux-gnu, x86_64-apple-darwin, x86_64-pc-windows-msvc, wasm32-unknown-unknown, wasm32-wasip1, wasm32-wasip2 ]
+        package: [ rshyper ]
     steps:
       -
         name: Checkout
@@ -72,19 +73,43 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          target: ${{ matrix.target }}
+      -
+        name: Benchmark (${{ matrix.package }})
+        run: cargo bench --locked --workspace --all-features --package ${{ matrix.package }} -- --verbose
+      - 
+        name: Upload the benchmarks
+        uses: actions/upload-artifact@v4
+        with:
+          name: Benchmark Report (${{ matrix.package }})
+          path: target/criterion/report/index.html
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        features:  [ all, default, full ]
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
       -
         if: matrix.features == ('full')
         name: Test (${{ matrix.features }})
-        run: cargo test -r --locked --workspace --target ${{ matrix.target}} --features ${{ matrix.features }}
+        run: cargo test --locked --release --workspace --features ${{ matrix.features }}
       -
         if: matrix.features == 'default'
         name: Test (default)
-        run: cargo test -r --locked --workspace --target ${{ matrix.target}}
+        run: cargo test --locked --release --workspace
       -
         if: matrix.features == 'all'
         name: Test (all-features)
-        run: cargo test -r --locked --workspace --target ${{ matrix.target}} --all-features
+        run: cargo test --locked --release --workspace --all-features
   test_no_defaults:
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.no_std
     continue-on-error: true
@@ -109,34 +134,11 @@ jobs:
           toolchain: nightly
           override: true
       -
-        if: matrix.features != 'no_std'
-        name: Test (${{ matrix.features }})
-        run: cargo test -r --locked --workspace  --no-default-features --features ${{ matrix.features }}
-      -
         if: matrix.features == 'no_std'
         name: Test (no_std)
-        run: cargo test -r --locked --workspace --no-default-features
-  benchmark:
-    needs: build
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        features:  [ full ]
-    steps:
+        run: cargo test --locked --release --workspace --no-default-features
       -
-        name: Checkout
-        uses: actions/checkout@v4
-      -
-        name: Setup Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      -
-        id: benchmark
-        name: Benchmark the workspace
-        run: cargo bench --locked --workspace --all-features -- --verbose
-      -
-        name: Benchmark
-        run: cargo bench --locked --workspace --all-features -- --verbose
+        if: matrix.features != 'no_std'
+        name: Test (${{ matrix.features }})
+        run: cargo test --locked --release --workspace  --no-default-features --features ${{ matrix.features }}
     
