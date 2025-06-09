@@ -59,7 +59,7 @@ where
         Ok(edge_id)
     }
     /// add a new node with the given weight and return its index
-    pub fn add_node(&mut self, weight: N) -> crate::Result<VertexId<Idx>>
+    pub fn add_node(&mut self, weight: Weight<N>) -> crate::Result<VertexId<Idx>>
     where
         Idx: Copy + core::ops::Add<Output = Idx> + One,
     {
@@ -68,7 +68,7 @@ where
         #[cfg(feature = "tracing")]
         tracing::info!("adding a new node with index {ndx}");
         // initialize a new node with the given weight & index
-        let node = HyperNode::new(ndx, Weight(weight));
+        let node = HyperNode::new(ndx, weight);
         // insert the new node into the vertices map
         self.nodes_mut().insert(ndx, node);
         Ok(ndx)
@@ -85,7 +85,7 @@ where
     {
         let ids = weights
             .into_iter()
-            .filter_map(|weight| self.add_node(weight).ok())
+            .filter_map(|weight| self.add_node(Weight(weight)).ok())
             .collect::<Vec<_>>();
         Ok(ids)
     }
@@ -95,7 +95,7 @@ where
         N: Default,
         Idx: Copy + core::ops::Add<Output = Idx> + One,
     {
-        self.add_node(N::default())
+        self.add_node(Default::default())
     }
     /// reset the hypergraph by clearing all nodes, edges, and facets
     pub fn clear(&mut self) -> &mut Self {

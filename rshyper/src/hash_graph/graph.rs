@@ -280,7 +280,7 @@ where
     K: GraphKind,
     Idx: NumIndex,
 {
-    fn add_node(&mut self, weight: N) -> crate::Result<VertexId<Idx>> {
+    fn add_node(&mut self, weight: Weight<N>) -> crate::Result<VertexId<Idx>> {
         self.add_node(weight)
     }
 

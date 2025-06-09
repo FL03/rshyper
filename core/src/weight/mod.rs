@@ -12,6 +12,7 @@ pub(crate) mod wrapper;
 mod impls {
     pub mod impl_weight;
     pub mod impl_weight_ops;
+    pub mod impl_weight_repr;
 }
 
 pub(crate) mod prelude {

@@ -4,7 +4,7 @@
 */
 use crate::hash_graph::{DirectedHashGraph, HashGraph, UndirectedHashGraph};
 use crate::index::{RawIndex, VertexId};
-use crate::{GraphAttributes, GraphKind};
+use crate::{GraphAttributes, GraphKind, Weight};
 use core::hash::Hash;
 
 impl<N, E, Idx> DirectedHashGraph<N, E, Idx>
@@ -43,11 +43,19 @@ where
     Idx: RawIndex + Eq + Hash,
     K: GraphKind,
 {
+    pub fn add_empty_node(&mut self) -> crate::Result<VertexId<Idx>>
+    where
+        Idx: Copy + core::ops::Add<Output = A::Idx> + num_traits::One,
+    {
+        let weight = Weight::new(());
+        self.add_node(weight)
+    }
+    #[deprecated(since = "0.9.0", note = "use `add_empty_node` instead")]
     pub fn insert_empty_node(&mut self) -> crate::Result<VertexId<Idx>>
     where
         Idx: Copy + core::ops::Add<Output = A::Idx> + num_traits::One,
     {
-        self.add_node(())
+        self.add_empty_node()
     }
 }
 
@@ -60,17 +68,24 @@ where
     Idx: RawIndex + Eq + Hash,
 {
     /// insert [`Some`] vertex with weight `T` and return its ID
-    pub fn insert_some_node(&mut self, weight: N) -> crate::Result<VertexId<Idx>>
+    pub fn add_some_node(&mut self, weight: N) -> crate::Result<VertexId<Idx>>
     where
         A::Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
     {
-        self.add_node(Some(weight))
+        self.add_node(Weight::some(weight))
     }
     /// insert [`None`] vertex with weight `T` and return its ID
     pub fn add_none_node(&mut self) -> crate::Result<VertexId<Idx>>
     where
         A::Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
     {
-        self.add_node(None)
+        self.add_node(Weight::none())
+    }
+    #[deprecated(since = "0.9.0", note = "use `add_some_node` instead")]
+    pub fn insert_some_node(&mut self, weight: N) -> crate::Result<VertexId<Idx>>
+    where
+        A::Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
+    {
+        self.add_some_node(weight)
     }
 }

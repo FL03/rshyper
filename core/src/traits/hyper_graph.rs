@@ -34,13 +34,13 @@ where
     where
         I: IntoIterator<Item = VertexId<A::Idx>>;
     /// add a new node to the graph with the given weight and return its index
-    fn add_node(&mut self, weight: N) -> crate::Result<VertexId<A::Idx>>;
+    fn add_node(&mut self, weight: Weight<N>) -> crate::Result<VertexId<A::Idx>>;
     /// add a new default node to the graph and return its index
     fn add_vertex(&mut self) -> crate::Result<VertexId<A::Idx>>
     where
         N: Default,
     {
-        self.add_node(N::default())
+        self.add_node(Default::default())
     }
     /// returns the vertices of the edge with the given index
     fn get_edge_vertices(

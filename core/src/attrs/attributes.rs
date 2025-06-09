@@ -2,7 +2,6 @@
     appellation: attrs <module>
     authors: @FL03
 */
-use super::GraphAttributes;
 use crate::index::RawIndex;
 use crate::{Directed, GraphKind, Undirected};
 use core::marker::PhantomData;
@@ -97,36 +96,6 @@ where
             index: PhantomData::<I>,
             kind: PhantomData::<Undirected>,
         }
-    }
-}
-
-impl<I, K> GraphAttributes for (PhantomData<I>, PhantomData<K>)
-where
-    I: RawIndex,
-    K: GraphKind,
-{
-    type Idx = I;
-    type Kind = K;
-
-    seal!();
-
-    fn new() -> Self {
-        (PhantomData::<I>, PhantomData::<K>)
-    }
-}
-
-impl<I, K> GraphAttributes for Attributes<I, K>
-where
-    I: RawIndex,
-    K: GraphKind,
-{
-    type Idx = I;
-    type Kind = K;
-
-    seal!();
-
-    fn new() -> Self {
-        Attributes::new()
     }
 }
 

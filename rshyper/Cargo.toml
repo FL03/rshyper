@@ -67,15 +67,15 @@ tracing-subscriber = { features = ["ansi", "chrono", "serde", "std"], workspace 
 
 [features]
 default = [
+    "hash_graph",
     "macros",
     "std",
-    "binary_graph",
-    "hash_graph",
 ]
 
 full = [
     "default",
     "anyhow",
+    "binary_graph",
     "json",
     "rand",
     "serde",
@@ -201,7 +201,6 @@ required-features = ["hash_graph", "macros", "std", "tracing"]
 # ************* [Tests] *************
 [[test]]
 name = "default"
-required-features = [  ]
 
 [[test]]
 name = "astar"

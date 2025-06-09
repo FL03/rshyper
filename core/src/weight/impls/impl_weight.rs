@@ -4,44 +4,6 @@
 */
 use crate::weight::Weight;
 
-impl<T> Weight<&T> {
-    /// returns a new [`Weight`] using a clone of the current inner value.
-    #[inline]
-    pub fn cloned(&self) -> Weight<T>
-    where
-        T: Clone,
-    {
-        Weight::new(self.0.clone())
-    }
-    /// returns a new instance of the [`Weight`] using a copy of the current inner value.
-    #[inline]
-    pub fn copied(&self) -> Weight<T>
-    where
-        T: Copy,
-    {
-        Weight::new(*self.0)
-    }
-}
-
-impl<T> Weight<&mut T> {
-    /// returns a new [`Weight`] using a clone of the current inner value.
-    #[inline]
-    pub fn cloned(&self) -> Weight<T>
-    where
-        T: Clone,
-    {
-        Weight::new(self.0.clone())
-    }
-    /// returns a new instance of the [`Weight`] using a copy of the current inner value.
-    #[inline]
-    pub const fn copied(&self) -> Weight<T>
-    where
-        T: Copy,
-    {
-        Weight::new(*self.0)
-    }
-}
-
 impl<T> AsRef<T> for Weight<T> {
     fn as_ref(&self) -> &T {
         self.get()

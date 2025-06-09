@@ -152,7 +152,7 @@ macro_rules! hypernode {
         $crate::hypernode!(@new $src.$var $(= $w)?);
     };
     (@new $src:ident.$var:ident = $w:expr) => {
-        let $var = $src.add_node($w).expect("Failed to insert node");
+        let $var = $src.add_node($crate::Weight($w)).expect("Failed to insert node");
     };
     (@new $src:ident.$var:ident) => {
         let $var = $src.add_vertex().expect("Failed to insert node");

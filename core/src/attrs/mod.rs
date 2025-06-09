@@ -32,7 +32,60 @@ pub trait GraphAttributes: 'static + Copy + Send + Sync {
 
     private!();
 
-    fn new() -> Self
-    where
-        Self: Sized;
+    /// returns a new instance of the graph attributes.
+    fn new() -> Self;
+    /// returns a [`PhantomData`] instance of the graph attributes.
+    fn phantom() -> PhantomData<(Self::Kind, Self::Idx)> {
+        PhantomData::<(Self::Kind, Self::Idx)>
+    }
+}
+
+/*
+ ************* Implementations *************
+*/
+use core::marker::PhantomData;
+
+impl<I, K> GraphAttributes for Attributes<I, K>
+where
+    I: RawIndex,
+    K: GraphKind,
+{
+    type Idx = I;
+    type Kind = K;
+
+    seal!();
+
+    fn new() -> Self {
+        Attributes::new()
+    }
+}
+
+impl<I, K> GraphAttributes for PhantomData<(K, I)>
+where
+    I: RawIndex,
+    K: GraphKind,
+{
+    type Idx = I;
+    type Kind = K;
+
+    seal!();
+
+    fn new() -> Self {
+        PhantomData::<(K, I)>
+    }
+}
+
+impl<I, K> GraphAttributes for (PhantomData<I>, PhantomData<K>)
+where
+    I: RawIndex,
+    K: GraphKind,
+{
+    type Idx = I;
+    type Kind = K;
+
+    seal!();
+
+    fn new() -> Self {
+        (PhantomData::<I>, PhantomData::<K>)
+    }
 }
