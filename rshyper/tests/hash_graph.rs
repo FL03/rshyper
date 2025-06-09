@@ -123,22 +123,43 @@ fn test_remove_hash_edges() -> rshyper::Result<()> {
 
 #[test]
 fn test_hash_graph_iter() -> rshyper::Result<()> {
+    fn nweight(scale: usize) -> usize {
+        10 + 10 * scale
+    }
     let mut graph = HashGraph::<usize, usize>::undirected();
 
-    // Add some nodes
-    let verts = graph.add_nodes([10, 20, 30])?;
-
-    // Add some edges
-    let e0 = graph.add_edge(verts[0..=1].to_vec())?;
-    let e1 = graph.add_edge(verts[1..=2].to_vec())?;
+    rshyper::hypergraph! {
+        graph {
+            nodes: {
+                let v0 = 10;
+                let v1 = 20;
+                let v2 = 30;
+                let v3 = 40;
+            };
+            edges: {
+                let _e0: [v0, v1] = 0;
+                let _e1: [v0, v1] = 1;
+                let _e2: [v1, v2] = 2;
+                let _e3: [v2, v3] = 3;
+            };
+        }
+    }
 
     // Iterate over nodes
-    let nodes = graph.node_iter();
-    assert!(nodes.enumerate().all(|(i, (&id, node))| node.weight() == &(10 + 10 * i) && id == verts[i]));
+    assert!(
+        graph
+            .node_iter()
+            .enumerate()
+            .all(|(i, (id, node))| id == node.index() && node.weight() == &nweight(i))
+    );
 
     // Iterate over edges
-    let mut edges = graph.surface_iter();
-    assert!(edges.all(|(&i, w)| w.weight() == &Weight(0) && (i == e0 || i == e1)));
+    assert!(
+        graph
+            .surface_iter()
+            .enumerate()
+            .all(|(i, (id, facet))| id == facet.id() && facet.weight() == &i)
+    );
 
     Ok(())
 }
