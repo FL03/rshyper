@@ -126,20 +126,15 @@ fn test_hash_graph_iter() -> rshyper::Result<()> {
     let mut graph = HashGraph::<usize, usize>::undirected();
 
     // Add some nodes
-    let v0 = graph.add_node(10)?;
-    let v1 = graph.add_node(20)?;
-    let v2 = graph.add_node(30)?;
-    assert!(v0 == 0 && v1 == 1 && v2 == 2);
+    let verts = graph.add_nodes([10, 20, 30])?;
 
     // Add some edges
-    let e0 = graph.add_edge(vec![v0, v1])?;
-    let e1 = graph.add_edge(vec![v1, v2])?;
+    let e0 = graph.add_edge(verts[0..=1].to_vec())?;
+    let e1 = graph.add_edge(verts[1..=2].to_vec())?;
 
     // Iterate over nodes
     let nodes = graph.node_iter();
-    assert!(nodes.enumerate().all(|(i, (&id, node))| {
-        node.weight() == 10 + 10 * i && (id == v0 || id == v1 || id == v2)
-    }));
+    assert!(nodes.enumerate().all(|(i, (&id, node))| node.weight() == &(10 + 10 * i) && id == verts[i]));
 
     // Iterate over edges
     let mut edges = graph.surface_iter();

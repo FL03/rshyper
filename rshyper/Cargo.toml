@@ -190,13 +190,8 @@ wasm-bindgen = [
 # ************* [Benchmarks] *************
 [[bench]]
 harness = false
-name = "default"
-required-features = ["std"]
-
-[[bench]]
-harness = false
 name = "hash_graph"
-required-features = ["macros", "std"]
+required-features = ["hash_graph", "macros", "std"]
 
 # ************* [Examples] *************
 [[example]]
