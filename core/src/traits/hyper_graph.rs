@@ -46,22 +46,12 @@ where
     fn get_edge_vertices(
         &self,
         index: &EdgeId<A::Idx>,
-    ) -> crate::Result<&<Self::Edge<E> as RawEdge>::Store>
-    where
-        E: 'static,
-    {
-        self.get_surface(index).map(|edge| edge.vertices())
-    }
+    ) -> crate::Result<&<Self::Edge<E> as RawEdge>::Store>;
     /// returns a mutable reference to the vertices of the edge with the given index
     fn get_edge_vertices_mut(
         &mut self,
         index: &EdgeId<A::Idx>,
-    ) -> crate::Result<&mut <Self::Edge<E> as RawEdge>::Store>
-    where
-        E: 'static,
-    {
-        self.get_surface_mut(index).map(|edge| edge.vertices_mut())
-    }
+    ) -> crate::Result<&mut <Self::Edge<E> as RawEdge>::Store>;
     /// returns a reference to the weight of the edge with the given index
     fn get_edge_weight(&self, index: &EdgeId<A::Idx>) -> crate::Result<&Weight<E>> {
         self.get_surface(index).map(|edge| edge.weight())

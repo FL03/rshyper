@@ -166,12 +166,12 @@ required-features = ["std"]
 [[bench]]
 harness = false
 name = "hash_graph"
-required-features = ["std"]
+required-features = ["macros", "std"]
 
 # ************* [Examples] *************
 [[example]]
 name = "hash_graph"
-required-features = ["hash_graph", "std", "tracing"]
+required-features = ["hash_graph", "macros", "std", "tracing"]
 
 # ************* [Tests] *************
 [[test]]

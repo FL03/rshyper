@@ -20,8 +20,7 @@ where
     pub(crate) graph: &'a H,
     pub(crate) queue: VecDeque<VertexId<A::Idx>>,
     pub(crate) visited: HashSet<VertexId<A::Idx>>,
-    _edge: core::marker::PhantomData<E>,
-    _node: core::marker::PhantomData<N>,
+    _marker: core::marker::PhantomData<(N, E)>,
 }
 
 impl<'a, N, E, A, H, K, Idx> BreadthFirstTraversal<'a, N, E, A, H>
@@ -32,13 +31,12 @@ where
     Idx: RawIndex + Eq + core::hash::Hash,
 {
     /// create a new instance from a hypergraph
-    pub(crate) fn from_hypergraph(graph: &'a H) -> Self {
+    pub(crate) fn new(graph: &'a H) -> Self {
         Self {
             graph,
             queue: VecDeque::new(),
             visited: HashSet::new(),
-            _edge: core::marker::PhantomData::<E>,
-            _node: core::marker::PhantomData::<N>,
+            _marker: core::marker::PhantomData::<(N, E)>,
         }
     }
     /// returns an immutable reference to the queue
@@ -67,17 +65,26 @@ where
     pub fn search(&mut self, start: VertexId<Idx>) -> crate::Result<Vec<VertexId<Idx>>>
     where
         Idx: NumIndex,
-        E: 'static,
         for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<Idx>>,
     {
         Search::search(self, start)
+    }
+    /// if the vertex hans't been visited yet, push it to the back of the queue and mark it as
+    /// visited by inserting it into the visited set.
+    pub(crate) fn register(&mut self, vertex: VertexId<Idx>)
+    where
+        Idx: Copy,
+    {
+        if !self.has_visited(&vertex) {
+            self.queue_mut().push_back(vertex);
+            self.visited_mut().insert(vertex);
+        }
     }
 }
 
 impl<'a, N, E, A, H, K, Idx> Search<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, A, H>
 where
     A: GraphAttributes<Idx = Idx, Kind = K>,
-    E: 'static,
     H: HyperGraph<N, E, A>,
     K: GraphKind,
     Idx: NumIndex,
@@ -102,19 +109,15 @@ where
         let mut path = Vec::new();
 
         // BFT algorithm
-        while let Some(current) = self.queue.pop_front() {
+        while let Some(current) = self.queue_mut().pop_front() {
             path.push(current);
 
             // Get all hyperedges containing the current vertex
-            if let Ok(edges) = self.graph.find_edges_with_node(&current) {
-                // visit all vertices within each edge that haven't been visited yet
-                for edge_id in edges {
-                    for &vertex in self.graph.get_edge_vertices(&edge_id)? {
-                        if !self.has_visited(&vertex) {
-                            self.queue.push_back(vertex);
-                            self.visited.insert(vertex);
-                        }
-                    }
+            let edges = self.graph.find_edges_with_node(&current)?;
+            // visit all vertices within each edge that haven't been visited yet
+            for edge_id in edges {
+                for vertex in self.graph.get_edge_vertices(&edge_id)? {
+                    self.register(*vertex);
                 }
             }
         }
@@ -137,6 +140,6 @@ where
     }
 
     fn visited(&self) -> &Self::Store<VertexId<Idx>> {
-        &self.visited
+        self.visited()
     }
 }

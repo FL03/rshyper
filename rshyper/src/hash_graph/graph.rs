@@ -222,6 +222,10 @@ where
         self.position_mut().next_edge().unwrap()
     }
     /// returns the next vertex index and updates the current position
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, level = "trace", target = "hash_graph")
+    )]
     pub fn next_vertex_id(&mut self) -> VertexId<Idx>
     where
         Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,

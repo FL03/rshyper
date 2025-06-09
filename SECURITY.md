@@ -4,11 +4,11 @@
 
 Checkout the current and supported packages below:
 
-|  Version  |     Supported?     |
-|-----------|--------------------|
-| 0.0.6     | :white_check_mark: |
-| <=0.0.4   | :white_check_mark: |
-| < 0.0.3   | :x:                |
+| Version  | Supported?         |
+|:---------|:-------------------|
+| 0.1.0    | :white_check_mark: |
+| <=0.0.9  | :white_check_mark: |
+| <=0.0.8  | :x:                |
 
 ## Reporting a Vulnerability
 

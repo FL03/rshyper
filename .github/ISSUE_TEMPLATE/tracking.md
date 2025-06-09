@@ -1,9 +1,8 @@
 ---
-name: Tracking Issue
-
 about: A template for creating issues dedicated to tracking other issues and pull requests
 assignees: [ FL03 ]
 labels: [ 'tracking' ]
+name: Tracking Issue
 title: 'Tracking issue for '
 type: Feature
 ---

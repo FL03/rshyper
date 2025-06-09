@@ -4,6 +4,7 @@
 */
 use super::{Search, Traversal};
 use crate::hash_graph::HashGraph;
+use core::hash::Hash;
 use rshyper_core::index::{HashIndex, NumIndex, VertexId};
 use rshyper_core::{GraphAttributes, GraphKind, HyperGraph};
 use std::collections::HashSet;
@@ -17,8 +18,7 @@ where
     pub(crate) graph: &'a H,
     pub(crate) stack: Vec<VertexId<A::Idx>>,
     pub(crate) visited: HashSet<VertexId<A::Idx>>,
-    _node: core::marker::PhantomData<N>,
-    _edge: core::marker::PhantomData<E>,
+    _marker: core::marker::PhantomData<(N, E)>,
 }
 
 impl<'a, N, E, H, A, K, Idx> DepthFirstTraversal<'a, N, E, A, H>
@@ -34,8 +34,7 @@ where
             graph,
             stack: Vec::new(),
             visited: HashSet::new(),
-            _node: core::marker::PhantomData::<N>,
-            _edge: core::marker::PhantomData::<E>,
+            _marker: core::marker::PhantomData::<(N, E)>,
         }
     }
     /// returns an immutable reference to the stack
@@ -72,7 +71,7 @@ where
         Search::search(self, start)
     }
     /// include the given index in both the stack and visited stores
-    pub fn register_vertex(&mut self, index: VertexId<Idx>) -> &mut Self
+    pub(crate) fn register_vertex(&mut self, index: VertexId<Idx>) -> &mut Self
     where
         Idx: Copy,
     {
@@ -86,7 +85,7 @@ impl<'a, N, E, A, H> Traversal<VertexId<A::Idx>> for DepthFirstTraversal<'a, N, 
 where
     A: GraphAttributes,
     H: HyperGraph<N, E, A>,
-    A::Idx: Eq + core::hash::Hash,
+    A::Idx: Eq + Hash,
 {
     type Store<I2> = HashSet<I2>;
 
@@ -103,8 +102,8 @@ impl<'a, N, E, A, K, Idx> Search<VertexId<Idx>>
     for DepthFirstTraversal<'a, N, E, A, HashGraph<N, E, A>>
 where
     A: GraphAttributes<Idx = Idx, Kind = K>,
-    N: Default + Eq + core::hash::Hash,
-    E: Default + Eq + core::hash::Hash,
+    N: Default + Eq + Hash,
+    E: Default + Eq + Hash,
     K: GraphKind,
     Idx: crate::NumIndex,
 {

@@ -2,6 +2,8 @@
     Appellation: impl_astar <module>
     Contrib: @FL03
 */
+use super::Heuristic;
+
 #[doc(inline)]
 pub use self::priority_node::PriorityNode;
 
@@ -9,36 +11,17 @@ pub(crate) mod priority_node;
 
 use super::{Search, Traversal};
 use crate::hash_graph::{HashGraph, VertexSet};
+use core::hash::Hash;
 use rshyper_core::index::{NumIndex, RawIndex, VertexId};
 use rshyper_core::{GraphAttributes, GraphKind};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 
-/// A simple trait defining a common interface for heuristic functions compatible with the
-/// [`A*`](AStarSearch) search implementation
-pub trait HeuristicFunc<T = crate::Udx> {
-    type Output;
-
-    fn compute(&self, start: VertexId<T>, goal: VertexId<T>) -> Self::Output;
-}
-
-impl<F, Idx> HeuristicFunc<Idx> for F
-where
-    Idx: RawIndex,
-    F: Fn(VertexId<Idx>, VertexId<Idx>) -> f64,
-{
-    type Output = f64;
-
-    fn compute(&self, start: VertexId<Idx>, goal: VertexId<Idx>) -> Self::Output {
-        self(start, goal)
-    }
-}
-
-/// A* Search algorithm for hypergraphs
+/// An A* Search algorithm implementation for hypergraphs
 pub struct AStarSearch<'a, N, E, A, F>
 where
-    F: HeuristicFunc<A::Idx>,
+    F: Heuristic<A::Idx>,
     A: GraphAttributes,
-    A::Idx: Eq + core::hash::Hash,
+    A::Idx: Eq + Hash,
 {
     pub(crate) graph: &'a HashGraph<N, E, A>,
     pub(crate) open_set: VertexSet<A::Idx>,
@@ -47,43 +30,46 @@ where
     pub(crate) g_score: HashMap<VertexId<A::Idx>, F::Output>,
     pub(crate) f_score: HashMap<VertexId<A::Idx>, F::Output>,
     pub(crate) heuristic: F,
+    _marker: core::marker::PhantomData<(N, E)>,
 }
 
 impl<'a, N, E, A, F, K, Idx> AStarSearch<'a, N, E, A, F>
 where
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
+    E: Eq + Hash,
+    N: Eq + Hash,
     A: GraphAttributes<Idx = Idx, Kind = K>,
-    F: HeuristicFunc<Idx>,
+    F: Heuristic<Idx>,
     K: GraphKind,
-    Idx: RawIndex + Eq + core::hash::Hash,
+    Idx: RawIndex + Eq + Hash,
 {
     /// Create a new A* search instance with the given heuristic function
     pub fn new(graph: &'a HashGraph<N, E, A>, heuristic: F) -> Self {
         Self {
+            heuristic,
             graph,
             open_set: VertexSet::new(),
             closed_set: VertexSet::new(),
             came_from: HashMap::new(),
             g_score: HashMap::new(),
             f_score: HashMap::new(),
-            heuristic,
+            _marker: core::marker::PhantomData::<(N, E)>,
         }
     }
     /// consumes the current instance to create another from the given heuristic function;
     /// **note:** while the functions may be different, the output type of both must match.
     pub fn with_heuristic<G>(self, heuristic: G) -> AStarSearch<'a, N, E, A, G>
     where
-        G: HeuristicFunc<Idx, Output = F::Output>,
+        G: Heuristic<Idx, Output = F::Output>,
     {
         AStarSearch {
+            heuristic,
             graph: self.graph,
             open_set: self.open_set,
             closed_set: self.closed_set,
             came_from: self.came_from,
             g_score: self.g_score,
             f_score: self.f_score,
-            heuristic,
+            _marker: self._marker,
         }
     }
 
@@ -133,7 +119,7 @@ where
     /// returns true if the given vertex has a f_score
     pub fn has_f_score<Q>(&self, vertex: &Q) -> bool
     where
-        Q: Eq + core::hash::Hash,
+        Q: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.f_score().contains_key(vertex)
@@ -141,7 +127,7 @@ where
     /// returns true if the given vertex has a g_score
     pub fn has_g_score<Q>(&self, vertex: &Q) -> bool
     where
-        Q: Eq + core::hash::Hash,
+        Q: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.g_score().contains_key(vertex)
@@ -149,7 +135,7 @@ where
     /// returns true if the given vertex has been visited
     pub fn has_visited<Q>(&self, vertex: &Q) -> bool
     where
-        Q: Eq + core::hash::Hash,
+        Q: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.closed_set().contains(vertex)
@@ -157,7 +143,7 @@ where
     /// returns true if the given vertex is in the open set
     pub fn in_open_set<Q>(&self, vertex: &Q) -> bool
     where
-        Q: Eq + core::hash::Hash,
+        Q: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.open_set().contains(vertex)
@@ -195,9 +181,9 @@ where
 impl<'a, N, E, F, A, K, Idx> AStarSearch<'a, N, E, A, F>
 where
     A: GraphAttributes<Idx = Idx, Kind = K>,
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
-    F: HeuristicFunc<Idx, Output = f64>,
+    E: Eq + Hash,
+    N: Eq + Hash,
+    F: Heuristic<Idx, Output = f64>,
     K: GraphKind,
     Idx: NumIndex,
 {
@@ -328,10 +314,10 @@ where
 impl<'a, N, E, F, A> Traversal<VertexId<A::Idx>> for AStarSearch<'a, N, E, A, F>
 where
     A: GraphAttributes,
-    A::Idx: Eq + core::hash::Hash,
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
-    F: HeuristicFunc<A::Idx, Output = f64>,
+    A::Idx: Eq + Hash,
+    E: Eq + Hash,
+    N: Eq + Hash,
+    F: Heuristic<A::Idx, Output = f64>,
 {
     type Store<U> = HashSet<U>;
 
@@ -346,10 +332,10 @@ where
 
 impl<'a, N, E, F, A, K, Idx> Search<VertexId<Idx>> for AStarSearch<'a, N, E, A, F>
 where
-    E: Eq + core::hash::Hash,
-    N: Eq + core::hash::Hash,
+    E: Eq + Hash,
+    N: Eq + Hash,
     A: GraphAttributes<Idx = Idx, Kind = K>,
-    F: HeuristicFunc<Idx, Output = f64>,
+    F: Heuristic<Idx, Output = f64>,
     K: GraphKind,
     Idx: NumIndex,
 {

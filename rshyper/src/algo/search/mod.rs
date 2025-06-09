@@ -30,7 +30,16 @@ pub(crate) mod prelude {
     pub use super::depth_first::DepthFirstTraversal;
 
     #[doc(inline)]
-    pub use super::{Search, Traversal};
+    pub use super::{GraphSearch, Heuristic, Search, Traversal};
+}
+
+use crate::index::{RawIndex, VertexId};
+/// [`Heuristic`] defines a common interface for heuristic functions compatible with the [`A*`](AStarSearch)
+/// search implementation
+pub trait Heuristic<T = crate::Udx> {
+    type Output;
+
+    fn compute(&self, start: VertexId<T>, goal: VertexId<T>) -> Self::Output;
 }
 
 /// [`Traversal`] trait defines an interface for operators capable of _traversing_ some type,
@@ -60,6 +69,18 @@ pub trait GraphSearch<Idx>: Search<Idx> + Traversal<Idx> {
 /*
  ************* Implementations *************
 */
+
+impl<F, Idx> Heuristic<Idx> for F
+where
+    Idx: RawIndex,
+    F: Fn(VertexId<Idx>, VertexId<Idx>) -> f64,
+{
+    type Output = f64;
+
+    fn compute(&self, start: VertexId<Idx>, goal: VertexId<Idx>) -> Self::Output {
+        self(start, goal)
+    }
+}
 
 impl<T, Idx> GraphSearch<Idx> for T
 where
