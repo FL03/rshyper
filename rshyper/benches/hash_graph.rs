@@ -2,13 +2,16 @@
     Appellation: hash_graph <bench>
     Contrib: @FL03
 */
-use criterion::{BatchSize, BenchmarkId, Criterion, Throughput, criterion_group, criterion_main};
-use rshyper::hash_graph::{UndirectedHashGraph as HyperGraph, VertexSet};
+use rshyper::hash_graph::{HashGraph, VertexSet};
 use rshyper::{VertexId, Weight};
-use std::hint::black_box;
 
-fn _init() -> HyperGraph<usize, usize> {
-    let mut graph = HyperGraph::undirected();
+use core::hint::black_box;
+use criterion::{BatchSize, BenchmarkId, Criterion, Throughput};
+
+const SAMPLE_SIZE: usize = 50;
+
+fn _init() -> HashGraph<usize, usize> {
+    let mut graph = HashGraph::undirected();
 
     rshyper::hypergraph! {
         graph {
@@ -45,18 +48,18 @@ fn _init() -> HyperGraph<usize, usize> {
 }
 
 lazy_static::lazy_static! {
-    static ref GRAPH: HyperGraph<usize, usize> = _init();
+    static ref GRAPH: HashGraph<usize, usize> = _init();
 }
 
 /// benchmark for adding edges
 fn hash_graph_bench_edge_add(c: &mut Criterion) {
-    c.bench_function("hash_graph_add_edge", |b| {
+    c.bench_function("HashGraph::add_edge", |b| {
         b.iter_batched(
-            || GRAPH.clone(),
+            HashGraph::<usize, usize>::undirected,
             |mut graph| {
                 // generate some set of three vertices
                 // Use the next value from the iterator as the weight
-                for w in 10..20 {
+                for w in 0..100 {
                     let verts = (0..3)
                         .map(|i| VertexId::from((i + i * 2) % 10))
                         .collect::<Vec<_>>();
@@ -73,16 +76,13 @@ fn hash_graph_bench_edge_add(c: &mut Criterion) {
 }
 /// benchmark for removing edges
 fn hash_graph_bench_edge_remove(c: &mut Criterion) {
-    c.bench_function("hash_graph_remove_edge", |b| {
+    c.bench_function("HashGraph::remove_edge", |b| {
         b.iter_batched(
-            || {
-                let graph = GRAPH.clone();
-                graph
-            },
+            _init,
             |mut graph| {
                 // Use the next value from the iterator as the weight
                 for id in 0..5 {
-                    black_box(graph.remove_edge(&id).expect("failed to remove node"));
+                    black_box(graph.remove_node(&id).expect("failed to remove node"));
                 }
             },
             BatchSize::SmallInput,
@@ -91,16 +91,13 @@ fn hash_graph_bench_edge_remove(c: &mut Criterion) {
 }
 /// benchmark for adding nodes to the graph
 fn hash_graph_bench_node_add(c: &mut Criterion) {
-    c.bench_function("hash_graph_node_add", |b| {
+    c.bench_function("HashGraph::add_nodes", |b| {
         b.iter_batched(
-            || GRAPH.clone(),
+            _init,
             |mut graph| {
-                // Use the next value from the iterator as the weight
-                for w in 10..20 {
-                    let weight = Weight::new(w);
-                    // Add a node with the given weight
-                    black_box(graph.add_node(weight).expect("failed to add node"));
-                }
+                graph
+                    .add_nodes(black_box(0..100))
+                    .expect("failed to add nodes")
             },
             BatchSize::SmallInput,
         )
@@ -114,7 +111,7 @@ fn hash_graph_bench_node_degree(c: &mut Criterion) {
         graph.get_node_degree(&VertexId::from(id));
     };
 
-    let mut group = c.benchmark_group("hash_graph_node_degree");
+    let mut group = c.benchmark_group("HashGraph::get_node_degree");
     for tgt in 0..10 {
         group.throughput(Throughput::Elements(tgt as u64));
         group.bench_with_input(BenchmarkId::from_parameter(tgt), &tgt, |b, &n| {
@@ -133,7 +130,8 @@ fn hash_graph_bench_node_neighbors(c: &mut Criterion) {
             .expect("failed to find any neighbors")
     };
 
-    let mut group = c.benchmark_group("graph_node_neighbors");
+    let mut group = c.benchmark_group("HashGraph::find_node_neighbors");
+    group.sample_size(SAMPLE_SIZE);
     for tgt in 0..10 {
         group.throughput(Throughput::Elements(tgt as u64));
         group.bench_with_input(BenchmarkId::from_parameter(tgt), &tgt, |b, &n| {
@@ -143,16 +141,24 @@ fn hash_graph_bench_node_neighbors(c: &mut Criterion) {
     group.finish();
 }
 
-fn hash_graph_bench_node_add_and_remove(c: &mut Criterion) {
-    c.bench_function("hash_graph_remove_node", |b| {
+fn bench_hasg_graph_remove_node(c: &mut Criterion) {
+    let mut group = c.benchmark_group("HashGraph");
+    // set the sample size for the group
+    group.sample_size(SAMPLE_SIZE);
+    // benchmark the function
+    group.bench_function("remove_node", |b| {
         b.iter_batched(
-            || GRAPH.clone(),
-            |mut graph| {
-                // Use the next value from the iterator as the weight
-                for w in 10..20 {
-                    let weight = Weight::new(w);
-                    let v = graph.add_node(weight).expect("failed to add node");
-                    black_box(graph.remove_edge(&v).expect("failed to remove node"));
+            || {
+                let mut graph = HashGraph::<usize, usize>::undirected();
+                let verts = graph.add_nodes(0..100).expect("failed to add nodes");
+                (graph, verts)
+            },
+            |(mut graph, verts)| {
+                // remove all the created nodes
+                for id in verts.iter() {
+                    graph
+                        .remove_node(black_box(id))
+                        .expect("failed to remove node");
                 }
             },
             BatchSize::SmallInput,
@@ -162,45 +168,53 @@ fn hash_graph_bench_node_add_and_remove(c: &mut Criterion) {
 
 fn hash_graph_bench_search_bft(c: &mut Criterion) {
     let graph = GRAPH.clone();
-    let search = |tgt: usize| {
-        // search the graph for some target vertex
-        graph.bft().search(tgt.into()).unwrap();
-    };
-    let mut group = c.benchmark_group("hash_graph_search_bft");
+    let mut group = c.benchmark_group("HashGraph::bft");
     for tgt in 0..10 {
         group.throughput(Throughput::Elements(tgt as u64));
         group.bench_with_input(BenchmarkId::from_parameter(tgt), &tgt, |b, &n| {
-            b.iter(|| search(n));
+            b.iter(|| {
+                let id = n.into();
+                // search the graph for some target vertex
+                graph.bft().search(black_box(id)).unwrap();
+            });
         });
     }
     group.finish();
 }
 
 fn hash_graph_bench_search_dft(c: &mut Criterion) {
+    // clone the graph to ensure we have a fresh instance for each benchmark
     let graph = GRAPH.clone();
-    let search = |tgt: usize| {
-        // search the graph for some target vertex
-        graph.dft().search(tgt.into()).unwrap();
-    };
-    let mut group = c.benchmark_group("hash_graph_search_dft");
+    // create a benchmark group for depth-first traversal
+    let mut group = c.benchmark_group("HashGraph::dft");
+    // set the sample size for the group
+    group.sample_size(SAMPLE_SIZE);
+    // iterate over a range of target vertices to benchmark
     for tgt in 0..10 {
         group.throughput(Throughput::Elements(tgt as u64));
+
         group.bench_with_input(BenchmarkId::from_parameter(tgt), &tgt, |b, &n| {
-            b.iter(|| search(n));
+            b.iter(|| {
+                let id = n.into();
+                // search the graph for some target vertex
+                graph.dft().search(black_box(id)).unwrap();
+            });
         });
     }
     group.finish();
 }
-
-criterion_group! {
+criterion::criterion_group! {
     benches,
     hash_graph_bench_edge_add,
     hash_graph_bench_edge_remove,
     hash_graph_bench_node_add,
     hash_graph_bench_node_degree,
     hash_graph_bench_node_neighbors,
-    hash_graph_bench_node_add_and_remove,
+    bench_hasg_graph_remove_node,
     hash_graph_bench_search_bft,
     hash_graph_bench_search_dft,
 }
-criterion_main!(benches);
+
+criterion::criterion_main! {
+    benches
+}

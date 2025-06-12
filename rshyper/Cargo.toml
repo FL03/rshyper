@@ -61,7 +61,7 @@ serde_json = { optional = true, workspace = true }
 wasm-bindgen = { optional = true, workspace = true }
 
 [dev-dependencies]
-criterion = { workspace = true }
+criterion = { features = ["plotters"], workspace = true }
 lazy_static = { workspace = true }
 tracing-subscriber = { features = ["ansi", "chrono", "serde", "std"], workspace = true }
 
@@ -189,8 +189,8 @@ wasm-bindgen = [
 harness = false
 name = "hash_graph"
 required-features = [
-    "hash_graph", 
-    "macros", 
+    "hash_graph",
+    "macros",
     "std"
 ]
 
@@ -206,32 +206,32 @@ name = "default"
 [[test]]
 name = "astar"
 required-features = [
-    "hash_graph", 
-    "macros", 
+    "hash_graph",
+    "macros",
     "std"
 ]
 
 [[test]]
 name = "bft"
 required-features = [
-    "hash_graph", 
-    "macros", 
+    "hash_graph",
+    "macros",
     "std"
 ]
 
 [[test]]
 name = "dft"
 required-features = [
-    "hash_graph", 
-    "macros", 
+    "hash_graph",
+    "macros",
     "std"
 ]
 
 [[test]]
 name = "hash_graph"
 required-features = [
-    "hash_graph", 
-    "macros", 
+    "hash_graph",
+    "macros",
     "std"
 ]
 

@@ -56,7 +56,7 @@ fn main() -> rshyper::Result<()> {
     tracing::info!("vertex {v} has a degree of {d}", v = v1, d = degree);
 
     // Remove a vertex
-    graph.remove_edge(&v2)?;
+    graph.remove_node(&v2)?;
     tracing::info!("removed vertex {v}...", v = v2);
 
     tracing::info!("Final graph state: {:?}", graph);

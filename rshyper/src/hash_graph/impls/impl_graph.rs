@@ -340,7 +340,7 @@ where
         feature = "tracing",
         tracing::instrument(skip_all, name = "remove_node", target = "hash_graph")
     )]
-    pub fn remove_edge<Q>(&mut self, index: &Q) -> crate::Result<HyperNode<N, Idx>>
+    pub fn remove_node<Q>(&mut self, index: &Q) -> crate::Result<HyperNode<N, Idx>>
     where
         Q: Eq + core::fmt::Debug + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
@@ -487,7 +487,7 @@ where
         Q: Eq + core::fmt::Debug + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.remove_edge(index)
+        self.remove_node(index)
     }
     #[deprecated(
         note = "use `set_node_weight` instead; this method will be removed in a future release",
