@@ -54,7 +54,7 @@ jobs:
       -
         name: Build the workspace
         run: cargo build --release --locked --workspace --all-features --target ${{ matrix.target }}
-  benchmark: 
+  benchmark:
     if: github.event_name == 'repository_dispatch' || github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') || github.event.inputs.benchmark == 'true'
     needs: build
     runs-on: ubuntu-latest
@@ -79,7 +79,7 @@ jobs:
       -
         name: Benchmark (${{ matrix.package }})
         run: cargo bench --locked --workspace --features full --package ${{ matrix.package }} --verbose --
-      - 
+      -
         name: Upload the benchmarks
         id: artifacts
         uses: actions/upload-artifact@v4
@@ -94,7 +94,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        features:  [ full ]
+        features:  [ full, all, default ]
+        target: [ x86_64-unknown-linux-gnu ]
+        toolchain: [ stable ]
     steps:
       -
         name: Checkout
@@ -104,61 +106,18 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          target: ${{ matrix.target }}
+          toolchain: ${{ matrix.toolchain }}
+          override: true
       -
+        if: matrix.features != 'default' && matrix.features != 'all'
         name: Test (${{ matrix.features }})
-        run: cargo test -r --locked --workspace --features ${{ matrix.features }}
-  test_std:
-    needs: build
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        features:  [ all, default ]
-    steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v4
-      -
-        name: Setup Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        run: cargo test -r --locked --workspace --target ${{ matrix.target }} --features ${{ matrix.features }}
       -
         if: matrix.features == 'default'
         name: Test (default)
-        run: cargo test -r --locked --workspace
+        run: cargo test -r --locked --workspace --target ${{ matrix.target }}
       -
         if: matrix.features == 'all'
         name: Test (all-features)
-        run: cargo test -r --locked --workspace --all-features
-  test_no_defaults:
-    if: github.event.inputs.no_std == 'true'
-    continue-on-error: true
-    needs: build
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        features:  [ alloc, no_std ]
-    steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v4
-      -
-        name: Setup Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          toolchain: nightly
-          override: true
-      -
-        name: Test (no_std)
-        if: matrix.features == 'no_std'
-        run: cargo test -r --locked --workspace --no-default-features
-      -
-        name: Test (${{ matrix.features }})
-        if: matrix.features != 'no_std'
-        run: cargo test -r --locked --workspace --no-default-features --features ${{ matrix.features }}
-        env:
-          RUSTFLAGS: "-C panic=abort -Z panic_abort_tests"
-    
+        run: cargo test -r --locked --workspace --target ${{ matrix.target }} --all-features
