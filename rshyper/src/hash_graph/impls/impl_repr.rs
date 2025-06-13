@@ -5,43 +5,48 @@
 use crate::hash_graph::{DirectedHashGraph, HashGraph, UndirectedHashGraph};
 use crate::index::{RawIndex, VertexId};
 use crate::{GraphAttributes, GraphKind, Weight};
-use core::hash::Hash;
+use core::hash::{BuildHasher, Hash};
 
-impl<N, E, Idx> DirectedHashGraph<N, E, Idx>
+impl<N, E, S, Idx> DirectedHashGraph<N, E, Idx, S>
 where
     E: Eq + Hash,
     N: Eq + Hash,
     Idx: Eq + RawIndex + Hash,
+    S: BuildHasher,
 {
     /// initialize a new, empty hypergraph
     pub fn directed() -> Self
     where
         Idx: Default,
+        S: Clone + Default,
     {
         HashGraph::new()
     }
 }
-impl<N, E, Idx> UndirectedHashGraph<N, E, Idx>
+impl<N, E, S, Idx> UndirectedHashGraph<N, E, Idx, S>
 where
     E: Eq + Hash,
     N: Eq + Hash,
     Idx: Eq + RawIndex + Hash,
+    S: BuildHasher,
 {
     /// initialize a new, empty hypergraph
     pub fn undirected() -> Self
     where
         Idx: Default,
+        S: Clone + Default,
     {
         HashGraph::new()
     }
 }
 
-impl<E, A, K, Idx> HashGraph<(), E, A>
+impl<E, A, S, K, Idx> HashGraph<(), E, A, S>
 where
     A: GraphAttributes<Kind = K, Idx = Idx>,
     E: Eq + Hash,
     Idx: RawIndex + Eq + Hash,
     K: GraphKind,
+    S: BuildHasher,
 {
     pub fn add_empty_node(&mut self) -> crate::Result<VertexId<Idx>>
     where
@@ -59,11 +64,12 @@ where
     }
 }
 
-impl<N, E, A, K, Idx> HashGraph<Option<N>, E, A>
+impl<N, E, A, S, K, Idx> HashGraph<Option<N>, E, A, S>
 where
     A: GraphAttributes<Kind = K, Idx = Idx>,
     E: Eq + Hash,
     N: Eq + Hash,
+    S: BuildHasher,
     K: GraphKind,
     Idx: RawIndex + Eq + Hash,
 {

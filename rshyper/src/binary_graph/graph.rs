@@ -4,12 +4,12 @@
 */
 use super::aliases::*;
 use crate::{GraphAttributes, GraphKind};
-use rshyper_core::attrs::UndirectedAttributes;
+use rshyper_core::attrs::UnAttributes;
 use rshyper_core::{EdgeId, IndexCursor, RawIndex, VertexId};
 
 /// a b-tree based hypergraph implementation
 #[derive(Clone, Debug, PartialEq, PartialOrd)]
-pub struct BinaryGraph<N, E, A = UndirectedAttributes<usize>>
+pub struct BinaryGraph<N, E, A = UnAttributes<usize>>
 where
     A: GraphAttributes,
     A::Idx: Ord,

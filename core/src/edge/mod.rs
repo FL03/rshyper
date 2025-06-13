@@ -318,14 +318,19 @@ mod impl_alloc {
 mod impl_std {
     use super::RawStore;
     use crate::index::{RawIndex, VertexId};
+    use core::hash::BuildHasher;
     use std::collections::hash_set::{self, HashSet};
 
-    impl<I> RawStore<I> for HashSet<VertexId<I>>
+    impl<I, S> RawStore<I> for HashSet<VertexId<I>, S>
     where
         I: RawIndex,
+        S: BuildHasher,
     {
-        type Iter<'a, _T: 'a> = hash_set::Iter<'a, _T>;
-        type Store<_T> = HashSet<_T>;
+        type Iter<'a, _T: 'a>
+            = hash_set::Iter<'a, _T>
+        where
+            S: 'a;
+        type Store<_T> = HashSet<_T, S>;
 
         seal!();
 

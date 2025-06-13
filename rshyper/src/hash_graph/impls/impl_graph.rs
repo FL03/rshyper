@@ -4,18 +4,19 @@
 */
 use crate::hash_graph::{HashFacet, HashGraph, VertexSet};
 use crate::{GraphAttributes, GraphKind};
-use core::hash::Hash;
+use core::hash::{BuildHasher, Hash};
 use num_traits::One;
 use rshyper_core::index::{EdgeId, RawIndex, VertexId};
 use rshyper_core::{HyperFacet, HyperNode, Weight};
 
-impl<N, E, A, K, Idx> HashGraph<N, E, A>
+impl<N, E, A, K, Idx, S> HashGraph<N, E, A, S>
 where
     E: Eq + Hash,
     N: Eq + Hash,
     A: GraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
     Idx: RawIndex + Eq + Hash,
+    S: BuildHasher,
 {
     /// insert a new [`surface`](HyperFacet) into the hypergraph with the given vertices and
     /// using the logical [`Default`] for the weight
@@ -24,6 +25,7 @@ where
         I: IntoIterator<Item = VertexId<Idx>>,
         Idx: Copy + core::ops::Add<Output = Idx> + One,
         E: Default,
+        S: Default,
     {
         self.add_surface(vertices, Weight(E::default()))
     }
@@ -34,9 +36,10 @@ where
         I: IntoIterator<Item = VertexId<Idx>>,
         E: Eq + Hash,
         Idx: Copy + core::ops::Add<Output = Idx> + One,
+        S: Default,
     {
         // collect the vertices into a HashSet to ensure uniqueness
-        let vset = vertices
+        let verts = vertices
             .into_iter()
             .map(|v| {
                 // ensure the vertex ID is valid
@@ -45,8 +48,8 @@ where
                 }
                 Ok(v)
             })
-            .filter_map(Result::ok)
-            .collect::<VertexSet<_>>();
+            .filter_map(Result::ok);
+        let vset = VertexSet::from_iter(verts);
         // fetch the next edge index
         let edge_id = self.next_edge_id();
         // handle the case where the edge has no associated vertices
@@ -180,7 +183,7 @@ where
         self.get_surface(index).map(|edge| edge.len())
     }
     /// returns the set of vertices composing the given edge
-    pub fn get_edge_vertices<Q>(&self, index: &Q) -> crate::Result<&VertexSet<Idx>>
+    pub fn get_edge_vertices<Q>(&self, index: &Q) -> crate::Result<&VertexSet<Idx, S>>
     where
         Q: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -188,7 +191,7 @@ where
         self.get_surface(index).map(|edge| edge.points())
     }
     /// returns a mutable reference to the set of vertices composing the given edge
-    pub fn get_edge_vertices_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut VertexSet<Idx>>
+    pub fn get_edge_vertices_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut VertexSet<Idx, S>>
     where
         Q: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -259,7 +262,7 @@ where
         self.get_node_mut(index).map(|node| node.weight_mut())
     }
     /// returns an immutable reference to the [`HashFacet`] associated with the given index
-    pub fn get_surface<Q>(&self, index: &Q) -> crate::Result<&HashFacet<E, K, Idx>>
+    pub fn get_surface<Q>(&self, index: &Q) -> crate::Result<&HashFacet<E, K, Idx, S>>
     where
         Q: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -269,7 +272,7 @@ where
             .ok_or_else(|| crate::Error::EdgeNotFound)
     }
     /// returns a mutable reference to the [`HashFacet`] associated with the given index
-    pub fn get_surface_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut HashFacet<E, K, Idx>>
+    pub fn get_surface_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut HashFacet<E, K, Idx, S>>
     where
         Q: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -290,6 +293,7 @@ where
         Idx: Copy + core::ops::Add<Output = Idx> + One,
         Q: Eq + Hash + core::fmt::Debug,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
+        S: Default,
         for<'a> &'a E: core::ops::Add<Output = E>,
     {
         self.merge_edges_with(e1, e2, |w1, w2| {
@@ -309,6 +313,7 @@ where
         Q: Eq + Hash + core::fmt::Debug,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
         F: FnOnce(&E, &E) -> E,
+        S: Default,
     {
         // remove the edges from the surfaces map
         let s1 = self.remove_surface(e1)?;
@@ -318,11 +323,8 @@ where
         #[cfg(feature = "tracing")]
         tracing::debug!("removed edge {e2:?} with vertices {ep:?}", ep = s2.points());
         // merge the vertices of the two edges
-        let vertices = s1
-            .points()
-            .union(s2.points())
-            .copied()
-            .collect::<VertexSet<_>>();
+        let vertices = s1.points().union(s2.points()).copied();
+        let vertices = VertexSet::from_iter(vertices);
         // merge the two weights using the provided function
         let weight = f(s1.weight().view().value(), s2.weight().view().value());
         // generate a new edge index
@@ -369,7 +371,7 @@ where
         feature = "tracing",
         tracing::instrument(skip_all, name = "remove_surface", target = "hash_graph")
     )]
-    pub fn remove_surface<Q>(&mut self, index: &Q) -> crate::Result<HashFacet<E, K, Idx>>
+    pub fn remove_surface<Q>(&mut self, index: &Q) -> crate::Result<HashFacet<E, K, Idx, S>>
     where
         Q: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -396,7 +398,7 @@ where
     /// retain surfaces in the hypergraph based on a predicate;
     pub fn retain_surfaces<F>(&mut self, f: F) -> &mut Self
     where
-        F: FnMut(&EdgeId<Idx>, &mut HashFacet<E, K, Idx>) -> bool,
+        F: FnMut(&EdgeId<Idx>, &mut HashFacet<E, K, Idx, S>) -> bool,
     {
         self.surfaces_mut().retain(f);
         self
@@ -434,13 +436,14 @@ where
 }
 
 #[allow(deprecated)]
-impl<N, E, A, K, Idx> HashGraph<N, E, A>
+impl<N, E, A, K, Idx, S> HashGraph<N, E, A, S>
 where
     E: Eq + Hash,
     N: Eq + Hash,
     A: GraphAttributes<Idx = Idx, Kind = K>,
     K: GraphKind,
     Idx: Eq + RawIndex + Hash,
+    S: BuildHasher,
 {
     #[deprecated(
         note = "use `contains_node_in_edge` instead; this method will be removed in a future release",

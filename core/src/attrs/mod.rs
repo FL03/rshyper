@@ -15,14 +15,14 @@ pub(crate) mod prelude {
     #[doc(inline)]
     pub use super::attributes::Attributes;
     #[doc(inline)]
-    pub use super::{DirectedAttributes, GraphAttributes, UndirectedAttributes};
+    pub use super::{DirAttributes, GraphAttributes, UnAttributes};
 }
 use crate::{Directed, GraphKind, RawIndex, Undirected};
 
 /// a type alias for graph [`Attributes`] configured with a [`Directed`] graph type.
-pub type DirectedAttributes<Idx> = Attributes<Idx, Directed>;
+pub type DirAttributes<Idx> = Attributes<Idx, Directed>;
 /// a type alias for graph [`Attributes`] configured with an [`Undirected`] graph type.
-pub type UndirectedAttributes<Idx> = Attributes<Idx, Undirected>;
+pub type UnAttributes<Idx> = Attributes<Idx, Undirected>;
 
 /// The [`GraphAttributes`] trait abstracts several generic types used to define a hyper graph
 /// into a single entity.
