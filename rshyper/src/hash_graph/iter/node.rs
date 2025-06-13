@@ -3,10 +3,9 @@
     authors: @FL03
 */
 use core::hash::Hash;
-use rshyper_core::index::{RawIndex, VertexId};
 use rshyper_core::HyperNode;
+use rshyper_core::index::{RawIndex, VertexId};
 use std::collections::hash_map;
-
 
 /// [`NodeIter`] is an iterator over the nodes of a hypergraph, yielding pairs of
 /// [`VertexId`] and the corresponding [`HyperNode`].

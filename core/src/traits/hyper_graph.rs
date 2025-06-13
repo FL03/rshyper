@@ -7,13 +7,18 @@ use crate::index::{EdgeId, VertexId};
 use crate::node::RawNode;
 use crate::{GraphAttributes, Weight};
 
+pub trait BinaryEdge: RawEdge {
+    fn lhs(&self) -> &VertexId<Self::Index>;
+    fn rhs(&self) -> &VertexId<Self::Index>;
+}
+
 /// [`RawHyperGraph`] is a trait that defines the basic operations for a hypergraph data
 /// structure.
 pub trait RawHyperGraph<A>
 where
     A: GraphAttributes,
 {
-    type Edge<E>: RawFacet<E, Idx = A::Idx, Kind = A::Kind>;
+    type Edge<E>: RawFacet<E, Index = A::Idx, Kind = A::Kind>;
     type Node<N>: RawNode<N, Key = A::Idx>;
 }
 
@@ -77,4 +82,39 @@ where
         &self,
         index: &VertexId<A::Idx>,
     ) -> crate::Result<impl Iterator<Item = EdgeId<A::Idx>>>;
+}
+
+/*
+ ************* Implementations *************
+*/
+use crate::GraphKind;
+use crate::edge::{HyperEdge, HyperFacet};
+use crate::index::RawIndex;
+
+impl<I, K> BinaryEdge for HyperEdge<[VertexId<I>; 2], K, I>
+where
+    I: RawIndex,
+    K: GraphKind,
+{
+    fn lhs(&self) -> &VertexId<I> {
+        &self.points()[0]
+    }
+
+    fn rhs(&self) -> &VertexId<I> {
+        &self.points()[1]
+    }
+}
+
+impl<E, I, K> BinaryEdge for HyperFacet<E, [VertexId<I>; 2], K, I>
+where
+    I: RawIndex,
+    K: GraphKind,
+{
+    fn lhs(&self) -> &VertexId<I> {
+        &self.points()[0]
+    }
+
+    fn rhs(&self) -> &VertexId<I> {
+        &self.points()[1]
+    }
 }

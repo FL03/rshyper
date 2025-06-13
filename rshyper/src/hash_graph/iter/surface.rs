@@ -4,8 +4,8 @@
 */
 use crate::hash_graph::HashFacet;
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::index::{EdgeId, RawIndex};
 use rshyper_core::GraphKind;
+use rshyper_core::index::{EdgeId, RawIndex};
 use std::collections::hash_map;
 use std::hash::RandomState;
 

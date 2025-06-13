@@ -137,7 +137,7 @@ where
     S: RawStore<Idx>,
 {
     type Kind = K;
-    type Idx = Idx;
+    type Index = Idx;
     type Store = S;
 
     seal!();

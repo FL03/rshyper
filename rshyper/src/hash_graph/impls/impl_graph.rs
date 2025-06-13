@@ -18,7 +18,7 @@ where
     Idx: RawIndex + Eq + Hash,
     S: BuildHasher,
 {
-    /// insert a new [`HyperFacet`] into the hypergraph composed of the given vertices and 
+    /// insert a new [`HyperFacet`] into the hypergraph composed of the given vertices and
     /// using the logical [`Default`] for the weight
     pub fn add_edge<I>(&mut self, vertices: I) -> crate::Result<EdgeId<Idx>>
     where
