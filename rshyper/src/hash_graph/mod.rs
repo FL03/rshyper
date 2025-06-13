@@ -4,10 +4,9 @@
 */
 //! this module focuses on implementing a hash-based hypergraph, [`HashGraph`]
 #[doc(inline)]
-pub use self::{aliases::*, graph::*, iter::*};
+pub use self::{aliases::*, graph::*, iter::prelude::*};
 
 pub mod graph;
-pub mod iter;
 
 mod impls {
     pub mod impl_graph;
@@ -17,11 +16,24 @@ mod impls {
     pub mod impl_serde;
 }
 
+pub mod iter {
+    #[doc(inline)]
+    pub use self::prelude::*;
+
+    pub mod node;
+    pub mod surface;
+
+    pub(crate) mod prelude {
+        #[doc(inline)]
+        pub use super::node::*;
+        #[doc(inline)]
+        pub use super::surface::*;
+    }
+}
+
 pub(crate) mod prelude {
     #[doc(inline)]
     pub use super::graph::*;
-    #[doc(inline)]
-    pub use super::iter::*;
 }
 
 pub(crate) mod aliases {

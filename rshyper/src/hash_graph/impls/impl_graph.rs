@@ -18,7 +18,7 @@ where
     Idx: RawIndex + Eq + Hash,
     S: BuildHasher,
 {
-    /// insert a new [`surface`](HyperFacet) into the hypergraph with the given vertices and
+    /// insert a new [`HyperFacet`] into the hypergraph composed of the given vertices and 
     /// using the logical [`Default`] for the weight
     pub fn add_edge<I>(&mut self, vertices: I) -> crate::Result<EdgeId<Idx>>
     where
@@ -290,9 +290,9 @@ where
     )]
     pub fn merge_edges<Q>(&mut self, e1: &Q, e2: &Q) -> crate::Result<EdgeId<Idx>>
     where
-        Idx: Copy + core::ops::Add<Output = Idx> + One,
         Q: Eq + Hash + core::fmt::Debug,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
+        Idx: Copy + core::ops::Add<Output = Idx> + One,
         S: Default,
         for<'a> &'a E: core::ops::Add<Output = E>,
     {
@@ -309,9 +309,9 @@ where
     )]
     pub fn merge_edges_with<Q, F>(&mut self, e1: &Q, e2: &Q, f: F) -> crate::Result<EdgeId<Idx>>
     where
-        Idx: Copy + core::ops::Add<Output = Idx> + One,
         Q: Eq + Hash + core::fmt::Debug,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
+        Idx: Copy + core::ops::Add<Output = Idx> + One,
         F: FnOnce(&E, &E) -> E,
         S: Default,
     {

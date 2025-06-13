@@ -211,16 +211,30 @@ where
     }
     /// returns an iterator over the nodes of the hypergraph, yielding pairs of [`VertexId`] and
     /// the corresponding [`HyperNode`].
-    pub fn node_iter(&self) -> super::iter::NodeIter<'_, N, Idx> {
-        super::iter::NodeIter {
+    pub fn node_iter(&self) -> super::NodeIter<'_, N, Idx> {
+        super::NodeIter {
             iter: self.nodes().iter(),
+        }
+    }
+    /// returns a mutable iterator over the nodes of the hypergraph, yielding pairs of
+    /// [`VertexId`] and a mutable reference to the corresponding [`HyperNode`].
+    pub fn node_iter_mut(&mut self) -> super::NodeIterMut<'_, N, Idx> {
+        super::NodeIterMut {
+            iter: self.nodes_mut().iter_mut(),
         }
     }
     /// returns an iterator over the surfaces of the hypergraph, yielding pairs of [`EdgeId`]
     /// and the corresponding [`HashFacet`].
-    pub fn surface_iter(&self) -> super::iter::SurfaceIter<'_, E, K, Idx, S> {
-        super::iter::SurfaceIter {
+    pub fn surface_iter(&self) -> super::SurfaceIter<'_, E, K, Idx, S> {
+        super::SurfaceIter {
             iter: self.surfaces().iter(),
+        }
+    }
+    /// returns a mutable iterator over the surfaces of the hypergraph, yielding pairs of
+    /// [`EdgeId`] and a mutable reference to the corresponding [`HashFacet`].
+    pub fn surface_iter_mut(&mut self) -> super::SurfaceIterMut<'_, E, K, Idx, S> {
+        super::SurfaceIterMut {
+            iter: self.surfaces_mut().iter_mut(),
         }
     }
     /// get the next edge index and updates the current position

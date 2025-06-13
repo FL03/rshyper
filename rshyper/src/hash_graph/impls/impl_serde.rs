@@ -33,24 +33,24 @@ where
     }
 }
 
-impl<N, E, A, Sh, K, Idx> Serialize for HashGraph<N, E, A, Sh>
+impl<N, E, A, S, K, Idx> Serialize for HashGraph<N, E, A, S>
 where
     A: GraphAttributes<Kind = K, Idx = Idx> + Serialize,
     N: Serialize + Eq + Hash,
     E: Serialize + Eq + Hash,
     Idx: Eq + Hash + RawIndex + Serialize,
     K: GraphKind + Serialize,
-    Sh: BuildHasher,
+    S: BuildHasher,
 {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    fn serialize<Ser>(&self, serializer: Ser) -> Result<Ser::Ok, Ser::Error>
     where
-        S: serde::ser::Serializer,
+        Ser: serde::ser::Serializer,
     {
         use serde::ser::SerializeStruct;
         let mut state = serializer.serialize_struct("HashGraph", 4)?;
-        state.serialize_field("nodes", &self.nodes)?;
-        state.serialize_field("surfaces", &self.surfaces)?;
-        state.serialize_field("position", &self.position)?;
+        state.serialize_field("nodes", self.nodes())?;
+        state.serialize_field("surfaces", self.surfaces())?;
+        state.serialize_field("position", self.position())?;
         state.serialize_field("_attrs", &self._attrs)?;
         state.end()
     }
