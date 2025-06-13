@@ -5,7 +5,7 @@
 use crate::binary_graph::{BinaryGraph, aliases::*};
 use alloc::vec::Vec;
 use rshyper_core::index::{EdgeId, RawIndex, VertexId};
-use rshyper_core::node::HyperNode;
+use rshyper_core::node::Node;
 use rshyper_core::{GraphAttributes, GraphKind, Weight};
 
 impl<N, E, A, K, Idx> BinaryGraph<N, E, A>
@@ -17,7 +17,7 @@ where
     Idx: RawIndex + Ord,
 {
     /// returns a reference to the node associated with the given key
-    pub fn get_node<Q>(&self, key: &Q) -> Option<&HyperNode<N, Idx>>
+    pub fn get_node<Q>(&self, key: &Q) -> Option<&Node<N, Idx>>
     where
         Q: ?Sized + Ord,
         VertexId<Idx>: core::borrow::Borrow<Q>,
@@ -25,7 +25,7 @@ where
         self.nodes().get(key)
     }
     /// returns a mutable reference to the node associated with the given key
-    pub fn get_node_mut<Q>(&mut self, key: &Q) -> Option<&mut HyperNode<N, Idx>>
+    pub fn get_node_mut<Q>(&mut self, key: &Q) -> Option<&mut Node<N, Idx>>
     where
         Q: ?Sized + Ord,
         VertexId<Idx>: core::borrow::Borrow<Q>,
@@ -83,7 +83,7 @@ where
             .map(|surface| surface.weight_mut())
     }
     /// returns the [`HyperNode`] of each vertex that makes up a given edge
-    pub fn get_surface_nodes<Q>(&self, key: &Q) -> Vec<&HyperNode<N, Idx>>
+    pub fn get_surface_nodes<Q>(&self, key: &Q) -> Vec<&Node<N, Idx>>
     where
         Q: ?Sized + Ord,
         EdgeId<Idx>: core::borrow::Borrow<Q>,

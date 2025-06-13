@@ -17,10 +17,10 @@ pub trait Contains<Q> {
  ************* Implementations *************
 */
 use crate::GraphKind;
-use crate::edge::{HyperEdge, HyperFacet, RawStore};
+use crate::edge::{Edge, RawStore, Surface};
 use crate::index::{RawIndex, VertexId};
 
-impl<S, K, Idx, Q> Contains<Q> for HyperEdge<S, K, Idx>
+impl<S, K, Idx, Q> Contains<Q> for Edge<S, K, Idx>
 where
     Q: PartialEq,
     S: RawStore<Idx>,
@@ -38,7 +38,7 @@ where
     }
 }
 
-impl<T, S, K, Idx, Q> Contains<Q> for HyperFacet<T, S, K, Idx>
+impl<T, S, K, Idx, Q> Contains<Q> for Surface<T, S, K, Idx>
 where
     Q: PartialEq,
     S: RawStore<Idx>,

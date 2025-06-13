@@ -2,12 +2,12 @@
     appellation: impl_repr <module>
     authors: @FL03
 */
-use crate::hash_graph::{DirectedHashGraph, HashGraph, UndirectedHashGraph};
+use crate::hash_graph::{DiHashGraph, HashGraph, UnHashGraph};
 use crate::index::{RawIndex, VertexId};
 use crate::{GraphAttributes, GraphKind, Weight};
 use core::hash::{BuildHasher, Hash};
 
-impl<N, E, S, Idx> DirectedHashGraph<N, E, Idx, S>
+impl<N, E, S, Idx> DiHashGraph<N, E, Idx, S>
 where
     E: Eq + Hash,
     N: Eq + Hash,
@@ -23,7 +23,7 @@ where
         HashGraph::new()
     }
 }
-impl<N, E, S, Idx> UndirectedHashGraph<N, E, Idx, S>
+impl<N, E, S, Idx> UnHashGraph<N, E, Idx, S>
 where
     E: Eq + Hash,
     N: Eq + Hash,

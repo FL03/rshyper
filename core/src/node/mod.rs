@@ -19,7 +19,7 @@ pub(crate) mod prelude {
     #[doc(inline)]
     pub use super::hyper_node::*;
     #[doc(inline)]
-    pub use super::{Node, Point, RawNode, RawPoint};
+    pub use super::{HyperNode, HyperPoint, RawNode, RawPoint};
 }
 
 use crate::Weight;
@@ -31,9 +31,9 @@ pub trait RawNode<T> {
 
     private!();
 }
-/// The [`Node`] trait extends the [`RawNode`] trait to provide additional functionality for
-/// nodes in a hypergraph, such as accessing the index and weight of the node.
-pub trait Node<T>: RawNode<T> {
+/// The [`HyperNode`] trait extends the [`RawNode`] trait to provide additional functionality
+/// for nodes in a hypergraph, such as accessing the index and weight of the node.
+pub trait HyperNode<T>: RawNode<T> {
     /// returns an immutable reference to the node index
     fn index(&self) -> &VertexId<Self::Key>;
     /// returns an immutable reference to the node data
@@ -72,7 +72,7 @@ pub trait RawPoint {
 }
 /// [`Point`] is a trait that extends the [`RawPoint`] trait to provide additional
 /// functionality for points in a hypergraph, such as accessing the index and raw index.
-pub trait Point: RawPoint {
+pub trait HyperPoint: RawPoint {
     /// returns the index of the point as a [`VertexId`].
     fn index(&self) -> &VertexId<Self::Key>;
     /// returns the raw index of the point as a reference to the underlying key type.
@@ -86,7 +86,7 @@ pub trait Point: RawPoint {
 */
 use crate::index::IndexBase;
 
-impl<T, Idx> RawNode<T> for HyperNode<T, Idx>
+impl<T, Idx> RawNode<T> for Node<T, Idx>
 where
     Idx: RawIndex,
 {
@@ -95,7 +95,7 @@ where
     seal!();
 }
 
-impl<T, Idx> Node<T> for HyperNode<T, Idx>
+impl<T, Idx> HyperNode<T> for Node<T, Idx>
 where
     Idx: RawIndex,
 {
@@ -119,7 +119,7 @@ where
     seal!();
 }
 
-impl<Id> Point for VertexId<Id>
+impl<Id> HyperPoint for VertexId<Id>
 where
     Id: RawIndex,
 {
@@ -128,7 +128,7 @@ where
     }
 }
 
-impl<T, Id> RawPoint for HyperNode<T, Id>
+impl<T, Id> RawPoint for Node<T, Id>
 where
     Id: RawIndex,
 {
@@ -137,7 +137,7 @@ where
     seal!();
 }
 
-impl<T, Id: RawIndex> Point for HyperNode<T, Id>
+impl<T, Id: RawIndex> HyperPoint for Node<T, Id>
 where
     Id: RawIndex,
 {

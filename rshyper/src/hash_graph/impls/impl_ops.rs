@@ -6,7 +6,7 @@ use crate::algo::search;
 use crate::hash_graph::{HashFacet, HashGraph};
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::index::{EdgeId, NumIndex, RawIndex, VertexId};
-use rshyper_core::node::HyperNode;
+use rshyper_core::node::Node;
 use rshyper_core::{Combine, GraphAttributes, GraphKind};
 
 impl<N, E, A, K, Idx> HashGraph<N, E, A>
@@ -132,7 +132,7 @@ where
     Idx: RawIndex + Eq + Hash,
     S: BuildHasher,
 {
-    type Output = HyperNode<N, Idx>;
+    type Output = Node<N, Idx>;
 
     fn index(&self, index: &VertexId<Idx>) -> &Self::Output {
         self.get_node(index).expect("Node not found")

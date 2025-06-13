@@ -30,10 +30,10 @@ pub(crate) mod macros {
 #[doc(inline)]
 pub use self::{
     attrs::{Attributes, GraphAttributes},
-    edge::{HyperEdge, HyperFacet},
+    edge::{Edge, Surface},
     error::{Error, Result},
     index::prelude::*,
-    node::HyperNode,
+    node::Node,
     traits::prelude::*,
     types::prelude::*,
     weight::prelude::*,

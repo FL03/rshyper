@@ -15,12 +15,12 @@ pub(crate) mod prelude {
     #[doc(inline)]
     pub use super::attributes::Attributes;
     #[doc(inline)]
-    pub use super::{DirAttributes, GraphAttributes, UnAttributes};
+    pub use super::{DiAttributes, GraphAttributes, UnAttributes};
 }
 use crate::{Directed, GraphKind, RawIndex, Undirected};
 
 /// a type alias for graph [`Attributes`] configured with a [`Directed`] graph type.
-pub type DirAttributes<Idx> = Attributes<Idx, Directed>;
+pub type DiAttributes<Idx> = Attributes<Idx, Directed>;
 /// a type alias for graph [`Attributes`] configured with an [`Undirected`] graph type.
 pub type UnAttributes<Idx> = Attributes<Idx, Undirected>;
 
@@ -37,6 +37,20 @@ pub trait GraphAttributes: 'static + Copy + Send + Sync {
     /// returns a [`PhantomData`] instance of the graph attributes.
     fn phantom() -> PhantomData<(Self::Kind, Self::Idx)> {
         PhantomData::<(Self::Kind, Self::Idx)>
+    }
+    /// convert the current attributes into a [`PhantomData`] instance.
+    fn into_phantom(self) -> PhantomData<(Self::Kind, Self::Idx)> {
+        PhantomData::<(Self::Kind, Self::Idx)>
+    }
+    /// returns true if the attributes are directed.
+    fn is_directed(&self) -> bool {
+        use core::any::TypeId;
+        TypeId::of::<Self::Kind>() == TypeId::of::<Directed>()
+    }
+    /// returns true if the attributes are undirected.
+    fn is_undirected(&self) -> bool {
+        use core::any::TypeId;
+        TypeId::of::<Self::Kind>() == TypeId::of::<Undirected>()
     }
 }
 

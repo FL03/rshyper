@@ -167,7 +167,7 @@ impl<T: RawIndex> Indexed<T> for VertexId<T> {
     }
 }
 
-impl<T, Idx> Indexed<Idx> for crate::HyperNode<T, Idx>
+impl<T, Idx> Indexed<Idx> for crate::Node<T, Idx>
 where
     Idx: RawIndex,
 {

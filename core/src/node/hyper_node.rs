@@ -5,7 +5,7 @@
 use crate::Weight;
 use crate::index::{RawIndex, VertexId};
 
-/// The [`HyperNode`] implementation generically associates a [`VertexId`] with a [`Weight`].
+/// The [`Node`] implementation generically associates a [`VertexId`] with a [`Weight`].
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
@@ -13,7 +13,7 @@ use crate::index::{RawIndex, VertexId};
     serde(rename_all = "snake_case")
 )]
 #[repr(C)]
-pub struct HyperNode<T, Idx>
+pub struct Node<T, Idx>
 where
     Idx: RawIndex,
 {
@@ -21,7 +21,7 @@ where
     pub(crate) weight: Weight<T>,
 }
 
-impl<T, Idx> HyperNode<T, Idx>
+impl<T, Idx> Node<T, Idx>
 where
     Idx: RawIndex,
 {
@@ -44,15 +44,15 @@ where
         Self::new(Default::default(), weight)
     }
     /// consumes the current instance to create another with the given index.
-    pub fn with_index<I2: RawIndex>(self, index: VertexId<I2>) -> HyperNode<T, I2> {
-        HyperNode {
+    pub fn with_index<I2: RawIndex>(self, index: VertexId<I2>) -> Node<T, I2> {
+        Node {
             index,
             weight: self.weight,
         }
     }
     /// consumes the current instance to create another with the given weight.
-    pub fn with_weight<U>(self, weight: Weight<U>) -> HyperNode<U, Idx> {
-        HyperNode {
+    pub fn with_weight<U>(self, weight: Weight<U>) -> Node<U, Idx> {
+        Node {
             index: self.index,
             weight,
         }
@@ -87,11 +87,11 @@ where
     }
     /// consumes the current instance and applies the given function onto the weight,
     /// returning a new instance with the same index and the resulting weight.
-    pub fn map<U, F>(self, f: F) -> HyperNode<U, Idx>
+    pub fn map<U, F>(self, f: F) -> Node<U, Idx>
     where
         F: FnOnce(T) -> U,
     {
-        HyperNode {
+        Node {
             index: self.index,
             weight: self.weight.map(f),
         }
@@ -106,7 +106,7 @@ where
     }
 }
 
-impl<T, Idx> Default for HyperNode<T, Idx>
+impl<T, Idx> Default for Node<T, Idx>
 where
     Idx: RawIndex + Default,
     T: Default,
@@ -119,7 +119,7 @@ where
     }
 }
 
-impl<T, Idx> core::fmt::Display for HyperNode<T, Idx>
+impl<T, Idx> core::fmt::Display for Node<T, Idx>
 where
     Idx: RawIndex + core::fmt::Display,
     T: core::fmt::Display,

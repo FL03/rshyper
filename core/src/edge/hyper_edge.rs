@@ -6,7 +6,7 @@ use super::{RawEdge, RawStore};
 use crate::GraphKind;
 use crate::index::{EdgeId, RawIndex, VertexId};
 
-/// [`HyperEdge`] is the base type for hyperedges in a graph. These edges are generic over the
+/// [`Edge`] is the base type for hyperedges in a graph. These edges are generic over the
 /// edge store type `S`, the graph kind `K`, and the index type `Idx`. This allows for
 /// flexibility in how edges store their vertices and how they are identified within the graph.
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -16,7 +16,7 @@ use crate::index::{EdgeId, RawIndex, VertexId};
     serde(rename_all = "snake_case")
 )]
 #[repr(C)]
-pub struct HyperEdge<S, K, Idx = usize>
+pub struct Edge<S, K, Idx = usize>
 where
     Idx: RawIndex,
     K: GraphKind,
@@ -27,7 +27,7 @@ where
     pub(crate) _kind: core::marker::PhantomData<K>,
 }
 
-impl<S, K, Idx> HyperEdge<S, K, Idx>
+impl<S, K, Idx> Edge<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
@@ -85,8 +85,8 @@ where
         Self { id, ..self }
     }
     /// consumes the current instance to create another with the given nodes.
-    pub fn with_points<S2: RawStore<Idx>>(self, nodes: S2) -> HyperEdge<S2, K, Idx> {
-        HyperEdge {
+    pub fn with_points<S2: RawStore<Idx>>(self, nodes: S2) -> Edge<S2, K, Idx> {
+        Edge {
             id: self.id,
             points: nodes,
             _kind: self._kind,
@@ -130,7 +130,7 @@ where
     }
 }
 
-impl<S, Idx, K> RawEdge for HyperEdge<S, K, Idx>
+impl<S, Idx, K> RawEdge for Edge<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
@@ -152,5 +152,16 @@ where
 
     fn vertices_mut(&mut self) -> &mut S {
         self.points_mut()
+    }
+}
+
+impl<S, I, K> super::HyperEdge for Edge<S, K, I>
+where
+    S: RawStore<I>,
+    I: RawIndex,
+    K: GraphKind,
+{
+    fn new(id: EdgeId<I>, vertices: S) -> Self {
+        Self::new(id, vertices)
     }
 }

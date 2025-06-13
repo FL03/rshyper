@@ -2,11 +2,11 @@
     Appellation: node <module>
     Contrib: @FL03
 */
-use super::{HyperEdge, RawEdge, RawFacet, RawStore};
+use super::{Edge, RawEdge, RawFacet, RawStore};
 use crate::index::{EdgeId, RawIndex, VertexId};
 use crate::{GraphKind, Weight};
 
-/// The [`HyperFacet`] implementation associates some weight with a hyperedge.
+/// The [`Surface`] implementation associates some weight with a hyperedge.
 /// Typically, the term **facet** is used to denote the surface of a particular polytope,
 /// however, here it is used to aptly define a _**weighted**_ hyperedge.
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -16,36 +16,36 @@ use crate::{GraphKind, Weight};
     serde(rename_all = "snake_case")
 )]
 #[repr(C)]
-pub struct HyperFacet<T, S, K, Idx = usize>
+pub struct Surface<T, S, K, Idx = usize>
 where
     Idx: RawIndex,
     K: GraphKind,
     S: RawStore<Idx>,
 {
-    pub(crate) edge: HyperEdge<S, K, Idx>,
+    pub(crate) edge: Edge<S, K, Idx>,
     pub(crate) weight: Weight<T>,
 }
 
-impl<T, S, K, Idx> HyperFacet<T, S, K, Idx>
+impl<T, S, K, Idx> Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
     S: RawStore<Idx>,
 {
-    /// create a new instance of the [`HyperFacet`] from the given id, nodes, and weight
+    /// create a new instance of the [`Surface`] from the given id, nodes, and weight
     pub fn new(id: EdgeId<Idx>, nodes: S, weight: Weight<T>) -> Self {
-        let edge = HyperEdge::new(id, nodes);
+        let edge = Edge::new(id, nodes);
         Self { edge, weight }
     }
     /// creates a new edge with the given id
-    pub fn from_edge(edge: HyperEdge<S, K, Idx>) -> Self
+    pub fn from_edge(edge: Edge<S, K, Idx>) -> Self
     where
         T: Default,
     {
         Self::from_edge_with_weight(edge, Default::default())
     }
     /// creates a new instance from the given edge and weight
-    pub fn from_edge_with_weight(edge: HyperEdge<S, K, Idx>, weight: Weight<T>) -> Self {
+    pub fn from_edge_with_weight(edge: Edge<S, K, Idx>, weight: Weight<T>) -> Self {
         Self { edge, weight }
     }
     /// creates a new edge with the given id
@@ -55,7 +55,7 @@ where
         T: Default,
     {
         Self {
-            edge: HyperEdge::from_id(id),
+            edge: Edge::from_id(id),
             weight: Weight::init(),
         }
     }
@@ -66,7 +66,7 @@ where
         T: Default,
     {
         Self {
-            edge: HyperEdge::from_points(nodes),
+            edge: Edge::from_points(nodes),
             weight: Weight::init(),
         }
     }
@@ -77,16 +77,16 @@ where
         S: Default,
     {
         Self {
-            edge: HyperEdge::default(),
+            edge: Edge::default(),
             weight,
         }
     }
     /// returns an immutable reference to the edge
-    pub const fn edge(&self) -> &HyperEdge<S, K, Idx> {
+    pub const fn edge(&self) -> &Edge<S, K, Idx> {
         &self.edge
     }
     /// returns a mutable reference to the edge
-    pub const fn edge_mut(&mut self) -> &mut HyperEdge<S, K, Idx> {
+    pub const fn edge_mut(&mut self) -> &mut Edge<S, K, Idx> {
         &mut self.edge
     }
     /// returns an immutable reference to the weight
@@ -130,21 +130,21 @@ where
     }
     /// consumes the current instance to create another with the given id.
     pub fn with_id(self, id: EdgeId<Idx>) -> Self {
-        HyperFacet {
+        Surface {
             edge: self.edge.with_id(id),
             weight: self.weight,
         }
     }
     /// consumes the current instance to create another with the given nodes.
-    pub fn with_points<S2: RawStore<Idx>>(self, nodes: S2) -> HyperFacet<T, S2, K, Idx> {
-        HyperFacet {
+    pub fn with_points<S2: RawStore<Idx>>(self, nodes: S2) -> Surface<T, S2, K, Idx> {
+        Surface {
             edge: self.edge.with_points(nodes),
             weight: self.weight,
         }
     }
     /// consumes the current instance to create another with the given weight.
-    pub fn with_weight<U>(self, weight: Weight<U>) -> HyperFacet<U, S, K, Idx> {
-        HyperFacet {
+    pub fn with_weight<U>(self, weight: Weight<U>) -> Surface<U, S, K, Idx> {
+        Surface {
             edge: self.edge,
             weight,
         }
@@ -169,7 +169,7 @@ where
     }
 }
 
-impl<T, S, Idx, K> RawEdge for HyperFacet<T, S, K, Idx>
+impl<T, S, Idx, K> RawEdge for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
@@ -194,7 +194,7 @@ where
     }
 }
 
-impl<T, S, Idx, K> RawFacet<T> for HyperFacet<T, S, K, Idx>
+impl<T, S, Idx, K> RawFacet<T> for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,

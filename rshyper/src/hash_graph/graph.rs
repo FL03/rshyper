@@ -4,20 +4,18 @@
 */
 use super::aliases::*;
 
-use rshyper_core::attrs::{DirAttributes, GraphAttributes, UnAttributes};
+use rshyper_core::attrs::{DiAttributes, GraphAttributes, UnAttributes};
 use rshyper_core::index::{EdgeId, IndexCursor, NumIndex, RawIndex, VertexId};
-use rshyper_core::node::HyperNode;
+use rshyper_core::node::Node;
 use rshyper_core::{GraphKind, HyperGraph, RawHyperGraph, Weight};
 
 use core::hash::{BuildHasher, Hash};
 use std::hash::RandomState;
 
 /// a type alias for a [directed](crate::Directed) [`HashGraph`]
-pub type DirectedHashGraph<N, E, Idx = usize, S = RandomState> =
-    HashGraph<N, E, DirAttributes<Idx>, S>;
+pub type DiHashGraph<N, E, Idx = usize, S = RandomState> = HashGraph<N, E, DiAttributes<Idx>, S>;
 /// a type alias for an [undirected](crate::Undirected) [`HashGraph`]
-pub type UndirectedHashGraph<N, E, Idx = usize, S = RandomState> =
-    HashGraph<N, E, UnAttributes<Idx>, S>;
+pub type UnHashGraph<N, E, Idx = usize, S = RandomState> = HashGraph<N, E, UnAttributes<Idx>, S>;
 
 /// A hash-based hypergraph implementation
 #[derive(Clone, Debug, Default)]
@@ -237,30 +235,78 @@ where
             iter: self.surfaces_mut().iter_mut(),
         }
     }
-    /// get the next edge index and updates the current position
+    /// returns a parallel iterator over the nodes of the hypergraph, yielding pairs of
+    /// [`VertexId`] and the corresponding [`HyperNode`].
+    #[cfg(feature = "rayon")]
+    pub fn node_par_iter(&self) -> super::NodeParIter<'_, N, Idx>
+    where
+        N: Send + Sync,
+        Idx: Send + Sync,
+    {
+        super::NodeParIter {
+            iter: self.node_iter(),
+        }
+    }
+    /// returns a mutable parallel iterator over the nodes of the hypergraph, yielding pairs of
+    /// [`VertexId`] and a mutable reference to the corresponding [`HyperNode`].
+    #[cfg(feature = "rayon")]
+    pub fn node_par_iter_mut(&mut self) -> super::NodeParIterMut<'_, N, Idx>
+    where
+        N: Send + Sync,
+        Idx: Send + Sync,
+    {
+        super::NodeParIterMut {
+            iter: self.node_iter_mut(),
+        }
+    }
+    /// returns a parallel iterator over the surfaces of the hypergraph, yielding pairs of
+    /// [`EdgeId`] and the corresponding [`HashFacet`].
+    #[cfg(feature = "rayon")]
+    pub fn surface_par_iter(&self) -> super::SurfaceParIter<'_, E, K, Idx, S>
+    where
+        E: Send + Sync,
+        K: Send + Sync,
+        Idx: Send + Sync,
+        S: Send + Sync,
+    {
+        super::SurfaceParIter {
+            iter: self.surface_iter(),
+        }
+    }
+    /// returns a mutable parallel iterator over the surfaces of the hypergraph, yielding pairs of
+    /// [`EdgeId`] and a mutable reference to the corresponding [`HashFacet`].
+    #[cfg(feature = "rayon")]
+    pub fn surface_par_iter_mut(&mut self) -> super::SurfaceParIterMut<'_, E, K, Idx, S>
+    where
+        E: Send + Sync,
+        K: Send + Sync,
+        Idx: Send + Sync,
+        S: Send + Sync,
+    {
+        super::SurfaceParIterMut {
+            iter: self.surface_iter_mut(),
+        }
+    }
+    /// computes the next edge index before replacing and returning the previous value
     pub fn next_edge_id(&mut self) -> EdgeId<Idx>
     where
         Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
     {
         self.position_mut().next_edge().unwrap()
     }
-    /// returns the next vertex index and updates the current position
-    #[cfg_attr(
-        feature = "tracing",
-        tracing::instrument(skip_all, level = "trace", target = "hash_graph")
-    )]
+    /// computes the next node index before replacing and returning the previous value
     pub fn next_vertex_id(&mut self) -> VertexId<Idx>
     where
         Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
     {
         self.position_mut().next_vertex().unwrap()
     }
-    /// returns the total number of hyperedges in the hypergraph
+    /// returns the total number of edges within the hypergraph
     pub fn total_edges(&self) -> usize {
         self.surfaces().len()
     }
-    /// returns the total number of vertices in the hypergraph
-    pub fn total_vertices(&self) -> usize {
+    /// returns the total number of nodes within the hypergraph
+    pub fn total_nodes(&self) -> usize {
         self.nodes().len()
     }
 }
@@ -294,7 +340,7 @@ where
     Idx: RawIndex + Eq + Hash,
     S: BuildHasher,
 {
-    type Node<N2> = HyperNode<N2, Idx>;
+    type Node<N2> = Node<N2, Idx>;
     type Edge<E2> = HashFacet<E2, K, Idx, S>;
 }
 
@@ -337,11 +383,11 @@ where
         self.get_edge_weight_mut(index)
     }
 
-    fn get_node(&self, index: &VertexId<Idx>) -> crate::Result<&HyperNode<N, Idx>> {
+    fn get_node(&self, index: &VertexId<Idx>) -> crate::Result<&Node<N, Idx>> {
         self.get_node(index)
     }
 
-    fn get_node_mut(&mut self, index: &VertexId<Idx>) -> crate::Result<&mut HyperNode<N, Idx>> {
+    fn get_node_mut(&mut self, index: &VertexId<Idx>) -> crate::Result<&mut Node<N, Idx>> {
         self.get_node_mut(index)
     }
 

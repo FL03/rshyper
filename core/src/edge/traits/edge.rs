@@ -31,8 +31,8 @@ pub trait RawEdge {
         TypeId::of::<crate::Undirected>() == TypeId::of::<Self::Kind>()
     }
 }
-/// [`Edge`] extends the behaviour of a [`RawEdge`] to include various constructors and
+/// [`HyperEdge`] extends the behaviour of a [`RawEdge`] to include various constructors and
 /// other utilitarian methods.
-pub trait Edge: RawEdge {
+pub trait HyperEdge: RawEdge {
     fn new(id: EdgeId<Self::Index>, vertices: Self::Store) -> Self;
 }

@@ -6,7 +6,7 @@ use crate::binary_graph::{BTreeFacet, BinaryGraph};
 use crate::index::{EdgeId, RawIndex, VertexId};
 use crate::{GraphAttributes, GraphKind};
 use core::ops::{Index, IndexMut};
-use rshyper_core::HyperNode;
+use rshyper_core::Node;
 
 impl<N, E, A, K, Idx> BinaryGraph<N, E, A>
 where
@@ -26,7 +26,7 @@ where
     K: GraphKind,
     Idx: RawIndex + Ord,
 {
-    type Output = HyperNode<N, Idx>;
+    type Output = Node<N, Idx>;
 
     fn index(&self, index: &VertexId<Idx>) -> &Self::Output {
         self.get_node(index)

@@ -7,7 +7,7 @@ use crate::{GraphAttributes, GraphKind};
 use core::hash::{BuildHasher, Hash};
 use num_traits::One;
 use rshyper_core::index::{EdgeId, RawIndex, VertexId};
-use rshyper_core::{HyperFacet, HyperNode, Weight};
+use rshyper_core::{Node, Surface, Weight};
 
 impl<N, E, A, K, Idx, S> HashGraph<N, E, A, S>
 where
@@ -56,7 +56,7 @@ where
         if vset.is_empty() {
             return Err(crate::Error::EmptyHyperedge);
         }
-        let surface = crate::HyperFacet::new(edge_id, vset, weight);
+        let surface = crate::Surface::new(edge_id, vset, weight);
         // insert the new hyperedge into the adjacency map
         self.surfaces_mut().insert(edge_id, surface);
         Ok(edge_id)
@@ -71,7 +71,7 @@ where
         #[cfg(feature = "tracing")]
         tracing::info!("adding a new node with index {ndx}");
         // initialize a new node with the given weight & index
-        let node = HyperNode::new(ndx, weight);
+        let node = Node::new(ndx, weight);
         // insert the new node into the vertices map
         self.nodes_mut().insert(ndx, node);
         Ok(ndx)
@@ -165,7 +165,7 @@ where
         feature = "tracing",
         tracing::instrument(skip_all, level = "trace", target = "hash_graph")
     )]
-    pub fn get_edge_nodes<Q>(&self, index: &Q) -> crate::Result<Vec<&HyperNode<N, Idx>>>
+    pub fn get_edge_nodes<Q>(&self, index: &Q) -> crate::Result<Vec<&Node<N, Idx>>>
     where
         Q: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -228,7 +228,7 @@ where
     }
     /// returns the weight of a particular vertex
     #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
-    pub fn get_node<Q>(&self, index: &Q) -> crate::Result<&HyperNode<N, Idx>>
+    pub fn get_node<Q>(&self, index: &Q) -> crate::Result<&Node<N, Idx>>
     where
         Q: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
@@ -236,7 +236,7 @@ where
         self.nodes().get(index).ok_or(crate::Error::NodeNotFound)
     }
     /// returns a mutable reference to the weight of a vertex
-    pub fn get_node_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut HyperNode<N, Idx>>
+    pub fn get_node_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut Node<N, Idx>>
     where
         Q: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
@@ -330,7 +330,7 @@ where
         // generate a new edge index
         let edge_id = self.next_edge_id();
         // initialize a new facet using the merged vertices, new index, and source weight
-        let surface = HyperFacet::new(edge_id, vertices, Weight(weight));
+        let surface = Surface::new(edge_id, vertices, Weight(weight));
         // insert the new hyperedge into the surfaces map
         self.surfaces_mut().insert(edge_id, surface);
         // return the new edge ID
@@ -342,7 +342,7 @@ where
         feature = "tracing",
         tracing::instrument(skip_all, name = "remove_node", target = "hash_graph")
     )]
-    pub fn remove_node<Q>(&mut self, index: &Q) -> crate::Result<HyperNode<N, Idx>>
+    pub fn remove_node<Q>(&mut self, index: &Q) -> crate::Result<Node<N, Idx>>
     where
         Q: Eq + core::fmt::Debug + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
@@ -390,7 +390,7 @@ where
     /// the predicate does not leave the graph in an invalid state.
     pub unsafe fn retain_nodes<F>(&mut self, f: F) -> &mut Self
     where
-        F: FnMut(&VertexId<Idx>, &mut HyperNode<N, Idx>) -> bool,
+        F: FnMut(&VertexId<Idx>, &mut Node<N, Idx>) -> bool,
     {
         self.nodes_mut().retain(f);
         self
@@ -436,6 +436,7 @@ where
 }
 
 #[allow(deprecated)]
+#[doc(hidden)]
 impl<N, E, A, K, Idx, S> HashGraph<N, E, A, S>
 where
     E: Eq + Hash,
@@ -445,6 +446,13 @@ where
     Idx: Eq + RawIndex + Hash,
     S: BuildHasher,
 {
+    #[deprecated(
+        note = "use `total_nodes` instead; this method will be removed in a future release",
+        since = "0.1.0"
+    )]
+    pub fn total_vertices(&self) -> usize {
+        self.total_nodes()
+    }
     #[deprecated(
         note = "use `contains_node_in_edge` instead; this method will be removed in a future release",
         since = "0.0.10"
@@ -485,7 +493,7 @@ where
         note = "use `remove_node` instead; this method will be removed the next major release",
         since = "0.0.10"
     )]
-    pub fn remove_vertex<Q>(&mut self, index: &Q) -> crate::Result<HyperNode<N, Idx>>
+    pub fn remove_vertex<Q>(&mut self, index: &Q) -> crate::Result<Node<N, Idx>>
     where
         Q: Eq + core::fmt::Debug + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,

@@ -2,33 +2,33 @@
     appellation: impl_edge <module>
     authors: @FL03
 */
-use crate::edge::{HyperEdge, RawStore};
+use crate::edge::{Edge, RawStore};
 use crate::index::{EdgeId, RawIndex, VertexId};
 use crate::{Directed, GraphKind, Undirected};
 
-impl<S, Idx> HyperEdge<S, Directed, Idx>
+impl<S, Idx> Edge<S, Directed, Idx>
 where
     Idx: RawIndex,
     S: RawStore<Idx>,
 {
-    /// creates a new directed hyperedge with the given id and nodes
+    /// returns a new [`Directed`] hyperedge with the given id and nodes
     pub fn directed(id: EdgeId<Idx>, nodes: S) -> Self {
         Self::new(id, nodes)
     }
 }
 
-impl<S, Idx> HyperEdge<S, Undirected, Idx>
+impl<S, Idx> Edge<S, Undirected, Idx>
 where
     Idx: RawIndex,
     S: RawStore<Idx>,
 {
-    /// creates a new undirected hyperedge with the given id and nodes
+    /// creates a new [`Undirected`] hyperedge with the given id and nodes
     pub fn undirected(id: EdgeId<Idx>, nodes: S) -> Self {
         Self::new(id, nodes)
     }
 }
 
-impl<S, K, Idx> Default for HyperEdge<S, K, Idx>
+impl<S, K, Idx> Default for Edge<S, K, Idx>
 where
     Idx: RawIndex + Default,
     K: GraphKind,
@@ -39,7 +39,7 @@ where
     }
 }
 
-impl<S, K, Idx> core::fmt::Display for HyperEdge<S, K, Idx>
+impl<S, K, Idx> core::fmt::Display for Edge<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
@@ -50,7 +50,7 @@ where
     }
 }
 
-impl<S, K, Idx> FromIterator<VertexId<Idx>> for HyperEdge<S, K, Idx>
+impl<S, K, Idx> FromIterator<VertexId<Idx>> for Edge<S, K, Idx>
 where
     Idx: Default + RawIndex,
     K: GraphKind,
@@ -65,7 +65,7 @@ where
     }
 }
 
-impl<S, K, Idx> From<EdgeId<Idx>> for HyperEdge<S, K, Idx>
+impl<S, K, Idx> From<EdgeId<Idx>> for Edge<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
@@ -76,18 +76,18 @@ where
     }
 }
 
-impl<S, K, Idx> From<HyperEdge<S, K, Idx>> for EdgeId<Idx>
+impl<S, K, Idx> From<Edge<S, K, Idx>> for EdgeId<Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
     S: RawStore<Idx>,
 {
-    fn from(from: HyperEdge<S, K, Idx>) -> Self {
+    fn from(from: Edge<S, K, Idx>) -> Self {
         from.id
     }
 }
 
-impl<S, K, Idx> AsRef<S> for HyperEdge<S, K, Idx>
+impl<S, K, Idx> AsRef<S> for Edge<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
@@ -98,7 +98,7 @@ where
     }
 }
 
-impl<S, K, Idx> AsMut<S> for HyperEdge<S, K, Idx>
+impl<S, K, Idx> AsMut<S> for Edge<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
@@ -109,7 +109,7 @@ where
     }
 }
 
-impl<S, K, Idx> core::borrow::Borrow<EdgeId<Idx>> for HyperEdge<S, K, Idx>
+impl<S, K, Idx> core::borrow::Borrow<EdgeId<Idx>> for Edge<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
@@ -120,7 +120,7 @@ where
     }
 }
 
-impl<S, K, Idx> core::borrow::BorrowMut<EdgeId<Idx>> for HyperEdge<S, K, Idx>
+impl<S, K, Idx> core::borrow::BorrowMut<EdgeId<Idx>> for Edge<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
@@ -131,7 +131,7 @@ where
     }
 }
 
-impl<S, K, Idx> core::ops::Deref for HyperEdge<S, K, Idx>
+impl<S, K, Idx> core::ops::Deref for Edge<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,
@@ -144,7 +144,7 @@ where
     }
 }
 
-impl<S, K, Idx> core::ops::DerefMut for HyperEdge<S, K, Idx>
+impl<S, K, Idx> core::ops::DerefMut for Edge<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphKind,

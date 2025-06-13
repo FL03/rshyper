@@ -88,10 +88,10 @@ where
  ************* Implementations *************
 */
 use crate::GraphKind;
-use crate::edge::{HyperEdge, HyperFacet};
+use crate::edge::{Edge, Surface};
 use crate::index::RawIndex;
 
-impl<I, K> BinaryEdge for HyperEdge<[VertexId<I>; 2], K, I>
+impl<I, K> BinaryEdge for Edge<[VertexId<I>; 2], K, I>
 where
     I: RawIndex,
     K: GraphKind,
@@ -105,7 +105,7 @@ where
     }
 }
 
-impl<E, I, K> BinaryEdge for HyperFacet<E, [VertexId<I>; 2], K, I>
+impl<E, I, K> BinaryEdge for Surface<E, [VertexId<I>; 2], K, I>
 where
     I: RawIndex,
     K: GraphKind,
