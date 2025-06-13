@@ -2,8 +2,10 @@
     appellation: hash_graph <module>
     authors: @FL03
 */
-//! this module provides a hash-based implementation of a hypergraph, [`HashGraph`], alongside
-//! any related representations, traits, types, and utilities.
+//! this module provides a hash-based hypergraph implementation [`HashGraph`] as well as
+//! various iterators, representations, and types related to the instance. The [`HashGraph`] is
+//! the "flagship" model of the `rshyper` crate, providing a flexible and efficient way to
+//! represent hypergraphs using hash maps and sets. It is designed to be used in a variety of
 #[doc(inline)]
 pub use self::{aliases::*, graph::*, iter::prelude::*};
 

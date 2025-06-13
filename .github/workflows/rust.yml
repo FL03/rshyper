@@ -28,11 +28,6 @@ on:
         description: 'Run benchmarks'
         required: true
         type: boolean
-      no_std:
-        default: false
-        description: 'Run tests with no_std feature'
-        required: true
-        type: boolean
 
 jobs:
   build:
@@ -66,7 +61,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [ rshyper ]
+        target: [ rshyper ]
     steps:
       -
         name: Checkout
@@ -76,15 +71,16 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          target: ${{ matrix.target }}
       -
-        name: Benchmark (${{ matrix.package }})
-        run: cargo bench --locked --workspace --features full --package ${{ matrix.package }} --verbose --
+        name: Benchmark the workspace
+        run: cargo bench --all-features --locked --verbose --workspace  --
       -
         name: Upload the benchmarks
         id: artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: benchmarks-${{ matrix.package }}@${{ github.sha }}
+          name: benchmarks.${{ matrix.target }}}@${{ github.sha }}
           if-no-files-found: error
           overwrite: true
           path: target/criterion/
