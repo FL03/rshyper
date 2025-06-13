@@ -196,8 +196,12 @@ required-features = [
 
 # ************* [Examples] *************
 [[example]]
+name = "basic_usage"
+required-features = ["hash_graph", "macros"]
+
+[[example]]
 name = "hash_graph"
-required-features = ["full"]
+required-features = ["hash_graph", "macros", "tracing"]
 
 # ************* [Tests] *************
 [[test]]
@@ -205,35 +209,19 @@ name = "default"
 
 [[test]]
 name = "astar"
-required-features = [
-    "hash_graph",
-    "macros",
-    "std"
-]
+required-features = ["hash_graph", "macros"]
 
 [[test]]
 name = "bft"
-required-features = [
-    "hash_graph",
-    "macros",
-    "std"
-]
+required-features = ["hash_graph", "macros"]
 
 [[test]]
 name = "dft"
-required-features = [
-    "hash_graph",
-    "macros",
-    "std"
-]
+required-features = ["hash_graph", "macros"]
 
 [[test]]
 name = "hash_graph"
-required-features = [
-    "hash_graph",
-    "macros",
-    "std"
-]
+required-features = ["hash_graph", "macros"]
 
 [[test]]
 name = "macros"

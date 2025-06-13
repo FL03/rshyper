@@ -2,7 +2,8 @@
     appellation: hash_graph <module>
     authors: @FL03
 */
-//! this module focuses on implementing a hash-based hypergraph, [`HashGraph`]
+//! this module provides a hash-based implementation of a hypergraph, [`HashGraph`], alongside
+//! any related representations, traits, types, and utilities.
 #[doc(inline)]
 pub use self::{aliases::*, graph::*, iter::prelude::*};
 
@@ -17,6 +18,7 @@ mod impls {
 }
 
 pub mod iter {
+    //! this module implements the iterators for the [`HashGraph`](super::HashGraph)
     #[doc(inline)]
     pub use self::prelude::*;
 

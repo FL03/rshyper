@@ -3,7 +3,6 @@
     Contrib: @FL03
 */
 use rshyper::HashGraph;
-use rshyper::hash_graph::UndirectedHashGraph as HyperGraph;
 
 fn main() -> rshyper::Result<()> {
     tracing_subscriber::fmt()
@@ -12,7 +11,7 @@ fn main() -> rshyper::Result<()> {
         .with_max_level(tracing::Level::TRACE)
         .init();
     // initialize a new instance of a hypergraph
-    let mut graph: HyperGraph<usize, usize> = HashGraph::undirected();
+    let mut graph = HashGraph::<usize, usize>::undirected();
     // use the macro to insert nodes into the graph
     rshyper::hypergraph! {
         graph {

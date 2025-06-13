@@ -22,7 +22,6 @@ where
     K: GraphKind,
     S: RawStore<Idx>,
 {
-    #[cfg_attr(feature = "serde", serde(flatten))]
     pub(crate) edge: HyperEdge<S, K, Idx>,
     pub(crate) weight: Weight<T>,
 }
