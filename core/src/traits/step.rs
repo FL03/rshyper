@@ -28,7 +28,7 @@ pub trait AddStep<T = Self>: StepWith<T> {
     /// computes the next value by adding a step to the current one, replacing and returning it
     fn add_step(&mut self) -> Self::Output;
 }
-//// [`CreateNext`] is a trait that defines a method to create the next value based on the
+/// [`CreateNext`] is a trait that defines a method to create the next value based on the
 /// current one. It is similar to a generator function that produces a new value given the
 /// current state.
 pub trait CreateNext<T = Self> {
