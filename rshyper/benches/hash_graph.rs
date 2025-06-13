@@ -60,14 +60,16 @@ fn hash_graph_bench_edge_add(c: &mut Criterion) {
                 // generate some set of three vertices
                 // Use the next value from the iterator as the weight
                 for w in 0..100 {
-                    let verts = (0..3)
-                        .map(|i| VertexId::from((i + i * 2) % 10))
+                    let verts = (0..(w % 10))
+                        .map(|i| {
+                            // create a vertex id from the current index
+                            VertexId::from((i + w) % 10)
+                        })
                         .collect::<Vec<_>>();
-                    black_box(
+
                         graph
-                            .add_surface(verts, Weight(w))
-                            .expect("failed to add edge"),
-                    );
+                            .add_surface(verts, black_box(Weight(w)))
+                            .expect("failed to add edge");
                 }
             },
             BatchSize::SmallInput,
@@ -82,7 +84,7 @@ fn hash_graph_bench_edge_remove(c: &mut Criterion) {
             |mut graph| {
                 // Use the next value from the iterator as the weight
                 for id in 0..5 {
-                    black_box(graph.remove_node(&id).expect("failed to remove node"));
+                    graph.remove_node(black_box(&id)).expect("failed to remove node");
                 }
             },
             BatchSize::SmallInput,
