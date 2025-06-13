@@ -53,4 +53,4 @@ jobs:
         name: Set output(s)
         id: results
         run:
-          echo "::set-output name=url::https://crates.io/crates/${{ matrix.package }}"
+          echo "url=https://crates.io/crates/${{ matrix.package }}" >> "$GITHUB_OUTPUT"

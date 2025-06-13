@@ -55,6 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       results: ${{ steps.artifacts.outputs.artifact-id }}
+      url: ${{ steps.artifacts.outputs.artifact-url }}
     permissions:
       contents: write
       checks: write
