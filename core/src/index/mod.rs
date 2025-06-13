@@ -95,6 +95,7 @@ pub trait NumIndex: HashIndex
 where
     Self: Copy
         + Ord
+        + crate::AddStep<Output = Self>
         + core::ops::Add<Output = Self>
         + core::ops::Div<Output = Self>
         + core::ops::Mul<Output = Self>
@@ -134,6 +135,7 @@ impl<T> NumIndex for T where
         + Copy
         + Default
         + Ord
+        + crate::AddStep<Output = Self>
         + core::ops::Add<Output = Self>
         + core::ops::Div<Output = Self>
         + core::ops::Mul<Output = Self>

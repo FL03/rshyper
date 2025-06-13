@@ -11,8 +11,8 @@ pub mod hyper_edge;
 pub mod hyper_facet;
 
 mod impls {
-    pub mod impl_hyper_edge;
-    pub mod impl_hyper_facet;
+    pub mod impl_edge;
+    pub mod impl_surface;
 }
 
 pub(crate) mod prelude {

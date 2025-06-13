@@ -15,13 +15,13 @@ pub use self::use_alloc::*;
 pub use self::use_std::*;
 
 /// a type alias for a [`Directed`] hyperedge
-pub type DirectedEdge<S, Idx = usize> = Edge<S, Directed, Idx>;
+pub type DiEdge<S, Idx = usize> = Edge<S, Directed, Idx>;
 /// a type alias for an [`Undirected`] hyperedge
-pub type UndirectedEdge<S, Idx = usize> = Edge<S, Undirected, Idx>;
+pub type UnEdge<S, Idx = usize> = Edge<S, Undirected, Idx>;
 /// a type alias for a [`Directed`] hypersurface
-pub type DirectedSurface<T, S, Idx = usize> = Surface<T, S, Directed, Idx>;
+pub type DiSurface<T, S, Idx = usize> = Surface<T, S, Directed, Idx>;
 /// a type alias for an [`Undirected`] hypersurface
-pub type UndirectedSurface<T, S, Idx = usize> = Surface<T, S, Undirected, Idx>;
+pub type UnSurface<T, S, Idx = usize> = Surface<T, S, Undirected, Idx>;
 
 /// a type alias for a [`Edge`] whose _vertices_ are stored in an array of fixed
 /// size with the size defined by the generic parameter `N`.

@@ -50,7 +50,7 @@ where
 {
     pub fn add_empty_node(&mut self) -> crate::Result<VertexId<Idx>>
     where
-        Idx: Copy + core::ops::Add<Output = A::Idx> + num_traits::One,
+        Idx: Copy + crate::AddStep<Output = Idx>,
     {
         let weight = Weight::new(());
         self.add_node(weight)
@@ -58,7 +58,7 @@ where
     #[deprecated(since = "0.9.0", note = "use `add_empty_node` instead")]
     pub fn insert_empty_node(&mut self) -> crate::Result<VertexId<Idx>>
     where
-        Idx: Copy + core::ops::Add<Output = A::Idx> + num_traits::One,
+        Idx: Copy + crate::AddStep<Output = Idx>,
     {
         self.add_empty_node()
     }
@@ -76,21 +76,21 @@ where
     /// insert [`Some`] vertex with weight `T` and return its ID
     pub fn add_some_node(&mut self, weight: N) -> crate::Result<VertexId<Idx>>
     where
-        A::Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
+        A::Idx: Copy + crate::AddStep<Output = Idx>,
     {
         self.add_node(Weight::some(weight))
     }
     /// insert [`None`] vertex with weight `T` and return its ID
     pub fn add_none_node(&mut self) -> crate::Result<VertexId<Idx>>
     where
-        A::Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
+        A::Idx: Copy + crate::AddStep<Output = Idx>,
     {
         self.add_node(Weight::none())
     }
     #[deprecated(since = "0.9.0", note = "use `add_some_node` instead")]
     pub fn insert_some_node(&mut self, weight: N) -> crate::Result<VertexId<Idx>>
     where
-        A::Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
+        A::Idx: Copy + crate::AddStep<Output = Idx>,
     {
         self.add_some_node(weight)
     }

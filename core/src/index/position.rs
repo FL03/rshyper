@@ -107,7 +107,7 @@ where
     /// [`step`](crate::index::IndexBase::step) for more details.
     pub fn next_edge(&mut self) -> IndexResult<EdgeId<T>>
     where
-        T: Copy + core::ops::Add<T, Output = T> + num_traits::One,
+        T: crate::AddStep<Output = T>,
     {
         self.edge_mut().step()
     }
@@ -115,7 +115,7 @@ where
     /// [`step`](crate::index::IndexBase::step) for more details.
     pub fn next_vertex(&mut self) -> IndexResult<VertexId<T>>
     where
-        T: Copy + core::ops::Add<T, Output = T> + num_traits::One,
+        T: crate::AddStep<Output = T>,
     {
         self.vertex_mut().step()
     }

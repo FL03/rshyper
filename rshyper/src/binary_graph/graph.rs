@@ -79,14 +79,14 @@ where
     /// get the next edge index and updates the current position
     pub fn next_edge_id(&mut self) -> EdgeId<Idx>
     where
-        Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
+        Idx: crate::AddStep<Output = Idx>,
     {
         self.position_mut().next_edge().unwrap()
     }
     /// returns the next vertex index and updates the current position
     pub fn next_vertex_id(&mut self) -> VertexId<Idx>
     where
-        Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
+        Idx: crate::AddStep<Output = Idx>,
     {
         self.position_mut().next_vertex().unwrap()
     }

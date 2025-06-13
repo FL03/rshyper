@@ -290,14 +290,14 @@ where
     /// computes the next edge index before replacing and returning the previous value
     pub fn next_edge_id(&mut self) -> EdgeId<Idx>
     where
-        Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
+        Idx: crate::AddStep<Output = Idx>,
     {
         self.position_mut().next_edge().unwrap()
     }
     /// computes the next node index before replacing and returning the previous value
     pub fn next_vertex_id(&mut self) -> VertexId<Idx>
     where
-        Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
+        Idx: crate::AddStep<Output = Idx>,
     {
         self.position_mut().next_vertex().unwrap()
     }

@@ -3,6 +3,8 @@
     Contrib: @FL03
 */
 use super::{GraphIndex, IndexError, RawIndex};
+use crate::{AddStep, StepWith};
+
 use num_traits::{One, Zero};
 
 /// A generic [`IndexBase`] implementation used to represent various [_kinds_](GraphIndex) of
@@ -160,9 +162,13 @@ where
     #[inline]
     pub fn step(&mut self) -> Result<Self, IndexError>
     where
-        T: Copy + core::ops::Add<T, Output = T> + One,
+        T: AddStep<Output = T>,
     {
-        self.step_with(|&prev| prev + T::one())
+        let prev = self.get_mut().add_step();
+        Ok(IndexBase {
+            value: prev,
+            _type: core::marker::PhantomData::<K>,
+        })
     }
     /// replaces the current value with the next one computed using the provided function and
     /// returns the previous instance of the index.
@@ -170,7 +176,10 @@ where
     where
         F: FnOnce(&T) -> T,
     {
-        crate::StepWith::step_with(self, f).ok_or(IndexError::IndexOutOfBounds)
+        // step the index with the provided function
+        let prev = StepWith::step_with(self, f);
+        // return the previous value
+        Ok(prev)
     }
     /// similar to [`step_with`](IndexBase::step_with), however, rather than replacing the
     /// current value with the computed value, it returns a new instance of the index
@@ -191,14 +200,14 @@ where
     }
 }
 
-impl<T, K> crate::StepWith<T> for IndexBase<T, K>
+impl<T, K> StepWith<T> for IndexBase<T, K>
 where
     K: GraphIndex,
     T: RawIndex,
 {
     type Output = IndexBase<T, K>;
 
-    fn step_with<F>(&mut self, f: F) -> Option<Self::Output>
+    fn step_with<F>(&mut self, f: F) -> Self::Output
     where
         F: FnOnce(&T) -> T,
     {
@@ -207,7 +216,7 @@ where
         // replace the current value with the next one
         let prev = self.replace(next);
         // return the previous instance
-        Some(Self::new(prev))
+        Self::new(prev)
     }
 }
 
@@ -276,7 +285,7 @@ where
 impl<T, K> Iterator for IndexBase<T, K>
 where
     K: GraphIndex,
-    T: RawIndex + Copy + core::ops::Add<T, Output = T> + One,
+    T: RawIndex + AddStep<Output = T>,
 {
     type Item = IndexBase<T, K>;
 

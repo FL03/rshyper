@@ -37,9 +37,9 @@ pub trait RawFacet<T>: RawEdge {
     }
 }
 
-/// [`Facet`] extends the behaviour of a [`RawFacet`] to include various constructors and
+/// [`HyperFacet`] extends the behaviour of a [`RawFacet`] to include various constructors and
 /// other utility methods.
-pub trait Facet<T>: RawFacet<T> {
+pub trait HyperFacet<T>: RawFacet<T> {
     /// creates a new facet with the given id and weight
     fn new(id: EdgeId<Self::Index>, store: Self::Store, weight: Weight<T>) -> Self;
 }
