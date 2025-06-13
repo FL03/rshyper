@@ -3,14 +3,14 @@
     authors: @FL03
 */
 use crate::binary_graph::BinaryGraph;
-use rshyper_core::index::RawIndex;
+use rshyper_core::idx::RawIndex;
 use rshyper_core::{Directed, GraphAttributes, Undirected};
 
 impl<N, E, A, Idx> BinaryGraph<N, E, A>
 where
     N: Ord,
     E: Ord,
-    A: GraphAttributes<Idx = Idx, Kind = Directed>,
+    A: GraphAttributes<Ix = Idx, Kind = Directed>,
     Idx: RawIndex + Ord,
 {
     /// initialize a new, empty directed binary graph
@@ -26,7 +26,7 @@ impl<N, E, A, Idx> BinaryGraph<N, E, A>
 where
     N: Ord,
     E: Ord,
-    A: GraphAttributes<Idx = Idx, Kind = Undirected>,
+    A: GraphAttributes<Ix = Idx, Kind = Undirected>,
     Idx: RawIndex + Ord,
 {
     /// initialize a new, empty undirected binary graph

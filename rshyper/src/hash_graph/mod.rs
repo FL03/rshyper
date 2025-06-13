@@ -11,6 +11,7 @@ pub mod graph;
 
 mod impls {
     pub mod impl_graph;
+    pub mod impl_iter;
     pub mod impl_ops;
     pub mod impl_repr;
     #[cfg(feature = "serde")]
@@ -39,7 +40,7 @@ pub(crate) mod prelude {
 }
 
 pub(crate) mod aliases {
-    use rshyper_core::index::{EdgeId, VertexId};
+    use rshyper_core::idx::{EdgeId, VertexId};
     use rshyper_core::{Edge, Node, Surface};
     use std::collections::{
         HashSet,

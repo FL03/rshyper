@@ -2,7 +2,7 @@
     appellation: cursor <module>
     authors: @FL03
 */
-use crate::index::{EdgeId, IndexResult, RawIndex, Udx, VertexId};
+use crate::idx::{EdgeId, IndexResult, RawIndex, Udx, VertexId};
 
 /// The [`IndexCursor`] stores the current edge and vertex indices in a hypergraph, allowing
 /// for efficient traversal and manipulation of the hypergraph structure. It is designed to

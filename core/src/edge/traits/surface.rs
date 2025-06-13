@@ -4,7 +4,7 @@
 */
 use super::RawEdge;
 use crate::Weight;
-use crate::index::EdgeId;
+use crate::idx::EdgeId;
 
 /// [`RawFacet`] extends the behaviour of a [`RawEdge`] to include a weight
 pub trait RawFacet<T>: RawEdge {

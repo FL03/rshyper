@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use crate::Weight;
-use crate::index::{RawIndex, VertexId};
+use crate::idx::{RawIndex, VertexId};
 use crate::node::Node;
 
 impl<T, Idx> AsRef<Weight<T>> for Node<T, Idx>

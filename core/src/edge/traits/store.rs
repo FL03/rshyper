@@ -2,7 +2,7 @@
     appellation: store <module>
     authors: @FL03
 */
-use crate::index::{RawIndex, VertexId};
+use crate::idx::{RawIndex, VertexId};
 
 /// [`RawStore`] is a trait that defines the behavior of a store that holds the vertices
 /// associated with a hyperedge or hyperfacet. It is used to abstract over different
@@ -107,7 +107,7 @@ where
 #[cfg(feature = "alloc")]
 mod impl_alloc {
     use super::RawStore;
-    use crate::index::{RawIndex, VertexId};
+    use crate::idx::{RawIndex, VertexId};
     use alloc::collections::{
         btree_set::{self, BTreeSet},
         vec_deque::{self, VecDeque},
@@ -184,7 +184,7 @@ mod impl_alloc {
 #[cfg(feature = "std")]
 mod impl_std {
     use super::RawStore;
-    use crate::index::{RawIndex, VertexId};
+    use crate::idx::{RawIndex, VertexId};
     use core::hash::BuildHasher;
     use std::collections::hash_set::{self, HashSet};
 

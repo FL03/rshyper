@@ -3,8 +3,8 @@
     authors: @FL03
 */
 use crate::edge::{Edge, RawStore};
-use crate::index::{EdgeId, RawIndex, VertexId};
-use crate::{Directed, GraphKind, Undirected};
+use crate::idx::{EdgeId, RawIndex, VertexId};
+use crate::{Directed, GraphType, Undirected};
 
 impl<S, Idx> Edge<S, Directed, Idx>
 where
@@ -31,7 +31,7 @@ where
 impl<S, K, Idx> Default for Edge<S, K, Idx>
 where
     Idx: RawIndex + Default,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx> + Default,
 {
     fn default() -> Self {
@@ -42,7 +42,7 @@ where
 impl<S, K, Idx> core::fmt::Display for Edge<S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx> + core::fmt::Debug,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
@@ -53,7 +53,7 @@ where
 impl<S, K, Idx> FromIterator<VertexId<Idx>> for Edge<S, K, Idx>
 where
     Idx: Default + RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx> + FromIterator<VertexId<Idx>>,
 {
     fn from_iter<I>(iter: I) -> Self
@@ -68,7 +68,7 @@ where
 impl<S, K, Idx> From<EdgeId<Idx>> for Edge<S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: Default + RawStore<Idx>,
 {
     fn from(from: EdgeId<Idx>) -> Self {
@@ -79,7 +79,7 @@ where
 impl<S, K, Idx> From<Edge<S, K, Idx>> for EdgeId<Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     fn from(from: Edge<S, K, Idx>) -> Self {
@@ -90,7 +90,7 @@ where
 impl<S, K, Idx> AsRef<S> for Edge<S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     fn as_ref(&self) -> &S {
@@ -101,7 +101,7 @@ where
 impl<S, K, Idx> AsMut<S> for Edge<S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     fn as_mut(&mut self) -> &mut S {
@@ -112,7 +112,7 @@ where
 impl<S, K, Idx> core::borrow::Borrow<EdgeId<Idx>> for Edge<S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     fn borrow(&self) -> &EdgeId<Idx> {
@@ -123,7 +123,7 @@ where
 impl<S, K, Idx> core::borrow::BorrowMut<EdgeId<Idx>> for Edge<S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     fn borrow_mut(&mut self) -> &mut EdgeId<Idx> {
@@ -134,7 +134,7 @@ where
 impl<S, K, Idx> core::ops::Deref for Edge<S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     type Target = EdgeId<Idx>;
@@ -147,7 +147,7 @@ where
 impl<S, K, Idx> core::ops::DerefMut for Edge<S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {

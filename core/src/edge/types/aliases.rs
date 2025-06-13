@@ -6,7 +6,7 @@
 //! [`Edge`] and [`Surface`] types
 //!
 use crate::edge::{Edge, Surface};
-use crate::index::VertexId;
+use crate::idx::VertexId;
 use crate::{Directed, Undirected};
 
 #[cfg(feature = "alloc")]
@@ -45,7 +45,7 @@ pub type SurfaceSliceMut<'a, T, K, Idx = usize> = Surface<T, &'a mut [VertexId<I
 #[cfg(feature = "alloc")]
 mod use_alloc {
     use crate::edge::{Edge, Surface};
-    use crate::index::VertexId;
+    use crate::idx::VertexId;
     use alloc::collections::{BTreeSet, VecDeque};
     use alloc::vec::Vec;
 
@@ -72,7 +72,7 @@ mod use_alloc {
 #[cfg(feature = "std")]
 mod use_std {
     use crate::edge::{Edge, Surface};
-    use crate::index::VertexId;
+    use crate::idx::VertexId;
 
     use std::collections::HashSet;
     use std::hash::RandomState;

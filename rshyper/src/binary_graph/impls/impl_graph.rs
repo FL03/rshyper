@@ -4,16 +4,16 @@
 */
 use crate::binary_graph::{BinaryGraph, aliases::*};
 use alloc::vec::Vec;
-use rshyper_core::index::{EdgeId, RawIndex, VertexId};
+use rshyper_core::idx::{EdgeId, RawIndex, VertexId};
 use rshyper_core::node::Node;
-use rshyper_core::{GraphAttributes, GraphKind, Weight};
+use rshyper_core::{GraphAttributes, GraphType, Weight};
 
 impl<N, E, A, K, Idx> BinaryGraph<N, E, A>
 where
     N: Ord,
     E: Ord,
-    A: GraphAttributes<Idx = Idx, Kind = K>,
-    K: GraphKind,
+    A: GraphAttributes<Ix = Idx, Kind = K>,
+    K: GraphType,
     Idx: RawIndex + Ord,
 {
     /// returns a reference to the node associated with the given key

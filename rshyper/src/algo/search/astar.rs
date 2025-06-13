@@ -12,38 +12,42 @@ pub(crate) mod priority_node;
 use super::{Search, Traversal};
 use crate::hash_graph::{HashGraph, VertexSet};
 use core::hash::Hash;
-use rshyper_core::index::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphAttributes, GraphKind};
+use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
+use rshyper_core::{GraphAttributes, GraphType, HyperGraph};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 
 /// An A* Search algorithm implementation for hypergraphs
-pub struct AStarSearch<'a, N, E, A, F>
+pub struct AStarSearch<'a, N, E, A, F, H = HashGraph<N, E, A>>
 where
-    F: Heuristic<A::Idx>,
     A: GraphAttributes,
-    A::Idx: Eq + Hash,
+    H: HyperGraph<N, E, A>,
+    F: Heuristic<A::Ix>,
+    N: Eq + Hash,
+    E: Eq + Hash,
+    A::Ix: RawIndex + Eq + Hash,
 {
-    pub(crate) graph: &'a HashGraph<N, E, A>,
-    pub(crate) open_set: VertexSet<A::Idx>,
-    pub(crate) closed_set: VertexSet<A::Idx>,
-    pub(crate) came_from: HashMap<VertexId<A::Idx>, VertexId<A::Idx>>,
-    pub(crate) g_score: HashMap<VertexId<A::Idx>, F::Output>,
-    pub(crate) f_score: HashMap<VertexId<A::Idx>, F::Output>,
+    pub(crate) graph: &'a H,
+    pub(crate) open_set: VertexSet<A::Ix>,
+    pub(crate) closed_set: VertexSet<A::Ix>,
+    pub(crate) came_from: HashMap<VertexId<A::Ix>, VertexId<A::Ix>>,
+    pub(crate) g_score: HashMap<VertexId<A::Ix>, F::Output>,
+    pub(crate) f_score: HashMap<VertexId<A::Ix>, F::Output>,
     pub(crate) heuristic: F,
     _marker: core::marker::PhantomData<(N, E)>,
 }
 
-impl<'a, N, E, A, F, K, Idx> AStarSearch<'a, N, E, A, F>
+impl<'a, N, E, A, F, H, K, Idx> AStarSearch<'a, N, E, A, F, H>
 where
     E: Eq + Hash,
     N: Eq + Hash,
-    A: GraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Ix = Idx, Kind = K>,
+    H: HyperGraph<N, E, A>,
     F: Heuristic<Idx>,
-    K: GraphKind,
+    K: GraphType,
     Idx: RawIndex + Eq + Hash,
 {
     /// Create a new A* search instance with the given heuristic function
-    pub fn new(graph: &'a HashGraph<N, E, A>, heuristic: F) -> Self {
+    pub fn new(graph: &'a H, heuristic: F) -> Self {
         Self {
             heuristic,
             graph,
@@ -57,7 +61,7 @@ where
     }
     /// consumes the current instance to create another from the given heuristic function;
     /// **note:** while the functions may be different, the output type of both must match.
-    pub fn with_heuristic<G>(self, heuristic: G) -> AStarSearch<'a, N, E, A, G>
+    pub fn with_heuristic<G>(self, heuristic: G) -> AStarSearch<'a, N, E, A, G, H>
     where
         G: Heuristic<Idx, Output = F::Output>,
     {
@@ -178,13 +182,14 @@ where
     }
 }
 
-impl<'a, N, E, F, A, K, Idx> AStarSearch<'a, N, E, A, F>
+impl<'a, N, E, F, A, S, K, Idx> AStarSearch<'a, N, E, A, F, HashGraph<N, E, A, S>>
 where
-    A: GraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Ix = Idx, Kind = K>,
+    S: core::hash::BuildHasher + Default,
     E: Eq + Hash,
     N: Eq + Hash,
     F: Heuristic<Idx, Output = f64>,
-    K: GraphKind,
+    K: GraphType,
     Idx: NumIndex,
 {
     /// Find the shortest path between start and goal vertices
@@ -311,37 +316,39 @@ where
     }
 }
 
-impl<'a, N, E, F, A> Traversal<VertexId<A::Idx>> for AStarSearch<'a, N, E, A, F>
+impl<'a, N, E, F, A, H> Traversal<VertexId<A::Ix>> for AStarSearch<'a, N, E, A, F, H>
 where
     A: GraphAttributes,
-    A::Idx: Eq + Hash,
+    H: HyperGraph<N, E, A>,
+    A::Ix: Eq + Hash,
     E: Eq + Hash,
     N: Eq + Hash,
-    F: Heuristic<A::Idx, Output = f64>,
+    F: Heuristic<A::Ix, Output = f64>,
 {
     type Store<U> = HashSet<U>;
 
-    fn has_visited(&self, vertex: &VertexId<A::Idx>) -> bool {
+    fn has_visited(&self, vertex: &VertexId<A::Ix>) -> bool {
         self.visited().contains(vertex)
     }
 
-    fn visited(&self) -> &Self::Store<VertexId<A::Idx>> {
+    fn visited(&self) -> &Self::Store<VertexId<A::Ix>> {
         self.closed_set()
     }
 }
 
-impl<'a, N, E, F, A, K, Idx> Search<VertexId<Idx>> for AStarSearch<'a, N, E, A, F>
+impl<'a, N, E, F, A, S> Search<VertexId<A::Ix>>
+    for AStarSearch<'a, N, E, A, F, HashGraph<N, E, A, S>>
 where
     E: Eq + Hash,
     N: Eq + Hash,
-    A: GraphAttributes<Idx = Idx, Kind = K>,
-    F: Heuristic<Idx, Output = f64>,
-    K: GraphKind,
-    Idx: NumIndex,
+    A: GraphAttributes,
+    F: Heuristic<A::Ix, Output = f64>,
+    S: core::hash::BuildHasher + Default,
+    A::Ix: NumIndex,
 {
-    type Output = Vec<VertexId<Idx>>;
+    type Output = Vec<VertexId<A::Ix>>;
 
-    fn search(&mut self, start: VertexId<Idx>) -> crate::Result<Self::Output> {
+    fn search(&mut self, start: VertexId<A::Ix>) -> crate::Result<Self::Output> {
         // For A*, we need a goal vertex to compute the heuristic
         // This implementation of search will explore the graph and return
         // all reachable vertices ordered by their distance from start

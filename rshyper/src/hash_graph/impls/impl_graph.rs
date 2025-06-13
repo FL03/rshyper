@@ -3,17 +3,17 @@
     authors: @FL03
 */
 use crate::hash_graph::{HashFacet, HashGraph, VertexSet};
-use crate::{GraphAttributes, GraphKind};
+use crate::{GraphAttributes, GraphType};
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::index::{EdgeId, RawIndex, VertexId};
+use rshyper_core::idx::{EdgeId, RawIndex, VertexId};
 use rshyper_core::{Node, Surface, Weight};
 
 impl<N, E, A, K, Idx, S> HashGraph<N, E, A, S>
 where
     E: Eq + Hash,
     N: Eq + Hash,
-    A: GraphAttributes<Idx = Idx, Kind = K>,
-    K: GraphKind,
+    A: GraphAttributes<Ix = Idx, Kind = K>,
+    K: GraphType,
     Idx: RawIndex + Eq + Hash,
     S: BuildHasher,
 {
@@ -348,10 +348,12 @@ where
     {
         #[cfg(feature = "tracing")]
         tracing::debug!("removing the vertex {index:?} from the hypergraph...");
+
         self.nodes_mut()
             .remove(index)
             .ok_or(crate::Error::NodeNotFound)
-            .inspect(|_node| {
+            .inspect(|node| {
+                self.history_mut().remove_vertex(node.index());
                 #[cfg(feature = "tracing")]
                 tracing::trace!(
                     "successfully removed the node; removing edges that contained the vertex..."
@@ -440,8 +442,8 @@ impl<N, E, A, K, Idx, S> HashGraph<N, E, A, S>
 where
     E: Eq + Hash,
     N: Eq + Hash,
-    A: GraphAttributes<Idx = Idx, Kind = K>,
-    K: GraphKind,
+    A: GraphAttributes<Ix = Idx, Kind = K>,
+    K: GraphType,
     Idx: Eq + RawIndex + Hash,
     S: BuildHasher,
 {

@@ -21,7 +21,7 @@ pub(crate) mod prelude {
 
 pub(crate) mod aliases {
     use alloc::collections::{BTreeMap, BTreeSet};
-    use rshyper_core::index::{EdgeId, VertexId};
+    use rshyper_core::idx::{EdgeId, VertexId};
     use rshyper_core::{Node, Surface};
 
     /// a type alias for a [`BTreeSet`] storing vertices in a hypergraph

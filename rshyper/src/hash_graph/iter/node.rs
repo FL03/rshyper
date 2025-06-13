@@ -4,8 +4,16 @@
 */
 use core::hash::Hash;
 use rshyper_core::Node;
-use rshyper_core::index::{RawIndex, VertexId};
+use rshyper_core::idx::{RawIndex, VertexId};
 use std::collections::hash_map;
+
+/// returns an interators over the vertices of a hypergraph, yielding the _keys_ of the nodes.
+pub struct Vertices<'a, N, Idx>
+where
+    Idx: RawIndex + Eq + Hash,
+{
+    pub(crate) iter: hash_map::Keys<'a, VertexId<Idx>, Node<N, Idx>>,
+}
 
 /// [`NodeIter`] is an iterator over the nodes of a hypergraph, yielding pairs of
 /// [`VertexId`] and the corresponding [`HyperNode`].
@@ -50,10 +58,17 @@ where
 /*
  ************* Implementations *************
 */
-#[cfg(feature = "rayon")]
-use rayon::iter::{
-    IntoParallelIterator, ParallelBridge, ParallelIterator, plumbing::UnindexedConsumer,
-};
+
+impl<'a, N, Idx> Iterator for Vertices<'a, N, Idx>
+where
+    Idx: RawIndex + Eq + Hash,
+{
+    type Item = &'a VertexId<Idx>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next()
+    }
+}
 
 impl<'a, N, Idx> Iterator for NodeIter<'a, N, Idx>
 where
@@ -78,39 +93,80 @@ where
 }
 
 #[cfg(feature = "rayon")]
-impl<'a, N, Idx> ParallelIterator for NodeParIter<'a, N, Idx>
-where
-    N: Send + Sync,
-    Idx: RawIndex + Eq + Hash,
-{
-    type Item = (&'a VertexId<Idx>, &'a Node<N, Idx>);
+mod impl_par {
+    use super::*;
+    use rayon::iter::plumbing::UnindexedConsumer;
+    use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
 
-    fn drive_unindexed<C>(self, consumer: C) -> C::Result
+    impl<'a, N, Idx> ParallelIterator for NodeIter<'a, N, Idx>
     where
-        C: UnindexedConsumer<Self::Item>,
+        N: Send + Sync,
+        Idx: RawIndex + Eq + Hash,
     {
-        self.iter
-            .par_bridge()
-            .into_par_iter()
-            .drive_unindexed(consumer)
+        type Item = (&'a VertexId<Idx>, &'a Node<N, Idx>);
+
+        fn drive_unindexed<C>(self, consumer: C) -> C::Result
+        where
+            C: UnindexedConsumer<Self::Item>,
+        {
+            self.iter
+                .par_bridge()
+                .into_par_iter()
+                .drive_unindexed(consumer)
+        }
     }
-}
 
-#[cfg(feature = "rayon")]
-impl<'a, N, Idx> ParallelIterator for NodeParIterMut<'a, N, Idx>
-where
-    N: Send + Sync,
-    Idx: RawIndex + Eq + Hash,
-{
-    type Item = (&'a VertexId<Idx>, &'a mut Node<N, Idx>);
-
-    fn drive_unindexed<C>(self, consumer: C) -> C::Result
+    impl<'a, N, Idx> ParallelIterator for NodeIterMut<'a, N, Idx>
     where
-        C: UnindexedConsumer<Self::Item>,
+        N: Send + Sync,
+        Idx: RawIndex + Eq + Hash,
     {
-        self.iter
-            .par_bridge()
-            .into_par_iter()
-            .drive_unindexed(consumer)
+        type Item = (&'a VertexId<Idx>, &'a mut Node<N, Idx>);
+
+        fn drive_unindexed<C>(self, consumer: C) -> C::Result
+        where
+            C: UnindexedConsumer<Self::Item>,
+        {
+            self.iter
+                .par_bridge()
+                .into_par_iter()
+                .drive_unindexed(consumer)
+        }
+    }
+
+    impl<'a, N, Idx> ParallelIterator for NodeParIter<'a, N, Idx>
+    where
+        N: Send + Sync,
+        Idx: RawIndex + Eq + Hash,
+    {
+        type Item = (&'a VertexId<Idx>, &'a Node<N, Idx>);
+
+        fn drive_unindexed<C>(self, consumer: C) -> C::Result
+        where
+            C: UnindexedConsumer<Self::Item>,
+        {
+            self.iter
+                .par_bridge()
+                .into_par_iter()
+                .drive_unindexed(consumer)
+        }
+    }
+
+    impl<'a, N, Idx> ParallelIterator for NodeParIterMut<'a, N, Idx>
+    where
+        N: Send + Sync,
+        Idx: RawIndex + Eq + Hash,
+    {
+        type Item = (&'a VertexId<Idx>, &'a mut Node<N, Idx>);
+
+        fn drive_unindexed<C>(self, consumer: C) -> C::Result
+        where
+            C: UnindexedConsumer<Self::Item>,
+        {
+            self.iter
+                .par_bridge()
+                .into_par_iter()
+                .drive_unindexed(consumer)
+        }
     }
 }

@@ -3,13 +3,13 @@
     authors: @FL03
 */
 use super::RawStore;
-use crate::GraphKind;
-use crate::index::{EdgeId, RawIndex};
+use crate::GraphType;
+use crate::idx::{EdgeId, RawIndex};
 
 /// [`RawEdge`] establishes a common interface for _hyperedge_ representations.
 pub trait RawEdge {
     type Index: RawIndex;
-    type Kind: GraphKind;
+    type Kind: GraphType;
     type Store: RawStore<Self::Index>;
 
     private!();

@@ -3,8 +3,8 @@
     Contrib: @FL03
 */
 use super::{Edge, RawEdge, RawFacet, RawStore};
-use crate::index::{EdgeId, RawIndex, VertexId};
-use crate::{GraphKind, Weight};
+use crate::idx::{EdgeId, RawIndex, VertexId};
+use crate::{GraphType, Weight};
 
 /// The [`Surface`] implementation associates some weight with a hyperedge.
 /// Typically, the term **facet** is used to denote the surface of a particular polytope,
@@ -19,7 +19,7 @@ use crate::{GraphKind, Weight};
 pub struct Surface<T, S, K, Idx = usize>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     pub(crate) edge: Edge<S, K, Idx>,
@@ -29,7 +29,7 @@ where
 impl<T, S, K, Idx> Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     /// create a new instance of the [`Surface`] from the given id, nodes, and weight
@@ -172,7 +172,7 @@ where
 impl<T, S, Idx, K> RawEdge for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     type Kind = K;
@@ -197,7 +197,7 @@ where
 impl<T, S, Idx, K> RawFacet<T> for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     seal!();

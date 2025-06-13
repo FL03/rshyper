@@ -23,7 +23,7 @@ pub(crate) mod prelude {
 }
 
 use crate::Weight;
-use crate::index::{RawIndex, VertexId};
+use crate::idx::{RawIndex, VertexId};
 
 /// [`RawNode`] is a trait that defines the behavior of a node in a hypergraph.
 pub trait RawNode<T> {
@@ -84,7 +84,7 @@ pub trait HyperPoint: RawPoint {
 /*
  ************* Implementations *************
 */
-use crate::index::IndexBase;
+use crate::idx::IndexBase;
 
 impl<T, Idx> RawNode<T> for Node<T, Idx>
 where

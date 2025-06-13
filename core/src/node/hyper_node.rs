@@ -3,7 +3,7 @@
     Contrib: @FL03
 */
 use crate::Weight;
-use crate::index::{RawIndex, VertexId};
+use crate::idx::{RawIndex, VertexId};
 
 /// The [`Node`] implementation generically associates a [`VertexId`] with a [`Weight`].
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]

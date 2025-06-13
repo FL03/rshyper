@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use crate::hash_graph::HashGraph;
-use crate::{GraphAttributes, GraphKind, RawIndex};
+use crate::{GraphAttributes, GraphType, RawIndex};
 use core::hash::{BuildHasher, Hash};
 use serde::de::{Deserialize, DeserializeOwned, MapAccess, Visitor};
 use serde::ser::Serialize;
@@ -12,11 +12,11 @@ const FIELDS: &[&str] = &["nodes", "surfaces", "position", "_attrs"];
 
 impl<'a, N, E, A, S, K, Idx> Deserialize<'a> for HashGraph<N, E, A, S>
 where
-    A: GraphAttributes<Kind = K, Idx = Idx> + DeserializeOwned,
+    A: GraphAttributes<Kind = K, Ix = Idx> + DeserializeOwned,
     N: DeserializeOwned + Eq + Hash,
     E: DeserializeOwned + Eq + Hash,
     Idx: Eq + Hash + RawIndex + DeserializeOwned,
-    K: GraphKind + DeserializeOwned,
+    K: GraphType + DeserializeOwned,
     S: BuildHasher + Default,
 {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -35,11 +35,11 @@ where
 
 impl<N, E, A, S, K, Idx> Serialize for HashGraph<N, E, A, S>
 where
-    A: GraphAttributes<Kind = K, Idx = Idx> + Serialize,
+    A: GraphAttributes<Kind = K, Ix = Idx> + Serialize,
     N: Serialize + Eq + Hash,
     E: Serialize + Eq + Hash,
     Idx: Eq + Hash + RawIndex + Serialize,
-    K: GraphKind + Serialize,
+    K: GraphType + Serialize,
     S: BuildHasher,
 {
     fn serialize<Ser>(&self, serializer: Ser) -> Result<Ser::Ok, Ser::Error>
@@ -51,7 +51,7 @@ where
         state.serialize_field("nodes", self.nodes())?;
         state.serialize_field("surfaces", self.surfaces())?;
         state.serialize_field("position", self.position())?;
-        state.serialize_field("_attrs", &self._attrs)?;
+        state.serialize_field("_attrs", &self.attrs)?;
         state.end()
     }
 }
@@ -62,11 +62,11 @@ struct HashGraphVisitor<N, E, A, S> {
 
 impl<'de, N, E, A, S, K, Idx> Visitor<'de> for HashGraphVisitor<N, E, A, S>
 where
-    A: GraphAttributes<Kind = K, Idx = Idx> + DeserializeOwned,
+    A: GraphAttributes<Kind = K, Ix = Idx> + DeserializeOwned,
     N: DeserializeOwned + Eq + Hash,
     E: DeserializeOwned + Eq + Hash,
     Idx: Eq + Hash + RawIndex + DeserializeOwned,
-    K: GraphKind + DeserializeOwned,
+    K: GraphType + DeserializeOwned,
     S: BuildHasher + Default,
 {
     type Value = HashGraph<N, E, A, S>;
@@ -121,8 +121,8 @@ where
         Ok(HashGraph {
             nodes,
             surfaces,
-            position,
-            _attrs: attrs,
+            history: position,
+            attrs,
         })
     }
 }

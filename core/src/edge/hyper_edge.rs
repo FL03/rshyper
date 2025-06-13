@@ -3,8 +3,8 @@
     authors: @FL03
 */
 use super::{RawEdge, RawStore};
-use crate::GraphKind;
-use crate::index::{EdgeId, RawIndex, VertexId};
+use crate::GraphType;
+use crate::idx::{EdgeId, RawIndex, VertexId};
 
 /// [`Edge`] is the base type for hyperedges in a graph. These edges are generic over the
 /// edge store type `S`, the graph kind `K`, and the index type `Idx`. This allows for
@@ -19,7 +19,7 @@ use crate::index::{EdgeId, RawIndex, VertexId};
 pub struct Edge<S, K, Idx = usize>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     pub(crate) id: EdgeId<Idx>,
@@ -30,7 +30,7 @@ where
 impl<S, K, Idx> Edge<S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     pub fn new(id: EdgeId<Idx>, points: S) -> Self {
@@ -133,7 +133,7 @@ where
 impl<S, Idx, K> RawEdge for Edge<S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     type Kind = K;
@@ -159,7 +159,7 @@ impl<S, I, K> super::HyperEdge for Edge<S, K, I>
 where
     S: RawStore<I>,
     I: RawIndex,
-    K: GraphKind,
+    K: GraphType,
 {
     fn new(id: EdgeId<I>, vertices: S) -> Self {
         Self::new(id, vertices)

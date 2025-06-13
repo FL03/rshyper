@@ -33,7 +33,7 @@ pub(crate) mod prelude {
     pub use super::{GraphSearch, Heuristic, Search, Traversal};
 }
 
-use crate::index::{RawIndex, VertexId};
+use crate::idx::{RawIndex, VertexId};
 /// [`Heuristic`] defines a common interface for heuristic functions compatible with the [`A*`](AStarSearch)
 /// search implementation
 pub trait Heuristic<T = crate::Udx> {

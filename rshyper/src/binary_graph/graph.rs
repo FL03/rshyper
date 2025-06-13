@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use super::aliases::*;
-use crate::{GraphAttributes, GraphKind};
+use crate::{GraphAttributes, GraphType};
 use rshyper_core::attrs::UnAttributes;
 use rshyper_core::{EdgeId, IndexCursor, RawIndex, VertexId};
 
@@ -12,24 +12,24 @@ use rshyper_core::{EdgeId, IndexCursor, RawIndex, VertexId};
 pub struct BinaryGraph<N, E, A = UnAttributes<usize>>
 where
     A: GraphAttributes,
-    A::Idx: Ord,
+    A::Ix: Ord,
 {
     /// the `nodes` of a hypergraph are the vertices, each identified by a `VertexId` and
     /// associated with a weight of type `N`.
-    pub(crate) nodes: NodeBMap<N, A::Idx>,
+    pub(crate) nodes: NodeBMap<N, A::Ix>,
     /// `surfaces` represent the hyperedges of the hypergraph, each identified by an `EdgeId`
-    pub(crate) surfaces: SurfaceBMap<E, A::Kind, A::Idx>,
+    pub(crate) surfaces: SurfaceBMap<E, A::Kind, A::Ix>,
     /// tracks the current position of the hypergraph, which is used to determine the next
     /// available indices for edges and vertices.
-    pub(crate) position: IndexCursor<A::Idx>,
+    pub(crate) position: IndexCursor<A::Ix>,
     /// the attributes of a graph define its _kind_ and the type of index used
     pub(crate) _attrs: A,
 }
 
 impl<N, E, A, K, Idx> BinaryGraph<N, E, A>
 where
-    A: GraphAttributes<Idx = Idx, Kind = K>,
-    K: GraphKind,
+    A: GraphAttributes<Ix = Idx, Kind = K>,
+    K: GraphType,
     Idx: Ord + RawIndex,
 {
     /// Creates a new empty [`BinaryGraph`] instance
@@ -95,7 +95,7 @@ where
 impl<N, E, A> Default for BinaryGraph<N, E, A>
 where
     A: GraphAttributes,
-    A::Idx: Default + Ord,
+    A::Ix: Default + Ord,
 {
     fn default() -> Self {
         Self::new()

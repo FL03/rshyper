@@ -3,8 +3,8 @@
     authors: @FL03
 */
 use crate::edge::{Edge, RawStore, Surface};
-use crate::index::{EdgeId, RawIndex};
-use crate::{Directed, GraphKind, Undirected, Weight};
+use crate::idx::{EdgeId, RawIndex};
+use crate::{Directed, GraphType, Undirected, Weight};
 
 impl<T, S, I> Surface<T, S, Directed, I>
 where
@@ -31,7 +31,7 @@ where
 impl<T, S, K, Idx> Default for Surface<T, S, K, Idx>
 where
     Idx: Default + RawIndex,
-    K: GraphKind,
+    K: GraphType,
     T: Default,
     S: RawStore<Idx> + Default,
 {
@@ -46,7 +46,7 @@ where
 impl<T, S, K, Idx> core::fmt::Display for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     T: core::fmt::Display,
     S: RawStore<Idx> + core::fmt::Debug,
 {
@@ -64,7 +64,7 @@ where
 impl<T, S, K, Idx> From<Edge<S, K, Idx>> for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
     T: Default,
 {
@@ -76,7 +76,7 @@ where
 impl<T, S, K, Idx> From<Surface<T, S, K, Idx>> for Edge<S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     fn from(facet: Surface<T, S, K, Idx>) -> Self {
@@ -87,7 +87,7 @@ where
 impl<T, S, K, Idx> From<EdgeId<Idx>> for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: Default + RawStore<Idx>,
     T: Default,
 {
@@ -99,7 +99,7 @@ where
 impl<T, S, K, Idx> AsRef<Weight<T>> for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     fn as_ref(&self) -> &Weight<T> {
@@ -110,7 +110,7 @@ where
 impl<T, S, K, Idx> AsMut<Weight<T>> for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     fn as_mut(&mut self) -> &mut Weight<T> {
@@ -121,7 +121,7 @@ where
 impl<T, S, K, Idx> core::borrow::Borrow<EdgeId<Idx>> for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     fn borrow(&self) -> &EdgeId<Idx> {
@@ -132,7 +132,7 @@ where
 impl<T, S, K, Idx> core::borrow::BorrowMut<EdgeId<Idx>> for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     fn borrow_mut(&mut self) -> &mut EdgeId<Idx> {
@@ -143,7 +143,7 @@ where
 impl<T, S, K, Idx> core::ops::Deref for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     type Target = Edge<S, K, Idx>;
@@ -156,7 +156,7 @@ where
 impl<T, S, K, Idx> core::ops::DerefMut for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
+    K: GraphType,
     S: RawStore<Idx>,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {

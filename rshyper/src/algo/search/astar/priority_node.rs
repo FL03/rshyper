@@ -2,7 +2,7 @@
     appellation: priority_node <module>
     authors: @FL03
 */
-use crate::index::{RawIndex, VertexId};
+use crate::idx::{RawIndex, VertexId};
 use core::cmp::Ordering;
 
 /// Priority queue node for A* algorithm
