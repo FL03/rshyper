@@ -85,7 +85,8 @@ fn bench_hash_graph_node(c: &mut Criterion) {
                     let i = rand::random_range(0..(N as u128)) % 100;
                     let idx = VertexId::from(i as usize);
                     // get the degree of each node
-                    graph.find_node_neighbors(black_box(&idx));
+                    graph.find_node_neighbors(black_box(&idx))
+                        .expect("failed to find node neighbors");
                 },
 
             BatchSize::SmallInput,
@@ -125,7 +126,7 @@ criterion::criterion_main! {
 #[cfg(feature = "rand")]
 mod ext {
     use rshyper::HashGraph;
-    use rshyper::edge::generate_random_edge;
+    pub(crate) use rshyper::edge::generate_random_edge;
 
     /// a constant for the sample size of a benchmark group
     #[allow(dead_code)]
@@ -140,7 +141,7 @@ mod ext {
         // initialize a new undirected hash graph
         let mut graph = HashGraph::undirected();
         // add 100 nodes to the graph
-        let _verts = graph.add_nodes(0..N).expect("failed to add nodes");
+        let _verts = graph.add_nodes(0..(N as Wt)).expect("failed to add nodes");
         // add 100 edges to the graph
         for _ in 0..N {
             // each edge contains between 2 and 100 vertices & a random weight
