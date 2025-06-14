@@ -2,15 +2,10 @@
     Appellation: hgraph <module>
     Contrib: @FL03
 */
-use crate::edge::{RawEdge, RawFacet};
+use crate::edge::{BinaryEdge, RawEdge, RawFacet};
 use crate::idx::{EdgeId, VertexId};
 use crate::node::RawNode;
 use crate::{GraphAttributes, Weight};
-
-pub trait BinaryEdge: RawEdge {
-    fn lhs(&self) -> &VertexId<Self::Index>;
-    fn rhs(&self) -> &VertexId<Self::Index>;
-}
 
 /// [`RawHyperGraph`] is a trait that defines the basic operations for a hypergraph data
 /// structure.
@@ -21,7 +16,10 @@ where
     type Edge<E>: RawFacet<E, Index = A::Ix, Kind = A::Kind>;
     type Node<N>: RawNode<N, Key = A::Ix>;
 }
-
+/// The [`HyperGraph`] trait directly extends the [`RawHyperGraph`] trait to provide additional
+/// utilities and constructors for implementors while establishing a more robust interface for
+/// hypergraphs. This trait is designed to abstract the basic behaviour of hypergraphs,
+/// enabling the generalization of implements algorithms and operators.
 pub trait HyperGraph<N, E, A>: RawHyperGraph<A>
 where
     A: GraphAttributes,
@@ -84,37 +82,25 @@ where
     ) -> crate::Result<impl Iterator<Item = EdgeId<A::Ix>>>;
 }
 
+/// The [`StdGraph`] is used to denotes instances in-which the hypergraph contains binary edges
+/// meaning that each edge is composed of exactly two vertices.
+pub trait StdGraph<N, E, A>: RawHyperGraph<A>
+where
+    A: GraphAttributes,
+    Self::Edge<E>: BinaryEdge,
+{
+}
+
 /*
  ************* Implementations *************
 */
-use crate::GraphType;
-use crate::edge::{Edge, Surface};
-use crate::idx::RawIndex;
 
-impl<I, K> BinaryEdge for Edge<[VertexId<I>; 2], K, I>
+impl<N, E, A, H> StdGraph<N, E, A> for H
 where
-    I: RawIndex,
-    K: GraphType,
+    A: GraphAttributes,
+    N: Default,
+    E: Default,
+    H: HyperGraph<N, E, A>,
+    H::Edge<E>: BinaryEdge,
 {
-    fn lhs(&self) -> &VertexId<I> {
-        &self.points()[0]
-    }
-
-    fn rhs(&self) -> &VertexId<I> {
-        &self.points()[1]
-    }
-}
-
-impl<E, I, K> BinaryEdge for Surface<E, [VertexId<I>; 2], K, I>
-where
-    I: RawIndex,
-    K: GraphType,
-{
-    fn lhs(&self) -> &VertexId<I> {
-        &self.points()[0]
-    }
-
-    fn rhs(&self) -> &VertexId<I> {
-        &self.points()[1]
-    }
 }
