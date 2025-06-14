@@ -266,12 +266,15 @@ where
     {
         self.position_mut().next_point().unwrap()
     }
+    /// returns the size of the hypergraph, which is defined to be the number of edges in `E`
+    /// where `H=(X,E)`.
     /// returns the total number of edges within the hypergraph
-    pub fn total_edges(&self) -> usize {
+    pub fn size(&self) -> usize {
         self.surfaces().len()
     }
-    /// returns the total number of nodes within the hypergraph
-    pub fn total_nodes(&self) -> usize {
+    /// returns the order of the hypergraph, which is defined to be the number of nodes in `X`
+    /// where `H=(X,E)`.
+    pub fn order(&self) -> usize {
         self.nodes().len()
     }
 }

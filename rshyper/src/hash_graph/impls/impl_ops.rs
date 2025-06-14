@@ -2,7 +2,8 @@
     appellation: impl_ops <module>
     authors: @FL03
 */
-use crate::algo::search;
+use crate::algo::path::Dijkstra;
+use crate::algo::search::{AStarSearch, BreadthFirstTraversal, DepthFirstTraversal, Heuristic};
 use crate::hash_graph::{HashFacet, HashGraph};
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::idx::{EdgeId, NumIndex, RawIndex, VertexId};
@@ -19,27 +20,35 @@ where
     A::Ix: NumIndex,
 {
     /// search the hypergraph using the A* algorithm with the given heuristic function
-    pub fn astar<F>(&self, heuristic: F) -> search::AStarSearch<'_, N, E, A, F, Self>
+    pub fn astar<F>(&self, heuristic: F) -> AStarSearch<'_, N, E, A, F, Self>
     where
-        F: search::Heuristic<A::Ix, Output = f64>,
+        F: Heuristic<A::Ix, Output = f64>,
     {
-        search::AStarSearch::new(self, heuristic)
+        AStarSearch::new(self, heuristic)
+    }
+    /// returns a new instance of the Dijkstra's algorithm for the hypergraph
+    pub fn dijkstra(&self) -> Dijkstra<'_, N, E, A, Self>
+    where
+        N: Default,
+        E: Default,
+    {
+        Dijkstra::new(self)
     }
     /// search the hypergraph using the depth-first traversal algorithm
-    pub fn dft(&self) -> search::DepthFirstTraversal<'_, N, E, A, Self>
+    pub fn dft(&self) -> DepthFirstTraversal<'_, N, E, A, Self>
     where
         N: Default,
         E: Default,
     {
-        search::DepthFirstTraversal::new(self)
+        DepthFirstTraversal::new(self)
     }
     /// search the hypergraph using the breadth-first traversal algorithm
-    pub fn bft(&self) -> search::BreadthFirstTraversal<'_, N, E, A, Self>
+    pub fn bft(&self) -> BreadthFirstTraversal<'_, N, E, A, Self>
     where
         N: Default,
         E: Default,
     {
-        search::BreadthFirstTraversal::new(self)
+        BreadthFirstTraversal::new(self)
     }
 }
 

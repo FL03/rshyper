@@ -7,6 +7,9 @@
 #[doc(inline)]
 pub use self::prelude::*;
 
+#[cfg(feature = "std")]
+/// path-finding algorithms for hypergraphs
+pub mod path;
 /// search algorithms for hypergraphs
 #[cfg(feature = "std")]
 pub mod search;
@@ -17,16 +20,37 @@ pub mod traits {
     #[doc(inline)]
     pub use self::prelude::*;
 
+    /// this module defines the [`Operator`] trait for establishing a common interface for all
+    /// algorithmic operators on a hypergraph.
     pub mod operators;
+    /// this module defines the interface for path-finding algorithms on hypergraphs, [`PathFinder`].
+    pub mod path;
+    /// this module defines the [`Search`] trait for all implemented search algorithms on a
+    /// hypergraph.
+    pub mod search;
+    /// this module defines the [`Traversal`] trait for traversing hypergraphs.
+    pub mod traverse;
 
     pub(crate) mod prelude {
         #[doc(inline)]
         pub use super::operators::*;
+        #[doc(inline)]
+        pub use super::path::*;
+        #[doc(inline)]
+        pub use super::search::*;
+        #[doc(inline)]
+        pub use super::traverse::*;
     }
 }
 
 pub(crate) mod prelude {
-    #[cfg(feature = "std")]
     #[doc(inline)]
+    pub use super::traits::prelude::*;
+
+    #[doc(inline)]
+    #[cfg(feature = "std")]
+    pub use super::path::prelude::*;
+    #[doc(inline)]
+    #[cfg(feature = "std")]
     pub use super::search::prelude::*;
 }

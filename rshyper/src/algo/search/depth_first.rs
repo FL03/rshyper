@@ -2,7 +2,7 @@
     Appellation: dft <module>
     Contrib: @FL03
 */
-use super::{Search, Traversal};
+use crate::algo::{Search, Traversal};
 use crate::hash_graph::HashGraph;
 use core::hash::Hash;
 use rshyper_core::idx::{HashIndex, NumIndex, VertexId};

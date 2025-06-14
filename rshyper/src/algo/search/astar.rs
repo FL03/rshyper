@@ -9,7 +9,7 @@ pub use self::priority_node::PriorityNode;
 
 pub(crate) mod priority_node;
 
-use super::{Search, Traversal};
+use crate::algo::{Search, Traversal};
 use crate::hash_graph::{HashGraph, VertexSet};
 use core::hash::Hash;
 use rshyper_core::idx::{NumIndex, RawIndex, VertexId};

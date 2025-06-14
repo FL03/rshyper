@@ -177,7 +177,8 @@ where
             .collect::<Vec<_>>();
         Ok(nodes)
     }
-    /// returns the number of vertices, or order, composing the hyperedge with the given id
+    /// returns the number of vertices within the given edge; more formally, the order of a
+    /// hypergraph `(X,E)` where the order is the number of vertices in `X`
     pub fn get_edge_order(&self, index: &EdgeId<Idx>) -> crate::Result<usize> {
         self.get_surface(index).map(|edge| edge.len())
     }
@@ -448,68 +449,24 @@ where
     S: BuildHasher,
 {
     #[deprecated(
-        note = "use `total_nodes` instead; this method will be removed in a future release",
+        note = "use `size` instead; this method will be removed in a future release",
+        since = "0.1.2"
+    )]
+    pub fn total_edges(&self) -> usize {
+        self.surfaces().len()
+    }
+    #[deprecated(
+        note = "use `order` instead; this method will be removed in a future release",
+        since = "0.1.2"
+    )]
+    pub fn total_nodes(&self) -> usize {
+        self.nodes().len()
+    }
+    #[deprecated(
+        note = "use `order` instead; this method will be removed in a future release",
         since = "0.1.0"
     )]
     pub fn total_vertices(&self) -> usize {
-        self.total_nodes()
-    }
-    #[deprecated(
-        note = "use `contains_node_in_edge` instead; this method will be removed in a future release",
-        since = "0.0.10"
-    )]
-    pub fn is_vertex_in_edge<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
-    where
-        Q: Eq + Hash + ?Sized,
-        Q2: Eq + Hash,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-        VertexId<Idx>: core::borrow::Borrow<Q2>,
-    {
-        if let Some(surface) = self.surfaces().get(index) {
-            return surface.contains(vertex);
-        }
-        false
-    }
-    #[deprecated(
-        note = "use `find_edges_with_node` instead; this method will be removed in a future release",
-        since = "0.0.10"
-    )]
-    pub fn get_edges_with_vertex(&self, index: &VertexId<Idx>) -> crate::Result<Vec<EdgeId<Idx>>>
-    where
-        Idx: Copy,
-    {
-        self.find_edges_with_node(index)
-    }
-    #[deprecated(
-        note = "use `find_node_neighbors` instead; this method will be removed the next major release",
-        since = "0.0.10"
-    )]
-    pub fn neighbors(&self, index: &VertexId<Idx>) -> crate::Result<VertexSet<Idx>>
-    where
-        Idx: Copy,
-    {
-        self.find_node_neighbors(index)
-    }
-    #[deprecated(
-        note = "use `remove_node` instead; this method will be removed the next major release",
-        since = "0.0.10"
-    )]
-    pub fn remove_vertex<Q>(&mut self, index: &Q) -> crate::Result<Node<N, Idx>>
-    where
-        Q: Eq + core::fmt::Debug + Hash,
-        VertexId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.remove_node(index)
-    }
-    #[deprecated(
-        note = "use `set_node_weight` instead; this method will be removed in a future release",
-        since = "0.0.10"
-    )]
-    pub fn update_vertex_weight<Q>(&mut self, index: &Q, weight: N) -> crate::Result<&mut Self>
-    where
-        Q: Eq + Hash + ?Sized,
-        VertexId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.set_node_weight(index, Weight(weight))
+        self.order()
     }
 }
