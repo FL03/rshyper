@@ -104,6 +104,22 @@ where
     {
         self.history_mut().get_mut(kind)
     }
+    /// returns a reference to the set of edge indices.
+    pub fn edge_history(&self) -> Option<&Vec<Ix>> {
+        self.get_history(&IndexKind::Edge)
+    }
+    /// returns a mutable reference to the set of edge indices.
+    pub fn edge_history_mut(&mut self) -> Option<&mut Vec<Ix>> {
+        self.get_history_mut(&IndexKind::Edge)
+    }
+    /// returns a reference to the set of vertex indices.
+    pub fn vertex_history(&self) -> Option<&Vec<Ix>> {
+        self.get_history(&IndexKind::Vertex)
+    }
+    /// returns a mutable reference to the set of vertex indices.
+    pub fn vertex_history_mut(&mut self) -> Option<&mut Vec<Ix>> {
+        self.get_history_mut(&IndexKind::Vertex)
+    }
     /// removes an edge index from the history for the specified kind.
     pub fn remove_edge(&mut self, index: &Ix) -> &mut Self {
         if let Some(indices) = self.get_history_mut(&IndexKind::Edge) {

@@ -187,7 +187,7 @@ wasm-bindgen = [
 # ************* [Benchmarks] *************
 [[bench]]
 harness = false
-name = "hg_edge"
+name = "hash_graph"
 required-features = [
     "hash_graph",
     "rand",
@@ -195,7 +195,7 @@ required-features = [
 
 [[bench]]
 harness = false
-name = "hg_node"
+name = "hg_edge"
 required-features = [
     "hash_graph",
     "rand",
