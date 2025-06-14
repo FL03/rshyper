@@ -166,7 +166,7 @@ where
     )]
     pub fn get_edge_nodes<Q>(&self, index: &Q) -> crate::Result<Vec<&Node<N, Idx>>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         let surface = self.get_surface(index)?;
@@ -184,7 +184,7 @@ where
     /// returns the set of vertices composing the given edge
     pub fn get_edge_vertices<Q>(&self, index: &Q) -> crate::Result<&VertexSet<Idx, S>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_surface(index).map(|edge| edge.points())
@@ -192,7 +192,7 @@ where
     /// returns a mutable reference to the set of vertices composing the given edge
     pub fn get_edge_vertices_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut VertexSet<Idx, S>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_surface_mut(index).map(|edge| edge.points_mut())
@@ -200,7 +200,7 @@ where
     /// returns an immutable reference to the weight of a hyperedge
     pub fn get_edge_weight<Q>(&self, index: &Q) -> crate::Result<&Weight<E>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_surface(index).map(|edge| edge.weight())
@@ -208,7 +208,7 @@ where
     /// returns a mutable reference to the weight of a hyperedge
     pub fn get_edge_weight_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut Weight<E>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_surface_mut(index).map(|edge| edge.weight_mut())
@@ -217,7 +217,7 @@ where
     /// contain the vertex
     pub fn get_node_degree<Q>(&self, index: &Q) -> usize
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces()
@@ -229,7 +229,7 @@ where
     #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
     pub fn get_node<Q>(&self, index: &Q) -> crate::Result<&Node<N, Idx>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.nodes().get(index).ok_or(crate::Error::NodeNotFound)
@@ -237,7 +237,7 @@ where
     /// returns a mutable reference to the weight of a vertex
     pub fn get_node_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut Node<N, Idx>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.nodes_mut()
@@ -247,7 +247,7 @@ where
     /// returns an immutable reference to the weight of a vertex
     pub fn get_node_weight<Q>(&self, index: &Q) -> crate::Result<&Weight<N>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_node(index).map(|node| node.weight())
@@ -255,7 +255,7 @@ where
     /// returns a mutable reference to the weight of a vertex
     pub fn get_node_weight_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut Weight<N>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_node_mut(index).map(|node| node.weight_mut())
@@ -263,7 +263,7 @@ where
     /// returns an immutable reference to the [`HashFacet`] associated with the given index
     pub fn get_surface<Q>(&self, index: &Q) -> crate::Result<&HashFacet<E, K, Idx, S>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces()
@@ -273,7 +273,7 @@ where
     /// returns a mutable reference to the [`HashFacet`] associated with the given index
     pub fn get_surface_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut HashFacet<E, K, Idx, S>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces_mut()
@@ -353,7 +353,7 @@ where
             .remove(index)
             .ok_or(crate::Error::NodeNotFound)
             .inspect(|node| {
-                self.history_mut().remove_vertex(node.index());
+                self.history_mut().remove_node(node.index());
                 #[cfg(feature = "tracing")]
                 tracing::trace!(
                     "successfully removed the node; removing edges that contained the vertex..."
@@ -374,7 +374,7 @@ where
     )]
     pub fn remove_surface<Q>(&mut self, index: &Q) -> crate::Result<HashFacet<E, K, Idx, S>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces_mut()
@@ -409,7 +409,7 @@ where
     #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
     pub fn set_edge_weight<Q>(&mut self, index: &Q, weight: Weight<E>) -> crate::Result<&mut Self>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_edge_weight_mut(index)
@@ -424,7 +424,7 @@ where
     #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
     pub fn set_node_weight<Q>(&mut self, index: &Q, weight: Weight<N>) -> crate::Result<&mut Self>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_node_weight_mut(index)
@@ -460,7 +460,7 @@ where
     )]
     pub fn is_vertex_in_edge<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         Q2: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
         VertexId<Idx>: core::borrow::Borrow<Q2>,
@@ -507,7 +507,7 @@ where
     )]
     pub fn update_vertex_weight<Q>(&mut self, index: &Q, weight: N) -> crate::Result<&mut Self>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.set_node_weight(index, Weight(weight))

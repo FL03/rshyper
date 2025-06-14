@@ -74,16 +74,12 @@ pub use self::algo::prelude::*;
 #[doc(inline)]
 pub use rshyper_core::*;
 
-#[cfg(feature = "binary_graph")]
-pub use self::binary_graph::BinaryGraph;
 #[doc(inline)]
 #[cfg(feature = "hash_graph")]
 pub use self::hash_graph::{DiHashGraph, HashGraph, UnHashGraph};
 
 /// the `algo` module focuses on implementing algorithms and operators for hypergraphs
 pub mod algo;
-#[cfg(feature = "binary_graph")]
-pub mod binary_graph;
 /// this module contains the [`HashGraph`], a hash-based hypergraph implementation
 #[cfg(feature = "hash_graph")]
 pub mod hash_graph;
@@ -96,8 +92,6 @@ pub mod prelude {
 
     #[doc(no_inline)]
     pub use crate::algo::prelude::*;
-    #[cfg(feature = "binary_graph")]
-    pub use crate::binary_graph::prelude::*;
     #[cfg(feature = "hash_graph")]
     pub use crate::hash_graph::prelude::*;
 }

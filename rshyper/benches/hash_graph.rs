@@ -62,12 +62,11 @@ fn bench_hash_graph(c: &mut Criterion) {
         b.iter_batched(
             setup,
             |graph| {
-                    let i = rand::random_range(0..(N as u128)) % 100;
-                    let idx = VertexId::from(i as usize);
-                    // get the degree of each node
-                    graph.get_node_degree(black_box(&idx));
-                },
-
+                let i = rand::random_range(0..(N as u128)) % 100;
+                let idx = VertexId::from(i as usize);
+                // get the degree of each node
+                graph.get_node_degree(black_box(&idx));
+            },
             BatchSize::SmallInput,
         )
     });
@@ -76,13 +75,13 @@ fn bench_hash_graph(c: &mut Criterion) {
         b.iter_batched(
             setup,
             |graph| {
-                    let i = rand::random_range(0..(N as u128)) % 100;
-                    let idx = VertexId::from(i as usize);
-                    // get the degree of each node
-                    graph.find_node_neighbors(black_box(&idx))
-                        .expect("failed to find node neighbors");
-                },
-
+                let i = rand::random_range(0..(N as u128)) % 100;
+                let idx = VertexId::from(i as usize);
+                // get the degree of each node
+                graph
+                    .find_node_neighbors(black_box(&idx))
+                    .expect("failed to find node neighbors");
+            },
             BatchSize::SmallInput,
         )
     });
@@ -91,15 +90,11 @@ fn bench_hash_graph(c: &mut Criterion) {
         b.iter_batched(
             setup,
             |mut graph| {
-                if let Some(verts) = graph.history().vertex_history().cloned()  {
-                    verts.iter().for_each(|id| {
-                        graph
-                            .remove_node(black_box(id))
-                            .expect("failed to remove node");
-                    })
-                }
-
-
+                graph.history().nodes().clone().iter().for_each(|id| {
+                    graph
+                        .remove_node(black_box(id))
+                        .expect("failed to remove node");
+                })
             },
             BatchSize::SmallInput,
         )
@@ -109,13 +104,12 @@ fn bench_hash_graph(c: &mut Criterion) {
         b.iter_batched(
             setup,
             |graph| {
-                    let i = rand::random_range(0..(N as u128)) % 100;
-                    let idx = VertexId::from(i as usize);
-                    // get the degree of each nodelet id = n.into();
-                    // search the graph for some target vertex
-                    graph.bft().search(black_box(idx)).unwrap();
-                },
-
+                let i = rand::random_range(0..(N as u128)) % 100;
+                let idx = VertexId::from(i as usize);
+                // get the degree of each nodelet id = n.into();
+                // search the graph for some target vertex
+                graph.bft().search(black_box(idx)).unwrap();
+            },
             BatchSize::SmallInput,
         )
     });
@@ -124,13 +118,12 @@ fn bench_hash_graph(c: &mut Criterion) {
         b.iter_batched(
             setup,
             |graph| {
-                    let i = rand::random_range(0..(N as u128)) % 100;
-                    let idx = VertexId::from(i as usize);
-                    // get the degree of each nodelet id = n.into();
-                    // search the graph for some target vertex
-                    graph.dft().search(black_box(idx)).unwrap();
-                },
-
+                let i = rand::random_range(0..(N as u128)) % 100;
+                let idx = VertexId::from(i as usize);
+                // get the degree of each nodelet id = n.into();
+                // search the graph for some target vertex
+                graph.dft().search(black_box(idx)).unwrap();
+            },
             BatchSize::SmallInput,
         )
     });

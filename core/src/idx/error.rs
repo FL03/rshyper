@@ -12,6 +12,8 @@ pub type IndexResult<T = ()> = core::result::Result<T, IndexError>;
 /// The error type for index-related operations
 #[derive(Debug, thiserror::Error)]
 pub enum IndexError {
+    #[error("Duplicate index")]
+    DuplicateIndex,
     #[error("Index is out of bounds")]
     IndexOutOfBounds,
     #[error("Invalid index")]
