@@ -19,7 +19,8 @@ pub mod traits {
     //! hypergraphs.
     #[doc(inline)]
     pub use self::prelude::*;
-
+    /// this module defines the [`Heuristic`] trait for heuristic functions
+    pub mod heuristic;
     /// this module defines the [`Operator`] trait for establishing a common interface for all
     /// algorithmic operators on a hypergraph.
     pub mod operators;
@@ -32,6 +33,8 @@ pub mod traits {
     pub mod traverse;
 
     pub(crate) mod prelude {
+        #[doc(inline)]
+        pub use super::heuristic::*;
         #[doc(inline)]
         pub use super::operators::*;
         #[doc(inline)]

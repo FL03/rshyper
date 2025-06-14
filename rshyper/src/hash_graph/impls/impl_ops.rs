@@ -2,8 +2,7 @@
     appellation: impl_ops <module>
     authors: @FL03
 */
-use crate::algo::path::Dijkstra;
-use crate::algo::search::{AStarSearch, BreadthFirstTraversal, DepthFirstTraversal, Heuristic};
+use crate::algo::{AStarSearch, BreadthFirstTraversal, DepthFirstTraversal, Dijkstra, Heuristic};
 use crate::hash_graph::{HashFacet, HashGraph};
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::idx::{EdgeId, NumIndex, RawIndex, VertexId};

@@ -2,9 +2,9 @@
     appellation: hyper_edge <module>
     authors: @FL03
 */
-use super::{EdgeStore, RawEdge};
-use crate::GraphType;
+use super::RawEdge;
 use crate::idx::{EdgeId, RawIndex, VertexId};
+use crate::{EdgeStore, GraphType};
 
 /// [`Edge`] is the base type for hyperedges in a graph. These edges are generic over the
 /// edge store type `S`, the graph kind `K`, and the index type `Idx`. This allows for

@@ -31,6 +31,30 @@ impl<K: GraphIndex> IndexBase<usize, K> {
             Self::atomic()
         }
     }
+    /// the [`next_step`](IndexBase::next_step) is useful for instances where the type `Idx` of
+    /// the [`IndexBase`] is not generalized, automatically using random number generation
+    /// if the `rand` feature is enabled, or an atomic counter otherwise. The method is also
+    /// useful in that it generates `usize` indices, whcih are the most common instances, yet
+    /// aren't direct implementors of the [`SampleUniform`](rand_distr::SampleUniform) trait.
+    pub fn next_step(&mut self) -> Self {
+        // declare the prev param
+        let prev: usize;
+        // use random number generation if the `rand` feature is enabled
+        #[cfg(feature = "rand")]
+        {
+            // generate a random value from the standard uniform distribution
+            let next = rand::random::<u128>();
+            // replace the current value with the next one
+            prev = self.replace(next as usize);
+        }
+        // otherwise use the atomic counter
+        #[cfg(not(feature = "rand"))]
+        {
+            prev = self.replace(INDEX_COUNTER.fetch_add(1, Ordering::Relaxed));
+        }
+        // return a new instance with the previous value
+        Self::new(prev)
+    }
 }
 
 impl<T: RawIndex> IndexBase<T, EdgeIndex> {

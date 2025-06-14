@@ -25,6 +25,15 @@ where
     K: GraphIndex,
     T: RawIndex,
 {
+    pub fn rand_step(&mut self) -> Self
+    where
+        StandardUniform: Distribution<T>,
+    {
+        // generate a random value from the standard uniform distribution
+        let next = rand::random::<T>();
+        // return a new instance with the previous value
+        Self::new(self.replace(next))
+    }
     /// generate a random index from a value of type `T`
     pub fn random() -> Self
     where

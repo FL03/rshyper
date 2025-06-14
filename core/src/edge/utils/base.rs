@@ -2,8 +2,8 @@
     appellation: base <module>
     authors: @FL03
 */
-use crate::edge::{Edge, RawStore};
-use crate::{GraphType, RawIndex, VertexId};
+use crate::edge::Edge;
+use crate::{GraphType, RawIndex, RawStore, VertexId};
 
 /// returns a new [`Edge`] from the given iterator of vertex ids
 pub fn edge<I, S, K, Idx>(iter: I) -> Edge<S, K, Idx>

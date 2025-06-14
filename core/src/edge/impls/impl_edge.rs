@@ -2,9 +2,9 @@
     appellation: impl_edge <module>
     authors: @FL03
 */
-use crate::edge::{Edge, EdgeStore};
+use crate::edge::Edge;
 use crate::idx::{EdgeId, RawIndex, VertexId};
-use crate::{Directed, GraphType, Undirected};
+use crate::{Directed, EdgeStore, GraphType, Undirected};
 
 impl<S, Idx> Edge<S, Directed, Idx>
 where

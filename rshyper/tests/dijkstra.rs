@@ -36,7 +36,8 @@ fn test_dijkstra_shortest_path() -> rshyper::Result<()> {
     let path = graph.dijkstra().find_path(v0, v3)?;
     // Dijkstra should find the shortest path (v0 -> v4 -> v3)
     assert_eq!(
-        path, [v0, v3],
+        path,
+        [v0, v3],
         "Path should start with v0, go through v4 and end with v3"
     );
 

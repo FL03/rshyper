@@ -75,11 +75,11 @@ where
     seal!();
 
     fn len(&self) -> usize {
-        <Self::Store<VertexId<I>>>::len(self)
+        <Self::Store<Self::Item>>::len(self)
     }
 
     fn is_empty(&self) -> bool {
-        <Self::Store<VertexId<I>>>::is_empty(self)
+        <Self::Store<Self::Item>>::is_empty(self)
     }
 }
 
@@ -93,11 +93,11 @@ where
     seal!();
 
     fn len(&self) -> usize {
-        <Self::Store<VertexId<I>>>::len(self)
+        <Self::Store<Self::Item>>::len(self)
     }
 
     fn is_empty(&self) -> bool {
-        <Self::Store<VertexId<I>>>::is_empty(self)
+        <Self::Store<Self::Item>>::is_empty(self)
     }
 }
 
@@ -111,11 +111,11 @@ where
     seal!();
 
     fn len(&self) -> usize {
-        <[VertexId<I>]>::len(self)
+        <[Self::Item]>::len(self)
     }
 
     fn is_empty(&self) -> bool {
-        <[VertexId<I>]>::is_empty(self)
+        <[Self::Item]>::is_empty(self)
     }
 }
 
@@ -129,7 +129,7 @@ where
         Self: 'b;
 
     fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
-        <Self::Store<VertexId<I>>>::iter(self)
+        <Self::Store<Self::Item>>::iter(self)
     }
 }
 
@@ -139,8 +139,8 @@ where
 {
     type Iter<'a, _T: 'a> = core::slice::Iter<'a, _T>;
 
-    fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
-        <Self::Store<VertexId<I>>>::iter(self)
+    fn iter(&self) -> Self::Iter<'_, Self::Item> {
+        <Self::Store<Self::Item>>::iter(self)
     }
 }
 
@@ -151,7 +151,7 @@ where
     type Iter<'a, _T: 'a> = core::slice::Iter<'a, _T>;
 
     fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
-        <[VertexId<I>]>::iter(self)
+        <[Self::Item]>::iter(self)
     }
 }
 
@@ -202,7 +202,7 @@ where
 #[allow(unused_macros)]
 macro_rules! impl_raw_store {
     (@impl $t:ident<$T:ident>) => {
-        impl<$T> $crate::edge::RawStore for $t<VertexId<$T>>
+        impl<$T> $crate::store::RawStore for $t<VertexId<$T>>
         where
             $T: $crate::idx::RawIndex,
         {
@@ -212,11 +212,11 @@ macro_rules! impl_raw_store {
             seal!();
 
             fn len(&self) -> usize {
-                <Self::Store<VertexId<$T>>>::len(self)
+                <Self::Store<Self::Item>>::len(self)
             }
 
             fn is_empty(&self) -> bool {
-                <Self::Store<VertexId<$T>>>::is_empty(self)
+                <Self::Store<Self::Item>>::is_empty(self)
             }
         }
     };
@@ -250,7 +250,7 @@ mod impl_alloc {
         type Iter<'a, _T: 'a> = btree_set::Iter<'a, _T>;
 
         fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
-            <Self::Store<VertexId<I>>>::iter(self)
+            <Self::Store<Self::Item>>::iter(self)
         }
     }
 
@@ -272,7 +272,7 @@ mod impl_alloc {
         type Iter<'a, _T: 'a> = vec_deque::Iter<'a, _T>;
 
         fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
-            <Self::Store<VertexId<I>>>::iter(self)
+            <Self::Store<Self::Item>>::iter(self)
         }
     }
 }
@@ -295,11 +295,11 @@ mod impl_std {
         seal!();
 
         fn len(&self) -> usize {
-            <Self::Store<VertexId<I>>>::len(self)
+            <Self::Store<Self::Item>>::len(self)
         }
 
         fn is_empty(&self) -> bool {
-            <Self::Store<VertexId<I>>>::is_empty(self)
+            <Self::Store<Self::Item>>::is_empty(self)
         }
     }
 
@@ -314,7 +314,7 @@ mod impl_std {
             S: 'a;
 
         fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
-            <Self::Store<VertexId<I>>>::iter(self)
+            <Self::Store<Self::Item>>::iter(self)
         }
     }
 }

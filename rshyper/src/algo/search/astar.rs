@@ -2,14 +2,12 @@
     Appellation: impl_astar <module>
     Contrib: @FL03
 */
-use super::Heuristic;
-
 #[doc(inline)]
 pub use self::priority_node::PriorityNode;
 
 pub(crate) mod priority_node;
 
-use crate::algo::{PathFinder, Search, Traversal};
+use crate::algo::{Heuristic, PathFinder, Search, Traversal};
 use crate::hash_graph::{HashGraph, VertexSet};
 use core::hash::Hash;
 use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
