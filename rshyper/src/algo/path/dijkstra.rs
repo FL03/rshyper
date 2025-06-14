@@ -115,9 +115,9 @@ where
         &mut self,
         start: VertexId<Idx>,
         dest: VertexId<Idx>,
-    ) -> crate::Result<<Self as PathFinder<VertexId<Idx>>>::Path>
+    ) -> crate::Result<<Self as PathFinder<Idx>>::Path>
     where
-        Self: PathFinder<VertexId<Idx>>,
+        Self: PathFinder<Idx>,
     {
         PathFinder::find_path(self, start, dest)
     }
@@ -148,8 +148,7 @@ where
     }
 }
 
-impl<'a, N, E, A, S, K, Idx> PathFinder<VertexId<Idx>>
-    for Dijkstra<'a, N, E, A, HashGraph<N, E, A, S>>
+impl<'a, N, E, A, S, K, Idx> PathFinder<Idx> for Dijkstra<'a, N, E, A, HashGraph<N, E, A, S>>
 where
     E: Eq + Hash,
     N: Eq + Hash,

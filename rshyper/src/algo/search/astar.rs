@@ -9,7 +9,7 @@ pub use self::priority_node::PriorityNode;
 
 pub(crate) mod priority_node;
 
-use crate::algo::{Search, Traversal};
+use crate::algo::{PathFinder, Search, Traversal};
 use crate::hash_graph::{HashGraph, VertexSet};
 use core::hash::Hash;
 use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
@@ -170,6 +170,17 @@ where
         self.f_score_mut().clear();
         self
     }
+    /// find a path between two nodes
+    pub fn find_path(
+        &mut self,
+        start: VertexId<Idx>,
+        goal: VertexId<Idx>,
+    ) -> crate::Result<<Self as PathFinder<Idx>>::Path>
+    where
+        Self: PathFinder<Idx>,
+    {
+        PathFinder::find_path(self, start, goal)
+    }
     /// a convience method to perform a search
     pub fn search(
         &mut self,
@@ -182,7 +193,8 @@ where
     }
 }
 
-impl<'a, N, E, F, A, S, K, Idx> AStarSearch<'a, N, E, A, F, HashGraph<N, E, A, S>>
+impl<'a, N, E, F, A, S, K, Idx> PathFinder<Idx>
+    for AStarSearch<'a, N, E, A, F, HashGraph<N, E, A, S>>
 where
     A: GraphAttributes<Ix = Idx, Kind = K>,
     S: core::hash::BuildHasher + Default,
@@ -192,12 +204,13 @@ where
     K: GraphType,
     Idx: NumIndex,
 {
+    type Path = Vec<VertexId<Idx>>;
     /// Find the shortest path between start and goal vertices
-    pub fn find_path(
+    fn find_path(
         &mut self,
         start: VertexId<Idx>,
         goal: VertexId<Idx>,
-    ) -> crate::Result<Vec<VertexId<Idx>>> {
+    ) -> crate::Result<Self::Path> {
         // Check if both vertices exist
         if !self.graph.contains_node(&start) {
             return Err(crate::Error::NodeNotFound);
@@ -299,10 +312,7 @@ where
     }
 
     // Reconstruct path from came_from map
-    fn reconstruct_path(&self, goal: VertexId<Idx>) -> Vec<VertexId<Idx>>
-    where
-        Idx: NumIndex,
-    {
+    fn reconstruct_path(&self, goal: VertexId<Idx>) -> Self::Path {
         let mut path = vec![goal];
         let mut current = goal;
 
