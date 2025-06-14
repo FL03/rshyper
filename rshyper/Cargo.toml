@@ -191,6 +191,7 @@ name = "hash_graph"
 required-features = [
     "hash_graph",
     "macros",
+    "rand",
 ]
 
 # ************* [Examples] *************

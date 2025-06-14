@@ -10,7 +10,9 @@ use criterion::{BatchSize, BenchmarkId, Criterion, Throughput};
 
 const SAMPLE_SIZE: usize = 50;
 
-fn _init() -> HashGraph<usize, usize> {
+type WeightType = u8;
+
+fn _init() -> HashGraph<WeightType, WeightType> {
     let mut graph = HashGraph::undirected();
 
     rshyper::hypergraph! {
@@ -47,30 +49,39 @@ fn _init() -> HashGraph<usize, usize> {
     graph
 }
 
+#[cfg(feature = "rand")]
+fn generate_random_edge<E>(n: usize) -> (Vec<VertexId>, Weight<E>)
+where
+    E: Clone + Into<usize>,
+    rand_distr::StandardUniform: rand_distr::Distribution<E>,
+{
+    use rand::Rng;
+    let mut rng = rand::rng();
+    // generate a random set of vertices containing anywhere between 2 and n vertices
+    let verts = (0..(rng.random_range(2..=n)))
+        .map(|_| VertexId::from(rng.random_range(0..n)))
+        .collect::<Vec<_>>();
+    let weight = Weight(rng.random());
+    (verts, weight)
+}
+
 lazy_static::lazy_static! {
-    static ref GRAPH: HashGraph<usize, usize> = _init();
+    static ref GRAPH: HashGraph<WeightType, WeightType> = _init();
 }
 
 /// benchmark for adding edges
+#[cfg(feature = "rand")]
 fn hash_graph_bench_edge_add(c: &mut Criterion) {
     c.bench_function("HashGraph::add_edge", |b| {
         b.iter_batched(
-            HashGraph::<usize, usize>::undirected,
+            _init,
             |mut graph| {
-                // generate some set of three vertices
-                // Use the next value from the iterator as the weight
-                for w in 0..100 {
-                    let verts = (0..(w % 10))
-                        .map(|i| {
-                            // create a vertex id from the current index
-                            VertexId::from((i + w) % 10)
-                        })
-                        .collect::<Vec<_>>();
-
-                        graph
-                            .add_surface(verts, black_box(Weight(w)))
-                            .expect("failed to add edge");
-                }
+                // generates a random edge (as parts) using vertices from 0 to 10
+                let (verts, weight) = generate_random_edge::<WeightType>(10);
+                // add the edge to the graph
+                graph
+                    .add_surface(black_box(verts), black_box(weight))
+                    .expect("failed to add edge");
             },
             BatchSize::SmallInput,
         )
@@ -84,7 +95,9 @@ fn hash_graph_bench_edge_remove(c: &mut Criterion) {
             |mut graph| {
                 // Use the next value from the iterator as the weight
                 for id in 0..5 {
-                    graph.remove_node(black_box(&id)).expect("failed to remove node");
+                    graph
+                        .remove_node(black_box(&id))
+                        .expect("failed to remove node");
                 }
             },
             BatchSize::SmallInput,

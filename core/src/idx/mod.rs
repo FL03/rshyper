@@ -71,7 +71,7 @@ pub mod traits {
 pub mod types {
     //! this module provides various types in support of the [`IndexBase`](super::IndexBase)
     //! type
-    //! 
+    //!
     #[doc(inline)]
     pub use self::prelude::*;
 
