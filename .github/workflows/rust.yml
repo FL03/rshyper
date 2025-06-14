@@ -81,7 +81,7 @@ jobs:
         id: artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: benchmarks.${{ matrix.target }}@${{ github.sha }}
+          name: ${{ github.event.repository.name }}.benchmarks@${{ matrix.target }}.${{ github.sha }}
           if-no-files-found: error
           overwrite: true
           path: target/criterion/
