@@ -7,7 +7,7 @@ use rshyper_core::idx::{RawIndex, VertexId};
 
 /// A node in the priority queue for Dijkstra's algorithm
 #[derive(Copy, Clone, Debug, Default)]
-pub struct QueueNode<Idx, T = f64>
+pub struct QueueNode<Idx, T>
 where
     Idx: RawIndex,
 {

@@ -21,12 +21,12 @@ fn test_dijkstra_shortest_path() -> rshyper::Result<()> {
                 let v5;
             };
             edges: {
-                let _e0: [v0, v1]; // v0 -> v1
-                let _e1: [v1, v2]; // v1 -> v2
-                let _e2: [v2, v5]; // v2 -> v5
-                let _e3: [v5, v4]; // v5 -> v4
-                let _e4: [v0, v4]; // v0 -> v4
-                let _e5: [v4, v3]; // v4 -> v3
+                let _e0: [v0, v1] = 1; // v0 -> v1
+                let _e1: [v1, v2] = 1; // v1 -> v2
+                let _e2: [v2, v5] = 1; // v2 -> v5
+                let _e3: [v5, v4] = 1; // v5 -> v4
+                let _e4: [v0, v4] = 1; // v0 -> v4
+                let _e5: [v4, v3] = 1; // v4 -> v3
             };
         }
     }
@@ -59,7 +59,7 @@ fn test_dijkstra_no_path() -> rshyper::Result<()> {
                 let v3;
             };
             edges: {
-                let _e0: [v0, v1];
+                let _e0: [v0, v1] = 1;
                 // v2 and v3 are disconnected
             };
         }
@@ -87,7 +87,7 @@ fn test_dijkstra_same_start_end() -> rshyper::Result<()> {
                 let v1;
             };
             edges: {
-                let _e0: [v0, v1];
+                let _e0: [v0, v1] = 1;
             };
         }
     }
@@ -117,10 +117,10 @@ fn test_dijkstra_multiple_paths() -> rshyper::Result<()> {
                 let v3;
             };
             edges: {
-                let _e0: [v0, v1]; // v0-v1
-                let _e1: [v1, v3]; // v1-v3
-                let _e2: [v0, v2]; // v0-v2
-                let _e3: [v2, v3]; // v2-v3
+                let _e0: [v0, v1] = 1; // v0-v1
+                let _e1: [v1, v3] = 1; // v1-v3
+                let _e2: [v0, v2] = 1; // v0-v2
+                let _e3: [v2, v3] = 1; // v2-v3
             };
         }
     }
@@ -148,7 +148,7 @@ fn test_dijkstra_direct_edge() -> rshyper::Result<()> {
                 let v1;
             };
             edges: {
-                let _e0: [v0, v1];
+                let _e0: [v0, v1] = 1;
             };
         }
     }

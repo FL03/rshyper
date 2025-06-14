@@ -10,14 +10,16 @@ mod queue_node;
 use crate::algo::{PathFinder, Search, Traversal};
 use crate::hash_graph::HashGraph;
 use core::hash::Hash;
+use num_traits::bounds::UpperBounded;
+use num_traits::{FromPrimitive, Num};
 use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
 use rshyper_core::{GraphAttributes, GraphType, HyperGraph};
 use std::collections::{BinaryHeap, HashSet};
-
+/// a type alias for a map of distances for vertices in the graph
 pub(crate) type Distances<K, V = f64> = std::collections::HashMap<VertexId<K>, V>;
-
+/// a type alias for the history of previous vertices in the graph, maps vertices to vertices
 pub(crate) type PreviousHistory<K> = std::collections::HashMap<VertexId<K>, VertexId<K>>;
-
+/// a type alias for a [`HashSet`](std::collections::HashSet) of visited vertices
 pub(crate) type Visited<K> = std::collections::HashSet<VertexId<K>>;
 
 /// Dijkstra's shortest path algorithm for hypergraphs
@@ -27,7 +29,7 @@ where
     H: HyperGraph<N, E, A>,
 {
     pub(crate) graph: &'a H,
-    pub(crate) distances: Distances<A::Ix, f64>,
+    pub(crate) distances: Distances<A::Ix, E>,
     pub(crate) previous: PreviousHistory<A::Ix>,
     pub(crate) visited: Visited<A::Ix>,
     _marker: core::marker::PhantomData<(N, E)>,
@@ -57,11 +59,11 @@ where
         self.graph
     }
     /// returns a reference to the distances
-    pub const fn distances(&self) -> &Distances<Idx, f64> {
+    pub const fn distances(&self) -> &Distances<Idx, E> {
         &self.distances
     }
     /// returns a mutable reference to the distances
-    pub const fn distances_mut(&mut self) -> &mut Distances<Idx, f64> {
+    pub const fn distances_mut(&mut self) -> &mut Distances<Idx, E> {
         &mut self.distances
     }
     /// returns a reference to the previous history
@@ -81,7 +83,7 @@ where
         &mut self.visited
     }
     /// update the distances and returns a mutable reference to the instance
-    pub fn set_distances(&mut self, distances: Distances<Idx, f64>) -> &mut Self {
+    pub fn set_distances(&mut self, distances: Distances<Idx, E>) -> &mut Self {
         *self.distances_mut() = distances;
         self
     }
@@ -96,7 +98,7 @@ where
         self
     }
     /// add a new node to the distances
-    pub fn add_distance(&mut self, vertex: VertexId<Idx>, distance: f64) -> &mut Self {
+    pub fn add_distance(&mut self, vertex: VertexId<Idx>, distance: E) -> &mut Self {
         self.distances_mut().insert(vertex, distance);
         self
     }
@@ -150,7 +152,7 @@ where
 
 impl<'a, N, E, A, S, K, Idx> PathFinder<Idx> for Dijkstra<'a, N, E, A, HashGraph<N, E, A, S>>
 where
-    E: Eq + Hash,
+    E: Copy + Default + Eq + Hash + PartialOrd + FromPrimitive + Num + UpperBounded,
     N: Eq + Hash,
     A: GraphAttributes<Ix = Idx, Kind = K>,
     S: core::hash::BuildHasher + Default,
@@ -169,9 +171,9 @@ where
             return Err(crate::Error::NodeNotFound);
         }
 
-        let mut heap = BinaryHeap::new();
-        self.add_distance(src, 0.0);
-        heap.push(QueueNode::new(0.0, src));
+        let mut heap: BinaryHeap<QueueNode<Idx, E>> = BinaryHeap::new();
+        self.add_distance(src, E::zero());
+        heap.push(QueueNode::from_vertex(src));
 
         while let Some(QueueNode {
             vertex: u,
@@ -191,13 +193,15 @@ where
             // For each neighbor via hyperedges
             if let Ok(edges) = self.graph().find_edges_with_node(&u) {
                 for edge_id in edges {
+                    // load the weight of the edge
+                    let weight = self.graph.get_edge_weight(&edge_id)?;
+                    // visit each node within the hyperedge
                     for v in self.graph.get_edge_vertices(&edge_id)?.iter().copied() {
                         if v == u {
                             continue;
                         }
-                        let edge_weight = 1.0; // Replace with actual edge weight if available
-                        let alt = u_cost + edge_weight;
-                        if alt < *self.distances().get(&v).unwrap_or(&f64::INFINITY) {
+                        let alt = u_cost + **weight;
+                        if alt < *self.distances().get(&v).unwrap_or(&E::max_value()) {
                             self.add_distance(v, alt).add_previous(v, u);
                             heap.push(QueueNode::new(alt, v));
                         }
@@ -245,7 +249,7 @@ where
 
 impl<'a, N, E, A, S> Search<VertexId<A::Ix>> for Dijkstra<'a, N, E, A, HashGraph<N, E, A, S>>
 where
-    E: Eq + Hash,
+    E: Copy + Default + Eq + Hash + PartialOrd + FromPrimitive + Num + UpperBounded,
     N: Eq + Hash,
     A: GraphAttributes,
     S: core::hash::BuildHasher + Default,
