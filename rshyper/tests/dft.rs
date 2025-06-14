@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use rshyper::Traversal;
-use rshyper::hash_graph::UndirectedHashGraph as HyperGraph;
+use rshyper::hash_graph::UnHashGraph as HyperGraph;
 
 #[test]
 fn test_depth_first_traversal() -> rshyper::Result<()> {

@@ -30,10 +30,10 @@ pub(crate) mod macros {
 #[doc(inline)]
 pub use self::{
     attrs::{Attributes, GraphAttributes},
-    edge::{HyperEdge, HyperFacet},
+    edge::{Edge, Surface},
     error::{Error, Result},
-    index::prelude::*,
-    node::HyperNode,
+    idx::prelude::*,
+    node::Node,
     traits::prelude::*,
     types::prelude::*,
     weight::prelude::*,
@@ -42,7 +42,7 @@ pub use self::{
 pub mod attrs;
 pub mod edge;
 pub mod error;
-pub mod index;
+pub mod idx;
 pub mod node;
 pub mod weight;
 
@@ -101,7 +101,7 @@ pub mod prelude {
     #[doc(no_inline)]
     pub use crate::edge::prelude::*;
     #[doc(no_inline)]
-    pub use crate::index::prelude::*;
+    pub use crate::idx::prelude::*;
     #[doc(no_inline)]
     pub use crate::node::prelude::*;
     #[doc(no_inline)]

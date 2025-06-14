@@ -2,7 +2,7 @@
     appellation: impl_rand <module>
     authors: @FL03
 */
-use crate::index::{GraphIndex, IndexBase, RawIndex};
+use crate::idx::{GraphIndex, IndexBase, RawIndex};
 use rand_distr::{Distribution, StandardUniform};
 
 /// generic implementations for the [`IndexBase<T, K>`] enabled by the `rand` feature

@@ -2,7 +2,7 @@
     appellation: impl_index <module>
     authors: @FL03
 */
-use crate::index::{GraphIndex, IndexBase, RawIndex};
+use crate::idx::{GraphIndex, IndexBase, RawIndex};
 use core::cmp::Ordering;
 use num_traits::{Num, One, Zero};
 

@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use rshyper::VertexId;
-use rshyper::hash_graph::UndirectedHashGraph as HyperGraph;
+use rshyper::hash_graph::UnHashGraph as HyperGraph;
 
 // #[ignore = "A* search cannot find min paths"]
 #[test]

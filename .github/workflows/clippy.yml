@@ -1,6 +1,6 @@
 name: clippy
 
-concurrency:   
+concurrency:
   cancel-in-progress: false
   group: ${{ github.workflow }}-${{ github.ref }}
 
@@ -25,19 +25,17 @@ on:
     types: [ clippy ]
   workflow_dispatch:
 
-
-
 jobs:
   clippy:
     continue-on-error: true
     runs-on: ubuntu-latest
     permissions:
-      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status 
+      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
       contents: read
       security-events: write
       statuses: write
     steps:
-      - 
+      -
         name: Checkout
         uses: actions/checkout@v4
       -
@@ -46,17 +44,17 @@ jobs:
         with:
           cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           components: clippy, rustfmt
-      - 
+      -
         name: Setup the for sarif output
         run: cargo install clippy-sarif sarif-fmt
-      - 
+      -
         name: Run Clippy
         run:
           cargo clippy
           --all-features
           --workspace
           --message-format=json | clippy-sarif | tee rust-clippy-results.sarif | sarif-fmt
-      - 
+      -
         name: Upload analysis
         uses: github/codeql-action/upload-sarif@v3
         with:

@@ -2,7 +2,7 @@
     appellation: cursor <module>
     authors: @FL03
 */
-use crate::index::{EdgeId, IndexResult, RawIndex, Udx, VertexId};
+use crate::idx::{EdgeId, IndexResult, RawIndex, Udx, VertexId};
 
 /// The [`IndexCursor`] stores the current edge and vertex indices in a hypergraph, allowing
 /// for efficient traversal and manipulation of the hypergraph structure. It is designed to
@@ -107,7 +107,7 @@ where
     /// [`step`](crate::index::IndexBase::step) for more details.
     pub fn next_edge(&mut self) -> IndexResult<EdgeId<T>>
     where
-        T: Copy + core::ops::Add<T, Output = T> + num_traits::One,
+        T: crate::AddStep<Output = T>,
     {
         self.edge_mut().step()
     }
@@ -115,7 +115,7 @@ where
     /// [`step`](crate::index::IndexBase::step) for more details.
     pub fn next_vertex(&mut self) -> IndexResult<VertexId<T>>
     where
-        T: Copy + core::ops::Add<T, Output = T> + num_traits::One,
+        T: crate::AddStep<Output = T>,
     {
         self.vertex_mut().step()
     }

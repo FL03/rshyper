@@ -2,11 +2,11 @@
     appellation: hyper_edge <module>
     authors: @FL03
 */
-use super::{RawEdge, RawStore};
-use crate::GraphKind;
-use crate::index::{EdgeId, RawIndex, VertexId};
+use super::{EdgeStore, RawEdge};
+use crate::GraphType;
+use crate::idx::{EdgeId, RawIndex, VertexId};
 
-/// [`HyperEdge`] is the base type for hyperedges in a graph. These edges are generic over the
+/// [`Edge`] is the base type for hyperedges in a graph. These edges are generic over the
 /// edge store type `S`, the graph kind `K`, and the index type `Idx`. This allows for
 /// flexibility in how edges store their vertices and how they are identified within the graph.
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -16,22 +16,22 @@ use crate::index::{EdgeId, RawIndex, VertexId};
     serde(rename_all = "snake_case")
 )]
 #[repr(C)]
-pub struct HyperEdge<S, K, Idx = usize>
+pub struct Edge<S, K, Idx = usize>
 where
     Idx: RawIndex,
-    K: GraphKind,
-    S: RawStore<Idx>,
+    K: GraphType,
+    S: EdgeStore<Idx>,
 {
     pub(crate) id: EdgeId<Idx>,
     pub(crate) points: S,
     pub(crate) _kind: core::marker::PhantomData<K>,
 }
 
-impl<S, K, Idx> HyperEdge<S, K, Idx>
+impl<S, K, Idx> Edge<S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
-    S: RawStore<Idx>,
+    K: GraphType,
+    S: EdgeStore<Idx>,
 {
     pub fn new(id: EdgeId<Idx>, points: S) -> Self {
         Self {
@@ -85,8 +85,8 @@ where
         Self { id, ..self }
     }
     /// consumes the current instance to create another with the given nodes.
-    pub fn with_points<S2: RawStore<Idx>>(self, nodes: S2) -> HyperEdge<S2, K, Idx> {
-        HyperEdge {
+    pub fn with_points<S2: EdgeStore<Idx>>(self, nodes: S2) -> Edge<S2, K, Idx> {
+        Edge {
             id: self.id,
             points: nodes,
             _kind: self._kind,
@@ -117,27 +117,27 @@ where
     /// returns the number of vertices in the edge
     pub fn len(&self) -> usize
     where
-        S: RawStore<Idx>,
+        S: EdgeStore<Idx>,
     {
         self.points().len()
     }
     /// returns true if the edge has no vertices
     pub fn is_empty(&self) -> bool
     where
-        S: RawStore<Idx>,
+        S: EdgeStore<Idx>,
     {
         self.points().is_empty()
     }
 }
 
-impl<S, Idx, K> RawEdge for HyperEdge<S, K, Idx>
+impl<S, K, Idx> RawEdge for Edge<S, K, Idx>
 where
     Idx: RawIndex,
-    K: GraphKind,
-    S: RawStore<Idx>,
+    K: GraphType,
+    S: EdgeStore<Idx>,
 {
     type Kind = K;
-    type Idx = Idx;
+    type Index = Idx;
     type Store = S;
 
     seal!();
@@ -152,5 +152,16 @@ where
 
     fn vertices_mut(&mut self) -> &mut S {
         self.points_mut()
+    }
+}
+
+impl<S, K, Idx> super::HyperEdge for Edge<S, K, Idx>
+where
+    S: EdgeStore<Idx>,
+    Idx: RawIndex,
+    K: GraphType,
+{
+    fn new(id: EdgeId<Idx>, vertices: S) -> Self {
+        Self::new(id, vertices)
     }
 }

@@ -6,7 +6,7 @@ use super::{EdgeId, RawIndex, VertexId};
 #[cfg(feature = "alloc")]
 use alloc::string::String;
 
-/// A type alias for a [Result] with the crate-specific error type [`IndexError`]
+/// A type alias for a [`Result`] with an error type of [`IndexError`]
 pub type IndexResult<T = ()> = core::result::Result<T, IndexError>;
 
 /// The error type for index-related operations

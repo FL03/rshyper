@@ -10,14 +10,33 @@ _**Warning: The library is currently in the early stages of development and is n
 
 `rshyper` is a Rust library designed to provide a hypergraph implementation with a focus on performance and flexibility. It is built to handle complex relationships between data points efficiently, making it suitable for various applications in graph theory, data analysis, and more.
 
+## Table of Contents
+
+- [Background](#background)
+  - [Terminology](#terminology)
+  - [Hypergraphs](#hypergraphs)
+    - [Definition](#definition)
+    - [Properties](#properties)
+- [Usage](#usage)
+  - [Features](#features)
+  - [Examples](#examples)
+- [Getting Started](#getting-started)
+- [Prerequisites](#prerequisites)
+  - [Building from the source](#building-from-the-source)
+- [Contributing](#contributing)
+- [License](#license)
+- [Security](#security)
+
 ## Background
 
 Before diving in to the technical side of things, let's start by defining several terms commonly used in the definition and implementation of hypergraphs.
 
+### Terminology
+
 - **edge**: here, we consider a hyperedge to specifically define
 - **facet**: a facet materializes a hyperedge by associating some weight with the edge.
 - **node**: a node is a complete _vertex_ in that it is considered to be weighted.
-- **surface**:here, the terms surface and facet are used interchangeably, and they refer to the same concept of a hyperedge with an associated weight.
+- **surface**: here, the terms surface and facet are used interchangeably, and they refer to the same concept of a hyperedge with an associated weight.
 - **vertex**: a vertex can be understood as a _point_ in space that is used to define edges within a hypergraph.
 
 ### Hypergraphs
@@ -34,10 +53,6 @@ Formally, a hypergraph is defined as a pair $H = (V, E)$ where:
 - **Non-binary edges**: Unlike traditional graphs where edges connect exactly two vertices, hyperedges can connect any number of vertices.
 - **Flexibility**: Hypergraphs can represent complex relationships and structures that are not easily captured by binary graphs.
 
-## Features
-
-- [x] `hash_graph` - A hash-based hypergraph implementation.
-
 ## Usage
 
 Add this to your `Cargo.toml`:
@@ -50,6 +65,18 @@ features = [
 ]
 version = "0.1.x"
 ```
+
+### Features
+
+- `hash_graph` - A hash-based hypergraph implementation.
+- `macros` - A set of macros to simplify hypergraph creation and manipulation.
+
+#### Dependency related features
+
+- `rand` - Parallel processing capabilities for efficient graph operations.
+- `rayon` - Parallel processing capabilities for efficient graph operations.
+- `serde` - Support for serialization and deserialization of hypergraphs.
+- `wasm` - WebAssembly support for running hypergraph operations in the browser.
 
 ### Examples
 
@@ -163,3 +190,11 @@ Pull requests are welcome. For major changes, please open an issue first
 to discuss what you would like to change.
 
 Please make sure to update tests as appropriate.
+
+## License
+
+This project is licensed under the Apache-2.0 License - see the [LICENSE](https://github.com/FL03/rshyper/blob/main/LICENSE) file for details.
+
+## Security
+
+View the [Security Policy](https://github.com/FL03/rshyper/blob/main/SECURITY.md) for details on how to report security vulnerabilities.

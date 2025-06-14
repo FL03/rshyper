@@ -3,17 +3,17 @@
     authors: @FL03
 */
 use crate::binary_graph::{BTreeFacet, BinaryGraph};
-use crate::index::{EdgeId, RawIndex, VertexId};
-use crate::{GraphAttributes, GraphKind};
+use crate::idx::{EdgeId, RawIndex, VertexId};
+use crate::{GraphAttributes, GraphType};
 use core::ops::{Index, IndexMut};
-use rshyper_core::HyperNode;
+use rshyper_core::Node;
 
 impl<N, E, A, K, Idx> BinaryGraph<N, E, A>
 where
     N: Ord,
     E: Ord,
-    A: GraphAttributes<Idx = Idx, Kind = K>,
-    K: GraphKind,
+    A: GraphAttributes<Ix = Idx, Kind = K>,
+    K: GraphType,
     Idx: RawIndex + Ord,
 {
 }
@@ -22,11 +22,11 @@ impl<N, E, A, K, Idx> Index<&VertexId<Idx>> for BinaryGraph<N, E, A>
 where
     N: Ord,
     E: Ord,
-    A: GraphAttributes<Idx = Idx, Kind = K>,
-    K: GraphKind,
+    A: GraphAttributes<Ix = Idx, Kind = K>,
+    K: GraphType,
     Idx: RawIndex + Ord,
 {
-    type Output = HyperNode<N, Idx>;
+    type Output = Node<N, Idx>;
 
     fn index(&self, index: &VertexId<Idx>) -> &Self::Output {
         self.get_node(index)
@@ -38,8 +38,8 @@ impl<N, E, A, K, Idx> IndexMut<&VertexId<Idx>> for BinaryGraph<N, E, A>
 where
     N: Ord,
     E: Ord,
-    A: GraphAttributes<Idx = Idx, Kind = K>,
-    K: GraphKind,
+    A: GraphAttributes<Ix = Idx, Kind = K>,
+    K: GraphType,
     Idx: RawIndex + Ord,
 {
     fn index_mut(&mut self, index: &VertexId<Idx>) -> &mut Self::Output {
@@ -52,8 +52,8 @@ impl<N, E, A, K, Idx> Index<&EdgeId<Idx>> for BinaryGraph<N, E, A>
 where
     N: Ord,
     E: Ord,
-    A: GraphAttributes<Idx = Idx, Kind = K>,
-    K: GraphKind,
+    A: GraphAttributes<Ix = Idx, Kind = K>,
+    K: GraphType,
     Idx: RawIndex + Ord,
 {
     type Output = BTreeFacet<E, K, Idx>;
@@ -68,8 +68,8 @@ impl<N, E, A, K, Idx> IndexMut<&EdgeId<Idx>> for BinaryGraph<N, E, A>
 where
     N: Ord,
     E: Ord,
-    A: GraphAttributes<Idx = Idx, Kind = K>,
-    K: GraphKind,
+    A: GraphAttributes<Ix = Idx, Kind = K>,
+    K: GraphType,
     Idx: RawIndex + Ord,
 {
     fn index_mut(&mut self, index: &EdgeId<Idx>) -> &mut Self::Output {

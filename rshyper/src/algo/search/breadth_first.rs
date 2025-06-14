@@ -4,8 +4,8 @@
 */
 use crate::hash_graph::HashGraph;
 use rshyper_core::edge::RawEdge;
-use rshyper_core::index::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphAttributes, GraphKind, HyperGraph};
+use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
+use rshyper_core::{GraphAttributes, GraphType, HyperGraph};
 use std::collections::{HashSet, VecDeque};
 
 use super::{Search, Traversal};
@@ -15,19 +15,19 @@ pub struct BreadthFirstTraversal<'a, N, E, A, H = HashGraph<N, E>>
 where
     A: GraphAttributes,
     H: HyperGraph<N, E, A>,
-    A::Idx: RawIndex + Eq + core::hash::Hash,
+    A::Ix: RawIndex + Eq + core::hash::Hash,
 {
     pub(crate) graph: &'a H,
-    pub(crate) queue: VecDeque<VertexId<A::Idx>>,
-    pub(crate) visited: HashSet<VertexId<A::Idx>>,
+    pub(crate) queue: VecDeque<VertexId<A::Ix>>,
+    pub(crate) visited: HashSet<VertexId<A::Ix>>,
     _marker: core::marker::PhantomData<(N, E)>,
 }
 
 impl<'a, N, E, A, H, K, Idx> BreadthFirstTraversal<'a, N, E, A, H>
 where
-    A: GraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Ix = Idx, Kind = K>,
     H: HyperGraph<N, E, A>,
-    K: GraphKind,
+    K: GraphType,
     Idx: RawIndex + Eq + core::hash::Hash,
 {
     /// create a new instance from a hypergraph
@@ -84,9 +84,9 @@ where
 
 impl<'a, N, E, A, H, K, Idx> Search<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, A, H>
 where
-    A: GraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Ix = Idx, Kind = K>,
     H: HyperGraph<N, E, A>,
-    K: GraphKind,
+    K: GraphType,
     Idx: NumIndex,
     for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<Idx>>,
 {
@@ -128,9 +128,9 @@ where
 
 impl<'a, N, E, A, H, K, Idx> Traversal<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, A, H>
 where
-    A: GraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Ix = Idx, Kind = K>,
     H: HyperGraph<N, E, A>,
-    K: GraphKind,
+    K: GraphType,
     Idx: RawIndex + Eq + core::hash::Hash,
 {
     type Store<I2> = HashSet<I2>;

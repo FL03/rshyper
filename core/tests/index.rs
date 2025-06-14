@@ -3,7 +3,7 @@
     authors: @FL03
 */
 extern crate rshyper_core as rshyper;
-use rshyper::index::{EdgeId, IndexBase, IndexCursor, VertexId, VertexIndex};
+use rshyper::idx::{EdgeId, IndexBase, IndexCursor, VertexId, VertexIndex};
 
 #[test]
 fn test_index() -> rshyper::Result<()> {

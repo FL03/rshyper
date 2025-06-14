@@ -2,58 +2,6 @@
     appellation: index <module>
     authors: @FL03
 */
-//! the [`index`](crate::index) module is centered around the [`IndexBase`] implementation.
-//! Additional type aliases ([`EdgeId`] and [`VertexId`]) are provided for convenience, as well
-//! as traits that define the behaviour of indices in a hypergraph.
-#[doc(inline)]
-pub use self::{aliases::*, error::*, id::IndexBase, kinds::*, position::IndexCursor};
-
-pub mod error;
-pub mod id;
-pub mod kinds;
-pub mod position;
-
-#[doc(hidden)]
-mod impls {
-    pub mod impl_ops;
-    #[cfg(feature = "rand")]
-    pub mod impl_rand;
-    pub mod impl_repr;
-}
-
-pub(crate) mod prelude {
-    #[doc(inline)]
-    pub use super::aliases::*;
-    #[doc(inline)]
-    pub use super::error::*;
-    #[doc(inline)]
-    pub use super::id::*;
-    #[doc(inline)]
-    pub use super::position::*;
-    #[doc(inline)]
-    pub use super::{HashIndex, Indexed, NumIndex, RawIndex};
-}
-
-mod aliases {
-    use super::{EdgeIndex, IndexBase, VertexIndex};
-    /// a type alias for a [`usize`] used to define the default index type throughout the crate.
-    pub type Udx = usize;
-    /// a type alias for an [`Index`] whose _kind_ is [`EdgeIndex`]
-    pub type EdgeId<T = Udx> = IndexBase<T, EdgeIndex>;
-    /// a type alias for an [`Index`] whose _kind_ is [`VertexIndex`]
-    pub type VertexId<T = Udx> = IndexBase<T, VertexIndex>;
-}
-
-///[`Indexed`] describes a common interface for all types which are aware of some associated
-/// index. The trait is generic over a type `T` which implements the [`RawIndex`] trait,
-/// allowing for flexibility in the type of index used while ensuring that the index type is
-/// compatible with the hypergraph's indexing system.
-pub trait Indexed<T: RawIndex> {
-    type Idx<I>;
-
-    /// Returns the index of the node.
-    fn index(&self) -> &Self::Idx<T>;
-}
 /// a simple trait for denoting types compatible with to be used as indices in a hypergraph.
 /// **note:** the trait is sealed to prevent external implementations.
 pub trait RawIndex: 'static + Send + Sync + core::fmt::Debug + core::fmt::Display {
@@ -95,6 +43,7 @@ pub trait NumIndex: HashIndex
 where
     Self: Copy
         + Ord
+        + crate::AddStep<Output = Self>
         + core::ops::Add<Output = Self>
         + core::ops::Div<Output = Self>
         + core::ops::Mul<Output = Self>
@@ -120,11 +69,9 @@ where
         + num_traits::NumAssignRef,
 {
 }
-
 /*
  ************* Implementations *************
 */
-
 impl<T> StdIndex for T where T: 'static + RawIndex + Clone + Default + PartialEq + PartialOrd {}
 
 impl<T> HashIndex for T where T: StdIndex + Eq + core::hash::Hash {}
@@ -134,6 +81,7 @@ impl<T> NumIndex for T where
         + Copy
         + Default
         + Ord
+        + crate::AddStep<Output = Self>
         + core::ops::Add<Output = Self>
         + core::ops::Div<Output = Self>
         + core::ops::Mul<Output = Self>
@@ -159,28 +107,6 @@ impl<T> NumIndex for T where
 {
 }
 
-impl<T: RawIndex> Indexed<T> for VertexId<T> {
-    type Idx<I> = VertexId<I>;
-
-    fn index(&self) -> &Self::Idx<T> {
-        self
-    }
-}
-
-impl<T, Idx> Indexed<Idx> for crate::HyperNode<T, Idx>
-where
-    Idx: RawIndex,
-{
-    type Idx<I> = VertexId<I>;
-
-    fn index(&self) -> &Self::Idx<Idx> {
-        &self.index
-    }
-}
-
-/*
- ************* [impl] RawIndex *************
-*/
 #[cfg(feature = "alloc")]
 impl RawIndex for alloc::boxed::Box<dyn RawIndex> {
     seal!();

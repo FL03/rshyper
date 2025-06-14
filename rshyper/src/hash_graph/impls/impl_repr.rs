@@ -2,50 +2,74 @@
     appellation: impl_repr <module>
     authors: @FL03
 */
-use crate::hash_graph::{DirectedHashGraph, HashGraph, UndirectedHashGraph};
-use crate::index::{RawIndex, VertexId};
-use crate::{GraphAttributes, GraphKind, Weight};
-use core::hash::Hash;
+use crate::hash_graph::{DiHashGraph, HashGraph, UnHashGraph};
+use core::hash::{BuildHasher, Hash};
+use rshyper_core::idx::{RawIndex, VertexId};
+use rshyper_core::{GraphAttributes, GraphType, Mode, Weight};
 
-impl<N, E, Idx> DirectedHashGraph<N, E, Idx>
+impl<N, E, A, S> HashGraph<N, E, A, S>
+where
+    A: GraphAttributes<Kind = Mode>,
+    E: Eq + Hash,
+    N: Eq + Hash,
+    S: BuildHasher,
+    A::Ix: Eq + Hash,
+{
+    /// initialize a new, empty hypergraph with a dynamic [`Mode`] kind and the logical default
+    /// for the indices.
+    pub fn dynamic() -> Self
+    where
+        A::Ix: Default,
+        S: Clone + Default,
+    {
+        HashGraph::new()
+    }
+}
+
+impl<N, E, S, Ix> DiHashGraph<N, E, Ix, S>
 where
     E: Eq + Hash,
     N: Eq + Hash,
-    Idx: Eq + RawIndex + Hash,
+    Ix: Eq + RawIndex + Hash,
+    S: BuildHasher,
 {
     /// initialize a new, empty hypergraph
     pub fn directed() -> Self
     where
-        Idx: Default,
+        Ix: Default,
+        S: Clone + Default,
     {
         HashGraph::new()
     }
 }
-impl<N, E, Idx> UndirectedHashGraph<N, E, Idx>
+impl<N, E, S, Ix> UnHashGraph<N, E, Ix, S>
 where
     E: Eq + Hash,
     N: Eq + Hash,
-    Idx: Eq + RawIndex + Hash,
+    Ix: Eq + RawIndex + Hash,
+    S: BuildHasher,
 {
     /// initialize a new, empty hypergraph
     pub fn undirected() -> Self
     where
-        Idx: Default,
+        Ix: Default,
+        S: Clone + Default,
     {
         HashGraph::new()
     }
 }
 
-impl<E, A, K, Idx> HashGraph<(), E, A>
+impl<E, A, S, K, Idx> HashGraph<(), E, A, S>
 where
-    A: GraphAttributes<Kind = K, Idx = Idx>,
+    A: GraphAttributes<Kind = K, Ix = Idx>,
     E: Eq + Hash,
     Idx: RawIndex + Eq + Hash,
-    K: GraphKind,
+    K: GraphType,
+    S: BuildHasher,
 {
     pub fn add_empty_node(&mut self) -> crate::Result<VertexId<Idx>>
     where
-        Idx: Copy + core::ops::Add<Output = A::Idx> + num_traits::One,
+        Idx: Copy + crate::AddStep<Output = Idx>,
     {
         let weight = Weight::new(());
         self.add_node(weight)
@@ -53,38 +77,39 @@ where
     #[deprecated(since = "0.9.0", note = "use `add_empty_node` instead")]
     pub fn insert_empty_node(&mut self) -> crate::Result<VertexId<Idx>>
     where
-        Idx: Copy + core::ops::Add<Output = A::Idx> + num_traits::One,
+        Idx: Copy + crate::AddStep<Output = Idx>,
     {
         self.add_empty_node()
     }
 }
 
-impl<N, E, A, K, Idx> HashGraph<Option<N>, E, A>
+impl<N, E, A, S, K, Idx> HashGraph<Option<N>, E, A, S>
 where
-    A: GraphAttributes<Kind = K, Idx = Idx>,
+    A: GraphAttributes<Kind = K, Ix = Idx>,
     E: Eq + Hash,
     N: Eq + Hash,
-    K: GraphKind,
+    S: BuildHasher,
+    K: GraphType,
     Idx: RawIndex + Eq + Hash,
 {
     /// insert [`Some`] vertex with weight `T` and return its ID
     pub fn add_some_node(&mut self, weight: N) -> crate::Result<VertexId<Idx>>
     where
-        A::Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
+        A::Ix: Copy + crate::AddStep<Output = Idx>,
     {
         self.add_node(Weight::some(weight))
     }
     /// insert [`None`] vertex with weight `T` and return its ID
     pub fn add_none_node(&mut self) -> crate::Result<VertexId<Idx>>
     where
-        A::Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
+        A::Ix: Copy + crate::AddStep<Output = Idx>,
     {
         self.add_node(Weight::none())
     }
     #[deprecated(since = "0.9.0", note = "use `add_some_node` instead")]
     pub fn insert_some_node(&mut self, weight: N) -> crate::Result<VertexId<Idx>>
     where
-        A::Idx: Copy + core::ops::Add<Output = Idx> + num_traits::One,
+        A::Ix: Copy + crate::AddStep<Output = Idx>,
     {
         self.add_some_node(weight)
     }

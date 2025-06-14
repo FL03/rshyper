@@ -24,7 +24,7 @@ pub enum Error {
     #[error("Cannot create an empty hyperedge")]
     EmptyHyperedge,
     #[error(transparent)]
-    IndexError(#[from] crate::index::IndexError),
+    IndexError(#[from] crate::idx::IndexError),
     #[cfg(feature = "anyhow")]
     #[error(transparent)]
     AnyError(#[from] anyhow::Error),

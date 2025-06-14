@@ -5,8 +5,8 @@
 use super::{Search, Traversal};
 use crate::hash_graph::HashGraph;
 use core::hash::Hash;
-use rshyper_core::index::{HashIndex, NumIndex, VertexId};
-use rshyper_core::{GraphAttributes, GraphKind, HyperGraph};
+use rshyper_core::idx::{HashIndex, NumIndex, VertexId};
+use rshyper_core::{GraphAttributes, GraphType, HyperGraph};
 use std::collections::HashSet;
 
 /// Depth-First Traversal algorithm for hypergraphs
@@ -16,16 +16,16 @@ where
     H: HyperGraph<N, E, A>,
 {
     pub(crate) graph: &'a H,
-    pub(crate) stack: Vec<VertexId<A::Idx>>,
-    pub(crate) visited: HashSet<VertexId<A::Idx>>,
+    pub(crate) stack: Vec<VertexId<A::Ix>>,
+    pub(crate) visited: HashSet<VertexId<A::Ix>>,
     _marker: core::marker::PhantomData<(N, E)>,
 }
 
 impl<'a, N, E, H, A, K, Idx> DepthFirstTraversal<'a, N, E, A, H>
 where
-    A: GraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Ix = Idx, Kind = K>,
     H: HyperGraph<N, E, A>,
-    K: GraphKind,
+    K: GraphType,
     Idx: HashIndex,
 {
     /// Create a new DepthFirstTraversal instance
@@ -81,19 +81,19 @@ where
     }
 }
 
-impl<'a, N, E, A, H> Traversal<VertexId<A::Idx>> for DepthFirstTraversal<'a, N, E, A, H>
+impl<'a, N, E, A, H> Traversal<VertexId<A::Ix>> for DepthFirstTraversal<'a, N, E, A, H>
 where
     A: GraphAttributes,
     H: HyperGraph<N, E, A>,
-    A::Idx: Eq + Hash,
+    A::Ix: Eq + Hash,
 {
     type Store<I2> = HashSet<I2>;
 
-    fn has_visited(&self, vertex: &VertexId<A::Idx>) -> bool {
+    fn has_visited(&self, vertex: &VertexId<A::Ix>) -> bool {
         self.visited().contains(vertex)
     }
 
-    fn visited(&self) -> &Self::Store<VertexId<A::Idx>> {
+    fn visited(&self) -> &Self::Store<VertexId<A::Ix>> {
         &self.visited
     }
 }
@@ -101,10 +101,10 @@ where
 impl<'a, N, E, A, K, Idx> Search<VertexId<Idx>>
     for DepthFirstTraversal<'a, N, E, A, HashGraph<N, E, A>>
 where
-    A: GraphAttributes<Idx = Idx, Kind = K>,
+    A: GraphAttributes<Ix = Idx, Kind = K>,
     N: Default + Eq + Hash,
     E: Default + Eq + Hash,
-    K: GraphKind,
+    K: GraphType,
     Idx: crate::NumIndex,
 {
     type Output = Vec<VertexId<Idx>>;
