@@ -2,21 +2,22 @@
     appellation: index <module>
     authors: @FL03
 */
-//! the [`index`](crate::index) module is centered around the [`IndexBase`] implementation.
-//! Additional type aliases ([`EdgeId`] and [`VertexId`]) are provided for convenience, as well
-//! as traits that define the behaviour of indices in a hypergraph.
+//! the [`idx`](crate::idx) module provides the [`IndexBase`], a generic index type used to
+//! establish a solid foundation for all indices used by the hypergraph. Type aliases, such as
+//! [`EdgeId`] and [`VertexId`], are provided for convenience, reducing the need to continually
+//! specify the index type when working with hypergraphs.
 #[doc(inline)]
 #[cfg(feature = "std")]
 pub use self::tracker::IndexTracker;
 #[doc(inline)]
-pub use self::{
-    error::*, id::IndexBase, position::IndexCursor, traits::prelude::*, types::prelude::*,
-};
+pub use self::{error::*, index::*, position::*, traits::prelude::*, types::prelude::*};
 
+/// this module defines the [`IndexError`] type, establishing the various errors encountered by
+/// indices in a hypergraph.
 pub mod error;
 /// this module provides the [`IndexBase`] type, which is a generic index type used to
 /// represent various kinds of indices in a hypergraph.
-pub mod id;
+pub mod index;
 /// this module implements the [`IndexCursor`] type, which is used to track the current edge
 /// and vertex indices in a hypergraph.
 pub mod position;
@@ -36,7 +37,7 @@ pub(crate) mod prelude {
     #[doc(inline)]
     pub use super::error::*;
     #[doc(inline)]
-    pub use super::id::*;
+    pub use super::index::*;
     #[doc(inline)]
     pub use super::position::*;
     #[doc(inline)]
