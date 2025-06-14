@@ -2,9 +2,8 @@
     appellation: edge <module>
     authors: @FL03
 */
-use super::EdgeStore;
-use crate::GraphType;
 use crate::idx::{EdgeId, RawIndex, VertexId};
+use crate::{EdgeStore, GraphType};
 
 /// [`RawEdge`] establishes a common interface for _hyperedge_ representations.
 pub trait RawEdge {
@@ -46,7 +45,7 @@ pub trait BinaryEdge: RawEdge {
 /*
  ************* Implementations *************
 */
-use super::BinaryStore;
+use crate::BinaryStore;
 use crate::edge::{Edge, Surface};
 
 impl<S, I, K> BinaryEdge for Edge<S, K, I>
@@ -56,11 +55,11 @@ where
     K: GraphType,
 {
     fn lhs(&self) -> &VertexId<I> {
-        self.points().lhs()
+        self.points().src()
     }
 
     fn rhs(&self) -> &VertexId<I> {
-        self.points().rhs()
+        self.points().tgt()
     }
 }
 

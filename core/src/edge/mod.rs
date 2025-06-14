@@ -36,17 +36,12 @@ pub mod traits {
     /// this module defines the [`RawEdge`] trait for establishing a common interface for
     /// representations of a hyperedge
     mod edge;
-    /// this module defines the [`RawStore`] trait for establishing a common interface for
-    /// representations of a set of [`VertexId`] that compose some edge
-    mod store;
     /// this module defines the [`RawFacet`] trait
     mod surface;
 
     pub(crate) mod prelude {
         #[doc(inline)]
         pub use super::edge::*;
-        #[doc(inline)]
-        pub use super::store::*;
         #[doc(inline)]
         pub use super::surface::*;
     }

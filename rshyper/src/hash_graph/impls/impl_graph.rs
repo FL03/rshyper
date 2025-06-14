@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use crate::hash_graph::{HashFacet, HashGraph, VertexSet};
-use crate::{GraphAttributes, GraphType};
+use crate::{AddStep, GraphAttributes, GraphType};
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::idx::{EdgeId, RawIndex, VertexId};
 use rshyper_core::{Node, Surface, Weight};
@@ -22,7 +22,7 @@ where
     pub fn add_edge<I>(&mut self, vertices: I) -> crate::Result<EdgeId<Idx>>
     where
         I: IntoIterator<Item = VertexId<Idx>>,
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Copy,
         E: Default,
         S: Default,
     {
@@ -34,7 +34,7 @@ where
     where
         I: IntoIterator<Item = VertexId<Idx>>,
         E: Eq + Hash,
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Copy,
         S: Default,
     {
         // collect the vertices into a HashSet to ensure uniqueness
@@ -63,7 +63,7 @@ where
     /// add a new node with the given weight and return its index
     pub fn add_node(&mut self, weight: Weight<N>) -> crate::Result<VertexId<Idx>>
     where
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Copy,
     {
         // generate a new index to identify the new node
         let ndx = self.next_vertex_id();
@@ -83,7 +83,7 @@ where
     pub fn add_nodes<I>(&mut self, weights: I) -> crate::Result<Vec<VertexId<Idx>>>
     where
         I: IntoIterator<Item = N>,
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Copy,
     {
         let ids = weights
             .into_iter()
@@ -95,7 +95,7 @@ where
     pub fn add_vertex(&mut self) -> crate::Result<VertexId<Idx>>
     where
         N: Default,
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Copy,
     {
         self.add_node(Default::default())
     }
@@ -166,7 +166,7 @@ where
     )]
     pub fn get_edge_nodes<Q>(&self, index: &Q) -> crate::Result<Vec<&Node<N, Idx>>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         let surface = self.get_surface(index)?;
@@ -177,14 +177,15 @@ where
             .collect::<Vec<_>>();
         Ok(nodes)
     }
-    /// returns the number of vertices, or order, composing the hyperedge with the given id
+    /// returns the number of vertices within the given edge; more formally, the order of a
+    /// hypergraph `(X,E)` where the order is the number of vertices in `X`
     pub fn get_edge_order(&self, index: &EdgeId<Idx>) -> crate::Result<usize> {
         self.get_surface(index).map(|edge| edge.len())
     }
     /// returns the set of vertices composing the given edge
     pub fn get_edge_vertices<Q>(&self, index: &Q) -> crate::Result<&VertexSet<Idx, S>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_surface(index).map(|edge| edge.points())
@@ -192,7 +193,7 @@ where
     /// returns a mutable reference to the set of vertices composing the given edge
     pub fn get_edge_vertices_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut VertexSet<Idx, S>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_surface_mut(index).map(|edge| edge.points_mut())
@@ -200,7 +201,7 @@ where
     /// returns an immutable reference to the weight of a hyperedge
     pub fn get_edge_weight<Q>(&self, index: &Q) -> crate::Result<&Weight<E>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_surface(index).map(|edge| edge.weight())
@@ -208,7 +209,7 @@ where
     /// returns a mutable reference to the weight of a hyperedge
     pub fn get_edge_weight_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut Weight<E>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_surface_mut(index).map(|edge| edge.weight_mut())
@@ -217,7 +218,7 @@ where
     /// contain the vertex
     pub fn get_node_degree<Q>(&self, index: &Q) -> usize
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces()
@@ -229,7 +230,7 @@ where
     #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
     pub fn get_node<Q>(&self, index: &Q) -> crate::Result<&Node<N, Idx>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.nodes().get(index).ok_or(crate::Error::NodeNotFound)
@@ -237,7 +238,7 @@ where
     /// returns a mutable reference to the weight of a vertex
     pub fn get_node_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut Node<N, Idx>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.nodes_mut()
@@ -247,7 +248,7 @@ where
     /// returns an immutable reference to the weight of a vertex
     pub fn get_node_weight<Q>(&self, index: &Q) -> crate::Result<&Weight<N>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_node(index).map(|node| node.weight())
@@ -255,7 +256,7 @@ where
     /// returns a mutable reference to the weight of a vertex
     pub fn get_node_weight_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut Weight<N>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_node_mut(index).map(|node| node.weight_mut())
@@ -263,7 +264,7 @@ where
     /// returns an immutable reference to the [`HashFacet`] associated with the given index
     pub fn get_surface<Q>(&self, index: &Q) -> crate::Result<&HashFacet<E, K, Idx, S>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces()
@@ -273,7 +274,7 @@ where
     /// returns a mutable reference to the [`HashFacet`] associated with the given index
     pub fn get_surface_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut HashFacet<E, K, Idx, S>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces_mut()
@@ -291,7 +292,7 @@ where
     where
         Q: Eq + Hash + core::fmt::Debug,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Copy,
         S: Default,
         for<'a> &'a E: core::ops::Add<Output = E>,
     {
@@ -310,7 +311,7 @@ where
     where
         Q: Eq + Hash + core::fmt::Debug,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Copy,
         F: FnOnce(&E, &E) -> E,
         S: Default,
     {
@@ -353,7 +354,7 @@ where
             .remove(index)
             .ok_or(crate::Error::NodeNotFound)
             .inspect(|node| {
-                self.history_mut().remove_vertex(node.index());
+                self.history_mut().remove_point(node.index());
                 #[cfg(feature = "tracing")]
                 tracing::trace!(
                     "successfully removed the node; removing edges that contained the vertex..."
@@ -374,7 +375,7 @@ where
     )]
     pub fn remove_surface<Q>(&mut self, index: &Q) -> crate::Result<HashFacet<E, K, Idx, S>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces_mut()
@@ -409,7 +410,7 @@ where
     #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
     pub fn set_edge_weight<Q>(&mut self, index: &Q, weight: Weight<E>) -> crate::Result<&mut Self>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_edge_weight_mut(index)
@@ -424,7 +425,7 @@ where
     #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
     pub fn set_node_weight<Q>(&mut self, index: &Q, weight: Weight<N>) -> crate::Result<&mut Self>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_node_weight_mut(index)
@@ -448,68 +449,24 @@ where
     S: BuildHasher,
 {
     #[deprecated(
-        note = "use `total_nodes` instead; this method will be removed in a future release",
+        note = "use `size` instead; this method will be removed in a future release",
+        since = "0.1.2"
+    )]
+    pub fn total_edges(&self) -> usize {
+        self.surfaces().len()
+    }
+    #[deprecated(
+        note = "use `order` instead; this method will be removed in a future release",
+        since = "0.1.2"
+    )]
+    pub fn total_nodes(&self) -> usize {
+        self.nodes().len()
+    }
+    #[deprecated(
+        note = "use `order` instead; this method will be removed in a future release",
         since = "0.1.0"
     )]
     pub fn total_vertices(&self) -> usize {
-        self.total_nodes()
-    }
-    #[deprecated(
-        note = "use `contains_node_in_edge` instead; this method will be removed in a future release",
-        since = "0.0.10"
-    )]
-    pub fn is_vertex_in_edge<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
-    where
-        Q: Eq + Hash,
-        Q2: Eq + Hash,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-        VertexId<Idx>: core::borrow::Borrow<Q2>,
-    {
-        if let Some(surface) = self.surfaces().get(index) {
-            return surface.contains(vertex);
-        }
-        false
-    }
-    #[deprecated(
-        note = "use `find_edges_with_node` instead; this method will be removed in a future release",
-        since = "0.0.10"
-    )]
-    pub fn get_edges_with_vertex(&self, index: &VertexId<Idx>) -> crate::Result<Vec<EdgeId<Idx>>>
-    where
-        Idx: Copy,
-    {
-        self.find_edges_with_node(index)
-    }
-    #[deprecated(
-        note = "use `find_node_neighbors` instead; this method will be removed the next major release",
-        since = "0.0.10"
-    )]
-    pub fn neighbors(&self, index: &VertexId<Idx>) -> crate::Result<VertexSet<Idx>>
-    where
-        Idx: Copy,
-    {
-        self.find_node_neighbors(index)
-    }
-    #[deprecated(
-        note = "use `remove_node` instead; this method will be removed the next major release",
-        since = "0.0.10"
-    )]
-    pub fn remove_vertex<Q>(&mut self, index: &Q) -> crate::Result<Node<N, Idx>>
-    where
-        Q: Eq + core::fmt::Debug + Hash,
-        VertexId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.remove_node(index)
-    }
-    #[deprecated(
-        note = "use `set_node_weight` instead; this method will be removed in a future release",
-        since = "0.0.10"
-    )]
-    pub fn update_vertex_weight<Q>(&mut self, index: &Q, weight: N) -> crate::Result<&mut Self>
-    where
-        Q: Eq + Hash,
-        VertexId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.set_node_weight(index, Weight(weight))
+        self.order()
     }
 }

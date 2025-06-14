@@ -2,13 +2,12 @@
     Appellation: bft <module>
     Contrib: @FL03
 */
+use crate::algo::{Search, Traversal};
 use crate::hash_graph::HashGraph;
 use rshyper_core::edge::RawEdge;
 use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
 use rshyper_core::{GraphAttributes, GraphType, HyperGraph};
 use std::collections::{HashSet, VecDeque};
-
-use super::{Search, Traversal};
 
 /// Breadth-First Traversal algorithm for hypergraphs
 pub struct BreadthFirstTraversal<'a, N, E, A, H = HashGraph<N, E>>

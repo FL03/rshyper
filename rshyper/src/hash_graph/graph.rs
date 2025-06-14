@@ -188,10 +188,18 @@ where
     {
         Self { surfaces, ..self }
     }
+    /// returns true if the hypergraph contains an edge with the given index;
+    pub fn contains_edge<Q>(&self, index: &Q) -> bool
+    where
+        Q: Eq + Hash + ?Sized,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.surfaces().contains_key(index)
+    }
     /// check if a vertex with the given id exists
     pub fn contains_node<Q>(&self, index: &Q) -> bool
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.nodes().contains_key(index)
@@ -203,7 +211,7 @@ where
     )]
     pub fn contains_node_in_edge<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         Q2: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
         VertexId<Idx>: core::borrow::Borrow<Q2>,
@@ -213,10 +221,11 @@ where
         }
         false
     }
-    /// returns true if the hypergraph contains an edge with the given index;
+    #[doc(hidden)]
+    #[deprecated(since = "0.1.2", note = "use `contains_edge` instead")]
     pub fn contains_surface<Q>(&self, index: &Q) -> bool
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces().contains_key(index)
@@ -255,14 +264,17 @@ where
     where
         Idx: crate::AddStep<Output = Idx>,
     {
-        self.position_mut().next_vertex().unwrap()
+        self.position_mut().next_point().unwrap()
     }
+    /// returns the size of the hypergraph, which is defined to be the number of edges in `E`
+    /// where `H=(X,E)`.
     /// returns the total number of edges within the hypergraph
-    pub fn total_edges(&self) -> usize {
+    pub fn size(&self) -> usize {
         self.surfaces().len()
     }
-    /// returns the total number of nodes within the hypergraph
-    pub fn total_nodes(&self) -> usize {
+    /// returns the order of the hypergraph, which is defined to be the number of nodes in `X`
+    /// where `H=(X,E)`.
+    pub fn order(&self) -> usize {
         self.nodes().len()
     }
 }
@@ -356,7 +368,7 @@ where
     }
 
     fn contains_edge(&self, index: &EdgeId<Ix>) -> bool {
-        self.contains_surface(index)
+        self.contains_edge(index)
     }
 
     fn contains_node(&self, index: &VertexId<Ix>) -> bool {

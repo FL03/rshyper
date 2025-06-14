@@ -2,9 +2,9 @@
     Appellation: node <module>
     Contrib: @FL03
 */
-use super::{Edge, EdgeStore, RawEdge, RawFacet};
+use super::{Edge, RawEdge, RawFacet};
 use crate::idx::{EdgeId, RawIndex, VertexId};
-use crate::{GraphType, Weight};
+use crate::{EdgeStore, GraphType, Weight};
 
 /// The [`Surface`] implementation associates some weight with a hyperedge.
 /// Typically, the term **facet** is used to denote the surface of a particular polytope,

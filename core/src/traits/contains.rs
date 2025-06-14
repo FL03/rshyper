@@ -16,9 +16,9 @@ pub trait Contains<Q> {
 /*
  ************* Implementations *************
 */
-use crate::GraphType;
-use crate::edge::{Edge, EdgeStore, Surface};
+use crate::edge::{Edge, Surface};
 use crate::idx::{RawIndex, VertexId};
+use crate::{EdgeStore, GraphType};
 
 impl<S, K, Idx, Q> Contains<Q> for Edge<S, K, Idx>
 where

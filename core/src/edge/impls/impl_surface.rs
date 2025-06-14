@@ -2,9 +2,9 @@
     appellation: impl_hyper_facet <module>
     authors: @FL03
 */
-use crate::edge::{Edge, EdgeStore, Surface};
+use crate::edge::{Edge, Surface};
 use crate::idx::{EdgeId, RawIndex};
-use crate::{Directed, GraphType, Undirected, Weight};
+use crate::{Directed, EdgeStore, GraphType, Undirected, Weight};
 
 impl<T, S, Idx> Surface<T, S, Directed, Idx>
 where

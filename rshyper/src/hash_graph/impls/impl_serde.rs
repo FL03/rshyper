@@ -2,22 +2,21 @@
     appellation: impl_serde <module>
     authors: @FL03
 */
-use crate::hash_graph::HashGraph;
-use crate::{GraphAttributes, GraphType, RawIndex};
+use crate::{GraphAttributes, HashGraph};
 use core::hash::{BuildHasher, Hash};
 use serde::de::{Deserialize, DeserializeOwned, MapAccess, Visitor};
 use serde::ser::Serialize;
 
 const FIELDS: &[&str] = &["nodes", "surfaces", "position", "_attrs"];
 
-impl<'a, N, E, A, S, K, Idx> Deserialize<'a> for HashGraph<N, E, A, S>
+impl<'a, N, E, A, S> Deserialize<'a> for HashGraph<N, E, A, S>
 where
-    A: GraphAttributes<Kind = K, Ix = Idx> + DeserializeOwned,
-    N: DeserializeOwned + Eq + Hash,
-    E: DeserializeOwned + Eq + Hash,
-    Idx: Eq + Hash + RawIndex + DeserializeOwned,
-    K: GraphType + DeserializeOwned,
+    A: GraphAttributes + DeserializeOwned,
+    E: Eq + Hash + DeserializeOwned,
+    N: Eq + Hash + DeserializeOwned,
     S: BuildHasher + Default,
+    A::Ix: Default + Eq + Hash + DeserializeOwned,
+    A::Kind: DeserializeOwned,
 {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -33,14 +32,14 @@ where
     }
 }
 
-impl<N, E, A, S, K, Idx> Serialize for HashGraph<N, E, A, S>
+impl<N, E, A, S> Serialize for HashGraph<N, E, A, S>
 where
-    A: GraphAttributes<Kind = K, Ix = Idx> + Serialize,
-    N: Serialize + Eq + Hash,
-    E: Serialize + Eq + Hash,
-    Idx: Eq + Hash + RawIndex + Serialize,
-    K: GraphType + Serialize,
-    S: BuildHasher,
+    A: GraphAttributes + Serialize,
+    E: Eq + Hash + Serialize,
+    N: Eq + Hash + Serialize,
+    S: BuildHasher + Default,
+    A::Ix: Default + Eq + Hash + Serialize,
+    A::Kind: Serialize,
 {
     fn serialize<Ser>(&self, serializer: Ser) -> Result<Ser::Ok, Ser::Error>
     where
@@ -60,14 +59,14 @@ struct HashGraphVisitor<N, E, A, S> {
     _marker: core::marker::PhantomData<(N, E, A, S)>,
 }
 
-impl<'de, N, E, A, S, K, Idx> Visitor<'de> for HashGraphVisitor<N, E, A, S>
+impl<'de, N, E, A, S> Visitor<'de> for HashGraphVisitor<N, E, A, S>
 where
-    A: GraphAttributes<Kind = K, Ix = Idx> + DeserializeOwned,
-    N: DeserializeOwned + Eq + Hash,
-    E: DeserializeOwned + Eq + Hash,
-    Idx: Eq + Hash + RawIndex + DeserializeOwned,
-    K: GraphType + DeserializeOwned,
+    A: GraphAttributes + DeserializeOwned,
+    E: Eq + Hash + DeserializeOwned,
+    N: Eq + Hash + DeserializeOwned,
     S: BuildHasher + Default,
+    A::Ix: Default + Eq + Hash + DeserializeOwned,
+    A::Kind: DeserializeOwned,
 {
     type Value = HashGraph<N, E, A, S>;
 

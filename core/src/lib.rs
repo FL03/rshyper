@@ -34,6 +34,7 @@ pub use self::{
     error::{Error, Result},
     idx::prelude::*,
     node::Node,
+    store::prelude::*,
     traits::prelude::*,
     types::prelude::*,
     weight::prelude::*,
@@ -44,6 +45,10 @@ pub mod edge;
 pub mod error;
 pub mod idx;
 pub mod node;
+/// this module provides various traits and implementations for containers capable of acting as
+/// storage for different components of a hypergraph, such as edges.
+pub mod store;
+/// this module implements the [`Weight`] type, which is used to represent weights in a hypergraph
 pub mod weight;
 
 pub mod traits {
@@ -51,14 +56,18 @@ pub mod traits {
     //! behaviors
     #[doc(inline)]
     pub use self::prelude::*;
-
+    /// the [`Contains`] trait provides a way to check if a graph contains a specific component
     pub mod contains;
+    /// this module provides various conversion traits and implementations
     pub mod convert;
+    /// the [`HyperGraph`] trait defines the core interface for hypergraphs, enabling the
+    /// generalization of algorithms constructors, and graphical operators.
     pub mod hyper_graph;
+    /// the [`Merge`] trait provides a way to combine two graphs into one
     pub mod merge;
+    /// this module defines sequential step generators
     pub mod step;
     pub mod transform;
-    pub mod weighted;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -73,8 +82,6 @@ pub mod traits {
         pub use super::step::*;
         #[doc(inline)]
         pub use super::transform::*;
-        #[doc(inline)]
-        pub use super::weighted::*;
     }
 }
 
@@ -91,23 +98,15 @@ pub mod types {
     }
 }
 
-#[doc(hidden)]
 pub mod prelude {
-    #[doc(no_inline)]
     pub use crate::error::*;
 
-    #[doc(inline)]
     pub use crate::attrs::prelude::*;
-    #[doc(no_inline)]
     pub use crate::edge::prelude::*;
-    #[doc(no_inline)]
     pub use crate::idx::prelude::*;
-    #[doc(no_inline)]
     pub use crate::node::prelude::*;
-    #[doc(no_inline)]
+    pub use crate::store::prelude::*;
     pub use crate::traits::prelude::*;
-    #[doc(no_inline)]
     pub use crate::types::prelude::*;
-    #[doc(no_inline)]
     pub use crate::weight::prelude::*;
 }

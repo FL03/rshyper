@@ -50,6 +50,7 @@ smart-default = { workspace = true }
 strum = { features = ["derive"], workspace = true }
 # math
 num-traits = { workspace = true }
+ordered-float = { workspace = true }
 # random
 rand = { optional = true, workspace = true }
 rand_distr = { optional = true, workspace = true }
@@ -143,6 +144,7 @@ json = [
 rand = [
     "dep:rand",
     "dep:rand_distr",
+    "ordered-float/rand",
     "rng",
     "rshyper-core/rand",
     "scsys/rand",
@@ -163,6 +165,7 @@ rng = [
 serde = [
     "dep:serde",
     "dep:serde_derive",
+    "ordered-float/serde",
     "rand?/serde",
     "rshyper-core/serde",
     "scsys/serde",
@@ -187,23 +190,7 @@ wasm-bindgen = [
 # ************* [Benchmarks] *************
 [[bench]]
 harness = false
-name = "hg_edge"
-required-features = [
-    "hash_graph",
-    "rand",
-]
-
-[[bench]]
-harness = false
-name = "hg_node"
-required-features = [
-    "hash_graph",
-    "rand",
-]
-
-[[bench]]
-harness = false
-name = "hg_search"
+name = "hash_graph"
 required-features = [
     "hash_graph",
     "rand",
@@ -232,6 +219,10 @@ required-features = ["hash_graph", "macros"]
 
 [[test]]
 name = "dft"
+required-features = ["hash_graph", "macros"]
+
+[[test]]
+name = "dijkstra"
 required-features = ["hash_graph", "macros"]
 
 [[test]]
