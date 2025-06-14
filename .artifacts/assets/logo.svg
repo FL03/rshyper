@@ -1,0 +1,30 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" fill="none"
+    stroke-linecap="round" stroke-linejoin="round">
+    <!-- Hyperedge 1 (cool blue) -->
+    <path fill="#dceefb" stroke="#3b82f6" stroke-width="2"
+        d="M70,30 Q100,10 130,30 Q150,60 130,90 Q100,110 70,90 Q50,60 70,30 Z" />
+
+    <!-- Hyperedge 2 (desaturated green) -->
+    <path fill="#e0f7ec" stroke="#10b981" stroke-width="2"
+        d="M50,130 Q100,110 150,130 Q130,170 100,180 Q70,170 50,130 Z" />
+
+    <!-- Nodes (Blue set) -->
+    <circle cx="70" cy="30" r="5" fill="#3b82f6" />
+    <circle cx="130" cy="30" r="5" fill="#3b82f6" />
+    <circle cx="130" cy="90" r="5" fill="#3b82f6" />
+    <circle cx="70" cy="90" r="5" fill="#3b82f6" />
+    <circle cx="50" cy="60" r="5" fill="#3b82f6" />
+    <circle cx="100" cy="10" r="5" fill="#3b82f6" />
+    <circle cx="150" cy="60" r="5" fill="#3b82f6" />
+
+    <!-- Nodes (Green set) -->
+    <circle cx="50" cy="130" r="5" fill="#10b981" />
+    <circle cx="100" cy="110" r="5" fill="#10b981" />
+    <circle cx="150" cy="130" r="5" fill="#10b981" />
+    <circle cx="130" cy="170" r="5" fill="#10b981" />
+    <circle cx="100" cy="180" r="5" fill="#10b981" />
+    <circle cx="70" cy="170" r="5" fill="#10b981" />
+
+    <!-- Curved connector between centroids (Blue → Green) -->
+    <path d="M100,60 Q120,100 100,145" stroke="#000" stroke-opacity="0.70" stroke-width="3" fill="none" />
+</svg>

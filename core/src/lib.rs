@@ -17,6 +17,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![crate_name = "rshyper_core"]
 #![crate_type = "lib"]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/rshyper/rshyper/main/assets/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/rshyper/rshyper/main/assets/logo.svg"
+)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;

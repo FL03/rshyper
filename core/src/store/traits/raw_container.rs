@@ -22,9 +22,9 @@ impl<T> RawContainer for alloc::boxed::Box<dyn RawContainer<Item = T>> {
 }
 
 macro_rules! impl_raw_container {
-    (@impl $($p:ident)::*<$I:ident>) => {
-        impl<$I> $crate::store::RawContainer for $($p)::*<$I> {
-            type Item = $I;
+    (@impl $($p:ident)::*<$K:ident, $V:ident, $($rest:ident),*>) => {
+        impl<$K, $V, $($rest),*> $crate::store::RawContainer for $($p)::*<$K, $V, $($rest),*> {
+            type Item = $V;
 
             seal!();
         }
@@ -32,6 +32,13 @@ macro_rules! impl_raw_container {
     (@impl $($p:ident)::*<$K:ident, $V:ident>) => {
         impl<$K, $V> $crate::store::RawContainer for $($p)::*<$K, $V> {
             type Item = $V;
+
+            seal!();
+        }
+    };
+    (@impl $($p:ident)::*<$I:ident>) => {
+        impl<$I> $crate::store::RawContainer for $($p)::*<$I> {
+            type Item = $I;
 
             seal!();
         }
@@ -62,7 +69,78 @@ impl_raw_container! {
 
 #[cfg(feature = "std")]
 impl_raw_container! {
-    std::collections::HashMap<K, V>,
-    std::collections::HashSet<T>,
+    std::collections::HashMap<K, V, S>,
     std::sync::Mutex<T>,
+}
+
+#[cfg(feature = "std")]
+impl<K, S> RawContainer for std::collections::HashSet<K, S> {
+    type Item = K;
+
+    seal!();
+}
+
+impl<T> RawContainer for [T] {
+    type Item = T;
+
+    seal!();
+}
+
+impl<'a, T> RawContainer for &'a [T] {
+    type Item = T;
+
+    seal!();
+}
+
+impl<'a, T> RawContainer for &'a mut [T] {
+    type Item = T;
+
+    seal!();
+}
+
+impl<T, const N: usize> RawContainer for [T; N] {
+    type Item = T;
+
+    seal!();
+}
+
+impl<'a, T, const N: usize> RawContainer for &'a [T; N] {
+    type Item = T;
+
+    seal!();
+}
+
+impl<'a, T, const N: usize> RawContainer for &'a mut [T; N] {
+    type Item = T;
+
+    seal!();
+}
+
+#[allow(unused_macros)]
+macro_rules! tuple_cont {
+    ($($T:ident),+ $(,)?) => {
+        impl<$($T),+> $crate::store::RawContainer for ($($T,)+) {
+            type Item =  ($($T,)+);
+
+            seal!();
+        }
+    };
+}
+
+impl<T> RawContainer for (T,) {
+    type Item = T;
+
+    seal!();
+}
+
+impl<T> RawContainer for (T, T) {
+    type Item = T;
+
+    seal!();
+}
+
+impl<T> RawContainer for (T, T, T) {
+    type Item = T;
+
+    seal!();
 }

@@ -2,6 +2,7 @@
     appellation: store <module>
     authors: @FL03
 */
+use super::RawContainer;
 use crate::idx::{RawIndex, VertexId};
 
 /// [`RawStore`] is a trait that defines the behavior of a store that holds the vertices
@@ -11,8 +12,7 @@ use crate::idx::{RawIndex, VertexId};
 /// **note:** The trait is sealed to prevent external implementations, ensuring that only the
 /// crate can define how edges are stored. This is to maintain consistency and prevent
 /// misuse of the trait in different contexts.
-pub trait RawStore {
-    type Item;
+pub trait RawStore: RawContainer {
     type Store<_T>: ?Sized;
 
     private!();
@@ -69,7 +69,6 @@ impl<I> RawStore for &[VertexId<I>]
 where
     I: RawIndex,
 {
-    type Item = VertexId<I>;
     type Store<_T> = [_T];
 
     seal!();
@@ -87,7 +86,6 @@ impl<I> RawStore for [VertexId<I>]
 where
     I: RawIndex,
 {
-    type Item = VertexId<I>;
     type Store<_T> = [_T];
 
     seal!();
@@ -105,7 +103,6 @@ impl<const N: usize, I> RawStore for [VertexId<I>; N]
 where
     I: RawIndex,
 {
-    type Item = VertexId<I>;
     type Store<_T> = [_T; N];
 
     seal!();
@@ -172,7 +169,6 @@ impl<I> RawStore for (VertexId<I>, VertexId<I>)
 where
     I: RawIndex,
 {
-    type Item = VertexId<I>;
     type Store<_T> = (_T, _T);
 
     seal!();
@@ -206,7 +202,6 @@ macro_rules! impl_raw_store {
         where
             $T: $crate::idx::RawIndex,
         {
-            type Item = VertexId<$T>;
             type Store<_T> = $t<_T>;
 
             seal!();
@@ -289,7 +284,6 @@ mod impl_std {
         I: RawIndex,
         S: BuildHasher,
     {
-        type Item = VertexId<I>;
         type Store<_T> = HashSet<_T, S>;
 
         seal!();
