@@ -10,15 +10,13 @@ use rshyper_core::{Node, Surface, Weight};
 
 impl<N, E, A, K, Idx, S> HashGraph<N, E, A, S>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
     A: GraphAttributes<Ix = Idx, Kind = K>,
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
     S: BuildHasher,
 {
-    /// insert a new [`HyperFacet`] into the hypergraph composed of the given vertices and
-    /// using the logical [`Default`] for the weight
+    /// add a new hyperedge, using the given vertices and the logical [`Default`] for the
+    /// weight of type `T` and returning the corresponding edge index.
     pub fn add_edge<I>(&mut self, vertices: I) -> crate::Result<EdgeId<Idx>>
     where
         I: IntoIterator<Item = VertexId<Idx>>,
@@ -26,14 +24,17 @@ where
         E: Default,
         S: Default,
     {
-        self.add_surface(vertices, Weight(E::default()))
+        self.add_surface(vertices, Default::default())
     }
-    /// insert a new hyperedge composed of the given vertices and weight, returning its unique
-    /// index
+    /// add a new hyperedge with the given vertices and weight, returning the corresponding
+    /// edge index.
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, level = "trace", target = "hash_graph")
+    )]
     pub fn add_surface<I>(&mut self, vertices: I, weight: Weight<E>) -> crate::Result<EdgeId<Idx>>
     where
         I: IntoIterator<Item = VertexId<Idx>>,
-        E: Eq + Hash,
         Idx: AddStep<Output = Idx> + Copy,
         S: Default,
     {
@@ -61,6 +62,10 @@ where
         Ok(edge_id)
     }
     /// add a new node with the given weight and return its index
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, level = "trace", target = "hash_graph")
+    )]
     pub fn add_node(&mut self, weight: Weight<N>) -> crate::Result<VertexId<Idx>>
     where
         Idx: AddStep<Output = Idx> + Copy,
@@ -76,22 +81,17 @@ where
         Ok(ndx)
     }
     /// add multiple nodes with the given weights and return their indices
-    #[cfg_attr(
-        feature = "tracing",
-        tracing::instrument(skip_all, level = "trace", target = "hash_graph")
-    )]
-    pub fn add_nodes<I>(&mut self, weights: I) -> crate::Result<Vec<VertexId<Idx>>>
+    pub fn add_nodes<I>(&mut self, weights: I) -> impl Iterator<Item = VertexId<Idx>>
     where
         I: IntoIterator<Item = N>,
         Idx: AddStep<Output = Idx> + Copy,
     {
-        let ids = weights
+        weights
             .into_iter()
             .filter_map(|weight| self.add_node(Weight(weight)).ok())
-            .collect::<Vec<_>>();
-        Ok(ids)
     }
-    /// add a new vertex with the default weight and return its ID
+    /// add a new hypernode using the logical [`Default`] for the weight of type `N` and
+    /// return its index.
     pub fn add_vertex(&mut self) -> crate::Result<VertexId<Idx>>
     where
         N: Default,
@@ -177,8 +177,7 @@ where
             .collect::<Vec<_>>();
         Ok(nodes)
     }
-    /// returns the number of vertices within the given edge; more formally, the order of a
-    /// hypergraph `(X,E)` where the order is the number of vertices in `X`
+    /// returns the number of vertices within the given edge
     pub fn get_edge_order(&self, index: &EdgeId<Idx>) -> crate::Result<usize> {
         self.get_surface(index).map(|edge| edge.len())
     }
@@ -367,7 +366,7 @@ where
                 );
             })
     }
-    /// remove the [`HyperFacet`] with the given index from the hypergraph
+    /// remove the hyperedge with the given index from the hypergraph
     #[inline]
     #[cfg_attr(
         feature = "tracing",
@@ -439,13 +438,9 @@ where
 
 #[allow(deprecated)]
 #[doc(hidden)]
-impl<N, E, A, K, Idx, S> HashGraph<N, E, A, S>
+impl<N, E, A, S> HashGraph<N, E, A, S>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
-    A: GraphAttributes<Ix = Idx, Kind = K>,
-    K: GraphType,
-    Idx: Eq + RawIndex + Hash,
+    A: GraphAttributes,
     S: BuildHasher,
 {
     #[deprecated(

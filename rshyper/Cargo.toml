@@ -227,7 +227,7 @@ required-features = ["hash_graph", "macros"]
 
 [[test]]
 name = "hash_graph"
-required-features = ["hash_graph", "macros"]
+required-features = ["hash_graph"]
 
 [[test]]
 name = "macros"

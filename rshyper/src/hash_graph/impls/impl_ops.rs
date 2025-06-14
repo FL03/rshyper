@@ -12,11 +12,9 @@ use rshyper_core::{Combine, GraphAttributes, GraphType};
 /// implementations for various algorithms and operators on the hypergraph
 impl<N, E, A, S> HashGraph<N, E, A, S>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
     S: BuildHasher + Default,
     A: GraphAttributes,
-    A::Ix: NumIndex,
+    A::Ix: NumIndex + Eq + Hash,
 {
     /// search the hypergraph using the A* algorithm with the given heuristic function
     pub fn astar<F>(&self, heuristic: F) -> AStarSearch<'_, N, E, A, F, Self>
@@ -71,8 +69,6 @@ where
 impl<'a, N, E, A, S, K, Idx> Combine<&'a EdgeId<Idx>, &'a EdgeId<Idx>> for HashGraph<N, E, A, S>
 where
     A: GraphAttributes<Ix = Idx, Kind = K>,
-    E: Eq + Hash,
-    N: Eq + Hash,
     K: GraphType,
     Idx: NumIndex,
     S: BuildHasher + Default,
@@ -91,8 +87,6 @@ where
 
 impl<N, E, A, S, K, Idx> core::ops::Index<&EdgeId<Idx>> for HashGraph<N, E, A, S>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
     A: GraphAttributes<Ix = Idx, Kind = K>,
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
@@ -107,8 +101,6 @@ where
 
 impl<N, E, A, S, K, Idx> core::ops::IndexMut<&EdgeId<Idx>> for HashGraph<N, E, A, S>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
     A: GraphAttributes<Ix = Idx, Kind = K>,
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
@@ -121,8 +113,6 @@ where
 
 impl<N, E, A, S, K, Idx> core::ops::Index<&VertexId<Idx>> for HashGraph<N, E, A, S>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
     A: GraphAttributes<Ix = Idx, Kind = K>,
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
@@ -137,8 +127,6 @@ where
 
 impl<N, E, A, S, K, Idx> core::ops::IndexMut<&VertexId<Idx>> for HashGraph<N, E, A, S>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
     A: GraphAttributes<Ix = Idx, Kind = K>,
     K: GraphType,
     Idx: RawIndex + Eq + Hash,

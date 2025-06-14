@@ -4,6 +4,7 @@
 */
 use crate::algo::{Search, Traversal};
 use crate::hash_graph::HashGraph;
+use core::hash::Hash;
 use rshyper_core::edge::RawEdge;
 use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
 use rshyper_core::{GraphAttributes, GraphType, HyperGraph};
@@ -14,7 +15,6 @@ pub struct BreadthFirstTraversal<'a, N, E, A, H = HashGraph<N, E>>
 where
     A: GraphAttributes,
     H: HyperGraph<N, E, A>,
-    A::Ix: RawIndex + Eq + core::hash::Hash,
 {
     pub(crate) graph: &'a H,
     pub(crate) queue: VecDeque<VertexId<A::Ix>>,
@@ -27,7 +27,7 @@ where
     A: GraphAttributes<Ix = Idx, Kind = K>,
     H: HyperGraph<N, E, A>,
     K: GraphType,
-    Idx: RawIndex + Eq + core::hash::Hash,
+    Idx: RawIndex,
 {
     /// create a new instance from a hypergraph
     pub(crate) fn new(graph: &'a H) -> Self {
@@ -72,7 +72,7 @@ where
     /// visited by inserting it into the visited set.
     pub(crate) fn register(&mut self, vertex: VertexId<Idx>)
     where
-        Idx: Copy,
+        Idx: Copy + Eq + Hash,
     {
         if !self.has_visited(&vertex) {
             self.queue_mut().push_back(vertex);
@@ -130,7 +130,7 @@ where
     A: GraphAttributes<Ix = Idx, Kind = K>,
     H: HyperGraph<N, E, A>,
     K: GraphType,
-    Idx: RawIndex + Eq + core::hash::Hash,
+    Idx: RawIndex + Eq + Hash,
 {
     type Store<I2> = HashSet<I2>;
 

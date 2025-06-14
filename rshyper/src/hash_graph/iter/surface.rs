@@ -12,7 +12,7 @@ use std::hash::RandomState;
 /// an iterator over the keys of the surfaces within a hypergraph, yielding the
 /// [`EdgeId`]s of the entries.
 #[repr(transparent)]
-pub struct SurfaceKeys<'a, E, K, Idx, S = RandomState>
+pub struct Edges<'a, E, K, Idx, S = RandomState>
 where
     Idx: RawIndex + Eq + Hash,
     K: GraphType,
@@ -74,7 +74,7 @@ where
 /*
  ************* Implementations *************
 */
-impl<'a, E, K, Idx, S> Iterator for SurfaceKeys<'a, E, K, Idx, S>
+impl<'a, E, K, Idx, S> Iterator for Edges<'a, E, K, Idx, S>
 where
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
@@ -122,7 +122,7 @@ mod impl_par {
     use rayon::iter::plumbing::UnindexedConsumer;
     use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
 
-    impl<'a, E, K, Idx, S> ParallelIterator for SurfaceKeys<'a, E, K, Idx, S>
+    impl<'a, E, K, Idx, S> ParallelIterator for Edges<'a, E, K, Idx, S>
     where
         K: GraphType + Send + Sync,
         E: Send + Sync,

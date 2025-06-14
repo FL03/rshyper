@@ -2,7 +2,7 @@
     Appellation: hash_graph <module>
     Contrib: @FL03
 */
-//! this module provides the [`HashGraph`] definition along with a couple aliases for 
+//! this module provides the [`HashGraph`] definition along with a couple aliases for
 //! convenience.
 use super::aliases::*;
 
@@ -25,7 +25,6 @@ pub struct HashGraph<N = (), E = (), A = UnAttributes<usize>, S = RandomState>
 where
     S: BuildHasher,
     A: GraphAttributes,
-    A::Ix: Eq + Hash,
 {
     /// the attributes of a graph define its _kind_ and the type of index used
     pub(crate) attrs: A,
@@ -41,12 +40,10 @@ where
 
 impl<N, E, A, K, Idx, S> HashGraph<N, E, A, S>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
     S: BuildHasher,
     A: GraphAttributes<Ix = Idx, Kind = K>,
     K: GraphType,
-    Idx: Eq + RawIndex + Hash,
+    Idx: RawIndex,
 {
     /// initialize a new, empty hypergraph
     pub fn new() -> Self
@@ -193,6 +190,7 @@ where
     /// returns true if the hypergraph contains an edge with the given index;
     pub fn contains_edge<Q>(&self, index: &Q) -> bool
     where
+        Idx: Eq + Hash,
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
@@ -201,6 +199,7 @@ where
     /// check if a vertex with the given id exists
     pub fn contains_node<Q>(&self, index: &Q) -> bool
     where
+        Idx: Eq + Hash,
         Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
@@ -213,6 +212,7 @@ where
     )]
     pub fn contains_node_in_edge<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
     where
+        Idx: Eq + Hash,
         Q: Eq + Hash + ?Sized,
         Q2: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -227,6 +227,7 @@ where
     #[deprecated(since = "0.1.2", note = "use `contains_edge` instead")]
     pub fn contains_surface<Q>(&self, index: &Q) -> bool
     where
+        Idx: Eq + Hash,
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
@@ -246,12 +247,18 @@ where
     }
     /// returns an [`Entry`](std::collections::hash_map::Entry) for the node with the given
     /// index, allowing for modifications or insertions to the mapping
-    pub fn node(&mut self, index: VertexId<Idx>) -> NodeEntry<'_, N, Idx> {
+    pub fn node(&mut self, index: VertexId<Idx>) -> NodeEntry<'_, N, Idx>
+    where
+        Idx: Eq + Hash,
+    {
         self.nodes_mut().entry(index)
     }
     /// returns a [`SurfaceEntry`] for the surface with the given index, allowing for in-place
     /// mutations to the value associated with the index
-    pub fn surface(&mut self, index: EdgeId<Idx>) -> SurfaceEntry<'_, E, K, Idx, S> {
+    pub fn surface(&mut self, index: EdgeId<Idx>) -> SurfaceEntry<'_, E, K, Idx, S>
+    where
+        Idx: Eq + Hash,
+    {
         self.surfaces_mut().entry(index)
     }
     /// computes the next edge index before replacing and returning the previous value
@@ -268,33 +275,32 @@ where
     {
         self.position_mut().next_point().unwrap()
     }
+    /// returns the order of the hypergraph, which is defined to be the number of nodes in `X`
+    /// where `H=(X,E)`.
+    pub fn order(&self) -> usize {
+        self.nodes().len()
+    }
     /// returns the size of the hypergraph, which is defined to be the number of edges in `E`
     /// where `H=(X,E)`.
     /// returns the total number of edges within the hypergraph
     pub fn size(&self) -> usize {
         self.surfaces().len()
     }
-    /// returns the order of the hypergraph, which is defined to be the number of nodes in `X`
-    /// where `H=(X,E)`.
-    pub fn order(&self) -> usize {
-        self.nodes().len()
-    }
 }
 
 impl<N, E, A, S> core::fmt::Display for HashGraph<N, E, A, S>
 where
     A: GraphAttributes,
-    E: core::fmt::Debug + Eq + Hash,
-    N: core::fmt::Debug + Eq + Hash,
+    E: core::fmt::Debug,
+    N: core::fmt::Debug,
     S: BuildHasher,
-    A::Ix: Eq + Hash,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(
             f,
             "{{ nodes: {n:?}, edges: {e:?} }}",
-            n = self.nodes(),
-            e = self.surfaces()
+            n = self.nodes,
+            e = self.surfaces
         )
     }
 }
@@ -302,10 +308,7 @@ where
 impl<N, E, A, S> RawHyperGraph<A> for HashGraph<N, E, A, S>
 where
     A: GraphAttributes,
-    E: Eq + Hash,
-    N: Eq + Hash,
     S: BuildHasher,
-    A::Ix: Eq + Hash,
 {
     type Node<N2> = Node<N2, A::Ix>;
     type Edge<E2> = HashFacet<E2, A::Kind, A::Ix, S>;
@@ -314,8 +317,6 @@ where
 impl<N, E, A, K, Ix, S> HyperGraph<N, E, A> for HashGraph<N, E, A, S>
 where
     A: GraphAttributes<Ix = Ix, Kind = K>,
-    E: Eq + Hash,
-    N: Eq + Hash,
     S: BuildHasher + Default,
     K: GraphType,
     Ix: NumIndex,

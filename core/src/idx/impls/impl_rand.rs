@@ -42,7 +42,7 @@ where
         Self::new(rand::random())
     }
     /// returns a new index randomly generated within the provided range
-    pub fn random_bewteen<R>(range: R) -> Self
+    pub fn random_between<R>(range: R) -> Self
     where
         R: SampleRange<T>,
         T: SampleUniform,

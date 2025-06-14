@@ -5,7 +5,7 @@
 use crate::algo::{Search, Traversal};
 use crate::hash_graph::HashGraph;
 use core::hash::Hash;
-use rshyper_core::idx::{HashIndex, NumIndex, VertexId};
+use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
 use rshyper_core::{GraphAttributes, GraphType, HyperGraph};
 use std::collections::HashSet;
 
@@ -26,7 +26,7 @@ where
     A: GraphAttributes<Ix = Idx, Kind = K>,
     H: HyperGraph<N, E, A>,
     K: GraphType,
-    Idx: HashIndex,
+    Idx: RawIndex,
 {
     /// Create a new DepthFirstTraversal instance
     pub(crate) fn new(graph: &'a H) -> Self {
@@ -73,7 +73,7 @@ where
     /// include the given index in both the stack and visited stores
     pub(crate) fn register_vertex(&mut self, index: VertexId<Idx>) -> &mut Self
     where
-        Idx: Copy,
+        Idx: Copy + Eq + Hash,
     {
         self.stack_mut().push(index);
         self.visited_mut().insert(index);
@@ -98,18 +98,16 @@ where
     }
 }
 
-impl<'a, N, E, A, K, Idx> Search<VertexId<Idx>>
-    for DepthFirstTraversal<'a, N, E, A, HashGraph<N, E, A>>
+impl<'a, N, E, A> Search<VertexId<A::Ix>> for DepthFirstTraversal<'a, N, E, A, HashGraph<N, E, A>>
 where
-    A: GraphAttributes<Ix = Idx, Kind = K>,
-    N: Default + Eq + Hash,
-    E: Default + Eq + Hash,
-    K: GraphType,
-    Idx: crate::NumIndex,
+    A: GraphAttributes,
+    E: Eq + Hash,
+    N: Eq + Hash,
+    A::Ix: crate::NumIndex,
 {
-    type Output = Vec<VertexId<Idx>>;
+    type Output = Vec<VertexId<A::Ix>>;
 
-    fn search(&mut self, start: VertexId<Idx>) -> crate::Result<Self::Output> {
+    fn search(&mut self, start: VertexId<A::Ix>) -> crate::Result<Self::Output> {
         // Reset state
         self.reset();
 

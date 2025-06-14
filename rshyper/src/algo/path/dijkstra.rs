@@ -13,7 +13,7 @@ use core::hash::Hash;
 use num_traits::bounds::UpperBounded;
 use num_traits::{FromPrimitive, Num};
 use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphAttributes, GraphType, HyperGraph};
+use rshyper_core::{GraphAttributes, HyperGraph};
 use std::collections::{BinaryHeap, HashSet};
 /// a type alias for a map of distances for vertices in the graph
 pub(crate) type Distances<K, V = f64> = std::collections::HashMap<VertexId<K>, V>;
@@ -35,14 +35,11 @@ where
     _marker: core::marker::PhantomData<(N, E)>,
 }
 
-impl<'a, N, E, A, H, K, Idx> Dijkstra<'a, N, E, A, H>
+impl<'a, N, E, A, H> Dijkstra<'a, N, E, A, H>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
-    A: GraphAttributes<Ix = Idx, Kind = K>,
+    A: GraphAttributes,
     H: HyperGraph<N, E, A>,
-    K: GraphType,
-    Idx: RawIndex + Eq + Hash,
+    A::Ix: RawIndex,
 {
     /// Create a new Dijkstra instance
     pub fn new(graph: &'a H) -> Self {
@@ -59,77 +56,86 @@ where
         self.graph
     }
     /// returns a reference to the distances
-    pub const fn distances(&self) -> &Distances<Idx, E> {
+    pub const fn distances(&self) -> &Distances<A::Ix, E> {
         &self.distances
     }
     /// returns a mutable reference to the distances
-    pub const fn distances_mut(&mut self) -> &mut Distances<Idx, E> {
+    pub const fn distances_mut(&mut self) -> &mut Distances<A::Ix, E> {
         &mut self.distances
     }
     /// returns a reference to the previous history
-    pub const fn previous(&self) -> &PreviousHistory<Idx> {
+    pub const fn previous(&self) -> &PreviousHistory<A::Ix> {
         &self.previous
     }
     /// returns a mutable reference to the previous history
-    pub const fn previous_mut(&mut self) -> &mut PreviousHistory<Idx> {
+    pub const fn previous_mut(&mut self) -> &mut PreviousHistory<A::Ix> {
         &mut self.previous
     }
     /// returns a reference to the visited vertices
-    pub const fn visited(&self) -> &Visited<Idx> {
+    pub const fn visited(&self) -> &Visited<A::Ix> {
         &self.visited
     }
     /// returns a mutable reference to the visited vertices
-    pub const fn visited_mut(&mut self) -> &mut Visited<Idx> {
+    pub const fn visited_mut(&mut self) -> &mut Visited<A::Ix> {
         &mut self.visited
     }
     /// update the distances and returns a mutable reference to the instance
-    pub fn set_distances(&mut self, distances: Distances<Idx, E>) -> &mut Self {
+    pub fn set_distances(&mut self, distances: Distances<A::Ix, E>) -> &mut Self {
         *self.distances_mut() = distances;
         self
     }
     /// update the previous history and returns a mutable reference to the instance
-    pub fn set_previous(&mut self, previous: PreviousHistory<Idx>) -> &mut Self {
+    pub fn set_previous(&mut self, previous: PreviousHistory<A::Ix>) -> &mut Self {
         *self.previous_mut() = previous;
         self
     }
     /// update the visited vertices and returns a mutable reference to the instance
-    pub fn set_visited(&mut self, visited: Visited<Idx>) -> &mut Self {
+    pub fn set_visited(&mut self, visited: Visited<A::Ix>) -> &mut Self {
         *self.visited_mut() = visited;
         self
     }
     /// add a new node to the distances
-    pub fn add_distance(&mut self, vertex: VertexId<Idx>, distance: E) -> &mut Self {
+    pub fn add_distance(&mut self, vertex: VertexId<A::Ix>, distance: E) -> &mut Self
+    where
+        A::Ix: Eq + Hash,
+    {
         self.distances_mut().insert(vertex, distance);
         self
     }
     /// add a vertex to the previous history
-    pub fn add_previous(&mut self, vertex: VertexId<Idx>, previous: VertexId<Idx>) -> &mut Self {
+    pub fn add_previous(&mut self, vertex: VertexId<A::Ix>, previous: VertexId<A::Ix>) -> &mut Self
+    where
+        A::Ix: Eq + Hash,
+    {
         self.previous_mut().insert(vertex, previous);
         self
     }
     /// record a vertex as visited
-    pub fn add_visited(&mut self, vertex: VertexId<Idx>) -> &mut Self {
+    pub fn add_visited(&mut self, vertex: VertexId<A::Ix>) -> &mut Self
+    where
+        A::Ix: Eq + Hash,
+    {
         self.visited_mut().insert(vertex);
         self
     }
     /// Find the shortest path from `start` to `goal`
     pub fn find_path(
         &mut self,
-        start: VertexId<Idx>,
-        dest: VertexId<Idx>,
-    ) -> crate::Result<<Self as PathFinder<Idx>>::Path>
+        start: VertexId<A::Ix>,
+        dest: VertexId<A::Ix>,
+    ) -> crate::Result<<Self as PathFinder<A::Ix>>::Path>
     where
-        Self: PathFinder<Idx>,
+        Self: PathFinder<A::Ix>,
     {
         PathFinder::find_path(self, start, dest)
     }
     /// search for a path starting from `start` to the vertex with the largest ID
     pub fn search(
         &mut self,
-        start: VertexId<Idx>,
-    ) -> crate::Result<<Self as Search<VertexId<Idx>>>::Output>
+        start: VertexId<A::Ix>,
+    ) -> crate::Result<<Self as Search<VertexId<A::Ix>>>::Output>
     where
-        Self: Search<VertexId<Idx>>,
+        Self: Search<VertexId<A::Ix>>,
     {
         Search::search(self, start)
     }
@@ -137,7 +143,8 @@ where
     pub fn has_visited<Q>(&self, vertex: &Q) -> bool
     where
         Q: ?Sized + Eq + Hash,
-        VertexId<Idx>: core::borrow::Borrow<Q>,
+        A::Ix: Eq + Hash,
+        VertexId<A::Ix>: core::borrow::Borrow<Q>,
     {
         self.visited().contains(vertex)
     }
@@ -150,18 +157,20 @@ where
     }
 }
 
-impl<'a, N, E, A, S, K, Idx> PathFinder<Idx> for Dijkstra<'a, N, E, A, HashGraph<N, E, A, S>>
+impl<'a, N, E, A, S> PathFinder<A::Ix> for Dijkstra<'a, N, E, A, HashGraph<N, E, A, S>>
 where
-    E: Copy + Default + Eq + Hash + PartialOrd + FromPrimitive + Num + UpperBounded,
-    N: Eq + Hash,
-    A: GraphAttributes<Ix = Idx, Kind = K>,
+    E: Copy + Default + PartialOrd + FromPrimitive + Num + UpperBounded,
+    A: GraphAttributes,
     S: core::hash::BuildHasher + Default,
-    K: GraphType,
-    Idx: NumIndex,
+    A::Ix: NumIndex,
 {
-    type Path = Vec<VertexId<Idx>>;
+    type Path = Vec<VertexId<A::Ix>>;
 
-    fn find_path(&mut self, src: VertexId<Idx>, dest: VertexId<Idx>) -> crate::Result<Self::Path> {
+    fn find_path(
+        &mut self,
+        src: VertexId<A::Ix>,
+        dest: VertexId<A::Ix>,
+    ) -> crate::Result<Self::Path> {
         self.reset();
 
         if !self.graph.contains_node(&src) {
@@ -171,7 +180,7 @@ where
             return Err(crate::Error::NodeNotFound);
         }
 
-        let mut heap: BinaryHeap<QueueNode<Idx, E>> = BinaryHeap::new();
+        let mut heap: BinaryHeap<QueueNode<A::Ix, E>> = BinaryHeap::new();
         self.add_distance(src, E::zero());
         heap.push(QueueNode::from_vertex(src));
 
@@ -213,7 +222,7 @@ where
         Err(crate::Error::PathNotFound)
     }
 
-    fn reconstruct_path(&self, mut goal: VertexId<Idx>) -> Vec<VertexId<Idx>> {
+    fn reconstruct_path(&self, mut goal: VertexId<A::Ix>) -> Vec<VertexId<A::Ix>> {
         // initialize a new path buffer
         let mut path = Vec::new();
         // add the target
@@ -249,8 +258,7 @@ where
 
 impl<'a, N, E, A, S> Search<VertexId<A::Ix>> for Dijkstra<'a, N, E, A, HashGraph<N, E, A, S>>
 where
-    E: Copy + Default + Eq + Hash + PartialOrd + FromPrimitive + Num + UpperBounded,
-    N: Eq + Hash,
+    E: Copy + Default + PartialOrd + FromPrimitive + Num + UpperBounded,
     A: GraphAttributes,
     S: core::hash::BuildHasher + Default,
     A::Ix: NumIndex,

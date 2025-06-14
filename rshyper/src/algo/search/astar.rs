@@ -20,9 +20,6 @@ where
     A: GraphAttributes,
     H: HyperGraph<N, E, A>,
     F: Heuristic<A::Ix>,
-    N: Eq + Hash,
-    E: Eq + Hash,
-    A::Ix: RawIndex + Eq + Hash,
 {
     pub(crate) graph: &'a H,
     pub(crate) open_set: VertexSet<A::Ix>,
@@ -36,13 +33,11 @@ where
 
 impl<'a, N, E, A, F, H, K, Idx> AStarSearch<'a, N, E, A, F, H>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
     A: GraphAttributes<Ix = Idx, Kind = K>,
     H: HyperGraph<N, E, A>,
     F: Heuristic<Idx>,
     K: GraphType,
-    Idx: RawIndex + Eq + Hash,
+    Idx: RawIndex,
 {
     /// Create a new A* search instance with the given heuristic function
     pub fn new(graph: &'a H, heuristic: F) -> Self {
@@ -121,7 +116,8 @@ where
     /// returns true if the given vertex has a f_score
     pub fn has_f_score<Q>(&self, vertex: &Q) -> bool
     where
-        Q: Eq + Hash,
+        Q: ?Sized + Eq + Hash,
+        Idx: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.f_score().contains_key(vertex)
@@ -129,7 +125,8 @@ where
     /// returns true if the given vertex has a g_score
     pub fn has_g_score<Q>(&self, vertex: &Q) -> bool
     where
-        Q: Eq + Hash,
+        Q: ?Sized + Eq + Hash,
+        Idx: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.g_score().contains_key(vertex)
@@ -137,7 +134,8 @@ where
     /// returns true if the given vertex has been visited
     pub fn has_visited<Q>(&self, vertex: &Q) -> bool
     where
-        Q: Eq + Hash,
+        Q: ?Sized + Eq + Hash,
+        Idx: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.closed_set().contains(vertex)
@@ -145,7 +143,8 @@ where
     /// returns true if the given vertex is in the open set
     pub fn in_open_set<Q>(&self, vertex: &Q) -> bool
     where
-        Q: Eq + Hash,
+        Q: ?Sized + Eq + Hash,
+        Idx: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.open_set().contains(vertex)
@@ -154,7 +153,7 @@ where
     /// useful for updating the state, marking a node as processed.
     pub fn move_open_to_closed(&mut self, vertex: &VertexId<Idx>)
     where
-        Idx: Copy,
+        Idx: Copy + Eq + Hash,
     {
         self.open_set_mut().remove(vertex);
         self.closed_set_mut().insert(*vertex);
@@ -195,9 +194,9 @@ impl<'a, N, E, F, A, S, K, Idx> PathFinder<Idx>
     for AStarSearch<'a, N, E, A, F, HashGraph<N, E, A, S>>
 where
     A: GraphAttributes<Ix = Idx, Kind = K>,
-    S: core::hash::BuildHasher + Default,
     E: Eq + Hash,
     N: Eq + Hash,
+    S: core::hash::BuildHasher + Default,
     F: Heuristic<Idx, Output = f64>,
     K: GraphType,
     Idx: NumIndex,
@@ -327,11 +326,9 @@ where
 impl<'a, N, E, F, A, H> Traversal<VertexId<A::Ix>> for AStarSearch<'a, N, E, A, F, H>
 where
     A: GraphAttributes,
+    F: Heuristic<A::Ix, Output = f64>,
     H: HyperGraph<N, E, A>,
     A::Ix: Eq + Hash,
-    E: Eq + Hash,
-    N: Eq + Hash,
-    F: Heuristic<A::Ix, Output = f64>,
 {
     type Store<U> = HashSet<U>;
 
@@ -347,11 +344,11 @@ where
 impl<'a, N, E, F, A, S> Search<VertexId<A::Ix>>
     for AStarSearch<'a, N, E, A, F, HashGraph<N, E, A, S>>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
     A: GraphAttributes,
     F: Heuristic<A::Ix, Output = f64>,
     S: core::hash::BuildHasher + Default,
+    E: Eq + Hash,
+    N: Eq + Hash,
     A::Ix: NumIndex,
 {
     type Output = Vec<VertexId<A::Ix>>;
