@@ -86,13 +86,13 @@ impl<T> RawContainer for [T] {
     seal!();
 }
 
-impl<'a, T> RawContainer for &'a [T] {
+impl<T> RawContainer for &[T] {
     type Item = T;
 
     seal!();
 }
 
-impl<'a, T> RawContainer for &'a mut [T] {
+impl<T> RawContainer for &mut [T] {
     type Item = T;
 
     seal!();
@@ -104,13 +104,13 @@ impl<T, const N: usize> RawContainer for [T; N] {
     seal!();
 }
 
-impl<'a, T, const N: usize> RawContainer for &'a [T; N] {
+impl<T, const N: usize> RawContainer for &[T; N] {
     type Item = T;
 
     seal!();
 }
 
-impl<'a, T, const N: usize> RawContainer for &'a mut [T; N] {
+impl<T, const N: usize> RawContainer for &mut [T; N] {
     type Item = T;
 
     seal!();
