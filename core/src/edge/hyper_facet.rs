@@ -136,7 +136,10 @@ where
         }
     }
     /// consumes the current instance to create another with the given nodes.
-    pub fn with_points<S2: RawStore<Item = VertexId<Idx>>>(self, nodes: S2) -> Surface<T, S2, K, Idx> {
+    pub fn with_points<S2: RawStore<Item = VertexId<Idx>>>(
+        self,
+        nodes: S2,
+    ) -> Surface<T, S2, K, Idx> {
         Surface {
             edge: self.edge.with_points(nodes),
             weight: self.weight,
