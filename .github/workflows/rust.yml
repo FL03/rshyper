@@ -81,7 +81,7 @@ jobs:
         id: artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Benchmark Report for ${{ github.event.repository.name }} (${{ matrix.target }}.${{ github.sha }})
+          name: Benchmark Report (${{ github.event.repository.name }})
           if-no-files-found: error
           overwrite: true
           path: target/criterion/
