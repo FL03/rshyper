@@ -8,8 +8,8 @@ use rshyper::VertexId;
 use core::hint::black_box;
 use criterion::{BatchSize, Criterion};
 
-/// benchmark for adding edges
-fn bench_hash_graph_edge(c: &mut Criterion) {
+/// benchmark for the [`HashGraph`] implementation.
+fn bench_hash_graph(c: &mut Criterion) {
     let mut group = c.benchmark_group("HashGraph");
     // set the sample size for the group
     group.sample_size(SAMPLES);
@@ -45,17 +45,6 @@ fn bench_hash_graph_edge(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
-    // finish the benchmark group
-    group.finish()
-}
-
-/// benchmark calculating the degree of a node
-fn bench_hash_graph_node(c: &mut Criterion) {
-    let mut group = c.benchmark_group("HashGraph");
-    // set the sample size for the group
-    group.sample_size(SAMPLES);
-    // set the duration for the measurement
-    group.measurement_time(std::time::Duration::from_secs(DURATION));
     // benchmark the `add_nodes` function
     group.bench_function("add_nodes", |b| {
         b.iter_batched(
@@ -115,17 +104,6 @@ fn bench_hash_graph_node(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
-    group.finish();
-}
-
-/// benchmark for breadth-first traversal search in the [`HashGraph`]
-fn bench_hash_graph_search(c: &mut Criterion) {
-    // initialize the benchmark group
-    let mut group = c.benchmark_group("HashGraph");
-    // set the sample size for the group
-    group.sample_size(SAMPLES);
-    // set the duration for the measurement
-    group.measurement_time(std::time::Duration::from_secs(DURATION));
     // benchmark the breadth-first traversal search
     group.bench_function("bft", |b| {
         b.iter_batched(
@@ -156,14 +134,13 @@ fn bench_hash_graph_search(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
+    // finish the group
     group.finish();
 }
 
 criterion::criterion_group! {
     benches,
-    bench_hash_graph_edge,
-    bench_hash_graph_node,
-    bench_hash_graph_search,
+    bench_hash_graph,
 }
 
 criterion::criterion_main! {
