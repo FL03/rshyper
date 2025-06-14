@@ -2,7 +2,7 @@
     appellation: edge <module>
     authors: @FL03
 */
-use super::RawStore;
+use super::EdgeStore;
 use crate::GraphType;
 use crate::idx::{EdgeId, RawIndex, VertexId};
 
@@ -10,7 +10,7 @@ use crate::idx::{EdgeId, RawIndex, VertexId};
 pub trait RawEdge {
     type Index: RawIndex;
     type Kind: GraphType;
-    type Store: RawStore<Item = VertexId<Self::Index>>;
+    type Store: EdgeStore<Self::Index>;
 
     private!();
 

@@ -2,7 +2,7 @@
     Appellation: node <module>
     Contrib: @FL03
 */
-use super::{Edge, RawEdge, RawFacet, RawStore};
+use super::{Edge, EdgeStore, RawEdge, RawFacet};
 use crate::idx::{EdgeId, RawIndex, VertexId};
 use crate::{GraphType, Weight};
 
@@ -20,7 +20,7 @@ pub struct Surface<T, S, K, Idx = usize>
 where
     Idx: RawIndex,
     K: GraphType,
-    S: RawStore<Item = VertexId<Idx>>,
+    S: EdgeStore<Idx>,
 {
     pub(crate) edge: Edge<S, K, Idx>,
     pub(crate) weight: Weight<T>,
@@ -30,7 +30,7 @@ impl<T, S, K, Idx> Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
-    S: RawStore<Item = VertexId<Idx>>,
+    S: EdgeStore<Idx>,
 {
     /// create a new instance of the [`Surface`] from the given id, nodes, and weight
     pub fn new(id: EdgeId<Idx>, nodes: S, weight: Weight<T>) -> Self {
@@ -136,10 +136,7 @@ where
         }
     }
     /// consumes the current instance to create another with the given nodes.
-    pub fn with_points<S2: RawStore<Item = VertexId<Idx>>>(
-        self,
-        nodes: S2,
-    ) -> Surface<T, S2, K, Idx> {
+    pub fn with_points<S2: EdgeStore<Idx>>(self, nodes: S2) -> Surface<T, S2, K, Idx> {
         Surface {
             edge: self.edge.with_points(nodes),
             weight: self.weight,
@@ -176,7 +173,7 @@ impl<T, S, Idx, K> RawEdge for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
-    S: RawStore<Item = VertexId<Idx>>,
+    S: EdgeStore<Idx>,
 {
     type Kind = K;
     type Index = Idx;
@@ -201,7 +198,7 @@ impl<T, S, Idx, K> RawFacet<T> for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
-    S: RawStore<Item = VertexId<Idx>>,
+    S: EdgeStore<Idx>,
 {
     seal!();
 

@@ -2,7 +2,7 @@
     appellation: hyper_edge <module>
     authors: @FL03
 */
-use super::{RawEdge, RawStore};
+use super::{EdgeStore, RawEdge};
 use crate::GraphType;
 use crate::idx::{EdgeId, RawIndex, VertexId};
 
@@ -20,7 +20,7 @@ pub struct Edge<S, K, Idx = usize>
 where
     Idx: RawIndex,
     K: GraphType,
-    S: RawStore<Item = VertexId<Idx>>,
+    S: EdgeStore<Idx>,
 {
     pub(crate) id: EdgeId<Idx>,
     pub(crate) points: S,
@@ -31,7 +31,7 @@ impl<S, K, Idx> Edge<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
-    S: RawStore<Item = VertexId<Idx>>,
+    S: EdgeStore<Idx>,
 {
     pub fn new(id: EdgeId<Idx>, points: S) -> Self {
         Self {
@@ -85,7 +85,7 @@ where
         Self { id, ..self }
     }
     /// consumes the current instance to create another with the given nodes.
-    pub fn with_points<S2: RawStore<Item = VertexId<Idx>>>(self, nodes: S2) -> Edge<S2, K, Idx> {
+    pub fn with_points<S2: EdgeStore<Idx>>(self, nodes: S2) -> Edge<S2, K, Idx> {
         Edge {
             id: self.id,
             points: nodes,
@@ -117,14 +117,14 @@ where
     /// returns the number of vertices in the edge
     pub fn len(&self) -> usize
     where
-        S: RawStore<Item = VertexId<Idx>>,
+        S: EdgeStore<Idx>,
     {
         self.points().len()
     }
     /// returns true if the edge has no vertices
     pub fn is_empty(&self) -> bool
     where
-        S: RawStore<Item = VertexId<Idx>>,
+        S: EdgeStore<Idx>,
     {
         self.points().is_empty()
     }
@@ -134,7 +134,7 @@ impl<S, K, Idx> RawEdge for Edge<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
-    S: RawStore<Item = VertexId<Idx>>,
+    S: EdgeStore<Idx>,
 {
     type Kind = K;
     type Index = Idx;
@@ -157,7 +157,7 @@ where
 
 impl<S, K, Idx> super::HyperEdge for Edge<S, K, Idx>
 where
-    S: RawStore<Item = VertexId<Idx>>,
+    S: EdgeStore<Idx>,
     Idx: RawIndex,
     K: GraphType,
 {

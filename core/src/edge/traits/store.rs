@@ -23,16 +23,23 @@ pub trait RawStore {
         self.len() == 0
     }
 }
+/// An [`EdgeStore`] is a trait is a specialization of the [`RawStore`] trait that represents
+/// a store for edges, which are collections of vertices. It is used to define the behavior
+pub trait EdgeStore<Idx = usize>: RawStore<Item = VertexId<Idx>>
+where
+    Idx: RawIndex,
+{
+}
 /// The [`BinaryStore`] trait extends the [`RawStore`] trait to provide specific methods for
 /// binary edges, which are edges that connect exactly two vertices.
-pub trait BinaryStore<Idx = usize>: RawStore<Item = VertexId<Idx>>
+pub trait BinaryStore<Idx>: RawStore<Item = VertexId<Idx>>
 where
     Idx: RawIndex,
 {
     /// returns the left-hand side vertex of the edge.
-    fn lhs(&self) -> &VertexId<Idx>;
+    fn lhs(&self) -> &Self::Item;
     /// returns the right-hand side vertex of the edge.
-    fn rhs(&self) -> &VertexId<Idx>;
+    fn rhs(&self) -> &Self::Item;
 }
 /// The [`StoreIter`] trait extends the [`RawStore`] trait to provide iteration capabilities
 /// over the vertices stored in the edge.
@@ -45,12 +52,19 @@ where
         _T: 'a,
         Self: 'a;
     /// returns an iterator over the vertices in the store.
-    fn iter(&self) -> Self::Iter<'_, VertexId<Idx>>;
+    fn iter(&self) -> Self::Iter<'_, Self::Item>;
 }
 
 /*
  ************* Implementations *************
 */
+impl<S, Idx> EdgeStore<Idx> for S
+where
+    Idx: RawIndex,
+    S: RawStore<Item = VertexId<Idx>>,
+{
+}
+
 impl<I> RawStore for &[VertexId<I>]
 where
     I: RawIndex,
