@@ -31,7 +31,7 @@ fn bench_hash_graph_edge(c: &mut Criterion) {
         )
     });
     // benchmark the `remove_edge` function
-    group.bench_function("HashGraph::remove_edge", |b| {
+    group.bench_function("remove_edge", |b| {
         b.iter_batched(
             setup,
             |mut graph| {
