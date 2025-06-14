@@ -195,14 +195,6 @@ required-features = [
 
 [[bench]]
 harness = false
-name = "hg_edge"
-required-features = [
-    "hash_graph",
-    "rand",
-]
-
-[[bench]]
-harness = false
 name = "hg_search"
 required-features = [
     "hash_graph",
