@@ -95,9 +95,9 @@ where
     /// returns true if the edge contains the given vertex index
     pub fn contains<Q>(&self, index: &Q) -> bool
     where
-        VertexId<Idx>: core::borrow::Borrow<Q>,
-        Q: PartialEq,
         Idx: PartialEq,
+        Q: ?Sized + PartialEq,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
         for<'a> &'a S: IntoIterator<Item = &'a VertexId<Idx>>,
     {
         use core::borrow::Borrow;
@@ -106,10 +106,10 @@ where
     /// returns true if the edge contains all the given vertex indices
     pub fn contains_all<Q, I>(&self, indices: I) -> bool
     where
-        VertexId<Idx>: core::borrow::Borrow<Q>,
-        Q: PartialEq,
         Idx: PartialEq,
         I: IntoIterator<Item = Q>,
+        Q: PartialEq,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
         for<'a> &'a S: IntoIterator<Item = &'a VertexId<Idx>>,
     {
         indices.into_iter().all(|index| self.contains(&index))

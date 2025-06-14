@@ -106,11 +106,11 @@ where
         self.edge_mut().id_mut()
     }
     /// returns an immutable reference to the nodes
-    pub const fn nodes(&self) -> &S {
+    pub const fn domain(&self) -> &S {
         self.edge().domain()
     }
     /// returns a mutable reference to the nodes
-    pub const fn nodes_mut(&mut self) -> &mut S {
+    pub const fn domain_mut(&mut self) -> &mut S {
         self.edge_mut().domain_mut()
     }
     /// updates the id and returns a mutable reference to the instance
@@ -136,7 +136,7 @@ where
         }
     }
     /// consumes the current instance to create another with the given nodes.
-    pub fn with_domainfrom_domain<S2: Domain<Idx>>(self, nodes: S2) -> Surface<T, S2, K, Idx> {
+    pub fn with_domain<S2: Domain<Idx>>(self, nodes: S2) -> Surface<T, S2, K, Idx> {
         Surface {
             edge: self.edge.with_domain(nodes),
             weight: self.weight,
@@ -153,7 +153,7 @@ where
     pub fn contains<Q>(&self, index: &Q) -> bool
     where
         VertexId<Idx>: core::borrow::Borrow<Q>,
-        Q: PartialEq,
+        Q: ?Sized + PartialEq,
         Idx: PartialEq,
         for<'a> &'a S: IntoIterator<Item = &'a VertexId<Idx>>,
     {
@@ -166,6 +166,30 @@ where
     /// returns the number of nodes in the edge
     pub fn len(&self) -> usize {
         self.edge().len()
+    }
+}
+
+#[allow(deprecated)]
+#[doc(hidden)]
+impl<T, S, K, Idx> Surface<T, S, K, Idx>
+where
+    Idx: RawIndex,
+    K: GraphType,
+    S: Domain<Idx>,
+{
+    #[deprecated(
+        note = "Use `domain` instead. This method will be removed in the next major version.",
+        since = "0.1.2"
+    )]
+    pub const fn nodes(&self) -> &S {
+        self.edge().domain()
+    }
+    #[deprecated(
+        note = "Use `domain_mut` instead. This method will be removed in the next major version.",
+        since = "0.1.2"
+    )]
+    pub const fn nodes_mut(&mut self) -> &mut S {
+        self.edge_mut().domain_mut()
     }
 }
 

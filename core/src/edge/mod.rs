@@ -10,7 +10,9 @@ pub use self::utils::prelude::*;
 #[doc(inline)]
 pub use self::{hyper_edge::*, hyper_facet::*, traits::prelude::*, types::prelude::*};
 
+/// the [`hyper_edge`] module defines the [`Edge`] type representing the basis of a hyperedge
 pub mod hyper_edge;
+/// the [`hyper_facet`] module defines the [`Surface`] type representing a "complete" hyperedge
 pub mod hyper_facet;
 
 mod impls {

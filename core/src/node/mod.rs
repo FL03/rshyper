@@ -2,13 +2,13 @@
     appellation: node <module>
     authors: @FL03
 */
-//! this module provides the [`HyperNode`] implmenetation alongisde the several traits such as
+//! this module provides the [`Node`] implmenetation alongisde the several traits such as
 //! [`RawNode`] and [`RawPoint`] focused on establishing a common, well-defined interface for
 //! weighted and unweighted "points" within a hypergraph.
 #[doc(inline)]
 pub use self::prelude::*;
 
-/// this module defines the [`HyperNode`] type
+/// this module defines the [`Node`] type
 pub mod hyper_node;
 
 mod impls {
