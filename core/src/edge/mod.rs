@@ -5,7 +5,9 @@
 //! this module contains the [`Edge`] and [`Surface`] implementations, which are
 //! respectively used to represent unweighted and weighted hyperedges in a hypergraph.
 #[doc(inline)]
-pub use self::{hyper_edge::*, hyper_facet::*, traits::prelude::*, types::prelude::*};
+pub use self::{
+    hyper_edge::*, hyper_facet::*, traits::prelude::*, types::prelude::*, utils::prelude::*,
+};
 
 pub mod hyper_edge;
 pub mod hyper_facet;
@@ -32,12 +34,12 @@ pub mod traits {
     pub use self::prelude::*;
     /// this module defines the [`RawEdge`] trait for establishing a common interface for
     /// representations of a hyperedge
-    pub mod edge;
+    mod edge;
     /// this module defines the [`RawStore`] trait for establishing a common interface for
     /// representations of a set of [`VertexId`] that compose some edge
-    pub mod store;
+    mod store;
     /// this module defines the [`RawFacet`] trait
-    pub mod surface;
+    mod surface;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -60,5 +62,19 @@ pub mod types {
     pub(crate) mod prelude {
         #[doc(inline)]
         pub use super::aliases::*;
+    }
+}
+
+pub mod utils {
+    #[doc(inline)]
+    pub use self::prelude::*;
+
+    #[cfg(feature = "rand")]
+    mod rand;
+
+    pub(crate) mod prelude {
+        #[cfg(feature = "rand")]
+        #[doc(inline)]
+        pub use super::rand::*;
     }
 }
