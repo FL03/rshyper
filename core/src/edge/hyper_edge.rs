@@ -20,7 +20,7 @@ pub struct Edge<S, K, Idx = usize>
 where
     Idx: RawIndex,
     K: GraphType,
-    S: RawStore<Idx>,
+    S: RawStore<Item = VertexId<Idx>>,
 {
     pub(crate) id: EdgeId<Idx>,
     pub(crate) points: S,
@@ -31,7 +31,7 @@ impl<S, K, Idx> Edge<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
-    S: RawStore<Idx>,
+    S: RawStore<Item = VertexId<Idx>>,
 {
     pub fn new(id: EdgeId<Idx>, points: S) -> Self {
         Self {
@@ -85,7 +85,7 @@ where
         Self { id, ..self }
     }
     /// consumes the current instance to create another with the given nodes.
-    pub fn with_points<S2: RawStore<Idx>>(self, nodes: S2) -> Edge<S2, K, Idx> {
+    pub fn with_points<S2: RawStore<Item = VertexId<Idx>>>(self, nodes: S2) -> Edge<S2, K, Idx> {
         Edge {
             id: self.id,
             points: nodes,
@@ -117,24 +117,24 @@ where
     /// returns the number of vertices in the edge
     pub fn len(&self) -> usize
     where
-        S: RawStore<Idx>,
+        S: RawStore<Item = VertexId<Idx>>,
     {
         self.points().len()
     }
     /// returns true if the edge has no vertices
     pub fn is_empty(&self) -> bool
     where
-        S: RawStore<Idx>,
+        S: RawStore<Item = VertexId<Idx>>,
     {
         self.points().is_empty()
     }
 }
 
-impl<S, Idx, K> RawEdge for Edge<S, K, Idx>
+impl<S, K, Idx> RawEdge for Edge<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
-    S: RawStore<Idx>,
+    S: RawStore<Item = VertexId<Idx>>,
 {
     type Kind = K;
     type Index = Idx;
@@ -155,13 +155,13 @@ where
     }
 }
 
-impl<S, I, K> super::HyperEdge for Edge<S, K, I>
+impl<S, K, Idx> super::HyperEdge for Edge<S, K, Idx>
 where
-    S: RawStore<I>,
-    I: RawIndex,
+    S: RawStore<Item = VertexId<Idx>>,
+    Idx: RawIndex,
     K: GraphType,
 {
-    fn new(id: EdgeId<I>, vertices: S) -> Self {
+    fn new(id: EdgeId<Idx>, vertices: S) -> Self {
         Self::new(id, vertices)
     }
 }

@@ -10,7 +10,7 @@ use crate::idx::{EdgeId, RawIndex, VertexId};
 pub trait RawEdge {
     type Index: RawIndex;
     type Kind: GraphType;
-    type Store: RawStore<Self::Index>;
+    type Store: RawStore<Item = VertexId<Self::Index>>;
 
     private!();
 
@@ -56,11 +56,11 @@ where
     K: GraphType,
 {
     fn lhs(&self) -> &VertexId<I> {
-        &self.points().lhs()
+        self.points().lhs()
     }
 
     fn rhs(&self) -> &VertexId<I> {
-        &self.points().rhs()
+        self.points().rhs()
     }
 }
 

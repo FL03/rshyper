@@ -11,10 +11,8 @@ use crate::idx::{RawIndex, VertexId};
 /// **note:** The trait is sealed to prevent external implementations, ensuring that only the
 /// crate can define how edges are stored. This is to maintain consistency and prevent
 /// misuse of the trait in different contexts.
-pub trait RawStore<Idx = usize>
-where
-    Idx: RawIndex,
-{
+pub trait RawStore {
+    type Item;
     type Store<_T>: ?Sized;
 
     private!();
@@ -27,7 +25,7 @@ where
 }
 /// The [`BinaryStore`] trait extends the [`RawStore`] trait to provide specific methods for
 /// binary edges, which are edges that connect exactly two vertices.
-pub trait BinaryStore<Idx = usize>: RawStore<Idx>
+pub trait BinaryStore<Idx = usize>: RawStore<Item = VertexId<Idx>>
 where
     Idx: RawIndex,
 {
@@ -38,7 +36,7 @@ where
 }
 /// The [`StoreIter`] trait extends the [`RawStore`] trait to provide iteration capabilities
 /// over the vertices stored in the edge.
-pub trait StoreIter<Idx = usize>: RawStore<Idx>
+pub trait StoreIter<Idx = usize>: RawStore<Item = VertexId<Idx>>
 where
     Idx: RawIndex,
 {
@@ -53,10 +51,11 @@ where
 /*
  ************* Implementations *************
 */
-impl<I> RawStore<I> for &[VertexId<I>]
+impl<I> RawStore for &[VertexId<I>]
 where
     I: RawIndex,
 {
+    type Item = VertexId<I>;
     type Store<_T> = [_T];
 
     seal!();
@@ -70,10 +69,11 @@ where
     }
 }
 
-impl<I> RawStore<I> for [VertexId<I>]
+impl<I> RawStore for [VertexId<I>]
 where
     I: RawIndex,
 {
+    type Item = VertexId<I>;
     type Store<_T> = [_T];
 
     seal!();
@@ -87,10 +87,11 @@ where
     }
 }
 
-impl<const N: usize, I> RawStore<I> for [VertexId<I>; N]
+impl<const N: usize, I> RawStore for [VertexId<I>; N]
 where
     I: RawIndex,
 {
+    type Item = VertexId<I>;
     type Store<_T> = [_T; N];
 
     seal!();
@@ -153,10 +154,11 @@ where
     }
 }
 
-impl<I> RawStore<I> for (VertexId<I>, VertexId<I>)
+impl<I> RawStore for (VertexId<I>, VertexId<I>)
 where
     I: RawIndex,
 {
+    type Item = VertexId<I>;
     type Store<_T> = (_T, _T);
 
     seal!();
@@ -186,10 +188,11 @@ where
 #[allow(unused_macros)]
 macro_rules! impl_raw_store {
     (@impl $t:ident<$T:ident>) => {
-        impl<$T> $crate::edge::RawStore<I> for $t<VertexId<$T>>
+        impl<$T> $crate::edge::RawStore for $t<VertexId<$T>>
         where
             $T: $crate::idx::RawIndex,
         {
+            type Item = VertexId<$T>;
             type Store<_T> = $t<_T>;
 
             seal!();
@@ -267,11 +270,12 @@ mod impl_std {
     use core::hash::BuildHasher;
     use std::collections::hash_set::{self, HashSet};
 
-    impl<I, S> RawStore<I> for HashSet<VertexId<I>, S>
+    impl<I, S> RawStore for HashSet<VertexId<I>, S>
     where
         I: RawIndex,
         S: BuildHasher,
     {
+        type Item = VertexId<I>;
         type Store<_T> = HashSet<_T, S>;
 
         seal!();

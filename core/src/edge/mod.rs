@@ -68,13 +68,17 @@ pub mod types {
 
 pub mod utils {
     //! this module implements various utility functions for working with edges in a hypergraph
+    #[allow(unused_imports)]
     #[doc(inline)]
     pub use self::prelude::*;
 
+    mod base;
     #[cfg(feature = "rand")]
     mod rand;
 
     pub(crate) mod prelude {
+        #[doc(inline)]
+        pub use super::base::*;
         #[cfg(feature = "rand")]
         #[doc(inline)]
         pub use super::rand::*;

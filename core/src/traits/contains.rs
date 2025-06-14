@@ -23,7 +23,7 @@ use crate::idx::{RawIndex, VertexId};
 impl<S, K, Idx, Q> Contains<Q> for Edge<S, K, Idx>
 where
     Q: PartialEq,
-    S: RawStore<Idx>,
+    S: RawStore<Item = VertexId<Idx>>,
     K: GraphType,
     Idx: RawIndex + PartialEq,
     for<'a> &'a S: IntoIterator<Item = &'a VertexId<Idx>>,
@@ -41,7 +41,7 @@ where
 impl<T, S, K, Idx, Q> Contains<Q> for Surface<T, S, K, Idx>
 where
     Q: PartialEq,
-    S: RawStore<Idx>,
+    S: RawStore<Item = VertexId<Idx>>,
     K: GraphType,
     Idx: RawIndex + PartialEq,
     for<'a> &'a S: IntoIterator<Item = &'a VertexId<Idx>>,
