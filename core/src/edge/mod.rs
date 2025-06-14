@@ -5,9 +5,10 @@
 //! this module contains the [`Edge`] and [`Surface`] implementations, which are
 //! respectively used to represent unweighted and weighted hyperedges in a hypergraph.
 #[doc(inline)]
-pub use self::{
-    hyper_edge::*, hyper_facet::*, traits::prelude::*, types::prelude::*, utils::prelude::*,
-};
+#[allow(unused_imports)]
+pub use self::utils::prelude::*;
+#[doc(inline)]
+pub use self::{hyper_edge::*, hyper_facet::*, traits::prelude::*, types::prelude::*};
 
 pub mod hyper_edge;
 pub mod hyper_facet;
@@ -66,6 +67,7 @@ pub mod types {
 }
 
 pub mod utils {
+    //! this module implements various utility functions for working with edges in a hypergraph
     #[doc(inline)]
     pub use self::prelude::*;
 
