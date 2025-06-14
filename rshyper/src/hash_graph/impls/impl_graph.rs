@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use crate::hash_graph::{HashFacet, HashGraph, VertexSet};
-use crate::{GraphAttributes, GraphType};
+use crate::{AddStep, GraphAttributes, GraphType};
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::idx::{EdgeId, RawIndex, VertexId};
 use rshyper_core::{Node, Surface, Weight};
@@ -22,7 +22,7 @@ where
     pub fn add_edge<I>(&mut self, vertices: I) -> crate::Result<EdgeId<Idx>>
     where
         I: IntoIterator<Item = VertexId<Idx>>,
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Copy,
         E: Default,
         S: Default,
     {
@@ -34,7 +34,7 @@ where
     where
         I: IntoIterator<Item = VertexId<Idx>>,
         E: Eq + Hash,
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Copy,
         S: Default,
     {
         // collect the vertices into a HashSet to ensure uniqueness
@@ -63,7 +63,7 @@ where
     /// add a new node with the given weight and return its index
     pub fn add_node(&mut self, weight: Weight<N>) -> crate::Result<VertexId<Idx>>
     where
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Copy,
     {
         // generate a new index to identify the new node
         let ndx = self.next_vertex_id();
@@ -83,7 +83,7 @@ where
     pub fn add_nodes<I>(&mut self, weights: I) -> crate::Result<Vec<VertexId<Idx>>>
     where
         I: IntoIterator<Item = N>,
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Copy,
     {
         let ids = weights
             .into_iter()
@@ -95,7 +95,7 @@ where
     pub fn add_vertex(&mut self) -> crate::Result<VertexId<Idx>>
     where
         N: Default,
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Copy,
     {
         self.add_node(Default::default())
     }
@@ -291,7 +291,7 @@ where
     where
         Q: Eq + Hash + core::fmt::Debug,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Copy,
         S: Default,
         for<'a> &'a E: core::ops::Add<Output = E>,
     {
@@ -310,7 +310,7 @@ where
     where
         Q: Eq + Hash + core::fmt::Debug,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Copy,
         F: FnOnce(&E, &E) -> E,
         S: Default,
     {
