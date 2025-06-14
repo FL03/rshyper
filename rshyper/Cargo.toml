@@ -193,14 +193,6 @@ required-features = [
     "rand",
 ]
 
-[[bench]]
-harness = false
-name = "hg_search"
-required-features = [
-    "hash_graph",
-    "rand",
-]
-
 # ************* [Examples] *************
 [[example]]
 name = "basic_usage"

@@ -113,10 +113,48 @@ fn bench_hash_graph_node(c: &mut Criterion) {
     group.finish();
 }
 
+/// benchmark for breadth-first traversal search in the [`HashGraph`]
+fn bench_hash_graph_search(c: &mut Criterion) {
+    // initialize the benchmark group
+    let mut group = c.benchmark_group("HashGraph");
+    // set the sample size for the group
+    group.sample_size(SAMPLES);
+    group.bench_function("bft", |b| {
+        b.iter_batched(
+            setup,
+            |graph| {
+                    let i = rand::random_range(0..(N as u128)) % 100;
+                    let idx = VertexId::from(i as usize);
+                    // get the degree of each nodelet id = n.into();
+                    // search the graph for some target vertex
+                    graph.bft().search(black_box(idx)).unwrap();
+                },
+
+            BatchSize::SmallInput,
+        )
+    });
+    group.bench_function("dft", |b| {
+        b.iter_batched(
+            setup,
+            |graph| {
+                    let i = rand::random_range(0..(N as u128)) % 100;
+                    let idx = VertexId::from(i as usize);
+                    // get the degree of each nodelet id = n.into();
+                    // search the graph for some target vertex
+                    graph.dft().search(black_box(idx)).unwrap();
+                },
+
+            BatchSize::SmallInput,
+        )
+    });
+    group.finish();
+}
+
 criterion::criterion_group! {
     benches,
     bench_hash_graph_edge,
     bench_hash_graph_node,
+    bench_hash_graph_search,
 }
 
 criterion::criterion_main! {
