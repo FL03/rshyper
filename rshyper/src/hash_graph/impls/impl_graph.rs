@@ -353,7 +353,7 @@ where
             .remove(index)
             .ok_or(crate::Error::NodeNotFound)
             .inspect(|node| {
-                self.history_mut().remove_node(node.index());
+                self.history_mut().remove_point(node.index());
                 #[cfg(feature = "tracing")]
                 tracing::trace!(
                     "successfully removed the node; removing edges that contained the vertex..."

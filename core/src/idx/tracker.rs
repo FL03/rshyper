@@ -20,7 +20,7 @@ where
 {
     pub(crate) cursor: IndexCursor<Ix>,
     pub(crate) edges: Vec<EdgeId<Ix>>,
-    pub(crate) nodes: Vec<VertexId<Ix>>,
+    pub(crate) points: Vec<VertexId<Ix>>,
 }
 
 impl<Ix> IndexTracker<Ix>
@@ -32,11 +32,29 @@ where
     where
         Ix: Default,
     {
+        Self::from_cursor(IndexCursor::default())
+    }
+    /// creates a new instance with an empty history and the given cursor.
+    pub fn from_cursor(cursor: IndexCursor<Ix>) -> Self {
         Self {
-            cursor: IndexCursor::default(),
+            cursor,
             edges: Vec::new(),
-            nodes: Vec::new(),
+            points: Vec::new(),
         }
+    }
+    /// create a new history with the cursor initialized to `1`
+    pub fn one() -> Self
+    where
+        Ix: num_traits::One,
+    {
+        Self::from_cursor(IndexCursor::one())
+    }
+    /// create a new history with the cursor initialized to `0`
+    pub fn zero() -> Self
+    where
+        Ix: num_traits::Zero,
+    {
+        Self::from_cursor(IndexCursor::zero())
     }
     /// returns a reference to the current cursor.
     pub const fn cursor(&self) -> &IndexCursor<Ix> {
@@ -55,12 +73,12 @@ where
         &mut self.edges
     }
     /// returns an immutable reference to the node history
-    pub const fn nodes(&self) -> &Vec<VertexId<Ix>> {
-        &self.nodes
+    pub const fn points(&self) -> &Vec<VertexId<Ix>> {
+        &self.points
     }
-    /// returns a mutable reference to the node history
-    pub const fn nodes_mut(&mut self) -> &mut Vec<VertexId<Ix>> {
-        &mut self.nodes
+    /// returns a mutable reference to the history of created nodes
+    pub const fn points_mut(&mut self) -> &mut Vec<VertexId<Ix>> {
+        &mut self.points
     }
     /// set the current position and return a mutable reference to the tracker
     #[inline]
@@ -76,8 +94,8 @@ where
     }
     /// overwrite the node history and return a mutable reference to the tracker
     #[inline]
-    pub fn set_nodes(&mut self, nodes: Vec<VertexId<Ix>>) -> &mut Self {
-        *self.nodes_mut() = nodes;
+    pub fn set_points(&mut self, nodes: Vec<VertexId<Ix>>) -> &mut Self {
+        *self.points_mut() = nodes;
         self
     }
     /// consumes the current instance to create another with the given position
@@ -92,8 +110,11 @@ where
     }
     /// consumes the current instance to create another with the given node history
     #[inline]
-    pub fn with_nodes(self, nodes: Vec<VertexId<Ix>>) -> Self {
-        Self { nodes, ..self }
+    pub fn with_points(self, nodes: Vec<VertexId<Ix>>) -> Self {
+        Self {
+            points: nodes,
+            ..self
+        }
     }
     /// add a new edge index to the history.
     #[inline]
@@ -103,8 +124,8 @@ where
     }
     /// add a new node index to the history.
     #[inline]
-    pub fn add_node(&mut self, index: VertexId<Ix>) -> &mut Self {
-        self.nodes_mut().push(index);
+    pub fn add_point(&mut self, index: VertexId<Ix>) -> &mut Self {
+        self.points_mut().push(index);
         self
     }
     /// returns true if the element is in the edge history
@@ -117,11 +138,11 @@ where
     }
     /// returns true if the element is in the node history
     #[inline]
-    pub fn contains_node(&self, index: &VertexId<Ix>) -> bool
+    pub fn contains_point(&self, index: &VertexId<Ix>) -> bool
     where
         Ix: PartialEq,
     {
-        self.nodes().contains(index)
+        self.points().contains(index)
     }
     /// returns a reference to the edge if at the given index
     #[inline]
@@ -141,19 +162,19 @@ where
     }
     /// returns a reference to the node if at the given index
     #[inline]
-    pub fn get_node<I>(&self, index: I) -> Option<&I::Output>
+    pub fn get_point<I>(&self, index: I) -> Option<&I::Output>
     where
         I: core::slice::SliceIndex<[VertexId<Ix>]>,
     {
-        self.nodes().get(index)
+        self.points().get(index)
     }
     /// returns a mutable reference to the node id
     #[inline]
-    pub fn get_node_mut<I>(&mut self, index: I) -> Option<&mut I::Output>
+    pub fn get_point_mut<I>(&mut self, index: I) -> Option<&mut I::Output>
     where
         I: core::slice::SliceIndex<[VertexId<Ix>]>,
     {
-        self.nodes_mut().get_mut(index)
+        self.points_mut().get_mut(index)
     }
     /// remove the index from the history for the specified kind.
     #[inline]
@@ -172,17 +193,17 @@ where
     }
     /// remove the index from the history for the specified kind.
     #[inline]
-    pub fn remove_node(&mut self, index: &Ix) -> &mut Self
+    pub fn remove_point(&mut self, index: &Ix) -> &mut Self
     where
         Ix: PartialEq,
     {
-        self.retain_node(|i| i != index);
+        self.retain_point(|i| i != index);
         self
     }
     /// removes an edge index from the history for the specified kind.
     #[inline]
-    pub fn remove_node_at(&mut self, index: usize) -> &mut Self {
-        self.nodes_mut().remove(index);
+    pub fn remove_point_at(&mut self, index: usize) -> &mut Self {
+        self.points_mut().remove(index);
         self
     }
     /// remove the index from the history for the specified kind.
@@ -195,11 +216,11 @@ where
     }
     /// retains only nodes satisfying the predicate `f`.
     #[inline]
-    pub fn retain_node<F>(&mut self, f: F)
+    pub fn retain_point<F>(&mut self, f: F)
     where
         F: FnMut(&VertexId<Ix>) -> bool,
     {
-        self.nodes_mut().retain(f);
+        self.points_mut().retain(f);
     }
     /// steps the edge index forward before storing and returning the previous index
     #[inline]
@@ -221,19 +242,19 @@ where
     }
     /// steps the node index forward before storing and returning the previous index
     #[inline]
-    pub fn next_node(&mut self) -> Result<VertexId<Ix>, IndexError>
+    pub fn next_point(&mut self) -> Result<VertexId<Ix>, IndexError>
     where
         Ix: AddStep<Output = Ix> + Copy + PartialEq,
     {
         // step the current node cursor forward before replacing and returning
         // the previous index
-        let prev = self.cursor_mut().next_vertex()?;
+        let prev = self.cursor_mut().next_point()?;
         // check if the previous node index is already in the history
-        if self.nodes().contains(&prev) {
+        if self.points().contains(&prev) {
             return Err(IndexError::DuplicateIndex);
         }
         // add the previous node index to the history
-        self.add_node(prev);
+        self.add_point(prev);
         // return the previous node index
         Ok(prev)
     }
@@ -251,14 +272,14 @@ where
     }
     #[deprecated(since = "0.1.2", note = "use `add_node` instead")]
     pub fn add_vertex_index(&mut self, index: VertexId<Ix>) -> &mut Self {
-        self.add_node(index)
+        self.add_point(index)
     }
     #[deprecated(since = "0.1.2", note = "use `remove_node` instead")]
     pub fn remove_vertex(&mut self, index: &Ix) -> &mut Self
     where
         Ix: PartialEq,
     {
-        self.remove_node(index)
+        self.remove_point(index)
     }
     #[deprecated(since = "0.1.2", note = "use `next_edge` instead")]
     pub fn next_edge_index(&mut self) -> Result<EdgeId<Ix>, IndexError>
@@ -267,11 +288,11 @@ where
     {
         self.next_edge()
     }
-    #[deprecated(since = "0.1.2", note = "use `next_node` instead")]
+    #[deprecated(since = "0.1.2", note = "use `next_point` instead")]
     pub fn next_vertex_index(&mut self) -> Result<VertexId<Ix>, IndexError>
     where
         Ix: AddStep<Output = Ix> + Copy + PartialEq,
     {
-        self.next_node()
+        self.next_point()
     }
 }

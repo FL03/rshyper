@@ -264,7 +264,7 @@ where
     where
         Idx: crate::AddStep<Output = Idx>,
     {
-        self.position_mut().next_vertex().unwrap()
+        self.position_mut().next_point().unwrap()
     }
     /// returns the total number of edges within the hypergraph
     pub fn total_edges(&self) -> usize {
