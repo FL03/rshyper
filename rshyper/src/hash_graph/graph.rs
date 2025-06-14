@@ -2,6 +2,8 @@
     Appellation: hash_graph <module>
     Contrib: @FL03
 */
+//! this module provides the [`HashGraph`] definition along with a couple aliases for 
+//! convenience.
 use super::aliases::*;
 
 use rshyper_core::attrs::{DiAttributes, GraphAttributes, UnAttributes};
