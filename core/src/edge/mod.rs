@@ -35,9 +35,9 @@ pub mod traits {
     pub use self::prelude::*;
     /// this module defines the [`RawEdge`] trait for establishing a common interface for
     /// representations of a hyperedge
-    mod edge;
+    pub mod edge;
     /// this module defines the [`RawFacet`] trait
-    mod surface;
+    pub mod surface;
 
     pub(crate) mod prelude {
         #[doc(inline)]

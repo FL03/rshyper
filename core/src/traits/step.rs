@@ -13,10 +13,10 @@ pub trait StepWith<T> {
     where
         F: FnOnce(&T) -> T;
 }
-/// [`Step`] is a trait establishing a common interface for entities that may be progressed,
+/// [`StepSelf`] is a trait establishing a common interface for entities that may be progressed,
 /// producing some [`Output`](Step::Output) as a result. The trait is typically used to define
 /// generators for indices within the hypergraph.
-pub trait Step {
+pub trait StepSelf {
     /// the expected output type of the step function
     type Output;
 
@@ -27,24 +27,6 @@ pub trait Step {
 pub trait AddStep<T = Self>: StepWith<T> {
     /// computes the next value by adding a step to the current one, replacing and returning it
     fn add_step(&mut self) -> Self::Output;
-}
-/// [`CreateNext`] is a trait that defines a method to create the next value based on the
-/// current one. It is similar to a generator function that produces a new value given the
-/// current state.
-pub trait CreateNext<T = Self> {
-    type Output;
-
-    /// Creates the next value based on the current one.
-    fn create_next(&self) -> Self::Output;
-}
-
-pub trait CreateNextWith<T = Self> {
-    type Output;
-
-    /// Creates the next value based on the current one and a provided function.
-    fn create_next_with<F>(&self, f: F) -> Self::Output
-    where
-        F: FnOnce(&T) -> T;
 }
 
 /*
@@ -70,7 +52,7 @@ macro_rules! impl_step_add {
         )*
     };
     (@saturating $t:ty) => {
-        impl Step for $t {
+        impl StepSelf for $t {
             type Output = $t;
 
             /// Creates the next value by incrementing the current one.
@@ -99,7 +81,7 @@ macro_rules! impl_step_add {
             }
         }
 
-        impl Step for $t {
+        impl StepSelf for $t {
             type Output = $t;
 
             /// Creates the next value by incrementing the current one.

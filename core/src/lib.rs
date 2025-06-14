@@ -1,13 +1,19 @@
+/*
+    appellation: rshyper-core <library>
+    authors: @FL03
+*/
 //! # rshyper-core
 //!
 //! This crate provides the core functionality for the rshyper library, implementing various
 //! primitives and utilities for working with hypergraphs.
 //!
-//! ## Features
+//! ## Components
 //!
-//! - `alloc`: enables the use of the `alloc` crate, allowing for dynamic memory allocation.
-//! - `std`: enables the use of the standard library, providing additional functionality and
-//!   types.
+//! - [`attrs`]: Contains the [`Attributes`] and [`GraphAttributes`] types for managing graph
+//!   attributes.
+//! - [`edge`]: implements the [`Edge`] and [`Surface`] types for representing hyperedges
+//! - [`node`]: provides the [`Node`] implementation for representing hypernodes
+//! - [`weight`]: gives the [`Weight`] type for representing weights in a hypergraph
 //!
 #![allow(
     clippy::should_implement_trait,
@@ -15,8 +21,6 @@
     clippy::missing_safety_doc
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![crate_name = "rshyper_core"]
-#![crate_type = "lib"]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/rshyper/rshyper/main/assets/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/rshyper/rshyper/main/assets/logo.svg"
@@ -38,7 +42,6 @@ pub use self::{
     error::{Error, Result},
     idx::prelude::*,
     node::Node,
-    store::prelude::*,
     traits::prelude::*,
     types::prelude::*,
     weight::prelude::*,
@@ -49,9 +52,6 @@ pub mod edge;
 pub mod error;
 pub mod idx;
 pub mod node;
-/// this module provides various traits and implementations for containers capable of acting as
-/// storage for different components of a hypergraph, such as edges.
-pub mod store;
 /// this module implements the [`Weight`] type, which is used to represent weights in a hypergraph
 pub mod weight;
 
@@ -64,6 +64,9 @@ pub mod traits {
     pub mod contains;
     /// this module provides various conversion traits and implementations
     pub mod convert;
+    /// this module implements the [`RawDomain`] trait for defining the type of collection used
+    /// to compose the hyperedge
+    pub mod domain;
     /// the [`HyperGraph`] trait defines the core interface for hypergraphs, enabling the
     /// generalization of algorithms constructors, and graphical operators.
     pub mod hyper_graph;
@@ -71,6 +74,8 @@ pub mod traits {
     pub mod merge;
     /// this module defines sequential step generators
     pub mod step;
+    /// traits for transformative operations on hypergraphs, such as mapping, are implemented
+    /// within this module
     pub mod transform;
 
     pub(crate) mod prelude {
@@ -78,6 +83,8 @@ pub mod traits {
         pub use super::contains::*;
         #[doc(inline)]
         pub use super::convert::*;
+        #[doc(inline)]
+        pub use super::domain::*;
         #[doc(inline)]
         pub use super::hyper_graph::*;
         #[doc(inline)]
@@ -90,10 +97,11 @@ pub mod traits {
 }
 
 pub mod types {
-    //! this module provides various primitive types used throughout the library such as [Weight]
+    //! this module provides various types used throughout the library
     #[doc(inline)]
     pub use self::prelude::*;
 
+    /// this module defines the two types of graph kinds: [`Directed`] and [`Undirected`]
     pub mod graph_kind;
 
     pub(crate) mod prelude {
@@ -109,7 +117,6 @@ pub mod prelude {
     pub use crate::edge::prelude::*;
     pub use crate::idx::prelude::*;
     pub use crate::node::prelude::*;
-    pub use crate::store::prelude::*;
     pub use crate::traits::prelude::*;
     pub use crate::types::prelude::*;
     pub use crate::weight::prelude::*;

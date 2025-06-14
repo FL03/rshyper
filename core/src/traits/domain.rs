@@ -1,8 +1,7 @@
 /*
-    appellation: store <module>
+    appellation: domain <module>
     authors: @FL03
 */
-use super::RawContainer;
 use crate::idx::{RawIndex, VertexId};
 
 /// [`RawStore`] is a trait that defines the behavior of a store that holds the vertices
@@ -12,7 +11,8 @@ use crate::idx::{RawIndex, VertexId};
 /// **note:** The trait is sealed to prevent external implementations, ensuring that only the
 /// crate can define how edges are stored. This is to maintain consistency and prevent
 /// misuse of the trait in different contexts.
-pub trait RawStore: RawContainer {
+pub trait RawDomain {
+    type Item;
     type Store<_T>: ?Sized;
 
     private!();
@@ -25,14 +25,14 @@ pub trait RawStore: RawContainer {
 }
 /// An [`EdgeStore`] is a trait is a specialization of the [`RawStore`] trait that represents
 /// a store for edges, which are collections of vertices. It is used to define the behavior
-pub trait EdgeStore<Idx = usize>: RawStore<Item = VertexId<Idx>>
+pub trait Domain<Idx = usize>: RawDomain<Item = VertexId<Idx>>
 where
     Idx: RawIndex,
 {
 }
 /// The [`BinaryStore`] trait extends the [`RawStore`] trait to provide specific methods for
 /// binary edges, which are edges that connect exactly two vertices.
-pub trait BinaryStore<Idx>: RawStore<Item = VertexId<Idx>>
+pub trait BinaryStore<Idx>: RawDomain<Item = VertexId<Idx>>
 where
     Idx: RawIndex,
 {
@@ -43,7 +43,7 @@ where
 }
 /// The [`StoreIter`] trait extends the [`RawStore`] trait to provide iteration capabilities
 /// over the vertices stored in the edge.
-pub trait StoreIter<Idx = usize>: RawStore<Item = VertexId<Idx>>
+pub trait StoreIter<Idx = usize>: RawDomain<Item = VertexId<Idx>>
 where
     Idx: RawIndex,
 {
@@ -58,17 +58,18 @@ where
 /*
  ************* Implementations *************
 */
-impl<S, Idx> EdgeStore<Idx> for S
+impl<S, Idx> Domain<Idx> for S
 where
     Idx: RawIndex,
-    S: RawStore<Item = VertexId<Idx>>,
+    S: RawDomain<Item = VertexId<Idx>>,
 {
 }
 
-impl<I> RawStore for &[VertexId<I>]
+impl<I> RawDomain for &[VertexId<I>]
 where
     I: RawIndex,
 {
+    type Item = VertexId<I>;
     type Store<_T> = [_T];
 
     seal!();
@@ -82,10 +83,11 @@ where
     }
 }
 
-impl<I> RawStore for [VertexId<I>]
+impl<I> RawDomain for [VertexId<I>]
 where
     I: RawIndex,
 {
+    type Item = VertexId<I>;
     type Store<_T> = [_T];
 
     seal!();
@@ -99,10 +101,11 @@ where
     }
 }
 
-impl<const N: usize, I> RawStore for [VertexId<I>; N]
+impl<const N: usize, I> RawDomain for [VertexId<I>; N]
 where
     I: RawIndex,
 {
+    type Item = VertexId<I>;
     type Store<_T> = [_T; N];
 
     seal!();
@@ -165,10 +168,11 @@ where
     }
 }
 
-impl<I> RawStore for (VertexId<I>, VertexId<I>)
+impl<I> RawDomain for (VertexId<I>, VertexId<I>)
 where
     I: RawIndex,
 {
+    type Item = VertexId<I>;
     type Store<_T> = (_T, _T);
 
     seal!();
@@ -196,12 +200,13 @@ where
 }
 
 #[allow(unused_macros)]
-macro_rules! impl_raw_store {
+macro_rules! impl_domain {
     (@impl $t:ident<$T:ident>) => {
-        impl<$T> $crate::store::RawStore for $t<VertexId<$T>>
+        impl<$T> $crate::RawDomain for $t<VertexId<$T>>
         where
             $T: $crate::idx::RawIndex,
         {
+            type Item = VertexId<$T>;
             type Store<_T> = $t<_T>;
 
             seal!();
@@ -214,10 +219,12 @@ macro_rules! impl_raw_store {
                 <Self::Store<Self::Item>>::is_empty(self)
             }
         }
+
+
     };
     ($($t:ident<$T:ident>),* $(,)?) => {
         $(
-            impl_raw_store!(@impl $t<$T>);
+            impl_domain!(@impl $t<$T>);
         )*
     };
 }
@@ -232,7 +239,7 @@ mod impl_alloc {
     };
     use alloc::vec::Vec;
 
-    impl_raw_store! {
+    impl_domain! {
         BTreeSet<I>,
         Vec<I>,
         VecDeque<I>
@@ -274,16 +281,17 @@ mod impl_alloc {
 
 #[cfg(feature = "std")]
 mod impl_std {
-    use super::{RawStore, StoreIter};
+    use super::{RawDomain, StoreIter};
     use crate::idx::{RawIndex, VertexId};
     use core::hash::BuildHasher;
     use std::collections::hash_set::{self, HashSet};
 
-    impl<I, S> RawStore for HashSet<VertexId<I>, S>
+    impl<I, S> RawDomain for HashSet<VertexId<I>, S>
     where
         I: RawIndex,
         S: BuildHasher,
     {
+        type Item = VertexId<I>;
         type Store<_T> = HashSet<_T, S>;
 
         seal!();

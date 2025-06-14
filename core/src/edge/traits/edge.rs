@@ -3,22 +3,22 @@
     authors: @FL03
 */
 use crate::idx::{EdgeId, RawIndex, VertexId};
-use crate::{EdgeStore, GraphType};
+use crate::{Domain, GraphType};
 
 /// [`RawEdge`] establishes a common interface for _hyperedge_ representations.
 pub trait RawEdge {
     type Index: RawIndex;
     type Kind: GraphType;
-    type Store: EdgeStore<Self::Index>;
+    type Store: Domain<Self::Index>;
 
     private!();
 
     /// returns an immutable reference to the edge index
     fn index(&self) -> &EdgeId<Self::Index>;
-    /// returns an immutable reference to the edge data.
-    fn vertices(&self) -> &Self::Store;
-    /// returns a mutable reference to the edge data.
-    fn vertices_mut(&mut self) -> &mut Self::Store;
+    /// returns a reference to the domain of the edge
+    fn domain(&self) -> &Self::Store;
+    /// returns a mutable reference to the domain of the edge
+    fn domain_mut(&mut self) -> &mut Self::Store;
     /// returns true if the edge is directed, false otherwise.
     fn is_directed(&self) -> bool {
         use core::any::TypeId;
@@ -55,11 +55,11 @@ where
     K: GraphType,
 {
     fn lhs(&self) -> &VertexId<I> {
-        self.points().src()
+        self.domain().src()
     }
 
     fn rhs(&self) -> &VertexId<I> {
-        self.points().tgt()
+        self.domain().tgt()
     }
 }
 

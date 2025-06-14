@@ -4,7 +4,7 @@
 */
 use super::{Edge, RawEdge, RawFacet};
 use crate::idx::{EdgeId, RawIndex, VertexId};
-use crate::{EdgeStore, GraphType, Weight};
+use crate::{Domain, GraphType, Weight};
 
 /// The [`Surface`] implementation associates some weight with a hyperedge.
 /// Typically, the term **facet** is used to denote the surface of a particular polytope,
@@ -20,7 +20,7 @@ pub struct Surface<T, S, K, Idx = usize>
 where
     Idx: RawIndex,
     K: GraphType,
-    S: EdgeStore<Idx>,
+    S: Domain<Idx>,
 {
     pub(crate) edge: Edge<S, K, Idx>,
     pub(crate) weight: Weight<T>,
@@ -30,7 +30,7 @@ impl<T, S, K, Idx> Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
-    S: EdgeStore<Idx>,
+    S: Domain<Idx>,
 {
     /// create a new instance of the [`Surface`] from the given id, nodes, and weight
     pub fn new(id: EdgeId<Idx>, nodes: S, weight: Weight<T>) -> Self {
@@ -60,13 +60,13 @@ where
         }
     }
     /// creates a new edge with the given nodes
-    pub fn from_points(nodes: S) -> Self
+    pub fn from_domain(nodes: S) -> Self
     where
         Idx: Default,
         T: Default,
     {
         Self {
-            edge: Edge::from_points(nodes),
+            edge: Edge::from_domain(nodes),
             weight: Weight::init(),
         }
     }
@@ -107,11 +107,11 @@ where
     }
     /// returns an immutable reference to the nodes
     pub const fn nodes(&self) -> &S {
-        self.edge().points()
+        self.edge().domain()
     }
     /// returns a mutable reference to the nodes
     pub const fn nodes_mut(&mut self) -> &mut S {
-        self.edge_mut().points_mut()
+        self.edge_mut().domain_mut()
     }
     /// updates the id and returns a mutable reference to the instance
     pub fn set_id(&mut self, id: EdgeId<Idx>) -> &mut Self {
@@ -119,8 +119,8 @@ where
         self
     }
     /// updates the nodes and returns a mutable reference to the instance
-    pub fn set_points(&mut self, nodes: S) -> &mut Self {
-        self.edge_mut().set_points(nodes);
+    pub fn set_domain(&mut self, nodes: S) -> &mut Self {
+        self.edge_mut().set_domain(nodes);
         self
     }
     /// updates the weight and returns a mutable reference to the instance
@@ -136,9 +136,9 @@ where
         }
     }
     /// consumes the current instance to create another with the given nodes.
-    pub fn with_points<S2: EdgeStore<Idx>>(self, nodes: S2) -> Surface<T, S2, K, Idx> {
+    pub fn with_domainfrom_domain<S2: Domain<Idx>>(self, nodes: S2) -> Surface<T, S2, K, Idx> {
         Surface {
-            edge: self.edge.with_points(nodes),
+            edge: self.edge.with_domain(nodes),
             weight: self.weight,
         }
     }
@@ -173,7 +173,7 @@ impl<T, S, Idx, K> RawEdge for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
-    S: EdgeStore<Idx>,
+    S: Domain<Idx>,
 {
     type Kind = K;
     type Index = Idx;
@@ -185,12 +185,12 @@ where
         self.edge().id()
     }
 
-    fn vertices(&self) -> &S {
-        self.edge().points()
+    fn domain(&self) -> &S {
+        self.edge().domain()
     }
 
-    fn vertices_mut(&mut self) -> &mut S {
-        self.edge_mut().points_mut()
+    fn domain_mut(&mut self) -> &mut S {
+        self.edge_mut().domain_mut()
     }
 }
 
@@ -198,7 +198,7 @@ impl<T, S, Idx, K> RawFacet<T> for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
-    S: EdgeStore<Idx>,
+    S: Domain<Idx>,
 {
     seal!();
 

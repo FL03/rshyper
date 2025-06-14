@@ -2,8 +2,28 @@
     appellation: impl_weight_repr <module>
     authors: @FL03
 */
-use crate::weight::Weight;
+use crate::weight::{UnWeight, Weight, Weightless};
 
+impl<T> Weightless<T> {
+    /// returns a new [`Unweighted`] instance with the inner value of type `T`.
+    pub const fn unweighted() -> Self {
+        Weight::new(UnWeight::new())
+    }
+    /// returns a new [`Weight`] of type `T` initialized using the provided closure `f`
+    pub fn init_with<F>(self, f: F) -> Weight<T>
+    where
+        F: FnOnce() -> T,
+    {
+        Weight::new(f())
+    }
+    /// returns a new [`Weight`] initialized using the logical default for type `T`
+    pub fn init_default(self) -> Weight<T>
+    where
+        T: Default,
+    {
+        self.init_with(Default::default)
+    }
+}
 impl<T> Weight<&T> {
     /// returns a new [`Weight`] using a clone of the current inner value.
     #[inline]

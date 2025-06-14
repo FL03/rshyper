@@ -150,7 +150,7 @@ where
                 neighbors.extend(
                     surface
                         .edge()
-                        .points()
+                        .domain()
                         .iter()
                         .copied()
                         .filter(|v| v != index),
@@ -171,7 +171,7 @@ where
     {
         let surface = self.get_surface(index)?;
         let nodes = surface
-            .points()
+            .domain()
             .iter()
             .map(|v| self.get_node(v).expect("vertex not found"))
             .collect::<Vec<_>>();
@@ -187,7 +187,7 @@ where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.get_surface(index).map(|edge| edge.points())
+        self.get_surface(index).map(|edge| edge.domain())
     }
     /// returns a mutable reference to the set of vertices composing the given edge
     pub fn get_edge_vertices_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut VertexSet<Idx, S>>
@@ -195,7 +195,7 @@ where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.get_surface_mut(index).map(|edge| edge.points_mut())
+        self.get_surface_mut(index).map(|edge| edge.domain_mut())
     }
     /// returns an immutable reference to the weight of a hyperedge
     pub fn get_edge_weight<Q>(&self, index: &Q) -> crate::Result<&Weight<E>>
@@ -222,7 +222,7 @@ where
     {
         self.surfaces()
             .values()
-            .filter(|facet| facet.edge().points().contains(index))
+            .filter(|facet| facet.edge().domain().contains(index))
             .count()
     }
     /// returns the weight of a particular vertex
@@ -317,12 +317,12 @@ where
         // remove the edges from the surfaces map
         let s1 = self.remove_surface(e1)?;
         #[cfg(feature = "tracing")]
-        tracing::debug!("removed edge {e1:?} with vertices {ep:?}", ep = s1.points());
+        tracing::debug!("removed edge {e1:?} with vertices {ep:?}", ep = s1.domain());
         let s2 = self.remove_surface(e2)?;
         #[cfg(feature = "tracing")]
-        tracing::debug!("removed edge {e2:?} with vertices {ep:?}", ep = s2.points());
+        tracing::debug!("removed edge {e2:?} with vertices {ep:?}", ep = s2.domain());
         // merge the vertices of the two edges
-        let vertices = s1.points().union(s2.points()).copied();
+        let vertices = s1.domain().union(s2.domain()).copied();
         let vertices = VertexSet::from_iter(vertices);
         // merge the two weights using the provided function
         let weight = f(s1.weight().view().value(), s2.weight().view().value());
