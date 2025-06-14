@@ -65,7 +65,9 @@
 #![allow(
     clippy::should_implement_trait,
     clippy::module_inception,
-    clippy::missing_safety_doc
+    clippy::missing_safety_doc,
+    clippy::non_canonical_clone_impl,
+    clippy::non_canonical_partial_ord_impl
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![crate_name = "rshyper"]

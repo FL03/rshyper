@@ -100,7 +100,7 @@ where
         // Reverse order for min-heap
         other
             .cost()
-            .partial_cmp(&self.cost())
+            .partial_cmp(self.cost())
             .unwrap_or(Ordering::Equal)
     }
 }
@@ -135,7 +135,7 @@ where
     }
 }
 
-impl<'a, Idx, T> PartialEq<QueueNode<Idx, T>> for &'a QueueNode<Idx, T>
+impl<Idx, T> PartialEq<QueueNode<Idx, T>> for &QueueNode<Idx, T>
 where
     Idx: RawIndex + PartialEq,
     T: PartialEq,
@@ -145,7 +145,7 @@ where
     }
 }
 
-impl<'a, Idx, T> PartialEq<QueueNode<Idx, T>> for &'a mut QueueNode<Idx, T>
+impl<Idx, T> PartialEq<QueueNode<Idx, T>> for &mut QueueNode<Idx, T>
 where
     Idx: RawIndex + PartialEq,
     T: PartialEq,
@@ -185,7 +185,7 @@ where
     }
 }
 
-impl<'a, Idx, T> PartialOrd<QueueNode<Idx, T>> for &'a QueueNode<Idx, T>
+impl<Idx, T> PartialOrd<QueueNode<Idx, T>> for &QueueNode<Idx, T>
 where
     Idx: RawIndex + PartialEq,
     T: PartialEq + PartialOrd,
@@ -195,7 +195,7 @@ where
     }
 }
 
-impl<'a, Idx, T> PartialOrd<QueueNode<Idx, T>> for &'a mut QueueNode<Idx, T>
+impl<Idx, T> PartialOrd<QueueNode<Idx, T>> for &mut QueueNode<Idx, T>
 where
     Idx: RawIndex + PartialEq,
     T: PartialEq + PartialOrd,

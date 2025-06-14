@@ -20,6 +20,17 @@ impl<K: GraphIndex> IndexBase<usize, K> {
         let prev = self.replace(INDEX_COUNTER.fetch_add(1, Ordering::Relaxed));
         Self::new(prev)
     }
+    /// initialize a new
+    pub fn init() -> Self {
+        #[cfg(feature = "rand")]
+        {
+            Self::rand()
+        }
+        #[cfg(not(feature = "rand"))]
+        {
+            Self::atomic()
+        }
+    }
 }
 
 impl<T: RawIndex> IndexBase<T, EdgeIndex> {
