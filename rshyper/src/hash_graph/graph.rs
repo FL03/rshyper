@@ -154,39 +154,6 @@ where
         self.surfaces = surfaces;
         self
     }
-    /// consumes the current instance to create another with the given nodes
-    #[inline]
-    pub fn with_nodes(self, nodes: NodeMap<N, Idx, S>) -> Self
-    where
-        Idx: Default,
-    {
-        Self { nodes, ..self }
-    }
-    /// consumes the current instance to create another with the given history
-    pub fn with_history(self, history: IndexTracker<Idx>) -> Self
-    where
-        Idx: Default,
-    {
-        Self { history, ..self }
-    }
-    /// consumes the current instance to create another with the given position
-    pub fn with_position(self, position: IndexCursor<Idx>) -> Self
-    where
-        Idx: Default,
-    {
-        Self {
-            history: self.history.with_cursor(position),
-            ..self
-        }
-    }
-    /// consumes the current instance to create another with the given edges
-    #[inline]
-    pub fn with_surfaces(self, surfaces: SurfaceMap<E, K, Idx, S>) -> Self
-    where
-        Idx: Default,
-    {
-        Self { surfaces, ..self }
-    }
     /// returns true if the hypergraph contains an edge with the given index;
     pub fn contains_edge<Q>(&self, index: &Q) -> bool
     where
