@@ -55,11 +55,11 @@ where
     K: GraphType,
 {
     fn lhs(&self) -> &VertexId<I> {
-        self.points().lhs()
+        self.points().src()
     }
 
     fn rhs(&self) -> &VertexId<I> {
-        self.points().rhs()
+        self.points().tgt()
     }
 }
 

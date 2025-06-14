@@ -37,9 +37,9 @@ where
     Idx: RawIndex,
 {
     /// returns the left-hand side vertex of the edge.
-    fn lhs(&self) -> &Self::Item;
+    fn src(&self) -> &Self::Item;
     /// returns the right-hand side vertex of the edge.
-    fn rhs(&self) -> &Self::Item;
+    fn tgt(&self) -> &Self::Item;
 }
 /// The [`StoreIter`] trait extends the [`RawStore`] trait to provide iteration capabilities
 /// over the vertices stored in the edge.
@@ -159,11 +159,11 @@ impl<I> BinaryStore<I> for [VertexId<I>; 2]
 where
     I: RawIndex,
 {
-    fn lhs(&self) -> &VertexId<I> {
+    fn src(&self) -> &VertexId<I> {
         &self[0]
     }
 
-    fn rhs(&self) -> &VertexId<I> {
+    fn tgt(&self) -> &VertexId<I> {
         &self[1]
     }
 }
@@ -190,11 +190,11 @@ impl<I> BinaryStore<I> for (VertexId<I>, VertexId<I>)
 where
     I: RawIndex,
 {
-    fn lhs(&self) -> &VertexId<I> {
+    fn src(&self) -> &VertexId<I> {
         &self.0
     }
 
-    fn rhs(&self) -> &VertexId<I> {
+    fn tgt(&self) -> &VertexId<I> {
         &self.1
     }
 }

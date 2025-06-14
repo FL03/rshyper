@@ -14,8 +14,10 @@ pub mod error;
 pub mod traits {
     #[doc(inline)]
     pub use self::prelude::*;
+
     /// this module defines the [`KeyValue`] trait and its associated types for key-value stores
     mod key_value;
+    mod raw_container;
     /// this module defines the [`RawStore`] trait for establishing a common interface for
     /// representations of a set of [`VertexId`] that compose some edge
     mod raw_store;
@@ -23,6 +25,8 @@ pub mod traits {
     pub(crate) mod prelude {
         #[doc(inline)]
         pub use super::key_value::*;
+        #[doc(inline)]
+        pub use super::raw_container::*;
         #[doc(inline)]
         pub use super::raw_store::*;
     }

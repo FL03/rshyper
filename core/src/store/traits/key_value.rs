@@ -30,7 +30,8 @@ pub trait RawKeyValue<K, V> {
     /// returns the [`Entry`] for the given key
     fn entry(&mut self, key: K) -> Self::Entry<'_>;
 }
-
+/// the [`KeyValue`] trait extends the [`RawKeyValue`] trait to provide additional methods for
+/// manipulating key-value stores.
 pub trait KeyValue<K, V>: RawKeyValue<K, V> {
     fn insert(&mut self, key: K, value: V) -> Option<V>;
 }
