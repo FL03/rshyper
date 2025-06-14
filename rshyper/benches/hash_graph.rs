@@ -13,6 +13,8 @@ fn bench_hash_graph_edge(c: &mut Criterion) {
     let mut group = c.benchmark_group("HashGraph");
     // set the sample size for the group
     group.sample_size(SAMPLES);
+    // set the duration for the measurement
+    group.measurement_time(std::time::Duration::from_secs(DURATION));
     // benchmark the `add_edge` function
     group.bench_function("add_edge", |b| {
         b.iter_batched(
@@ -43,7 +45,6 @@ fn bench_hash_graph_edge(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
-
     // finish the benchmark group
     group.finish()
 }
@@ -53,7 +54,9 @@ fn bench_hash_graph_node(c: &mut Criterion) {
     let mut group = c.benchmark_group("HashGraph");
     // set the sample size for the group
     group.sample_size(SAMPLES);
-
+    // set the duration for the measurement
+    group.measurement_time(std::time::Duration::from_secs(DURATION));
+    // benchmark the `add_nodes` function
     group.bench_function("add_nodes", |b| {
         b.iter_batched(
             setup,
@@ -65,6 +68,7 @@ fn bench_hash_graph_node(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
+    // benchmark the `get_node_degree` function
     group.bench_function("get_node_degree", |b| {
         b.iter_batched(
             setup,
@@ -78,6 +82,7 @@ fn bench_hash_graph_node(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
+    // benchmark the `find_node_neighbors` function
     group.bench_function("find_node_neighbors", |b| {
         b.iter_batched(
             setup,
@@ -92,7 +97,7 @@ fn bench_hash_graph_node(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
-    // benchmark the function
+    // benchmark the `remove_node` function
     group.bench_function("remove_node", |b| {
         b.iter_batched(
             setup,
@@ -119,6 +124,9 @@ fn bench_hash_graph_search(c: &mut Criterion) {
     let mut group = c.benchmark_group("HashGraph");
     // set the sample size for the group
     group.sample_size(SAMPLES);
+    // set the duration for the measurement
+    group.measurement_time(std::time::Duration::from_secs(DURATION));
+    // benchmark the breadth-first traversal search
     group.bench_function("bft", |b| {
         b.iter_batched(
             setup,
@@ -133,6 +141,7 @@ fn bench_hash_graph_search(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
+    // benchmark the depth-first traversal search
     group.bench_function("dft", |b| {
         b.iter_batched(
             setup,
@@ -166,8 +175,8 @@ mod ext {
     use rshyper::HashGraph;
     pub(crate) use rshyper::edge::generate_random_edge;
 
+    pub const DURATION: u64 = 7;
     /// a constant for the sample size of a benchmark group
-    #[allow(dead_code)]
     pub const SAMPLES: usize = 50;
 
     pub const N: usize = 100;
