@@ -60,6 +60,28 @@ where
             weight,
         }
     }
+    /// converts the node into a 2-tuple consisting of the node index and the weight:
+    /// 
+    /// - `0`: a reference to the node index
+    /// - `1`: a reference to the node weight
+    pub const fn as_tuple(&self) -> (&VertexId<Idx>, &Weight<T>) {
+        (self.id(), self.weight())
+    }
+    /// consumes the node to convert it into a 2-tuple consisting of the node index and the 
+    /// weight
+    pub fn into_tuple(self) -> (VertexId<Idx>, Weight<T>) {
+        (self.id, self.weight)
+    }
+    /// returns the node as a tuple with a mutable reference to the weight such that:
+    /// 
+    /// -  `0`: a reference to the node index
+    /// -  `1`: a mutable reference to the node weight
+    /// 
+    /// this method is useful for converting the node into a standard item produced by mutable 
+    /// key-value iterators where `Item = (&'a K, &'a mut V)`
+    pub fn as_tuple_mut(&mut self) -> (&VertexId<Idx>, &mut Weight<T>) {
+        (&self.id, &mut self.weight)
+    }
     /// returns an immutable reference to the node index
     pub const fn id(&self) -> &VertexId<Idx> {
         &self.id
