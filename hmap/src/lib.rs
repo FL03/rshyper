@@ -62,6 +62,11 @@
 //!
 //! For more detailed examples, please refer to the [examples directory](https://github.com/FL03/rshyper/blob/main/rshyper/examples).
 //!
+#![crate_type = "lib"]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
+)]
 #![allow(
     clippy::should_implement_trait,
     clippy::module_inception,
@@ -69,12 +74,13 @@
     clippy::non_canonical_clone_impl,
     clippy::non_canonical_partial_ord_impl
 )]
+// **** WARNING ****
+// the `std` feature is required by the crate, only declared for concistency w.r.t. the
+// available features and for ensuring that all the depencies actually implement the `std`
+// feature since the workspace naturally imports them with the `default-features = false`
+// flag toggled
+// **** WARNING ****
 #![cfg(feature = "std")]
-#![crate_type = "lib"]
-#![doc(
-    html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
-)]
-
 /// declare the macros module for use throughout the crate
 #[macro_use]
 pub(crate) mod macros {

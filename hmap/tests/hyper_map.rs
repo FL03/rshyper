@@ -68,7 +68,7 @@ fn test_merge_hash_edge() -> HyperResult<()> {
     let v2 = graph.add_vertex()?;
     // add some surfaces (hyperedges) with vertices
     let e1 = graph.add_surface([v0, v1], 10.into_weight())?;
-    let e2 = graph.add_surface([v1, v2], 10.into_weight())?;
+    let e2 = graph.add_surface([v1, v2], 20.into_weight())?;
     // merge the two edges
     let em = graph.merge_edges(&e1, &e2)?;
     // verify that the two edges used to merge are no longer in the graph

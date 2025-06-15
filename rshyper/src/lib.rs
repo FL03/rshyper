@@ -46,7 +46,7 @@
 //!
 //! ## Features
 //!
-//! - `hash_graph`: enables the [`HashGraph`] implementation, a hash-based hypergraph structure
+//! - `hyper_map`: enables the [`HyperMap`] implementation, a hash-based hypergraph structure
 //! - `macros`: enables the implemented macros for streamlining graph management
 //!
 //! ### _Dependencies_
@@ -54,7 +54,6 @@
 //! **Note:** While the `alloc` and `std` libraries are feature-gated, they are required for
 //! anything useful in this crate; both are enabled by default.
 //!
-//! - `anyhow`: enables the use of the `anyhow` crate for error handling
 //! - `rayon`: enables parallel processing capabilities using the `rayon` crate
 //! - `serde`: enables serialization and deserialization of hypergraphs using the `serde` crate
 //!
@@ -62,6 +61,12 @@
 //!
 //! For more detailed examples, please refer to the [examples directory](https://github.com/FL03/rshyper/blob/main/rshyper/examples).
 //!
+#![crate_name = "rshyper"]
+#![crate_type = "lib"]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
+)]
 #![allow(
     clippy::should_implement_trait,
     clippy::module_inception,
@@ -70,11 +75,6 @@
     clippy::non_canonical_partial_ord_impl
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![crate_name = "rshyper"]
-#![crate_type = "lib"]
-#![doc(
-    html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
-)]
 
 /*
  ************* ROOT *************

@@ -13,6 +13,11 @@
 //! - [`depth_first`]: enables the depth-first search algorithm for hypergraphs
 //! - [`dijkstra`]: enables Dijkstra's algorithm for finding the shortest path in hypergraphs
 //!
+#![crate_type = "lib"]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
+)]
 #![allow(
     clippy::missing_safety_doc,
     clippy::module_inception,
@@ -22,10 +27,6 @@
     clippy::should_implement_trait
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![doc(
-    html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg",
-    html_favicon_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
-)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
