@@ -157,6 +157,18 @@ fn bench_hash_graph_search(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
+    // finish the group
+    group.finish();
+}
+
+/// benchmarks for search algorithms in the [`HashGraph`] implementation.
+fn _bench_hash_graph_path_finders(c: &mut Criterion) {
+    let mut group = c.benchmark_group("HashGraph::pathfinder");
+    // set the sample size for the group
+    group.sample_size(SAMPLES);
+    // set the duration for the measurement
+    group.measurement_time(std::time::Duration::from_secs(DURATION));
+
     // benchmark the dijkstra path-finding algorithm
     group.bench_function("dijkstra", |b| {
         b.iter_batched(
@@ -189,10 +201,11 @@ criterion::criterion_main! {
     benches
 }
 
+#[allow(unused_variables)]
 #[cfg(feature = "rand")]
 mod ext {
     use rshyper::edge::generate_random_edge;
-    use rshyper::{HashGraph, VertexId};
+    use rshyper::{HashGraph, IntoWeight, VertexId};
 
     /// the duration, in seconds, for which the benchmarks should run
     pub const DURATION: u64 = 7;
@@ -207,10 +220,29 @@ mod ext {
     pub fn setup() -> HashGraph<Wt, Wt> {
         // initialize a new undirected hash graph
         let mut graph = HashGraph::<Wt, Wt>::undirected();
+        let v0 = graph.add_vertex().expect("failed to add vertex");
+        let v1 = graph.add_vertex().expect("failed to add vertex");
+        let v2 = graph.add_vertex().expect("failed to add vertex");
+        let v3 = graph.add_vertex().expect("failed to add vertex");
+        let v4 = graph.add_vertex().expect("failed to add vertex");
+        let v5 = graph.add_vertex().expect("failed to add vertex");
+        // add a few edges to the graph
+        let e0 = graph
+            .add_surface([v0, v1, v2, v3, v5], 1.into_weight())
+            .expect("failed to add surface");
+        let e1 = graph
+            .add_surface([v1, v2, v3, v4], 2.into_weight())
+            .expect("failed to add surface");
+        let e2 = graph
+            .add_surface([v2, v3, v4, v5], 3.into_weight())
+            .expect("failed to add surface");
+        let e3 = graph
+            .add_surface([v0, v1], 4.into_weight())
+            .expect("failed to add surface");
         // add 100 nodes to the graph
-        let _ = graph.add_nodes(0..(N as Wt)).collect::<Vec<_>>();
+        let _ = graph.add_nodes(5..(N as Wt)).collect::<Vec<_>>();
         // add 100 edges to the graph
-        for _ in 0..graph.order() {
+        for _ in graph.size()..graph.order() {
             // each edge contains between 2 and 100 vertices & a random weight
             let (verts, weight) = generate_random_edge::<Wt>(N);
             // add a self-loop to each vertex
