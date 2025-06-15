@@ -29,41 +29,22 @@ crate-type = [
     "cdylib",
     "rlib",
 ]
-bench = true
+bench = false
 doc = true
 doctest = true
 test = true
 
 [dependencies]
+# core modules
 rshyper-core = { workspace = true }
-
+# optional dependencies
 rshyper-algo = { optional = true, workspace = true }
-rshyper-macros = { optional = true, workspace = true }
-# custom
-scsys = { workspace = true }
-# concurrency & parallelism
-rayon = { optional = true, workspace = true }
-# error handling
-thiserror = { workspace = true }
-# logging
-tracing = { optional = true, workspace = true }
-# macros
-paste = { workspace = true }
-smart-default = { workspace = true }
-strum = { features = ["derive"], workspace = true }
-# math
-num-traits = { workspace = true }
-# random
-rand = { optional = true, workspace = true }
-rand_distr = { optional = true, workspace = true }
-# serialization
-serde = { features = ["derive"], optional = true, workspace = true }
-serde_derive = { optional = true, workspace = true }
-serde_json = { optional = true, workspace = true }
+rshyper-hmap = { optional = true, workspace = true }
 
 [dev-dependencies]
-criterion = { features = ["plotters"], workspace = true }
 lazy_static = { workspace = true }
+rand = { features = ["std"], workspace = true }
+tracing = { features = ["std"], workspace = true }
 tracing-subscriber = { features = ["ansi", "chrono", "serde", "std"], workspace = true }
 
 [features]
@@ -89,121 +70,95 @@ algo = ["dep:rshyper-algo"]
 hash_grap = ["hyper_map"]
 
 hyper_map = [
+    "dep:rshyper-hmap",
     "std"
 ]
 
-macros = ["dep:rshyper-macros"]
+macros = []
 
 # ************* [FF:Environments] *************
 nightly = [
-    "rshyper-algo/nightly",
+    "rshyper-algo?/nightly",
     "rshyper-core/nightly",
-    "rshyper-macros?/nightly",
+    "rshyper-hmap?/nightly",
 ]
 
 std = [
     "alloc",
-    "num-traits/std",
-    "rand?/std",
-    "rshyper-algo/std",
+    "rshyper-algo?/std",
     "rshyper-core/std",
-    "scsys/std",
-    "serde?/std",
-    "strum/std",
-    "tracing?/std",
-    "thiserror/std",
+    "rshyper-hmap?/std",
 ]
 
 wasi = [
     "alloc",
-    "rshyper-algo/wasi",
+    "rshyper-algo?/wasi",
     "rshyper-core/wasi",
-    "scsys/wasi",
+    "rshyper-hmap?/wasi",
 ]
 
 wasm = [
     "alloc",
-    "rayon?/web_spin_lock",
-    "rshyper-algo/wasm",
+    "rshyper-algo?/wasm",
     "rshyper-core/wasm",
-    "scsys/wasm",
-    "wasm-bindgen",
+    "rshyper-hmap?/wasm",
 ]
 
 # ************* [FF:Dependencies] *************
 alloc = [
-    "rshyper-algo/alloc",
+    "rshyper-algo?/alloc",
     "rshyper-core/alloc",
-    "scsys/alloc",
-    "serde?/alloc",
-    "serde_json?/alloc",
+    "rshyper-hmap?/alloc",
 ]
 
 anyhow = [
     "rshyper-algo?/anyhow",
     "rshyper-core/anyhow",
-    "scsys/anyhow",
+    "rshyper-hmap?/anyhow",
 ]
 
 json = [
     "alloc",
-    "serde",
-    "serde_json",
     "rshyper-core/json",
-    "scsys/json",
+    "rshyper-hmap?/json",
 ]
 
 rand = [
-    "dep:rand",
-    "dep:rand_distr",
     "rng",
     "rshyper-core/rand",
-    "scsys/rand",
+    "rshyper-hmap?/rand",
 ]
 
 rayon = [
-    "dep:rayon",
+    "rshyper-algo?/rayon",
     "rshyper-core/rayon",
+    "rshyper-hmap?/rayon",
 ]
 
 rng = [
-    "rand?/small_rng",
-    "rand?/thread_rng",
     "rshyper-core/rng",
-    "scsys/rng",
+    "rshyper-hmap?/rng",
 ]
 
 serde = [
-    "dep:serde",
-    "dep:serde_derive",
-    "rand?/serde",
+    "rshyper-algo?/serde",
     "rshyper-core/serde",
-    "scsys/serde",
+    "rshyper-hmap?/serde",
 ]
 
 serde_json = [
-    "dep:serde_json",
     "rshyper-core/serde_json",
+    "rshyper-hmap?/serde_json",
 ]
 
 tracing = [
-    "dep:tracing",
     "rshyper-algo?/tracing",
     "rshyper-core/tracing",
-    "scsys/tracing",
+    "rshyper-hmap?/tracing",
 ]
 
 wasm-bindgen = [
     "rshyper-core/wasm-bindgen",
-]
-
-# ************* [Benchmarks] *************
-[[bench]]
-harness = false
-name ="hyper_map"
-required-features = [
-    "hyper_map",
-    "rand",
 ]
 
 # ************* [Examples] *************
@@ -227,40 +182,8 @@ required-features = [
 name = "default"
 
 [[test]]
-name = "astar"
-required-features = [
-    "algo",
-    "hyper_map",
-]
-
-[[test]]
-name = "bft"
-required-features = [
-    "algo",
-    "hyper_map",
-]
-
-[[test]]
-name = "dft"
-required-features = [
-    "algo",
-    "hyper_map",
-]
-
-[[test]]
-name = "dijkstra"
-required-features = [
-    "algo",
-    "hyper_map",
-]
-
-[[test]]
-name ="hyper_map"
-required-features = ["hyper_map"]
-
-[[test]]
 name = "macros"
 required-features = [
-    "alloc",
+    "hyper_map",
     "macros",
 ]

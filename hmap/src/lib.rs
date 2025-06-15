@@ -1,8 +1,8 @@
 /*
-    appellation: rshyper <library>
+    appellation: rshyper-hmap <library>
     authors: @FL03
 */
-//! # rshyper
+//! # rshyper-hmap
 //!
 //! [![crates.io](https://img.shields.io/crates/v/rshyper?style=for-the-badge&logo=rust)](https://crates.io/crates/rshyper)
 //! [![docs.rs](https://img.shields.io/docsrs/rshyper?style=for-the-badge&logo=docs.rs)](https://docs.rs/rshyper)
@@ -69,67 +69,82 @@
     clippy::non_canonical_clone_impl,
     clippy::non_canonical_partial_ord_impl
 )]
-#![cfg_attr(not(feature = "std"), no_std)]
-#![crate_name = "rshyper"]
+#![cfg(feature = "std")]
 #![crate_type = "lib"]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
 )]
 
-/*
- ************* ROOT *************
-*/
-
-#[cfg(feature = "alloc")]
-extern crate alloc;
-
+/// declare the macros module for use throughout the crate
 #[macro_use]
-#[cfg(feature = "macros")]
 pub(crate) mod macros {
-    //! this module defines the various macros used throughout the crate to streamline the
-    //! creation and maniuplation of hypergraphs and their constituent components.
+
     #[macro_use]
-    pub mod hypergraph;
+    pub mod seal;
 }
 
-/*
- ************* REIMPORTS *************
-*/
-
-#[doc(inline)]
-#[cfg(feature = "hyper_map")]
-pub use self::hyper_map::{DiHyperMap, HyperMap, UnHyperMap};
-#[doc(inline)]
-pub use rshyper_core::*;
-
-/*
- ************* FEATURE-GATED MODULES *************
-*/
-
-#[doc(inline)]
-#[cfg(feature = "algo")]
 /// the `algo` module focuses on implementing algorithms and operators for hypergraphs
-pub use rshyper_algo as algo;
+extern crate rshyper_algo as algo;
+extern crate rshyper_core as rshyper;
+
 #[doc(inline)]
-#[cfg(feature = "hyper_map")]
-/// this module contains the [`HyperMap`](rshyper_hmap::HyperMap), a hash-based hypergraph
-/// implementation
-pub use rshyper_hmap as hyper_map;
+pub use self::{graph::*, types::prelude::*};
 
-/*
- ************* PRELUDE *************
-*/
+pub mod graph;
 
-/// the prelude module for the crate contains all commonly used traits, types, and functions
-#[allow(missing_docs)]
+mod impls {
+    pub mod impl_graph;
+    pub mod impl_hyper_graph;
+    pub mod impl_iter;
+    pub mod impl_ops;
+    pub mod impl_repr;
+    #[cfg(feature = "serde")]
+    pub mod impl_serde;
+}
+
+pub mod iter {
+    //! this module implements the iterators for the [`HyperMap`](super::HashGraph)
+    #[doc(inline)]
+    pub use self::prelude::*;
+
+    pub mod node;
+    pub mod seq;
+    pub mod surface;
+
+    pub(crate) mod prelude {
+        #[doc(inline)]
+        pub use super::node::*;
+        #[doc(inline)]
+        pub use super::seq::*;
+        #[doc(inline)]
+        pub use super::surface::*;
+    }
+}
+
+pub mod types {
+    //! this module defines various types and type aliases in support of the [`HyperMap`](super::HyperMap)
+    //! implementation
+    #[doc(inline)]
+    pub use self::prelude::*;
+
+    mod aliases;
+
+    pub(crate) mod prelude {
+        #[doc(inline)]
+        pub use super::aliases::*;
+    }
+}
+
+#[doc(hidden)]
 pub mod prelude {
-    // pub use super::error::*;
-    pub use rshyper_core::prelude::*;
+    #[doc(inline)]
+    pub use super::graph::*;
+    #[doc(inline)]
+    pub use super::iter::prelude::*;
+    #[doc(inline)]
+    pub use super::types::prelude::*;
 
-    #[cfg(feature = "macros")]
-    pub use crate::{hyperedge, hypergraph, hypernode};
-    #[cfg(feature = "algo")]
-    pub use rshyper_algo::prelude::*;
-    #[cfg(feature = "hyper_map")]
-    pub use rshyper_hmap::prelude::*;
+    #[allow(deprecated)]
+    #[deprecated(since = "0.1.3", note = "use `HyperMap` instead")]
+    pub use super::{DiHashGraph, HashGraph, UnHashGraph};
 }

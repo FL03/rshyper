@@ -7,7 +7,7 @@ updates:
       - rshyper
       - algo
       - core
-      - macros
+      - hmap
     schedule:
       interval: monthly
   - package-ecosystem: devcontainers

@@ -2,34 +2,20 @@
     Appellation: graph <module>
     Contrib: @FL03
 */
-use rshyper::UnHyperMap;
+use rshyper::{UnHyperMap, hypergraph};
 
 fn main() -> rshyper::HyperResult<()> {
     tracing_subscriber::fmt()
-        .with_line_number(true)
+        .with_line_number(false)
+        .with_file(false)
+        .with_thread_ids(false)
+        .with_thread_names(false)
+        .with_target(true)
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .with_max_level(tracing::Level::TRACE)
         .init();
-
-    // rshyper::hygraph! {
-    //     // define the graph structure
-    //     graph {
-    //         nodes: {
-    //             let v0;
-    //             let v1;
-    //             let v2;
-    //             let v3;
-    //         };
-    //         edges: {
-    //             let e0: [v0, v1, v2];
-    //             let e1: [v1, v2, v3];
-    //             let e2: [v0, v1];
-    //             let e3: [v1, v2];
-    //         };
-    //     };
-    // }
     // use the macro to insert nodes into the graph
-    rshyper::hypergraph! {
+    hypergraph! {
         let mut graph: UnHyperMap::<usize, usize> {
             nodes: {
                 let v0;
