@@ -83,6 +83,7 @@ extern crate alloc;
 pub(crate) mod macros;
 
 #[doc(inline)]
+#[cfg(all(feature = "std", feature = "algo"))]
 pub use self::algo::prelude::*;
 #[doc(inline)]
 pub use rshyper_core::*;
@@ -92,6 +93,7 @@ pub use rshyper_core::*;
 pub use self::hash_graph::{DiHashGraph, HashGraph, UnHashGraph};
 
 /// the `algo` module focuses on implementing algorithms and operators for hypergraphs
+#[cfg(all(feature = "std", feature = "algo"))]
 pub mod algo;
 /// this module contains the [`HashGraph`], a hash-based hypergraph implementation
 #[cfg(feature = "hash_graph")]
@@ -100,10 +102,9 @@ pub mod hash_graph;
 /// the prelude module for the crate contains all commonly used traits, types, and functions
 #[allow(missing_docs)]
 pub mod prelude {
-    #[doc(no_inline)]
     pub use rshyper_core::prelude::*;
 
-    #[doc(no_inline)]
+    #[cfg(all(feature = "std", feature = "algo"))]
     pub use crate::algo::prelude::*;
     #[cfg(feature = "hash_graph")]
     pub use crate::hash_graph::prelude::*;

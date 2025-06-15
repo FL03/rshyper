@@ -68,6 +68,7 @@ tracing-subscriber = { features = ["ansi", "chrono", "serde", "std"], workspace 
 
 [features]
 default = [
+    "algo",
     "hash_graph",
     "macros",
     "std",
@@ -76,7 +77,6 @@ default = [
 full = [
     "default",
     "anyhow",
-    "binary_graph",
     "json",
     "rand",
     "serde",
@@ -84,8 +84,8 @@ full = [
 ]
 
 # ************* [FF:Flags] *************
-binary_graph = [
-    "alloc"
+algo = [
+    "std",
 ]
 
 hash_graph = [

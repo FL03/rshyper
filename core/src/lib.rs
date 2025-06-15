@@ -69,6 +69,7 @@ pub mod traits {
     pub mod domain;
     /// the [`HyperGraph`] trait defines the core interface for hypergraphs, enabling the
     /// generalization of algorithms constructors, and graphical operators.
+    #[cfg(feature = "alloc")]
     pub mod hyper_graph;
     /// the [`Merge`] trait provides a way to combine two graphs into one
     pub mod merge;
@@ -86,6 +87,7 @@ pub mod traits {
         #[doc(inline)]
         pub use super::domain::*;
         #[doc(inline)]
+        #[cfg(feature = "alloc")]
         pub use super::hyper_graph::*;
         #[doc(inline)]
         pub use super::merge::*;

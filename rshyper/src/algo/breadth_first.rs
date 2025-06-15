@@ -3,7 +3,6 @@
     Contrib: @FL03
 */
 use crate::algo::{Search, Traversal};
-use crate::hash_graph::HashGraph;
 use core::hash::Hash;
 use rshyper_core::edge::RawEdge;
 use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
@@ -11,7 +10,7 @@ use rshyper_core::{GraphAttributes, GraphType, HyperGraph};
 use std::collections::{HashSet, VecDeque};
 
 /// Breadth-First Traversal algorithm for hypergraphs
-pub struct BreadthFirstTraversal<'a, N, E, A, H = HashGraph<N, E>>
+pub struct BreadthFirstTraversal<'a, N, E, A, H>
 where
     A: GraphAttributes,
     H: HyperGraph<N, E, A>,
@@ -115,7 +114,7 @@ where
             let edges = self.graph.find_edges_with_node(&current)?;
             // visit all vertices within each edge that haven't been visited yet
             for edge_id in edges {
-                for vertex in self.graph.get_edge_vertices(&edge_id)? {
+                for vertex in self.graph.get_edge_domain(&edge_id)? {
                     self.register(*vertex);
                 }
             }

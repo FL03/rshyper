@@ -3,8 +3,8 @@
     Contrib: @FL03
 */
 use crate::algo::{Search, Traversal};
-use crate::hash_graph::HashGraph;
 use core::hash::Hash;
+use rshyper_core::edge::RawEdge;
 use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
 use rshyper_core::{GraphAttributes, GraphType, HyperGraph};
 use std::collections::HashSet;
@@ -55,7 +55,11 @@ where
     }
     /// reset the traversal state
     pub fn reset(&mut self) -> &mut Self {
+        #[cfg(feature = "tracing")]
+        tracing::debug!("resetting the depth-first traversal operator state...");
+        // clear the stack
         self.stack_mut().clear();
+        // clear the visited set
         self.visited_mut().clear();
         self
     }
@@ -98,12 +102,12 @@ where
     }
 }
 
-impl<'a, N, E, A> Search<VertexId<A::Ix>> for DepthFirstTraversal<'a, N, E, A, HashGraph<N, E, A>>
+impl<'a, N, E, A, H> Search<VertexId<A::Ix>> for DepthFirstTraversal<'a, N, E, A, H>
 where
     A: GraphAttributes,
-    E: Eq + Hash,
-    N: Eq + Hash,
-    A::Ix: crate::NumIndex,
+    H: HyperGraph<N, E, A>,
+    A::Ix: NumIndex,
+    for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
     type Output = Vec<VertexId<A::Ix>>;
 
@@ -130,11 +134,11 @@ where
             if let Ok(edges) = self.graph.find_edges_with_node(&current) {
                 // For each hyperedge, visit all vertices that haven't been visited yet
                 for edge_id in edges {
-                    let vertices = self.graph.get_edge_vertices(&edge_id)?;
+                    let vertices = self.graph.get_edge_domain(&edge_id)?;
 
                     // Add vertices in reverse order to maintain expected DFS behavior
                     let mut new_vertices = vertices
-                        .iter()
+                        .into_iter()
                         .filter(|&v| !self.has_visited(v))
                         .copied()
                         .collect::<Vec<_>>();

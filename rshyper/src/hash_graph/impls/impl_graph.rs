@@ -54,23 +54,33 @@ where
         let edge_id = self.next_edge_id();
         // create a new surface
         let surface = Surface::new(edge_id.clone(), verts, weight);
-        // ensure the surface is valid
-        if surface.is_empty() && self.history().contains_edge(surface.id()) {
-            return Err(crate::Error::EmptyHyperedge);
-        }
         // add the hyperedge to the graph
         self.add_hyperedge(surface)?;
+        // log the addition of the new hyperedge
+        #[cfg(feature = "tracing")]
+        tracing::debug!("added a new hyperedge with id {edge_id}");
+        // return the edge id
         Ok(edge_id)
     }
-    /// add a new hyperedge directly using an externally defined surface;
-    ///
-    /// **note:** it is up to the user to ensure the surface id is recordered, otherwise
-    /// dupliciated may occur. For this reason, it is recommended to use any other insertion
-    /// routine for new hyperedges unless you are sure the surface is valid.
+    /// add a new hyperedge directly using an externally defined surfac, returns an error if the
+    /// surface is empty or if the associated edge id is not recorded in the history.
     pub fn add_hyperedge(&mut self, surface: HashFacet<E, K, Idx, S>) -> crate::Result<EdgeId<Idx>>
     where
         Idx: Clone,
     {
+        // ensure the surface is valid
+        if surface.is_empty() {
+            return Err(crate::Error::EmptyHyperedge);
+        }
+        // verify the edge id is already recorded in the history
+        if !self.history().contains_edge(surface.id()) {
+            #[cfg(feature = "tracing")]
+            tracing::error!(
+                "the surface with id {} is not recorded in the history",
+                surface.id()
+            );
+            return Err(crate::idx::IndexError::InvalidIndex.into());
+        }
         // get the id of the surface
         let id = surface.id().clone();
         // insert the new hyperedge into the adjacency map
@@ -78,7 +88,6 @@ where
         // return the id
         Ok(id)
     }
-
     /// add a new node with the given weight and return its index
     #[cfg_attr(
         feature = "tracing",
@@ -91,7 +100,7 @@ where
         // generate a new index to identify the new node
         let ndx = self.next_vertex_id();
         #[cfg(feature = "tracing")]
-        tracing::info!("adding a new node with index {ndx}");
+        tracing::debug!("adding a new node with index {ndx}");
         // initialize a new node with the given weight & index
         let node = Node::new(ndx, weight);
         // insert the new node into the vertices map
@@ -119,6 +128,9 @@ where
     }
     /// reset the hypergraph by clearing all nodes, edges, and facets
     pub fn clear(&mut self) -> &mut Self {
+        // log the addition of the new hyperedge
+        #[cfg(feature = "tracing")]
+        tracing::info!("clearing the hypergraph...");
         self.surfaces_mut().clear();
         self.nodes_mut().clear();
         self

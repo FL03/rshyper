@@ -9,7 +9,8 @@ use super::aliases::*;
 use rshyper_core::attrs::{DiAttributes, GraphAttributes, UnAttributes};
 use rshyper_core::idx::{EdgeId, Frame, IndexTracker, NumIndex, RawIndex, VertexId};
 use rshyper_core::node::Node;
-use rshyper_core::{GraphType, HyperGraph, Mode, RawHyperGraph, Weight};
+use rshyper_core::traits::{HyperGraph, HyperGraphIterEdge, HyperGraphIterNode, RawHyperGraph};
+use rshyper_core::{GraphType, Mode, Weight};
 
 use core::hash::{BuildHasher, Hash};
 use std::hash::RandomState;
@@ -281,77 +282,129 @@ where
     type Edge<E2> = HashFacet<E2, A::Kind, A::Ix, S>;
 }
 
-impl<N, E, A, K, Ix, S> HyperGraph<N, E, A> for HashGraph<N, E, A, S>
+impl<N, E, A, S> HyperGraph<N, E, A> for HashGraph<N, E, A, S>
 where
-    A: GraphAttributes<Ix = Ix, Kind = K>,
+    A: GraphAttributes,
     S: BuildHasher + Default,
-    K: GraphType,
-    Ix: NumIndex,
+    A::Ix: NumIndex,
 {
-    fn add_node(&mut self, weight: Weight<N>) -> crate::Result<VertexId<Ix>> {
+    fn add_node(&mut self, weight: Weight<N>) -> crate::Result<VertexId<A::Ix>> {
         self.add_node(weight)
     }
 
-    fn add_surface<I>(&mut self, iter: I, weight: Weight<E>) -> crate::Result<EdgeId<Ix>>
+    fn add_surface<I>(&mut self, iter: I, weight: Weight<E>) -> crate::Result<EdgeId<A::Ix>>
     where
-        I: IntoIterator<Item = VertexId<Ix>>,
+        I: IntoIterator<Item = VertexId<A::Ix>>,
     {
         self.add_surface(iter, weight)
     }
 
-    fn get_edge_vertices(&self, index: &EdgeId<Ix>) -> crate::Result<&VertexSet<Ix, S>> {
+    fn get_edge_domain(&self, index: &EdgeId<A::Ix>) -> crate::Result<&VertexSet<A::Ix, S>> {
         self.get_edge_vertices(index)
     }
 
-    fn get_edge_vertices_mut(
+    fn get_edge_domain_mut(
         &mut self,
-        index: &EdgeId<Ix>,
-    ) -> crate::Result<&mut VertexSet<Ix, S>> {
+        index: &EdgeId<A::Ix>,
+    ) -> crate::Result<&mut VertexSet<A::Ix, S>> {
         self.get_edge_vertices_mut(index)
     }
 
-    fn get_edge_weight(&self, index: &EdgeId<Ix>) -> crate::Result<&Weight<E>> {
+    fn get_edge_weight(&self, index: &EdgeId<A::Ix>) -> crate::Result<&Weight<E>> {
         self.get_edge_weight(index)
     }
 
-    fn get_edge_weight_mut(&mut self, index: &EdgeId<Ix>) -> crate::Result<&mut Weight<E>> {
+    fn get_edge_weight_mut(&mut self, index: &EdgeId<A::Ix>) -> crate::Result<&mut Weight<E>> {
         self.get_edge_weight_mut(index)
     }
 
-    fn get_node(&self, index: &VertexId<Ix>) -> crate::Result<&Node<N, Ix>> {
+    fn get_node(&self, index: &VertexId<A::Ix>) -> crate::Result<&Node<N, A::Ix>> {
         self.get_node(index)
     }
 
-    fn get_node_mut(&mut self, index: &VertexId<Ix>) -> crate::Result<&mut Node<N, Ix>> {
+    fn get_node_mut(&mut self, index: &VertexId<A::Ix>) -> crate::Result<&mut Node<N, A::Ix>> {
         self.get_node_mut(index)
     }
 
-    fn get_surface(&self, index: &EdgeId<Ix>) -> crate::Result<&HashFacet<E, K, Ix, S>> {
+    fn get_surface(
+        &self,
+        index: &EdgeId<A::Ix>,
+    ) -> crate::Result<&HashFacet<E, A::Kind, A::Ix, S>> {
         self.get_surface(index)
     }
 
     fn get_surface_mut(
         &mut self,
-        index: &EdgeId<Ix>,
-    ) -> crate::Result<&mut HashFacet<E, K, Ix, S>> {
+        index: &EdgeId<A::Ix>,
+    ) -> crate::Result<&mut HashFacet<E, A::Kind, A::Ix, S>> {
         self.get_surface_mut(index)
     }
 
-    fn contains_edge(&self, index: &EdgeId<Ix>) -> bool {
+    fn contains_edge(&self, index: &EdgeId<A::Ix>) -> bool {
         self.contains_edge(index)
     }
 
-    fn contains_node(&self, index: &VertexId<Ix>) -> bool {
+    fn contains_node(&self, index: &VertexId<A::Ix>) -> bool {
         self.contains_node(index)
     }
 
-    fn find_edges_with_node(
-        &self,
-        index: &VertexId<Ix>,
-    ) -> crate::Result<impl Iterator<Item = EdgeId<Ix>>> {
-        match self.find_edges_with_node(index) {
-            Ok(edges) => Ok(edges.into_iter()),
-            Err(e) => Err(e),
-        }
+    fn find_edges_with_node(&self, index: &VertexId<A::Ix>) -> crate::Result<Vec<EdgeId<A::Ix>>> {
+        self.find_edges_with_node(index)
+    }
+}
+
+impl<N, E, A, S> HyperGraphIterNode<N, E, A> for HashGraph<N, E, A, S>
+where
+    A: GraphAttributes,
+    S: BuildHasher + Default,
+    E: Eq + Hash,
+    N: Eq + Hash,
+    A::Ix: NumIndex,
+{
+    type Nodes<'a>
+        = super::NodeIter<'a, N, A::Ix>
+    where
+        Self: 'a,
+        Self::Node<N>: 'a;
+    type Verts<'a>
+        = super::Vertices<'a, N, A::Ix>
+    where
+        Self: 'a;
+
+    fn iter_nodes(&self) -> Self::Nodes<'_> {
+        self.node_iter()
+    }
+
+    fn vertices(&self) -> Self::Verts<'_> {
+        self.vertices()
+    }
+}
+
+impl<N, E, A, S> HyperGraphIterEdge<N, E, A> for HashGraph<N, E, A, S>
+where
+    A: GraphAttributes,
+    S: BuildHasher + Default,
+    E: Eq + Hash,
+    N: Eq + Hash,
+    A::Ix: NumIndex,
+{
+    type Surfaces<'a>
+        = super::SurfaceIter<'a, E, A::Kind, A::Ix, S>
+    where
+        Self: 'a,
+        Self::Edge<E>: 'a;
+
+    type Edges<'a>
+        = super::Edges<'a, E, A::Kind, A::Ix, S>
+    where
+        Self: 'a,
+        Self::Edge<E>: 'a;
+
+    fn iter_surfaces(&self) -> Self::Surfaces<'_> {
+        self.surface_iter()
+    }
+
+    fn edges(&self) -> Self::Edges<'_> {
+        self.surface_keys()
     }
 }

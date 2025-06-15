@@ -8,14 +8,15 @@ pub use self::priority_node::PriorityNode;
 pub(crate) mod priority_node;
 
 use crate::algo::{Heuristic, PathFinder, Search, Traversal};
-use crate::hash_graph::{HashGraph, VertexSet};
+use crate::hash_graph::VertexSet;
 use core::hash::Hash;
+use rshyper_core::edge::RawEdge;
 use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphAttributes, GraphType, HyperGraph};
+use rshyper_core::{GraphAttributes, GraphType, HyperGraph, HyperGraphIter};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 
 /// An A* Search algorithm implementation for hypergraphs
-pub struct AStarSearch<'a, N, E, A, F, H = HashGraph<N, E, A>>
+pub struct AStarSearch<'a, N, E, A, F, H>
 where
     A: GraphAttributes,
     H: HyperGraph<N, E, A>,
@@ -190,23 +191,20 @@ where
     }
 }
 
-impl<'a, N, E, F, A, S, K, Idx> PathFinder<Idx>
-    for AStarSearch<'a, N, E, A, F, HashGraph<N, E, A, S>>
+impl<'a, N, E, F, A, H> PathFinder<A::Ix> for AStarSearch<'a, N, E, A, F, H>
 where
-    A: GraphAttributes<Ix = Idx, Kind = K>,
-    E: Eq + Hash,
-    N: Eq + Hash,
-    S: core::hash::BuildHasher + Default,
-    F: Heuristic<Idx, Output = f64>,
-    K: GraphType,
-    Idx: NumIndex,
+    A: GraphAttributes,
+    H: HyperGraph<N, E, A>,
+    F: Heuristic<A::Ix, Output = f64>,
+    A::Ix: NumIndex,
+    for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
-    type Path = Vec<VertexId<Idx>>;
+    type Path = Vec<VertexId<A::Ix>>;
     /// Find the shortest path between start and goal vertices
     fn find_path(
         &mut self,
-        start: VertexId<Idx>,
-        goal: VertexId<Idx>,
+        start: VertexId<A::Ix>,
+        goal: VertexId<A::Ix>,
     ) -> crate::Result<Self::Path> {
         // Check if both vertices exist
         if !self.graph.contains_node(&start) {
@@ -257,51 +255,53 @@ where
             self.move_open_to_closed(&current);
 
             // Get all hyperedges containing the current vertex
-            let edges = self.graph.find_edges_with_node(&current)?;
+            self.graph
+                .find_edges_with_node(&current)?
+                .iter()
+                .for_each(|edge_id| {
+                    // Get all vertices in this hyperedge
+                    let vertices = self
+                        .graph
+                        .get_edge_domain(&edge_id)
+                        .expect("Failed to get edge vertices");
 
-            edges.iter().for_each(|edge_id| {
-                // Get all vertices in this hyperedge
-                let vertices = self
-                    .graph
-                    .get_edge_vertices(edge_id)
-                    .expect("Failed to get edge vertices");
-
-                // Process each vertex in this hyperedge
-                for &neighbor in vertices {
-                    // Skip if this is the current vertex or already evaluated
-                    if neighbor == current || self.has_visited(&neighbor) {
-                        continue;
-                    }
-
-                    // Cost to reach neighbor through current vertex
-                    let tentative_g_score = self.g_score[&current] + 1.0;
-
-                    // Check if this path is better than any previous path
-                    let is_better_path =
-                        !self.has_g_score(&neighbor) || tentative_g_score < self.g_score[&neighbor];
-
-                    if is_better_path {
-                        // Update path info
-                        self.came_from_mut().insert(neighbor, current);
-                        self.g_score_mut().insert(neighbor, tentative_g_score);
-
-                        // Update f_score (g_score + heuristic)
-                        let f_score = tentative_g_score + self.heuristic().compute(neighbor, goal);
-                        self.f_score_mut().insert(neighbor, f_score);
-
-                        // Add to open set if not already there
-                        if !self.in_open_set(&neighbor) {
-                            self.open_set_mut().insert(neighbor);
+                    // Process each vertex in this hyperedge
+                    for &neighbor in vertices {
+                        // Skip if this is the current vertex or already evaluated
+                        if neighbor == current || self.has_visited(&neighbor) {
+                            continue;
                         }
 
-                        // push the neighbor into the priority queue with its f_score (negative for min-heap behavior)
-                        priority_queue.push(PriorityNode {
-                            vertex: neighbor,
-                            priority: -(f_score as i64),
-                        });
+                        // Cost to reach neighbor through current vertex
+                        let tentative_g_score = self.g_score[&current] + 1.0;
+
+                        // Check if this path is better than any previous path
+                        let is_better_path = !self.has_g_score(&neighbor)
+                            || tentative_g_score < self.g_score[&neighbor];
+
+                        if is_better_path {
+                            // Update path info
+                            self.came_from_mut().insert(neighbor, current);
+                            self.g_score_mut().insert(neighbor, tentative_g_score);
+
+                            // Update f_score (g_score + heuristic)
+                            let f_score =
+                                tentative_g_score + self.heuristic().compute(neighbor, goal);
+                            self.f_score_mut().insert(neighbor, f_score);
+
+                            // Add to open set if not already there
+                            if !self.in_open_set(&neighbor) {
+                                self.open_set_mut().insert(neighbor);
+                            }
+
+                            // push the neighbor into the priority queue with its f_score (negative for min-heap behavior)
+                            priority_queue.push(PriorityNode {
+                                vertex: neighbor,
+                                priority: -(f_score as i64),
+                            });
+                        }
                     }
-                }
-            });
+                });
         }
 
         // No path found
@@ -309,7 +309,7 @@ where
     }
 
     // Reconstruct path from came_from map
-    fn reconstruct_path(&self, goal: VertexId<Idx>) -> Self::Path {
+    fn reconstruct_path(&self, goal: VertexId<A::Ix>) -> Self::Path {
         let mut path = vec![goal];
         let mut current = goal;
 
@@ -341,15 +341,13 @@ where
     }
 }
 
-impl<'a, N, E, F, A, S> Search<VertexId<A::Ix>>
-    for AStarSearch<'a, N, E, A, F, HashGraph<N, E, A, S>>
+impl<'a, N, E, F, A, H> Search<VertexId<A::Ix>> for AStarSearch<'a, N, E, A, F, H>
 where
     A: GraphAttributes,
     F: Heuristic<A::Ix, Output = f64>,
-    S: core::hash::BuildHasher + Default,
-    E: Eq + Hash,
-    N: Eq + Hash,
+    H: HyperGraphIter<N, E, A>,
     A::Ix: NumIndex,
+    for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
     type Output = Vec<VertexId<A::Ix>>;
 
@@ -365,7 +363,7 @@ where
 
         // Using the vertex with the largest ID as a pseudo-goal
         // This is a hack to make A* behave more like a general search
-        let max_vertex_id = match self.graph.nodes().keys().max() {
+        let max_vertex_id = match self.graph.vertices().max() {
             Some(&id) => id,
             None => return Ok(vec![]),
         };

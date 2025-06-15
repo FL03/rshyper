@@ -7,12 +7,14 @@
 #[doc(inline)]
 pub use self::prelude::*;
 
-#[cfg(feature = "std")]
-/// path-finding algorithms for hypergraphs
-pub mod path;
-/// search algorithms for hypergraphs
-#[cfg(feature = "std")]
-pub mod search;
+/// this module implements the A* search algorithm
+pub mod astar;
+/// this module implements the breadth-first search algorithm
+pub mod breadth_first;
+/// this module implements the depth-first search algorithm
+pub mod depth_first;
+/// this module implements the Dijkstra's algorithm for finding the shortest path in a hypergraph
+pub mod dijkstra;
 
 pub mod traits {
     //! this module implements additional traits for defining algorithmic operators on
@@ -51,9 +53,11 @@ pub(crate) mod prelude {
     pub use super::traits::prelude::*;
 
     #[doc(inline)]
-    #[cfg(feature = "std")]
-    pub use super::path::prelude::*;
+    pub use super::astar::AStarSearch;
     #[doc(inline)]
-    #[cfg(feature = "std")]
-    pub use super::search::prelude::*;
+    pub use super::breadth_first::BreadthFirstTraversal;
+    #[doc(inline)]
+    pub use super::depth_first::DepthFirstTraversal;
+    #[doc(inline)]
+    pub use super::dijkstra::Dijkstra;
 }

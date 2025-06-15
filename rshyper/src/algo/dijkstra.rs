@@ -8,13 +8,14 @@ pub use self::queue_node::QueueNode;
 mod queue_node;
 
 use crate::algo::{PathFinder, Search, Traversal};
-use crate::hash_graph::HashGraph;
 use core::hash::Hash;
 use num_traits::bounds::UpperBounded;
 use num_traits::{FromPrimitive, Num};
+use rshyper_core::edge::RawEdge;
 use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphAttributes, HyperGraph};
+use rshyper_core::{GraphAttributes, HyperGraph, HyperGraphIter};
 use std::collections::{BinaryHeap, HashSet};
+
 /// a type alias for a map of distances for vertices in the graph
 pub(crate) type Distances<K, V = f64> = std::collections::HashMap<VertexId<K>, V>;
 /// a type alias for the history of previous vertices in the graph, maps vertices to vertices
@@ -23,7 +24,7 @@ pub(crate) type PreviousHistory<K> = std::collections::HashMap<VertexId<K>, Vert
 pub(crate) type Visited<K> = std::collections::HashSet<VertexId<K>>;
 
 /// Dijkstra's shortest path algorithm for hypergraphs
-pub struct Dijkstra<'a, N, E, A, H = HashGraph<N, E, A>>
+pub struct Dijkstra<'a, N, E, A, H>
 where
     A: GraphAttributes,
     H: HyperGraph<N, E, A>,
@@ -157,12 +158,13 @@ where
     }
 }
 
-impl<'a, N, E, A, S> PathFinder<A::Ix> for Dijkstra<'a, N, E, A, HashGraph<N, E, A, S>>
+impl<'a, N, E, A, H> PathFinder<A::Ix> for Dijkstra<'a, N, E, A, H>
 where
     E: Copy + Default + PartialOrd + FromPrimitive + Num + UpperBounded,
     A: GraphAttributes,
-    S: core::hash::BuildHasher + Default,
+    H: HyperGraph<N, E, A>,
     A::Ix: NumIndex,
+    <H::Edge<E> as RawEdge>::Store: Clone + IntoIterator<Item = VertexId<A::Ix>>,
 {
     type Path = Vec<VertexId<A::Ix>>;
 
@@ -200,25 +202,23 @@ where
             }
 
             // For each neighbor via hyperedges
-            if let Ok(edges) = self.graph().find_edges_with_node(&u) {
-                for edge_id in edges {
-                    // load the weight of the edge
-                    let weight = self.graph.get_edge_weight(&edge_id)?;
-                    // visit each node within the hyperedge
-                    for v in self.graph.get_edge_vertices(&edge_id)?.iter().copied() {
-                        if v == u {
-                            continue;
-                        }
-                        let alt = u_cost + **weight;
-                        if alt < *self.distances().get(&v).unwrap_or(&E::max_value()) {
-                            self.add_distance(v, alt).add_previous(v, u);
-                            heap.push(QueueNode::new(alt, v));
-                        }
+            let edges = self.graph().find_edges_with_node(&u)?;
+            for edge_id in edges {
+                // load the weight of the edge
+                let weight = self.graph.get_edge_weight(&edge_id)?.view();
+                // visit each node within the hyperedge
+                for v in self.graph.get_edge_domain(&edge_id)?.clone() {
+                    if v == u {
+                        continue;
+                    }
+                    let alt = u_cost + **weight;
+                    if alt < *self.distances().get(&v).unwrap_or(&E::max_value()) {
+                        self.add_distance(v, alt).add_previous(v, u);
+                        heap.push(QueueNode::new(alt, v));
                     }
                 }
             }
         }
-
         Err(crate::Error::PathNotFound)
     }
 
@@ -256,21 +256,30 @@ where
     }
 }
 
-impl<'a, N, E, A, S> Search<VertexId<A::Ix>> for Dijkstra<'a, N, E, A, HashGraph<N, E, A, S>>
+impl<'a, N, E, A, H> Search<VertexId<A::Ix>> for Dijkstra<'a, N, E, A, H>
 where
     E: Copy + Default + PartialOrd + FromPrimitive + Num + UpperBounded,
     A: GraphAttributes,
-    S: core::hash::BuildHasher + Default,
+    H: HyperGraphIter<N, E, A>,
     A::Ix: NumIndex,
+    <H::Edge<E> as RawEdge>::Store: Clone + IntoIterator<Item = VertexId<A::Ix>>,
 {
     type Output = Vec<VertexId<A::Ix>>;
 
     fn search(&mut self, start: VertexId<A::Ix>) -> crate::Result<Self::Output> {
         // Use the vertex with the largest ID as a pseudo-goal if not specified
-        let max_vertex_id = match self.graph.nodes().keys().max() {
+        let max_vertex_id = match self.graph.vertices().max() {
             Some(&id) => id,
-            None => return Ok(vec![]),
+            None => {
+                #[cfg(feature = "tracing")]
+                tracing::warn!("Graph is empty, returning an empty path.");
+                return Ok(Vec::new());
+            }
         };
-        self.find_path(start, max_vertex_id)
+        // use the path-finding algorithm to find the path
+        let path = self.find_path(start, max_vertex_id)?;
+        #[cfg(feature = "tracing")]
+        tracing::info!("found path: {:?}", path);
+        Ok(path)
     }
 }
