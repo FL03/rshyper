@@ -59,6 +59,7 @@ Formally, a hypergraph is defined as a pair $H = (V, E)$ where:
 
 Listed below are some intrinsic properties of hypergraphs:
 
+- **domain:** the domain of a hypergraph `H` is the set of vertices `V` within the edge set `E`.
 - **order:** The order of a hypergraph `H` is the number of vertices in `V`.
 - **size:** The size of a hypergraph `H` is the number of hyperedges in `E`.
 
