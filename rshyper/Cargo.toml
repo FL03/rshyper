@@ -69,7 +69,7 @@ tracing-subscriber = { features = ["ansi", "chrono", "serde", "std"], workspace 
 [features]
 default = [
     "algo",
-    "hash_graph",
+    "hyper_map",
     "macros",
     "std",
 ]
@@ -86,7 +86,9 @@ full = [
 # ************* [FF:Flags] *************
 algo = ["dep:rshyper-algo"]
 
-hash_graph = [
+hash_grap = ["hyper_map"]
+
+hyper_map = [
     "std"
 ]
 
@@ -198,9 +200,9 @@ wasm-bindgen = [
 # ************* [Benchmarks] *************
 [[bench]]
 harness = false
-name = "hash_graph"
+name ="hyper_map"
 required-features = [
-    "hash_graph",
+    "hyper_map",
     "rand",
 ]
 
@@ -208,15 +210,15 @@ required-features = [
 [[example]]
 name = "basic_usage"
 required-features = [
-    "hash_graph", 
+    "hyper_map",
     "macros",
 ]
 
 [[example]]
-name = "hash_graph"
+name ="hyper_map"
 required-features = [
-    "hash_graph", 
-    "macros", 
+    "hyper_map",
+    "macros",
     "tracing",
 ]
 
@@ -227,41 +229,38 @@ name = "default"
 [[test]]
 name = "astar"
 required-features = [
-    "algo", 
-    "hash_graph",
+    "algo",
+    "hyper_map",
 ]
 
 [[test]]
 name = "bft"
 required-features = [
-    "algo", 
-    "hash_graph",
+    "algo",
+    "hyper_map",
 ]
-
 
 [[test]]
 name = "dft"
 required-features = [
-    "algo", 
-    "hash_graph",
+    "algo",
+    "hyper_map",
 ]
-
 
 [[test]]
 name = "dijkstra"
 required-features = [
-    "algo", 
-    "hash_graph",
+    "algo",
+    "hyper_map",
 ]
 
-
 [[test]]
-name = "hash_graph"
-required-features = ["hash_graph"]
+name ="hyper_map"
+required-features = ["hyper_map"]
 
 [[test]]
 name = "macros"
 required-features = [
-    "alloc", 
+    "alloc",
     "macros",
 ]

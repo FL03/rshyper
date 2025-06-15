@@ -2,7 +2,7 @@
     appellation: surface <module>
     authors: @FL03
 */
-use crate::hash_graph::HashFacet;
+use crate::hyper_map::HashFacet;
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::GraphType;
 use rshyper_core::idx::{EdgeId, RawIndex};

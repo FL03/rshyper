@@ -2,7 +2,7 @@
     appellation: dft <test>
     authors: @FL03
 */
-use rshyper::hash_graph::UnHashGraph as HyperGraph;
+use rshyper::hyper_map::UnHyperMap as HyperGraph;
 
 #[test]
 fn test_depth_first_traversal() -> rshyper::Result<()> {

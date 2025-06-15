@@ -2,7 +2,7 @@
     Appellation: graph <module>
     Contrib: @FL03
 */
-use rshyper::HashGraph;
+use rshyper::HyperMap;
 
 fn main() -> rshyper::Result<()> {
     tracing_subscriber::fmt()
@@ -11,7 +11,7 @@ fn main() -> rshyper::Result<()> {
         .with_max_level(tracing::Level::TRACE)
         .init();
     // initialize a new instance of a hypergraph
-    let mut graph = HashGraph::<usize, usize>::undirected();
+    let mut graph = HyperMap::<usize, usize>::undirected();
     // use the macro to insert nodes into the graph
     rshyper::hypergraph! {
         graph {

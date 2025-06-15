@@ -3,14 +3,14 @@
     authors: @FL03
 */
 use crate::algo;
-use crate::hash_graph::{HashFacet, HashGraph};
+use crate::hyper_map::{HashFacet, HyperMap};
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::idx::{EdgeId, NumIndex, RawIndex, VertexId};
 use rshyper_core::node::Node;
 use rshyper_core::{Combine, GraphAttributes, GraphType};
 
 /// implementations for various algorithms and operators on the hypergraph
-impl<N, E, A, S> HashGraph<N, E, A, S>
+impl<N, E, A, S> HyperMap<N, E, A, S>
 where
     S: BuildHasher + Default,
     A: GraphAttributes,
@@ -37,7 +37,7 @@ where
     }
 }
 
-impl<N, E, A, S, K, Idx> Combine<EdgeId<Idx>, EdgeId<Idx>> for HashGraph<N, E, A, S>
+impl<N, E, A, S, K, Idx> Combine<EdgeId<Idx>, EdgeId<Idx>> for HyperMap<N, E, A, S>
 where
     A: GraphAttributes<Ix = Idx, Kind = K>,
     E: Clone + core::ops::Add<Output = E>,
@@ -58,7 +58,7 @@ where
     }
 }
 
-impl<'a, N, E, A, S, K, Idx> Combine<&'a EdgeId<Idx>, &'a EdgeId<Idx>> for HashGraph<N, E, A, S>
+impl<'a, N, E, A, S, K, Idx> Combine<&'a EdgeId<Idx>, &'a EdgeId<Idx>> for HyperMap<N, E, A, S>
 where
     A: GraphAttributes<Ix = Idx, Kind = K>,
     K: GraphType,
@@ -78,7 +78,7 @@ where
     }
 }
 
-impl<N, E, A, S, K, Idx> core::ops::Index<&EdgeId<Idx>> for HashGraph<N, E, A, S>
+impl<N, E, A, S, K, Idx> core::ops::Index<&EdgeId<Idx>> for HyperMap<N, E, A, S>
 where
     A: GraphAttributes<Ix = Idx, Kind = K>,
     K: GraphType,
@@ -92,7 +92,7 @@ where
     }
 }
 
-impl<N, E, A, S, K, Idx> core::ops::IndexMut<&EdgeId<Idx>> for HashGraph<N, E, A, S>
+impl<N, E, A, S, K, Idx> core::ops::IndexMut<&EdgeId<Idx>> for HyperMap<N, E, A, S>
 where
     A: GraphAttributes<Ix = Idx, Kind = K>,
     K: GraphType,
@@ -104,7 +104,7 @@ where
     }
 }
 
-impl<N, E, A, S, K, Idx> core::ops::Index<&VertexId<Idx>> for HashGraph<N, E, A, S>
+impl<N, E, A, S, K, Idx> core::ops::Index<&VertexId<Idx>> for HyperMap<N, E, A, S>
 where
     A: GraphAttributes<Ix = Idx, Kind = K>,
     K: GraphType,
@@ -118,7 +118,7 @@ where
     }
 }
 
-impl<N, E, A, S, K, Idx> core::ops::IndexMut<&VertexId<Idx>> for HashGraph<N, E, A, S>
+impl<N, E, A, S, K, Idx> core::ops::IndexMut<&VertexId<Idx>> for HyperMap<N, E, A, S>
 where
     A: GraphAttributes<Ix = Idx, Kind = K>,
     K: GraphType,

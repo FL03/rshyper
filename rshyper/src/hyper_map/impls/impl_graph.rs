@@ -2,13 +2,13 @@
     appellation: impl_graph <module>
     authors: @FL03
 */
-use crate::hash_graph::{HashFacet, HashGraph, VertexSet};
+use crate::hyper_map::{HashFacet, HyperMap, VertexSet};
 use crate::{AddStep, GraphAttributes, GraphType};
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::idx::{EdgeId, RawIndex, VertexId};
 use rshyper_core::{Error, Node, Surface, Weight};
 
-impl<N, E, A, K, Idx, S> HashGraph<N, E, A, S>
+impl<N, E, A, K, Idx, S> HyperMap<N, E, A, S>
 where
     A: GraphAttributes<Ix = Idx, Kind = K>,
     K: GraphType,
@@ -499,7 +499,7 @@ where
 
 #[allow(deprecated)]
 #[doc(hidden)]
-impl<N, E, A, S> HashGraph<N, E, A, S>
+impl<N, E, A, S> HyperMap<N, E, A, S>
 where
     A: GraphAttributes,
     S: BuildHasher,

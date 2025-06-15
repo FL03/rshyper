@@ -2,14 +2,14 @@
     appellation: impl_serde <module>
     authors: @FL03
 */
-use crate::{GraphAttributes, HashGraph};
+use crate::{GraphAttributes, HyperMap};
 use core::hash::{BuildHasher, Hash};
 use serde::de::{Deserialize, DeserializeOwned, MapAccess, Visitor};
 use serde::ser::Serialize;
 
 const FIELDS: &[&str] = &["nodes", "surfaces", "position", "_attrs"];
 
-impl<'a, N, E, A, S> Deserialize<'a> for HashGraph<N, E, A, S>
+impl<'a, N, E, A, S> Deserialize<'a> for HyperMap<N, E, A, S>
 where
     A: GraphAttributes + DeserializeOwned,
     E: DeserializeOwned,
@@ -32,7 +32,7 @@ where
     }
 }
 
-impl<N, E, A, S> Serialize for HashGraph<N, E, A, S>
+impl<N, E, A, S> Serialize for HyperMap<N, E, A, S>
 where
     A: GraphAttributes + Serialize,
     E: Serialize,
@@ -68,7 +68,7 @@ where
     A::Ix: Default + Eq + Hash + DeserializeOwned,
     A::Kind: DeserializeOwned,
 {
-    type Value = HashGraph<N, E, A, S>;
+    type Value = HyperMap<N, E, A, S>;
 
     fn expecting(&self, formatter: &mut core::fmt::Formatter) -> core::fmt::Result {
         formatter.write_str("a HashGraph")
@@ -117,7 +117,7 @@ where
         let surfaces = surfaces.ok_or_else(|| serde::de::Error::missing_field("surfaces"))?;
         let position = position.ok_or_else(|| serde::de::Error::missing_field("position"))?;
         let attrs = attrs.ok_or_else(|| serde::de::Error::missing_field("_attrs"))?;
-        Ok(HashGraph {
+        Ok(HyperMap {
             nodes,
             surfaces,
             history: position,

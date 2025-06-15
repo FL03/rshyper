@@ -1,5 +1,3 @@
-
-
 use crate::idx::RawIndex;
 use crate::node::Node;
 use core::hash::Hash;
@@ -13,7 +11,7 @@ where
 }
 
 /*
-    ************* Implementations *************
+ ************* Implementations *************
 */
 
 impl<'a, N, Idx> Iterator for SeqNodeIter<'a, N, Idx>

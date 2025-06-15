@@ -1,16 +1,16 @@
 /*
-    Appellation: hash_graph <bench>
+    Appellation: hyper_map <bench>
     Contrib: @FL03
 */
 use self::ext::*;
 use rshyper::edge::generate_random_edge;
-use rshyper::{HashGraph, VertexId};
+use rshyper::{HyperMap, VertexId};
 
 use core::hint::black_box;
 use criterion::{BatchSize, Criterion};
 
 /// benchmark various edge operations on the [`HashGraph`] implementation.
-fn bench_hash_graph_edges(c: &mut Criterion) {
+fn bench_hypermap_edges(c: &mut Criterion) {
     let mut group = c.benchmark_group("HashGraph::edges");
     // set the sample size for the group
     group.sample_size(SAMPLES);
@@ -51,7 +51,7 @@ fn bench_hash_graph_edges(c: &mut Criterion) {
 }
 
 /// benchmark for the [`HashGraph`] implementation.
-fn bench_hash_graph_nodes(c: &mut Criterion) {
+fn bench_hypermap_nodes(c: &mut Criterion) {
     let mut group = c.benchmark_group("HashGraph::nodes");
     // set the sample size for the group
     group.sample_size(SAMPLES);
@@ -60,7 +60,7 @@ fn bench_hash_graph_nodes(c: &mut Criterion) {
     // benchmark the `add_nodes` function
     group.bench_function("add_nodes", |b| {
         b.iter_batched(
-            HashGraph::<Wt, Wt>::new,
+            HyperMap::<Wt, Wt>::new,
             |mut graph| {
                 let _ = graph.add_nodes(black_box(0..(N as Wt)));
             },
@@ -112,7 +112,7 @@ fn bench_hash_graph_nodes(c: &mut Criterion) {
 }
 
 /// benchmarks for search algorithms in the [`HashGraph`] implementation.
-fn bench_hash_graph_search(c: &mut Criterion) {
+fn bench_hypermap_search(c: &mut Criterion) {
     let mut group = c.benchmark_group("HashGraph::search");
     // set the sample size for the group
     group.sample_size(SAMPLES);
@@ -149,9 +149,7 @@ fn bench_hash_graph_search(c: &mut Criterion) {
 }
 
 /// benchmarks for search algorithms in the [`HashGraph`] implementation.
-fn _bench_hash_graph_path_finders(c: &mut Criterion) {
-    
-
+fn _bench_hypermap_path_finders(c: &mut Criterion) {
     // a dummy hueristic function that returns a constant value
     pub fn hue<T>(_a: VertexId, _b: VertexId) -> T
     where
@@ -204,7 +202,7 @@ fn _bench_hash_graph_path_finders(c: &mut Criterion) {
 criterion::criterion_group! {
     name = benches;
     config = Criterion::default().sample_size(SAMPLES).measurement_time(std::time::Duration::from_secs(DURATION)).with_plots();
-    targets = bench_hash_graph_edges, bench_hash_graph_nodes, bench_hash_graph_search
+    targets = bench_hypermap_edges, bench_hypermap_nodes, bench_hypermap_search
 }
 
 criterion::criterion_main! {
@@ -215,7 +213,7 @@ criterion::criterion_main! {
 #[cfg(feature = "rand")]
 mod ext {
     use rshyper::edge::generate_random_edge;
-    use rshyper::{HashGraph, IntoWeight};
+    use rshyper::{HyperMap, IntoWeight};
 
     /// the duration, in seconds, for which the benchmarks should run
     pub const DURATION: u64 = 7;
@@ -227,9 +225,9 @@ mod ext {
     pub type Wt = i128;
 
     /// initialize a new [`HashGraph`] with a predefined structure
-    pub fn setup() -> HashGraph<Wt, Wt> {
+    pub fn setup() -> HyperMap<Wt, Wt> {
         // initialize a new undirected hash graph
-        let mut graph = HashGraph::<Wt, Wt>::undirected();
+        let mut graph = HyperMap::<Wt, Wt>::undirected();
         let v0 = graph.add_vertex().expect("failed to add vertex");
         let v1 = graph.add_vertex().expect("failed to add vertex");
         let v2 = graph.add_vertex().expect("failed to add vertex");

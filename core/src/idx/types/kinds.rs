@@ -31,6 +31,9 @@ where
 {
     private!();
 }
+/// the [`Grid`] enumerate the possible variations of indicies that can be used within the
+/// scope of a hypergraph. This entity is useful for enabling "compoite" collections of
+/// indicies for iteration, traversal, etc.
 #[derive(
     Clone,
     Copy,

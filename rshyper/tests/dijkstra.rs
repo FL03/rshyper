@@ -3,12 +3,12 @@
     authors: @FL03
 */
 #![allow(unused_variables)]
-use rshyper::HashGraph;
+use rshyper::HyperMap;
 
 #[test]
 fn test_dijkstra_direct_edge() -> rshyper::Result<()> {
     // initializea new undirected hashgraph
-    let mut graph = HashGraph::<usize, usize>::undirected();
+    let mut graph = HyperMap::<usize, usize>::undirected();
     // add some nodes
     let v0 = graph.add_vertex()?;
     let v1 = graph.add_vertex()?;
@@ -26,7 +26,7 @@ fn test_dijkstra_direct_edge() -> rshyper::Result<()> {
 #[test]
 fn test_dijkstra_shortest_path() -> rshyper::Result<()> {
     // Initialize a new graph
-    let mut graph = HashGraph::<usize, usize>::undirected();
+    let mut graph = HyperMap::<usize, usize>::undirected();
     // add vertices to the graph
     let v0 = graph.add_vertex()?;
     let v1 = graph.add_vertex()?;
@@ -58,7 +58,7 @@ fn test_dijkstra_shortest_path() -> rshyper::Result<()> {
 #[test]
 fn test_dijkstra_no_path() -> rshyper::Result<()> {
     // initializea new undirected hashgraph
-    let mut graph = HashGraph::<usize, usize>::undirected();
+    let mut graph = HyperMap::<usize, usize>::undirected();
     // add vertices to the graph
     let v0 = graph.add_vertex()?;
     let v1 = graph.add_vertex()?;
@@ -83,7 +83,7 @@ fn test_dijkstra_no_path() -> rshyper::Result<()> {
 #[test]
 fn test_dijkstra_same_start_end() -> rshyper::Result<()> {
     // initializea new undirected hashgraph
-    let mut graph = HashGraph::<usize, usize>::undirected();
+    let mut graph = HyperMap::<usize, usize>::undirected();
     // setup the graph with some nodes and edges
     rshyper::hypergraph! {
         graph {
@@ -111,7 +111,7 @@ fn test_dijkstra_same_start_end() -> rshyper::Result<()> {
 #[test]
 fn test_dijkstra_multiple_paths() -> rshyper::Result<()> {
     // initializea new undirected hashgraph
-    let mut graph = HashGraph::<usize, usize>::undirected();
+    let mut graph = HyperMap::<usize, usize>::undirected();
     // add some nodes to the graph
     let v0 = graph.add_vertex()?;
     let v1 = graph.add_vertex()?;

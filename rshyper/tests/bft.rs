@@ -2,11 +2,11 @@
     Appellation: search <test>
     Contrib: @FL03
 */
-use rshyper::HashGraph;
+use rshyper::HyperMap;
 
 #[test]
 fn test_breadth_first_traversal() -> rshyper::Result<()> {
-    let mut graph = HashGraph::<usize, usize>::undirected();
+    let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a simple hypergraph
     // 0 -- 1 -- 3
@@ -44,7 +44,7 @@ fn test_breadth_first_traversal() -> rshyper::Result<()> {
 
 #[test]
 fn test_bft_cyclic_graph() -> rshyper::Result<()> {
-    let mut graph = HashGraph::<usize, usize>::undirected();
+    let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a cyclic hypergraph
     // 0 -- 1 -- 2
@@ -79,7 +79,7 @@ fn test_bft_cyclic_graph() -> rshyper::Result<()> {
 
 #[test]
 fn test_bft_disconnected_graph() -> rshyper::Result<()> {
-    let mut graph = HashGraph::<usize, usize>::undirected();
+    let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a disconnected hypergraph
     // 0 -- 1    2 -- 3
@@ -109,7 +109,7 @@ fn test_bft_disconnected_graph() -> rshyper::Result<()> {
 
 #[test]
 fn test_bft_hyperedge_with_multiple_vertices() -> rshyper::Result<()> {
-    let mut graph = HashGraph::<usize, usize>::undirected();
+    let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a hypergraph with a large hyperedge
     // connecting multiple vertices

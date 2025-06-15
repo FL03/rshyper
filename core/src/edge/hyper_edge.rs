@@ -9,7 +9,7 @@ use crate::{Domain, GraphType};
 /// [`Edge`] is the base type for hyperedges in a graph. These edges are generic over the
 /// edge store type `S`, the graph kind `K`, and the index type `Idx`. This allows for
 /// flexibility in how edges store their vertices and how they are identified within the graph.
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize, serde::Serialize),

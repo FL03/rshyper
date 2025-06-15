@@ -2,11 +2,11 @@
     Appellation: graph <module>
     Contrib: @FL03
 */
-use rshyper::HashGraph;
+use rshyper::HyperMap;
 
 fn main() -> rshyper::Result<()> {
     // initialize a new instance of a hypergraph
-    let mut graph = HashGraph::<usize, usize>::undirected();
+    let mut graph = HyperMap::<usize, usize>::undirected();
     // use the macro to insert nodes into the graph
     rshyper::hypergraph! {
         graph {
@@ -24,7 +24,7 @@ fn main() -> rshyper::Result<()> {
             };
         }
     }
-    println!("Initial graph state: {:?}", graph);
+    println!("*********\nInitial graph state:\n*********\n{:?}", graph);
     let e23 = graph.merge_edges(&e2, &e3)?;
     println!(
         "Merged edges {e2} and {e3} into {e23} with a weight of {}",
@@ -34,5 +34,7 @@ fn main() -> rshyper::Result<()> {
     println!("Edge {e1} has order {order_e1}");
     let e0_weight = graph.get_edge_weight(&e0)?;
     println!("Edge {e0} has weight {e0_weight}");
+
+    println!("*********\nFinal graph state:\n*********\n{:?}", graph);
     Ok(())
 }

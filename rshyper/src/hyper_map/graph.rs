@@ -2,7 +2,7 @@
     Appellation: hash_graph <module>
     Contrib: @FL03
 */
-//! this module provides the [`HashGraph`] definition along with a couple aliases for
+//! this module provides the [`HyperMap`] definition along with a couple aliases for
 //! convenience.
 use super::aliases::*;
 
@@ -17,14 +17,22 @@ use rshyper_core::{GraphType, Mode, Weight};
 use core::hash::{BuildHasher, Hash};
 use std::hash::RandomState;
 
-/// a type alias for a [directed](crate::Directed) [`HashGraph`]
-pub type DiHashGraph<N, E, Idx = usize, S = RandomState> = HashGraph<N, E, DiAttributes<Idx>, S>;
-/// a type alias for an [undirected](crate::Undirected) [`HashGraph`]
-pub type UnHashGraph<N, E, Idx = usize, S = RandomState> = HashGraph<N, E, UnAttributes<Idx>, S>;
+/// a type alias for a [directed](crate::Directed) [`HyperMap`]
+pub type DiHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, DiAttributes<Idx>, S>;
+/// a type alias for an [undirected](crate::Undirected) [`HyperMap`]
+pub type UnHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, UnAttributes<Idx>, S>;
 
-/// A hash-based hypergraph implementation
-#[derive(Clone, Debug, Default)]
-pub struct HashGraph<N = (), E = (), A = UnAttributes<usize>, S = RandomState>
+/// A map-based hypergraph implementation that is generic over the types:
+///
+/// - `N`: the weight of the nodes (vertices)
+/// - `E`: the weight of the edges (surfaces)
+/// - `A`: the attributes of the hypergraph, which define its kind and index type
+///   - `A::Ix`: the index type used for vertices and edges, which must implement the
+///     [`RawIndex`] trait
+///   - `A::Kind`: the kind of the hypergraph, which must implement the [`GraphType`] trait
+/// - `S`: the hasher used for hashing the nodes and edges
+#[derive(Clone, Default)]
+pub struct HyperMap<N = (), E = (), A = UnAttributes<usize>, S = RandomState>
 where
     S: BuildHasher,
     A: GraphAttributes,
@@ -41,7 +49,7 @@ where
     pub(crate) surfaces: SurfaceMap<E, A::Kind, A::Ix, S>,
 }
 
-impl<N, E, A, K, Idx, S> HashGraph<N, E, A, S>
+impl<N, E, A, K, Idx, S> HyperMap<N, E, A, S>
 where
     S: BuildHasher,
     A: GraphAttributes<Ix = Idx, Kind = K>,
@@ -55,7 +63,7 @@ where
         S: Clone + Default,
     {
         let hasher = S::default();
-        HashGraph {
+        HyperMap {
             attrs: A::new(),
             history: IndexTracker::new(),
             surfaces: SurfaceMap::with_hasher(hasher.clone()),
@@ -69,7 +77,7 @@ where
         S: Clone + Default,
     {
         let hasher = S::default();
-        HashGraph {
+        HyperMap {
             surfaces: SurfaceMap::with_capacity_and_hasher(edges, hasher.clone()),
             nodes: NodeMap::with_capacity_and_hasher(nodes, hasher),
             history: IndexTracker::new(),
@@ -258,7 +266,23 @@ where
     }
 }
 
-impl<N, E, A, S> core::fmt::Display for HashGraph<N, E, A, S>
+impl<N, E, A, S> core::fmt::Debug for HyperMap<N, E, A, S>
+where
+    A: GraphAttributes,
+    E: core::fmt::Debug,
+    N: core::fmt::Debug,
+    S: BuildHasher,
+{
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("HyperMap")
+            .field("history", self.history())
+            .field("nodes", self.nodes())
+            .field("surfaces", self.surfaces())
+            .finish()
+    }
+}
+
+impl<N, E, A, S> core::fmt::Display for HyperMap<N, E, A, S>
 where
     A: GraphAttributes,
     E: core::fmt::Debug,
@@ -268,14 +292,15 @@ where
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(
             f,
-            "{{ nodes: {n:?}, edges: {e:?} }}",
-            n = self.nodes,
-            e = self.surfaces
+            "{{ history: {h:?}, edges: {e:?}, nodes: {n:?} }}",
+            n = self.nodes(),
+            e = self.surfaces(),
+            h = self.history()
         )
     }
 }
 
-impl<N, E, A, S> RawHyperGraph<A> for HashGraph<N, E, A, S>
+impl<N, E, A, S> RawHyperGraph<A> for HyperMap<N, E, A, S>
 where
     A: GraphAttributes,
     S: BuildHasher,
@@ -284,7 +309,7 @@ where
     type Edge<E2> = HashFacet<E2, A::Kind, A::Ix, S>;
 }
 
-impl<N, E, A, S> HyperGraph<N, E, A> for HashGraph<N, E, A, S>
+impl<N, E, A, S> HyperGraph<N, E, A> for HyperMap<N, E, A, S>
 where
     A: GraphAttributes,
     S: BuildHasher + Default,
@@ -351,7 +376,7 @@ where
     }
 }
 
-impl<N, E, A, S> HyperGraphIterNode<N, E, A> for HashGraph<N, E, A, S>
+impl<N, E, A, S> HyperGraphIterNode<N, E, A> for HyperMap<N, E, A, S>
 where
     A: GraphAttributes,
     S: BuildHasher + Default,
@@ -378,7 +403,7 @@ where
     }
 }
 
-impl<N, E, A, S> HyperGraphIterEdge<N, E, A> for HashGraph<N, E, A, S>
+impl<N, E, A, S> HyperGraphIterEdge<N, E, A> for HyperMap<N, E, A, S>
 where
     A: GraphAttributes,
     S: BuildHasher + Default,

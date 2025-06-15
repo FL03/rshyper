@@ -2,13 +2,15 @@
     appellation: macros <module>
     authors: @FL03
 */
+#[cfg(feature = "hyper_map")]
+use rshyper::HyperMap;
 
-#[cfg(feature = "hash_graph")]
 #[test]
+#[cfg(feature = "hyper_map")]
 fn test_hypergraph_on_eg() -> rshyper::Result<()> {
-    use rshyper::HashGraph;
-    let mut graph = HashGraph::<usize, usize>::undirected();
-
+    // initialize a new, undirected hypergraph
+    let mut graph = HyperMap::<usize, usize>::undirected();
+    // use the `hypergraph!` macro to define nodes and edges
     rshyper::hypergraph! {
         graph {
             nodes: {
@@ -24,24 +26,24 @@ fn test_hypergraph_on_eg() -> rshyper::Result<()> {
             };
         }
     }
-
+    // verify the nodes
     assert_eq!(graph.get_node(&v0)?.weight(), &<usize>::default());
     assert_eq!(graph.get_node(&v1)?.weight(), &10);
     assert_eq!(graph.get_node(&v2)?.weight(), &20);
     assert_eq!(graph.get_node(&v3)?.weight(), &30);
-
+    // verify the edges
     assert_eq!(graph.get_edge_order(&e1)?, 3);
     assert_eq!(graph.get_edge_order(&e2)?, 3);
-
+    // finish
     Ok(())
 }
 
-#[cfg(feature = "hash_graph")]
 #[test]
+#[cfg(feature = "hyper_map")]
 fn test_hypernode_on_eg() -> rshyper::Result<()> {
-    use rshyper::HashGraph;
-    let mut graph = HashGraph::<usize, usize>::undirected();
-
+    // initialize a new, undirected hypergraph
+    let mut graph = HyperMap::<usize, usize>::undirected();
+    // use the `hypernode!` macro to define nodes
     rshyper::hypernode! {
         graph {
             let v0;
@@ -50,35 +52,37 @@ fn test_hypernode_on_eg() -> rshyper::Result<()> {
             let v3 = 30;
         }
     }
-
-    assert_eq!(graph.get_node(&v0)?.weight(), &<usize>::default());
-    assert_eq!(graph.get_node(&v1)?.weight(), &10);
-    assert_eq!(graph.get_node(&v2)?.weight(), &20);
-    assert_eq!(graph.get_node(&v3)?.weight(), &30);
-
+    // verify the graph composition
+    assert_eq!(graph.size(), 0); // no edges defined
+    assert_eq!(graph.order(), 4); // 4 vertices
+    // verify the weights of each node
+    for (id, exp) in [(v0, 0), (v1, 10), (v2, 20), (v3, 30)] {
+        assert_eq!(graph.get_node(&id)?.weight(), &exp);
+    }
+    // finish
     Ok(())
 }
 
-#[cfg(feature = "hash_graph")]
 #[test]
+#[cfg(feature = "hyper_map")]
 fn test_hyperedge_on_hg() -> rshyper::Result<()> {
-    use rshyper::HashGraph;
-    let mut graph = HashGraph::<usize, usize>::undirected();
-
+    // initialize a new, undirected hypergraph
+    let mut graph = HyperMap::<usize, usize>::undirected();
+    // manually add some vertices
     let v0 = graph.add_vertex()?;
     let v1 = graph.add_vertex()?;
     let v2 = graph.add_vertex()?;
     let v3 = graph.add_vertex()?;
-
+    // use the `hyperedge!` macro to define edges
     rshyper::hyperedge! {
         graph {
             let e1: [v0, v1, v2];
             let e2: [v1, v2, v3];
         }
     }
-
-    assert_eq!(graph.get_edge_order(&e1)?, 3);
-    assert_eq!(graph.get_edge_order(&e2)?, 3);
-
+    // verify the graph composition
+    assert_eq!(graph.size(), 2); // 2 edges
+    assert_eq!(graph.get_edge_order(&e1)?, graph.get_edge_order(&e2)?); // both edges have 3 vertices
+    // finish
     Ok(())
 }

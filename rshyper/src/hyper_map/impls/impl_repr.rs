@@ -2,12 +2,12 @@
     appellation: impl_repr <module>
     authors: @FL03
 */
-use crate::hash_graph::{DiHashGraph, HashGraph, UnHashGraph};
+use crate::hyper_map::{DiHyperMap, HyperMap, UnHyperMap};
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::idx::{RawIndex, VertexId};
 use rshyper_core::{AddStep, GraphAttributes, Mode, Weight};
 
-impl<N, E, A, S> HashGraph<N, E, A, S>
+impl<N, E, A, S> HyperMap<N, E, A, S>
 where
     A: GraphAttributes<Kind = Mode>,
     S: BuildHasher,
@@ -19,11 +19,11 @@ where
         A::Ix: Default,
         S: Clone + Default,
     {
-        HashGraph::new()
+        HyperMap::new()
     }
 }
 
-impl<N, E, S, Ix> DiHashGraph<N, E, Ix, S>
+impl<N, E, S, Ix> DiHyperMap<N, E, Ix, S>
 where
     Ix: RawIndex,
     S: BuildHasher,
@@ -34,10 +34,10 @@ where
         Ix: Default,
         S: Clone + Default,
     {
-        HashGraph::new()
+        HyperMap::new()
     }
 }
-impl<N, E, S, Ix> UnHashGraph<N, E, Ix, S>
+impl<N, E, S, Ix> UnHyperMap<N, E, Ix, S>
 where
     Ix: RawIndex,
     S: BuildHasher,
@@ -48,11 +48,11 @@ where
         Ix: Default,
         S: Clone + Default,
     {
-        HashGraph::new()
+        HyperMap::new()
     }
 }
 
-impl<E, A, S> HashGraph<(), E, A, S>
+impl<E, A, S> HyperMap<(), E, A, S>
 where
     A: GraphAttributes,
     S: BuildHasher,
@@ -74,7 +74,7 @@ where
     }
 }
 
-impl<N, E, A, S> HashGraph<Option<N>, E, A, S>
+impl<N, E, A, S> HyperMap<Option<N>, E, A, S>
 where
     A: GraphAttributes,
     S: BuildHasher,

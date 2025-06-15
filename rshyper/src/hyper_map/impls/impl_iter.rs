@@ -2,13 +2,13 @@
     appellation: impl_iter <module>
     authors: @FL03
 */
-use crate::hash_graph::HashGraph;
-use crate::hash_graph::iter::*;
+use crate::hyper_map::HyperMap;
+use crate::hyper_map::iter::*;
 
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::{GraphAttributes, GraphType, RawIndex};
 
-impl<N, E, A, S, K, Idx> HashGraph<N, E, A, S>
+impl<N, E, A, S, K, Idx> HyperMap<N, E, A, S>
 where
     N: Eq + Hash,
     E: Eq + Hash,

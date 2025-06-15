@@ -89,8 +89,8 @@ pub use rshyper_core::*;
 pub use rshyper_macros::*;
 
 #[doc(inline)]
-#[cfg(feature = "hash_graph")]
-pub use self::hash_graph::{DiHashGraph, HashGraph, UnHashGraph};
+#[cfg(feature = "hyper_map")]
+pub use self::hyper_map::{DiHyperMap, HyperMap, UnHyperMap};
 
 #[doc(inline)]
 #[cfg(feature = "algo")]
@@ -98,8 +98,8 @@ pub use self::hash_graph::{DiHashGraph, HashGraph, UnHashGraph};
 pub use rshyper_algo as algo;
 
 /// this module contains the [`HashGraph`], a hash-based hypergraph implementation
-#[cfg(feature = "hash_graph")]
-pub mod hash_graph;
+#[cfg(feature = "hyper_map")]
+pub mod hyper_map;
 
 /// the prelude module for the crate contains all commonly used traits, types, and functions
 #[allow(missing_docs)]
@@ -107,8 +107,8 @@ pub mod prelude {
     // pub use super::error::*;
     pub use rshyper_core::prelude::*;
 
-    #[cfg(feature = "hash_graph")]
-    pub use crate::hash_graph::prelude::*;
+    #[cfg(feature = "hyper_map")]
+    pub use crate::hyper_map::prelude::*;
     #[cfg(feature = "algo")]
     pub use rshyper_algo::prelude::*;
     #[cfg(feature = "macros")]
