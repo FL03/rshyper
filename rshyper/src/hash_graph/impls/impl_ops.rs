@@ -24,27 +24,15 @@ where
         algo::AStarSearch::new(self, heuristic)
     }
     /// search the hypergraph using the breadth-first traversal algorithm
-    pub fn bft(&self) -> algo::BreadthFirstTraversal<'_, N, E, A, Self>
-    where
-        N: Default,
-        E: Default,
-    {
+    pub fn bft(&self) -> algo::BreadthFirstTraversal<'_, N, E, A, Self> {
         algo::BreadthFirstTraversal::new(self)
     }
     /// search the hypergraph using the depth-first traversal algorithm
-    pub fn dft(&self) -> algo::DepthFirstTraversal<'_, N, E, A, Self>
-    where
-        N: Default,
-        E: Default,
-    {
+    pub fn dft(&self) -> algo::DepthFirstTraversal<'_, N, E, A, Self> {
         algo::DepthFirstTraversal::new(self)
     }
     /// returns a new instance of the Dijkstra's algorithm for the hypergraph
-    pub fn dijkstra(&self) -> algo::Dijkstra<'_, N, E, A, Self>
-    where
-        N: Default,
-        E: Default,
-    {
+    pub fn dijkstra(&self) -> algo::Dijkstra<'_, N, E, A, Self> {
         algo::Dijkstra::new(self)
     }
 }
@@ -52,8 +40,7 @@ where
 impl<N, E, A, S, K, Idx> Combine<EdgeId<Idx>, EdgeId<Idx>> for HashGraph<N, E, A, S>
 where
     A: GraphAttributes<Ix = Idx, Kind = K>,
-    E: Clone + Eq + Hash + core::ops::Add<Output = E>,
-    N: Eq + Hash,
+    E: Clone + core::ops::Add<Output = E>,
     K: GraphType,
     Idx: NumIndex,
     S: BuildHasher + Default,

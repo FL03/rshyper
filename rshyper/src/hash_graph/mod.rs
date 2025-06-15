@@ -26,11 +26,14 @@ pub mod iter {
     pub use self::prelude::*;
 
     pub mod node;
+    pub mod seq;
     pub mod surface;
 
     pub(crate) mod prelude {
         #[doc(inline)]
         pub use super::node::*;
+        #[doc(inline)]
+        pub use super::seq::*;
         #[doc(inline)]
         pub use super::surface::*;
     }

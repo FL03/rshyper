@@ -17,6 +17,7 @@ where
     pub(crate) iter: hash_map::Iter<'a, VertexId<Idx>, Node<N, Idx>>,
 }
 
+
 /// returns an interators over the vertices of a hypergraph, yielding the _keys_ of the nodes.
 pub struct Vertices<'a, N, Idx>
 where

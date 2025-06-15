@@ -17,6 +17,25 @@ where
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
 {
+    // /// returns a sequential iterator over the nodes of the hypergraph, yielding pairs of
+    // /// [`VertexId`](rshyper_core::VertexId) and the corresponding [`Node`](rshyper_core::Node).
+    // pub fn iter_nodes(&self) -> SeqNodeIter<'_, N, Idx> {
+    //     let store = self
+    //         .history()
+    //         .nodes()
+    //         .iter()
+    //         .filter_map(|id| {
+    //             let node = self.get_node(id).ok();
+    //             if let Some(node) = node {
+    //                 return Some(node);
+    //             }
+    //             None
+
+    //         }).collect::<Vec<_>>();
+    //     SeqNodeIter {
+    //         iter: store.iter(),
+    //     }
+    // }
     /// returns an iterator over the nodes of the hypergraph, yielding pairs of [`VertexId`](rshyper_core::VertexId)
     /// and the corresponding [`Node`](rshyper_core::Node).
     pub fn node_iter(&self) -> NodeIter<'_, N, Idx> {

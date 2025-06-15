@@ -5,15 +5,12 @@
 use crate::hash_graph::{DiHashGraph, HashGraph, UnHashGraph};
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::idx::{RawIndex, VertexId};
-use rshyper_core::{GraphAttributes, GraphType, Mode, Weight};
+use rshyper_core::{AddStep, GraphAttributes, Mode, Weight};
 
 impl<N, E, A, S> HashGraph<N, E, A, S>
 where
     A: GraphAttributes<Kind = Mode>,
-    E: Eq + Hash,
-    N: Eq + Hash,
     S: BuildHasher,
-    A::Ix: Eq + Hash,
 {
     /// initialize a new, empty hypergraph with a dynamic [`Mode`] kind and the logical default
     /// for the indices.
@@ -28,9 +25,7 @@ where
 
 impl<N, E, S, Ix> DiHashGraph<N, E, Ix, S>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
-    Ix: Eq + RawIndex + Hash,
+    Ix: RawIndex,
     S: BuildHasher,
 {
     /// initialize a new, empty hypergraph
@@ -44,9 +39,7 @@ where
 }
 impl<N, E, S, Ix> UnHashGraph<N, E, Ix, S>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
-    Ix: Eq + RawIndex + Hash,
+    Ix: RawIndex,
     S: BuildHasher,
 {
     /// initialize a new, empty hypergraph
@@ -59,57 +52,52 @@ where
     }
 }
 
-impl<E, A, S, K, Idx> HashGraph<(), E, A, S>
+impl<E, A, S> HashGraph<(), E, A, S>
 where
-    A: GraphAttributes<Kind = K, Ix = Idx>,
-    E: Eq + Hash,
-    Idx: RawIndex + Eq + Hash,
-    K: GraphType,
+    A: GraphAttributes,
     S: BuildHasher,
+    A::Ix: Eq + Hash,
 {
-    pub fn add_empty_node(&mut self) -> crate::Result<VertexId<Idx>>
+    pub fn add_empty_node(&mut self) -> crate::Result<VertexId<A::Ix>>
     where
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        A::Ix: AddStep<Output = A::Ix> + Copy,
     {
         let weight = Weight::new(());
         self.add_node(weight)
     }
     #[deprecated(since = "0.9.0", note = "use `add_empty_node` instead")]
-    pub fn insert_empty_node(&mut self) -> crate::Result<VertexId<Idx>>
+    pub fn insert_empty_node(&mut self) -> crate::Result<VertexId<A::Ix>>
     where
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        A::Ix: AddStep<Output = A::Ix> + Copy,
     {
         self.add_empty_node()
     }
 }
 
-impl<N, E, A, S, K, Idx> HashGraph<Option<N>, E, A, S>
+impl<N, E, A, S> HashGraph<Option<N>, E, A, S>
 where
-    A: GraphAttributes<Kind = K, Ix = Idx>,
-    E: Eq + Hash,
-    N: Eq + Hash,
+    A: GraphAttributes,
     S: BuildHasher,
-    K: GraphType,
-    Idx: RawIndex + Eq + Hash,
+    A::Ix: Eq + Hash,
 {
     /// insert [`Some`] vertex with weight `T` and return its ID
-    pub fn add_some_node(&mut self, weight: N) -> crate::Result<VertexId<Idx>>
+    pub fn add_some_node(&mut self, weight: N) -> crate::Result<VertexId<A::Ix>>
     where
-        A::Ix: Copy + crate::AddStep<Output = Idx>,
+        A::Ix: AddStep<Output = A::Ix> + Copy,
     {
         self.add_node(Weight::some(weight))
     }
     /// insert [`None`] vertex with weight `T` and return its ID
-    pub fn add_none_node(&mut self) -> crate::Result<VertexId<Idx>>
+    pub fn add_none_node(&mut self) -> crate::Result<VertexId<A::Ix>>
     where
-        A::Ix: Copy + crate::AddStep<Output = Idx>,
+        A::Ix: AddStep<Output = A::Ix> + Copy,
     {
         self.add_node(Weight::none())
     }
     #[deprecated(since = "0.9.0", note = "use `add_some_node` instead")]
-    pub fn insert_some_node(&mut self, weight: N) -> crate::Result<VertexId<Idx>>
+    pub fn insert_some_node(&mut self, weight: N) -> crate::Result<VertexId<A::Ix>>
     where
-        A::Ix: Copy + crate::AddStep<Output = Idx>,
+        A::Ix: AddStep<Output = A::Ix> + Copy,
     {
         self.add_some_node(weight)
     }

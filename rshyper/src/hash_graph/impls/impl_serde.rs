@@ -12,8 +12,8 @@ const FIELDS: &[&str] = &["nodes", "surfaces", "position", "_attrs"];
 impl<'a, N, E, A, S> Deserialize<'a> for HashGraph<N, E, A, S>
 where
     A: GraphAttributes + DeserializeOwned,
-    E: Eq + Hash + DeserializeOwned,
-    N: Eq + Hash + DeserializeOwned,
+    E: DeserializeOwned,
+    N: DeserializeOwned,
     S: BuildHasher + Default,
     A::Ix: Default + Eq + Hash + DeserializeOwned,
     A::Kind: DeserializeOwned,
@@ -35,8 +35,8 @@ where
 impl<N, E, A, S> Serialize for HashGraph<N, E, A, S>
 where
     A: GraphAttributes + Serialize,
-    E: Eq + Hash + Serialize,
-    N: Eq + Hash + Serialize,
+    E: Serialize,
+    N: Serialize,
     S: BuildHasher + Default,
     A::Ix: Default + Eq + Hash + Serialize,
     A::Kind: Serialize,
@@ -62,8 +62,8 @@ struct HashGraphVisitor<N, E, A, S> {
 impl<'de, N, E, A, S> Visitor<'de> for HashGraphVisitor<N, E, A, S>
 where
     A: GraphAttributes + DeserializeOwned,
-    E: Eq + Hash + DeserializeOwned,
-    N: Eq + Hash + DeserializeOwned,
+    E: DeserializeOwned,
+    N: DeserializeOwned,
     S: BuildHasher + Default,
     A::Ix: Default + Eq + Hash + DeserializeOwned,
     A::Kind: DeserializeOwned,
