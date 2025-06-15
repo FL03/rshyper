@@ -119,19 +119,6 @@ fn bench_hash_graph_search(c: &mut Criterion) {
     // set the duration for the measurement
     group.measurement_time(std::time::Duration::from_secs(DURATION));
     // benchmark the breadth-first traversal search
-    group.bench_function("A*", |b| {
-        b.iter_batched(
-            setup,
-            |graph| {
-                let idx = VertexId::random_between(0..N).map(|i| i % N);
-                // get the degree of each nodelet id = n.into();
-                // search the graph for some target vertex
-                graph.astar(hue::<f64>).search(black_box(idx)).unwrap();
-            },
-            BatchSize::SmallInput,
-        )
-    });
-    // benchmark the breadth-first traversal search
     group.bench_function("bft", |b| {
         b.iter_batched(
             setup,
@@ -169,6 +156,19 @@ fn _bench_hash_graph_path_finders(c: &mut Criterion) {
     // set the duration for the measurement
     group.measurement_time(std::time::Duration::from_secs(DURATION));
 
+    // benchmark the breadth-first traversal search
+    group.bench_function("A*", |b| {
+        b.iter_batched(
+            setup,
+            |graph| {
+                let idx = VertexId::random_between(0..N).map(|i| i % N);
+                // get the degree of each nodelet id = n.into();
+                // search the graph for some target vertex
+                graph.astar(hue::<f64>).search(black_box(idx)).unwrap();
+            },
+            BatchSize::SmallInput,
+        )
+    });
     // benchmark the dijkstra path-finding algorithm
     group.bench_function("dijkstra", |b| {
         b.iter_batched(
