@@ -23,10 +23,8 @@
 //!
 //! ## Features
 //!
-//! - `hyper_map`: enables the [`HyperMap`] implementation, a hash-based hypergraph structure
-//! - `macros`: enables the implemented macros for streamlining graph management
-//!
-//! ### _Dependencies_
+//! The crate is heavily feature-gated to maximize compatibility and minimize dependencies,
+//! listed below are some of the most important / impactful features:
 //!
 //! - `rayon`: enables parallel processing capabilities using the `rayon` crate
 //! - `serde`: enables serialization and deserialization of hypergraphs using the `serde` crate
@@ -40,13 +38,7 @@
     html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
 )]
-#![allow(
-    clippy::should_implement_trait,
-    clippy::module_inception,
-    clippy::missing_safety_doc,
-    clippy::non_canonical_clone_impl,
-    clippy::non_canonical_partial_ord_impl
-)]
+#![allow(clippy::should_implement_trait, clippy::module_inception)]
 // **** WARNING ****
 // the `std` feature is required by the crate, only declared for concistency w.r.t. the
 // available features and for ensuring that all the depencies actually implement the `std`
@@ -61,7 +53,6 @@ pub(crate) mod macros {
     #[macro_use]
     pub mod seal;
 }
-
 /// the `algo` module focuses on implementing algorithms and operators for hypergraphs
 extern crate rshyper_algo as algo;
 extern crate rshyper_core as rshyper;
@@ -72,7 +63,6 @@ pub use self::{graph::*, types::prelude::*};
 pub mod graph;
 
 mod impls {
-
     #[cfg(feature = "algo")]
     pub mod impl_algo;
     pub mod impl_graph;

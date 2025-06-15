@@ -2,14 +2,16 @@
     Appellation: hash_graph <module>
     Contrib: @FL03
 */
-//! this module provides a map-based hypergraph implementation [`HyperMap`] and
+/// the [`graph`] module is responsible for defining the [`HyperMap`] structure and provides
+/// its root implementation(s).
 use crate::types::prelude::*;
 
-use rshyper_core::attrs::{DiAttributes, GraphAttributes, UnAttributes};
-use rshyper_core::idx::{EdgeId, Frame, IndexTracker, RawIndex, VertexId};
-use rshyper_core::prelude::{AddStep, GraphType, Mode};
-
 use core::hash::{BuildHasher, Hash};
+use rshyper_core::{
+    AddStep, GraphType, Mode,
+    attrs::{DiAttributes, GraphAttributes, UnAttributes},
+    idx::{EdgeId, Frame, IndexTracker, RawIndex, VertexId},
+};
 use std::hash::RandomState;
 
 /// a type alias for a [directed](crate::Directed) [`HyperMap`]
@@ -17,7 +19,8 @@ pub type DiHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, DiAttri
 /// a type alias for an [undirected](crate::Undirected) [`HyperMap`]
 pub type UnHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, UnAttributes<Idx>, S>;
 
-/// A map-based hypergraph implementation that is generic over the types:
+/// The [`HyperMap`] is a map-based implementation of a hypergraph that is generic over the
+/// types:
 ///
 /// - `N`: the weight of the nodes (vertices)
 /// - `E`: the weight of the edges (surfaces)
@@ -26,6 +29,13 @@ pub type UnHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, UnAttri
 ///     [`RawIndex`] trait
 ///   - `A::Kind`: the kind of the hypergraph, which must implement the [`GraphType`] trait
 /// - `S`: the hasher used for hashing the nodes and edges
+///
+/// The generic design enables the graph to be used in various contexts and conditions while
+/// retaining a familiar interface for users. This implementation focuses on performance and
+/// flexibility, leveraging an internal history to maintain a sense of order and enable
+/// sequential iterators over the components of the graph w.r.t. the order in which they were
+/// created.
+///
 #[derive(Clone, Default)]
 pub struct HyperMap<N = (), E = (), A = UnAttributes<usize>, S = RandomState>
 where
