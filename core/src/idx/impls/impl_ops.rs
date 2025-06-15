@@ -2,75 +2,112 @@
     appellation: impl_index <module>
     authors: @FL03
 */
-use crate::idx::{GraphIndex, IndexBase, RawIndex};
+use crate::idx::IndexBase;
 use core::cmp::Ordering;
 use num_traits::{Num, One, Zero};
 
+impl<T, K> Eq for IndexBase<T, K> where T: Eq {}
+
 impl<T, K> PartialEq<T> for IndexBase<T, K>
 where
-    K: GraphIndex,
-    T: RawIndex + PartialEq,
+    T: PartialEq,
 {
     fn eq(&self, other: &T) -> bool {
-        self.get() == other
+        &self.value == other
     }
 }
 
 impl<'a, T, K> PartialEq<&'a T> for IndexBase<T, K>
 where
-    K: GraphIndex,
-    T: RawIndex + PartialEq,
+    T: PartialEq,
 {
     fn eq(&self, other: &&'a T) -> bool {
-        self.get() == *other
+        &self.value == *other
     }
 }
 
 impl<'a, T, K> PartialEq<&'a mut T> for IndexBase<T, K>
 where
-    K: GraphIndex,
-    T: RawIndex + PartialEq,
+    T: PartialEq,
 {
     fn eq(&self, other: &&'a mut T) -> bool {
-        self.get() == *other
+        &self.value == *other
+    }
+}
+
+impl<T, K> PartialEq<IndexBase<T, K>> for IndexBase<T, K>
+where
+    T: PartialEq,
+{
+    fn eq(&self, other: &IndexBase<T, K>) -> bool {
+        &self.value == &other.value
+    }
+}
+
+impl<'a, T, K> PartialEq<&'a IndexBase<T, K>> for IndexBase<T, K>
+where
+    T: PartialEq,
+{
+    fn eq(&self, other: &&'a IndexBase<T, K>) -> bool {
+        &self.value == &other.value
+    }
+}
+
+impl<'a, T, K> PartialEq<&'a mut IndexBase<T, K>> for IndexBase<T, K>
+where
+    T: PartialEq,
+{
+    fn eq(&self, other: &&'a mut IndexBase<T, K>) -> bool {
+        &self.value == &other.value
+    }
+}
+
+impl<'a, T, K> PartialEq<IndexBase<T, K>> for &'a IndexBase<T, K>
+where
+    T: PartialEq,
+{
+    fn eq(&self, other: &IndexBase<T, K>) -> bool {
+        &self.value == &other.value
+    }
+}
+
+impl<'a, T, K> PartialEq<IndexBase<T, K>> for &'a mut IndexBase<T, K>
+where
+    T: PartialEq,
+{
+    fn eq(&self, other: &IndexBase<T, K>) -> bool {
+        &self.value == &other.value
     }
 }
 
 impl<T, K> PartialOrd<T> for IndexBase<T, K>
 where
-    K: GraphIndex,
-    T: RawIndex + PartialOrd,
+    T: PartialOrd,
 {
     fn partial_cmp(&self, other: &T) -> Option<Ordering> {
-        self.get().partial_cmp(other)
+        self.value.partial_cmp(other)
     }
 }
 
 impl<'a, T, K> PartialOrd<&'a T> for IndexBase<T, K>
 where
-    K: GraphIndex,
-    T: RawIndex + PartialOrd,
+    T: PartialOrd,
 {
     fn partial_cmp(&self, other: &&'a T) -> Option<Ordering> {
-        self.get().partial_cmp(*other)
+        self.value.partial_cmp(*other)
     }
 }
 
 impl<'a, T, K> PartialOrd<&'a mut T> for IndexBase<T, K>
 where
-    K: GraphIndex,
-    T: RawIndex + PartialOrd,
+    T: PartialOrd,
 {
     fn partial_cmp(&self, other: &&'a mut T) -> Option<Ordering> {
-        self.get().partial_cmp(*other)
+        self.value.partial_cmp(*other)
     }
 }
 
-impl<T, K> core::ops::Deref for IndexBase<T, K>
-where
-    K: GraphIndex,
-    T: RawIndex,
-{
+impl<T, K> core::ops::Deref for IndexBase<T, K> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -78,11 +115,7 @@ where
     }
 }
 
-impl<T, K> core::ops::DerefMut for IndexBase<T, K>
-where
-    K: GraphIndex,
-    T: RawIndex,
-{
+impl<T, K> core::ops::DerefMut for IndexBase<T, K> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.value
     }
@@ -90,63 +123,71 @@ where
 
 impl<T, K> core::ops::Not for IndexBase<T, K>
 where
-    K: GraphIndex,
-    T: RawIndex + core::ops::Not,
-    T::Output: RawIndex,
+    T: core::ops::Not,
 {
     type Output = IndexBase<T::Output, K>;
 
     fn not(self) -> Self::Output {
-        self.map(|value| !value)
+        IndexBase {
+            value: !self.value,
+            _type: core::marker::PhantomData::<K>,
+        }
     }
 }
 
 impl<T, K> core::ops::Neg for IndexBase<T, K>
 where
-    K: GraphIndex,
-    T: RawIndex + core::ops::Neg,
-    T::Output: RawIndex,
+    T: core::ops::Neg,
 {
     type Output = IndexBase<T::Output, K>;
 
     fn neg(self) -> Self::Output {
-        self.map(|value| -value)
+        IndexBase {
+            value: -self.value,
+            _type: core::marker::PhantomData::<K>,
+        }
     }
 }
 
 impl<T, K> One for IndexBase<T, K>
 where
-    K: GraphIndex,
-    T: RawIndex + One,
+    T: One,
 {
     fn one() -> Self {
-        Self::new(T::one())
+        Self {
+            value: T::one(),
+            _type: core::marker::PhantomData::<K>,
+        }
     }
 }
 
 impl<T, K> Zero for IndexBase<T, K>
 where
-    K: GraphIndex,
-    T: RawIndex + Zero,
+    T: Zero,
 {
     fn zero() -> Self {
-        Self::new(T::zero())
+        Self {
+            value: T::zero(),
+            _type: core::marker::PhantomData::<K>,
+        }
     }
 
     fn is_zero(&self) -> bool {
-        self.get().is_zero()
+        self.value.is_zero()
     }
 }
 
 impl<T, K> Num for IndexBase<T, K>
 where
-    K: GraphIndex + Eq,
-    T: RawIndex + Num,
+    T: Num,
 {
     type FromStrRadixErr = T::FromStrRadixErr;
 
     fn from_str_radix(str: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
-        T::from_str_radix(str, radix).map(IndexBase::new)
+        T::from_str_radix(str, radix).map(|value| IndexBase {
+            value,
+            _type: core::marker::PhantomData::<K>,
+        })
     }
 }
 
@@ -154,15 +195,106 @@ macro_rules! impl_binary_op {
     (@impl $trait:ident::$method:ident) => {
         impl<K, A, B, C> ::core::ops::$trait<IndexBase<B, K>> for IndexBase<A, K>
         where
-            A: RawIndex + ::core::ops::$trait<B, Output = C>,
-            B: RawIndex,
-            C: RawIndex,
-            K: GraphIndex,
+            A: ::core::ops::$trait<B, Output = C>,
         {
             type Output = IndexBase<C, K>;
 
             fn $method(self, rhs: IndexBase<B, K>) -> Self::Output {
-                IndexBase::new(::core::ops::$trait::$method(self.value, rhs.value))
+                let value = ::core::ops::$trait::$method(self.value, rhs.value);
+                IndexBase {
+                    value,
+                    _type: core::marker::PhantomData::<K>,
+                }
+            }
+        }
+
+        impl<'a, K, A, B, C> ::core::ops::$trait<&'a IndexBase<B, K>> for IndexBase<A, K>
+        where
+            A: ::core::ops::$trait<&'a B, Output = C>,
+        {
+            type Output = IndexBase<C, K>;
+
+            fn $method(self, rhs: &'a IndexBase<B, K>) -> Self::Output {
+                let value = ::core::ops::$trait::$method(self.value, &rhs.value);
+                IndexBase {
+                    value,
+                    _type: core::marker::PhantomData::<K>,
+                }
+            }
+        }
+
+        impl<'a, K, A, B, C> ::core::ops::$trait<&'a mut IndexBase<B, K>> for IndexBase<A, K>
+        where
+            A: ::core::ops::$trait<&'a mut B, Output = C>,
+        {
+            type Output = IndexBase<C, K>;
+
+            fn $method(self, rhs: &'a mut IndexBase<B, K>) -> Self::Output {
+                let value = ::core::ops::$trait::$method(self.value, &mut rhs.value);
+                IndexBase {
+                    value,
+                    _type: core::marker::PhantomData::<K>,
+                }
+            }
+        }
+
+        impl<'a, K, A, B, C> ::core::ops::$trait<IndexBase<B, K>> for &'a IndexBase<A, K>
+        where
+            &'a A: ::core::ops::$trait<B, Output = C>,
+        {
+            type Output = IndexBase<C, K>;
+
+            fn $method(self, rhs: IndexBase<B, K>) -> Self::Output {
+                let value = ::core::ops::$trait::$method(&self.value, rhs.value);
+                IndexBase {
+                    value,
+                    _type: core::marker::PhantomData::<K>,
+                }
+            }
+        }
+
+        impl<'a, K, A, B, C> ::core::ops::$trait<IndexBase<B, K>> for &'a mut IndexBase<A, K>
+        where
+            &'a mut A: ::core::ops::$trait<B, Output = C>,
+        {
+            type Output = IndexBase<C, K>;
+
+            fn $method(self, rhs: IndexBase<B, K>) -> Self::Output {
+                let value = ::core::ops::$trait::$method(&mut self.value, rhs.value);
+                IndexBase {
+                    value,
+                    _type: core::marker::PhantomData::<K>,
+                }
+            }
+        }
+
+        impl<'a, K, A, B, C> ::core::ops::$trait<&'a IndexBase<B, K>> for &'a IndexBase<A, K>
+        where
+            &'a A: ::core::ops::$trait<&'a B, Output = C>,
+        {
+            type Output = IndexBase<C, K>;
+
+            fn $method(self, rhs: &'a IndexBase<B, K>) -> Self::Output {
+                let value = ::core::ops::$trait::$method(&self.value, &rhs.value);
+                IndexBase {
+                    value,
+                    _type: core::marker::PhantomData::<K>,
+                }
+            }
+        }
+
+        impl<'a, K, A, B, C> ::core::ops::$trait<&'a mut IndexBase<B, K>> for &'a mut IndexBase<A, K>
+        where
+            &'a mut A: ::core::ops::$trait<&'a mut B, Output = C>,
+        {
+            type Output = IndexBase<C, K>;
+
+            fn $method(self, rhs: &'a mut IndexBase<B, K>) -> Self::Output {
+                let value = ::core::ops::$trait::$method(&mut self.value, &mut rhs.value);
+                IndexBase {
+                    value,
+                    _type: core::marker::PhantomData::<K>,
+                }
             }
         }
     };
@@ -183,8 +315,7 @@ macro_rules! impl_assign_op {
     (@impl $trait:ident::$method:ident) => {
         impl<K, A, B> ::core::ops::$trait<B> for IndexBase<A, K>
         where
-            A: RawIndex + ::core::ops::$trait<B>,
-            K: GraphIndex,
+            A: ::core::ops::$trait<B>,
         {
             fn $method(&mut self, rhs: B) {
                 ::core::ops::$trait::$method(&mut self.value, rhs)
@@ -193,7 +324,9 @@ macro_rules! impl_assign_op {
     };
 
     ($($trait:ident::$method:ident),* $(,)?) => {
-        $(impl_assign_op!(@impl $trait::$method);)*
+        $(
+            impl_assign_op!(@impl $trait::$method);
+        )*
     };
 }
 

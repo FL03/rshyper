@@ -3,7 +3,8 @@
     Contrib: @FL03
 */
 use self::ext::*;
-use rshyper::VertexId;
+use rshyper::edge::generate_random_edge;
+use rshyper::{HashGraph, VertexId};
 
 use core::hint::black_box;
 use criterion::{BatchSize, Criterion};
@@ -59,8 +60,10 @@ fn bench_hash_graph_nodes(c: &mut Criterion) {
     // benchmark the `add_nodes` function
     group.bench_function("add_nodes", |b| {
         b.iter_batched(
-            setup,
-            |mut graph| graph.add_nodes(black_box(0..100)).collect::<Vec<_>>(),
+            HashGraph::<Wt, Wt>::new,
+            |mut graph| {
+                let _ = graph.add_nodes(black_box(0..(N as Wt)));
+            },
             BatchSize::SmallInput,
         )
     });
@@ -69,8 +72,7 @@ fn bench_hash_graph_nodes(c: &mut Criterion) {
         b.iter_batched(
             setup,
             |graph| {
-                let i = rand::random_range(0..(N as u128)) % 100;
-                let idx = VertexId::from(i as usize);
+                let idx = VertexId::random_between(0..N).map(|i| i % N);
                 // get the degree of each node
                 graph.get_node_degree(black_box(&idx));
             },
@@ -82,8 +84,7 @@ fn bench_hash_graph_nodes(c: &mut Criterion) {
         b.iter_batched(
             setup,
             |graph| {
-                let i = rand::random_range(0..(N as u128)) % 100;
-                let idx = VertexId::from(i as usize);
+                let idx = VertexId::random_between(0..N).map(|i| i % N);
                 // get the degree of each node
                 graph
                     .find_node_neighbors(black_box(&idx))
@@ -122,7 +123,7 @@ fn bench_hash_graph_search(c: &mut Criterion) {
         b.iter_batched(
             setup,
             |graph| {
-                let idx = VertexId::random_between(0..N);
+                let idx = VertexId::random_between(0..N).map(|i| i % N);
                 // get the degree of each nodelet id = n.into();
                 // search the graph for some target vertex
                 graph.astar(hue::<f64>).search(black_box(idx)).unwrap();
@@ -135,7 +136,7 @@ fn bench_hash_graph_search(c: &mut Criterion) {
         b.iter_batched(
             setup,
             |graph| {
-                let idx = VertexId::random_between(0..N);
+                let idx = VertexId::random_between(0..N).map(|i| i % N);
                 // get the degree of each nodelet id = n.into();
                 // search the graph for some target vertex
                 graph.bft().search(black_box(idx)).unwrap();
@@ -161,10 +162,15 @@ fn bench_hash_graph_search(c: &mut Criterion) {
         b.iter_batched(
             setup,
             |graph| {
-                let idx = VertexId::random_between(0..N);
-                // get the degree of each nodelet id = n.into();
-                // search the graph for some target vertex
-                graph.dijkstra().search(black_box(idx)).unwrap();
+                // generate a random source vertex
+                let src = VertexId::random_between(0..N).map(|i| i % N);
+                // generate a random target vertex
+                let tgt = VertexId::random_between(0..N).map(|i| i % N);
+                // use the dijkstra algorithm to find a path between two vertices
+                graph
+                    .dijkstra()
+                    .find_path(black_box(src), black_box(tgt))
+                    .unwrap();
             },
             BatchSize::SmallInput,
         )
@@ -185,9 +191,8 @@ criterion::criterion_main! {
 
 #[cfg(feature = "rand")]
 mod ext {
+    use rshyper::edge::generate_random_edge;
     use rshyper::{HashGraph, VertexId};
-    // re-import the generate_random_edge function for convenience
-    pub(crate) use rshyper::edge::generate_random_edge;
 
     /// the duration, in seconds, for which the benchmarks should run
     pub const DURATION: u64 = 7;
