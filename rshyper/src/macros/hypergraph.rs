@@ -30,9 +30,43 @@
 ///     }
 /// }
 /// ```
+/// 
+/// or 
+/// 
+/// ```rust
+/// use rshyper::UnHyperMap;
+/// 
+/// // use the macro to initialize a new hypergraph
+/// rshyper::hypergraph! {
+///     let mut graph: UnHyperMap::<usize, usize> {
+///         nodes: {
+///             let v0;
+///             let v1;
+///             let v2 = 10;
+///         };
+///         edges: {
+///             let e0: [v0, v1];
+///             let e1: [v0, v1, v2] = 10;
+///         };
+///     }
+/// }
 #[cfg(feature = "macros")]
 #[macro_export]
 macro_rules! hypergraph {
+    (
+        let mut $graph:ident: $H:ty {
+            nodes: {$($nodes:tt)*};
+            edges: {$($edges:tt)*};
+        }
+
+    ) => {
+        // initialize a new hypergraph with the given type
+        let mut $graph: $H = <$H>::new();
+        // insert nodes into the graph
+        $crate::hypernode!($graph {$($nodes)*});
+        // insert edges into the graph
+        $crate::hyperedge!($graph {$($edges)*});
+    };
     (
         $graph:ident {
             nodes: {$($nodes:tt)*};
