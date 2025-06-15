@@ -8,7 +8,7 @@
 use alloc::{boxed::Box, string::String};
 
 /// A type alias for a [Result] with the crate-specific error type [`HyperError`]
-pub type Result<T = ()> = core::result::Result<T, HyperError>;
+pub type HyperResult<T = ()> = core::result::Result<T, HyperError>;
 
 /// The error type for this crate
 #[derive(Debug, thiserror::Error)]
