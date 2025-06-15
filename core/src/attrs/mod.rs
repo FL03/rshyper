@@ -9,7 +9,8 @@
 #[doc(inline)]
 pub use self::attributes::Attributes;
 
-mod attributes;
+/// this module provides the physical [`Attributes`] implementation for hypergraphs.
+pub mod attributes;
 
 pub(crate) mod prelude {
     #[doc(inline)]

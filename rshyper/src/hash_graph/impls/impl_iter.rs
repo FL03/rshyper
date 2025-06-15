@@ -107,8 +107,8 @@ where
         }
     }
     /// returns an iterator over the keys of the surfaces, yielding the indices of the entries.
-    pub fn surface_keys(&self) -> SurfaceKeys<'_, E, K, Idx, S> {
-        SurfaceKeys {
+    pub fn surface_keys(&self) -> Edges<'_, E, K, Idx, S> {
+        Edges {
             iter: self.surfaces().keys(),
         }
     }

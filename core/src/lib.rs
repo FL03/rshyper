@@ -1,13 +1,19 @@
+/*
+    appellation: rshyper-core <library>
+    authors: @FL03
+*/
 //! # rshyper-core
 //!
 //! This crate provides the core functionality for the rshyper library, implementing various
 //! primitives and utilities for working with hypergraphs.
 //!
-//! ## Features
+//! ## Components
 //!
-//! - `alloc`: enables the use of the `alloc` crate, allowing for dynamic memory allocation.
-//! - `std`: enables the use of the standard library, providing additional functionality and
-//!   types.
+//! - [`attrs`]: Contains the [`Attributes`] and [`GraphAttributes`] types for managing graph
+//!   attributes.
+//! - [`edge`]: implements the [`Edge`] and [`Surface`] types for representing hyperedges
+//! - [`node`]: provides the [`Node`] implementation for representing hypernodes
+//! - [`weight`]: gives the [`Weight`] type for representing weights in a hypergraph
 //!
 #![allow(
     clippy::should_implement_trait,
@@ -15,8 +21,10 @@
     clippy::missing_safety_doc
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![crate_name = "rshyper_core"]
-#![crate_type = "lib"]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/rshyper/rshyper/main/assets/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/rshyper/rshyper/main/assets/logo.svg"
+)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -44,6 +52,7 @@ pub mod edge;
 pub mod error;
 pub mod idx;
 pub mod node;
+/// this module implements the [`Weight`] type, which is used to represent weights in a hypergraph
 pub mod weight;
 
 pub mod traits {
@@ -51,21 +60,30 @@ pub mod traits {
     //! behaviors
     #[doc(inline)]
     pub use self::prelude::*;
-
+    /// the [`Contains`] trait provides a way to check if a graph contains a specific component
     pub mod contains;
-    pub mod convert;
+    /// this module implements the [`RawDomain`] trait for defining the type of collection used
+    /// to compose the hyperedge
+    pub mod domain;
+    /// the [`HyperGraph`] trait defines the core interface for hypergraphs, enabling the
+    /// generalization of algorithms constructors, and graphical operators.
+    #[cfg(feature = "alloc")]
     pub mod hyper_graph;
+    /// the [`Merge`] trait provides a way to combine two graphs into one
     pub mod merge;
+    /// this module defines sequential step generators
     pub mod step;
+    /// traits for transformative operations on hypergraphs, such as mapping, are implemented
+    /// within this module
     pub mod transform;
-    pub mod weighted;
 
     pub(crate) mod prelude {
         #[doc(inline)]
         pub use super::contains::*;
         #[doc(inline)]
-        pub use super::convert::*;
+        pub use super::domain::*;
         #[doc(inline)]
+        #[cfg(feature = "alloc")]
         pub use super::hyper_graph::*;
         #[doc(inline)]
         pub use super::merge::*;
@@ -73,16 +91,15 @@ pub mod traits {
         pub use super::step::*;
         #[doc(inline)]
         pub use super::transform::*;
-        #[doc(inline)]
-        pub use super::weighted::*;
     }
 }
 
 pub mod types {
-    //! this module provides various primitive types used throughout the library such as [Weight]
+    //! this module provides various types used throughout the library
     #[doc(inline)]
     pub use self::prelude::*;
 
+    /// this module defines the two types of graph kinds: [`Directed`] and [`Undirected`]
     pub mod graph_kind;
 
     pub(crate) mod prelude {
@@ -91,23 +108,14 @@ pub mod types {
     }
 }
 
-#[doc(hidden)]
 pub mod prelude {
-    #[doc(no_inline)]
     pub use crate::error::*;
 
-    #[doc(inline)]
     pub use crate::attrs::prelude::*;
-    #[doc(no_inline)]
     pub use crate::edge::prelude::*;
-    #[doc(no_inline)]
     pub use crate::idx::prelude::*;
-    #[doc(no_inline)]
     pub use crate::node::prelude::*;
-    #[doc(no_inline)]
     pub use crate::traits::prelude::*;
-    #[doc(no_inline)]
     pub use crate::types::prelude::*;
-    #[doc(no_inline)]
     pub use crate::weight::prelude::*;
 }

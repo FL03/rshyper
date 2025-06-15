@@ -35,6 +35,6 @@ where
     type Idx<I> = VertexId<I>;
 
     fn index(&self) -> &Self::Idx<Idx> {
-        &self.index
+        &self.id
     }
 }

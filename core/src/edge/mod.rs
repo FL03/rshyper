@@ -10,7 +10,9 @@ pub use self::utils::prelude::*;
 #[doc(inline)]
 pub use self::{hyper_edge::*, hyper_facet::*, traits::prelude::*, types::prelude::*};
 
+/// the [`hyper_edge`] module defines the [`Edge`] type representing the basis of a hyperedge
 pub mod hyper_edge;
+/// the [`hyper_facet`] module defines the [`Surface`] type representing a "complete" hyperedge
 pub mod hyper_facet;
 
 mod impls {
@@ -35,18 +37,13 @@ pub mod traits {
     pub use self::prelude::*;
     /// this module defines the [`RawEdge`] trait for establishing a common interface for
     /// representations of a hyperedge
-    mod edge;
-    /// this module defines the [`RawStore`] trait for establishing a common interface for
-    /// representations of a set of [`VertexId`] that compose some edge
-    mod store;
+    pub mod edge;
     /// this module defines the [`RawFacet`] trait
-    mod surface;
+    pub mod surface;
 
     pub(crate) mod prelude {
         #[doc(inline)]
         pub use super::edge::*;
-        #[doc(inline)]
-        pub use super::store::*;
         #[doc(inline)]
         pub use super::surface::*;
     }

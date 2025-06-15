@@ -15,20 +15,69 @@ impl<K: GraphIndex> IndexBase<usize, K> {
     pub fn atomic() -> Self {
         Self::new(INDEX_COUNTER.fetch_add(1, Ordering::Relaxed))
     }
-    /// consumes the current index and returns a new, atomic index.
+    /// a helper method that dynamically initializes the index based on the enabled features:
+    ///
+    /// - `rand`: if enabled, use random number generation to generate the index.
+    /// - `fallback`: otherwise, use an atomic counter to generate the index.
+    pub fn create() -> Self {
+        #[cfg(feature = "rand")]
+        {
+            Self::rand()
+        }
+        #[cfg(not(feature = "rand"))]
+        {
+            Self::atomic()
+        }
+    }
+    /// atomically generates a the next index, replacing the current value with the generated
+    /// one and returning the previous value.
     pub fn atomic_next(&mut self) -> Self {
-        let prev = self.replace(INDEX_COUNTER.fetch_add(1, Ordering::Relaxed));
+        // generate the next id atomically
+        let mut id = Self::atomic();
+        // swap values, replacing the current instances value with the new one
+        self.swap(&mut id);
+        // return the previous instance
+        id
+    }
+    /// the [`generate`](IndexBase::generate) is useful for instances where the type `Idx` of
+    /// the [`IndexBase`] is not generalized, automatically using random number generation
+    /// if the `rand` feature is enabled, or an atomic counter otherwise. The method is also
+    /// useful in that it generates [`usize`] indices, whcih are the most common instances, yet
+    /// aren't direct implementors of [`StandardUniform`](rand_distr::StandardUniform).
+    pub fn generate(&mut self) -> Self {
+        // declare the prev param
+        let prev: usize;
+        // use random number generation if the `rand` feature is enabled
+        #[cfg(feature = "rand")]
+        {
+            // generate a random value from the standard uniform distribution
+            let next = rand::random::<u128>();
+            // replace the current value with the next one
+            prev = self.replace(next as usize);
+        }
+        // otherwise use the atomic counter
+        #[cfg(not(feature = "rand"))]
+        {
+            prev = self.replace(INDEX_COUNTER.fetch_add(1, Ordering::Relaxed));
+        }
+        // return a new instance with the previous value
         Self::new(prev)
     }
 }
 
-impl<T: RawIndex> IndexBase<T, EdgeIndex> {
+impl<T> IndexBase<T, EdgeIndex>
+where
+    T: RawIndex,
+{
     pub fn vertex(value: T) -> Self {
         Self::new(value)
     }
 }
 
-impl<T: RawIndex> IndexBase<T, VertexIndex> {
+impl<T> IndexBase<T, VertexIndex>
+where
+    T: RawIndex,
+{
     pub fn vertex(value: T) -> Self {
         Self::new(value)
     }

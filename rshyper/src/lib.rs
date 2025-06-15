@@ -15,19 +15,23 @@
 //! algorithmic techniques. The crate is designed to be flexible and modular enabled via heavy
 //! feature-gating throughout the framework.
 //!
-//!
 //! ## Background
 //!
 //! Before diving in to the technical side of things, let's start by defining several terms
 //! commonly used in the definition and implementation of hypergraphs.
 //!
-//! ### Terminology
+//! ### Terms
 //!
-//! - **edge**: an edge is a connection between two or more vertices.
-//! - **facet**: a facet, often called a surface, materializes a hyperedge by associating some
-//!   weight with the edge.
-//! - **node**: a node is a complete _vertex_ in that it is considered to be weighted.
-//! - **vertex**: a vertex is an _unweighted_ node defining a point within the hypergraph.
+//! - **edge:** a hyperedge is a generalization of an edge in a graph, allowing it to connect
+//!   any number of vertices.
+//! - **facet:** a facet, or surface, defines a weighted hyperedge composed of one or more
+//!   vertices.
+//! - **node** a node is a complete _vertex_ in that it is considered to be weighted.
+//! - **point:** here, a point is a synonym for a vertex, and is used to define the position of
+//!   a vertex within the hypergraph.
+//! - **surface:** a surface is a synonym for a facet, speaking to an edge and its associated
+//!   weight.
+//! - **vertex:** a vertex is an _unweighted_ node defining a point within the hypergraph.
 //!
 //! ### Hypergraphs
 //!
@@ -35,6 +39,10 @@
 //! vertices. This flexible data-strcture is highly mathematical, yet, extremely useful in
 //! many applications such as database design, network analysis, combinatorial optimization,
 //! modeling topological spaces, and more.
+//!
+//! #### _Definition 1:_
+//! Formally, a directed hypergraph is a pair `H = (V,E)` where `V` is a set of vertices and
+//! `E` is a set of hyperedges. Each hyperedge `e ∈ E` is a subset of `V` that can contain
 //!
 //! ## Features
 //!
@@ -57,11 +65,16 @@
 #![allow(
     clippy::should_implement_trait,
     clippy::module_inception,
-    clippy::missing_safety_doc
+    clippy::missing_safety_doc,
+    clippy::non_canonical_clone_impl,
+    clippy::non_canonical_partial_ord_impl
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![crate_name = "rshyper"]
 #![crate_type = "lib"]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
+)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -70,20 +83,18 @@ extern crate alloc;
 pub(crate) mod macros;
 
 #[doc(inline)]
+#[cfg(all(feature = "std", feature = "algo"))]
 pub use self::algo::prelude::*;
 #[doc(inline)]
 pub use rshyper_core::*;
 
-#[cfg(feature = "binary_graph")]
-pub use self::binary_graph::BinaryGraph;
 #[doc(inline)]
 #[cfg(feature = "hash_graph")]
 pub use self::hash_graph::{DiHashGraph, HashGraph, UnHashGraph};
 
 /// the `algo` module focuses on implementing algorithms and operators for hypergraphs
+#[cfg(all(feature = "std", feature = "algo"))]
 pub mod algo;
-#[cfg(feature = "binary_graph")]
-pub mod binary_graph;
 /// this module contains the [`HashGraph`], a hash-based hypergraph implementation
 #[cfg(feature = "hash_graph")]
 pub mod hash_graph;
@@ -91,13 +102,10 @@ pub mod hash_graph;
 /// the prelude module for the crate contains all commonly used traits, types, and functions
 #[allow(missing_docs)]
 pub mod prelude {
-    #[doc(no_inline)]
     pub use rshyper_core::prelude::*;
 
-    #[doc(no_inline)]
+    #[cfg(all(feature = "std", feature = "algo"))]
     pub use crate::algo::prelude::*;
-    #[cfg(feature = "binary_graph")]
-    pub use crate::binary_graph::prelude::*;
     #[cfg(feature = "hash_graph")]
     pub use crate::hash_graph::prelude::*;
 }

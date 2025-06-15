@@ -3,38 +3,122 @@
     authors: @FL03
 */
 use crate::hash_graph::{HashFacet, HashGraph, VertexSet};
-use crate::{GraphAttributes, GraphType};
+use crate::{AddStep, GraphAttributes, GraphType};
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::idx::{EdgeId, RawIndex, VertexId};
 use rshyper_core::{Node, Surface, Weight};
 
 impl<N, E, A, K, Idx, S> HashGraph<N, E, A, S>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
     A: GraphAttributes<Ix = Idx, Kind = K>,
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
     S: BuildHasher,
 {
-    /// insert a new [`HyperFacet`] into the hypergraph composed of the given vertices and
-    /// using the logical [`Default`] for the weight
+    /// add a new hyperedge, using the given vertices and the logical [`Default`] for the
+    /// weight of type `T` and returning the corresponding edge index.
     pub fn add_edge<I>(&mut self, vertices: I) -> crate::Result<EdgeId<Idx>>
     where
         I: IntoIterator<Item = VertexId<Idx>>,
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Clone,
         E: Default,
         S: Default,
     {
-        self.add_surface(vertices, Weight(E::default()))
+        self.add_surface(vertices, Default::default())
     }
-    /// insert a new hyperedge composed of the given vertices and weight, returning its unique
-    /// index
+    /// add a new hyperedge directly using an externally defined surfac, returns an error if the
+    /// surface is empty or if the associated edge id is not recorded in the history.
+    pub(crate) fn add_hyperedge(
+        &mut self,
+        surface: HashFacet<E, K, Idx, S>,
+    ) -> crate::Result<EdgeId<Idx>>
+    where
+        Idx: Clone,
+    {
+        // ensure the surface is valid
+        if surface.is_empty() {
+            return Err(crate::Error::EmptyHyperedge);
+        }
+        // verify the edge id is already recorded in the history
+        if !self.history().contains_edge(surface.id()) {
+            #[cfg(feature = "tracing")]
+            tracing::error!(
+                "the surface with id {} is not recorded in the history",
+                surface.id()
+            );
+            // self.history_mut().add_edge(surface.id().clone());
+            return Err(crate::Error::EdgeNotFound);
+        }
+        // get the id of the surface
+        let id = surface.id().clone();
+        #[cfg(feature = "tracing")]
+        tracing::debug!("inserting a new hyperedge ({id}) into the graph...");
+        // insert the new hyperedge into the adjacency map
+        self.surfaces_mut().insert(id.clone(), surface);
+        // return the id
+        Ok(id)
+    }
+    /// directly insert a new hypernode
+    pub(crate) fn add_hypernode(&mut self, data: Node<N, Idx>) -> crate::Result<VertexId<Idx>>
+    where
+        Idx: Clone,
+    {
+        // verify the edge id is already recorded in the history
+        if !self.history().contains_node(data.id()) {
+            #[cfg(feature = "tracing")]
+            tracing::error!(
+                "the surface with id {} is not recorded in the history",
+                data.id()
+            );
+            // self.history_mut().add_edge(surface.id().clone());
+            return Err(crate::Error::NodeNotFound);
+        }
+        // get the id of the surface
+        let id = data.id().clone();
+        #[cfg(feature = "tracing")]
+        tracing::debug!("inserting a new hypernode ({id}) into the graph...");
+        // insert the new hyperedge into the adjacency map
+        self.nodes_mut().insert(id.clone(), data);
+        // return the id
+        Ok(id)
+    }
+    /// add a new node with the given weight and return its index
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, level = "trace", target = "hash_graph")
+    )]
+    pub fn add_node(&mut self, weight: Weight<N>) -> crate::Result<VertexId<Idx>>
+    where
+        Idx: AddStep<Output = Idx> + Copy,
+    {
+        // generate a new index to identify the new node
+        let ndx = self.next_vertex_id();
+        // initialize a new node with the given weight & index
+        let node = Node::new(ndx, weight);
+        // insert the new node into the vertices map
+        self.add_hypernode(node)?;
+        Ok(ndx)
+    }
+    /// add multiple nodes with the given weights and return their indices
+    pub fn add_nodes<I>(&mut self, weights: I) -> impl Iterator<Item = VertexId<Idx>>
+    where
+        I: IntoIterator<Item = N>,
+        Idx: AddStep<Output = Idx> + Copy,
+    {
+        weights
+            .into_iter()
+            .filter_map(|weight| self.add_node(Weight(weight)).ok())
+    }
+    /// add a new hyperedge with the given vertices and weight, returning the corresponding
+    /// edge index.
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, level = "trace", target = "hash_graph")
+    )]
     pub fn add_surface<I>(&mut self, vertices: I, weight: Weight<E>) -> crate::Result<EdgeId<Idx>>
     where
         I: IntoIterator<Item = VertexId<Idx>>,
-        E: Eq + Hash,
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Clone,
         S: Default,
     {
         // collect the vertices into a HashSet to ensure uniqueness
@@ -47,60 +131,34 @@ where
                 }
                 Ok(v)
             })
-            .filter_map(Result::ok);
-        let vset = VertexSet::from_iter(verts);
+            .filter_map(Result::ok)
+            .collect::<VertexSet<Idx, S>>();
         // fetch the next edge index
         let edge_id = self.next_edge_id();
-        // handle the case where the edge has no associated vertices
-        if vset.is_empty() {
-            return Err(crate::Error::EmptyHyperedge);
-        }
-        let surface = crate::Surface::new(edge_id, vset, weight);
-        // insert the new hyperedge into the adjacency map
-        self.surfaces_mut().insert(edge_id, surface);
+        // create a new surface
+        let surface = Surface::new(edge_id.clone(), verts, weight);
+        // add the hyperedge to the graph
+        self.add_hyperedge(surface)?;
+        // log the addition of the new hyperedge
+        #[cfg(feature = "tracing")]
+        tracing::debug!("added a new hyperedge with id {edge_id}");
+        // return the edge id
         Ok(edge_id)
     }
-    /// add a new node with the given weight and return its index
-    pub fn add_node(&mut self, weight: Weight<N>) -> crate::Result<VertexId<Idx>>
-    where
-        Idx: Copy + crate::AddStep<Output = Idx>,
-    {
-        // generate a new index to identify the new node
-        let ndx = self.next_vertex_id();
-        #[cfg(feature = "tracing")]
-        tracing::info!("adding a new node with index {ndx}");
-        // initialize a new node with the given weight & index
-        let node = Node::new(ndx, weight);
-        // insert the new node into the vertices map
-        self.nodes_mut().insert(ndx, node);
-        Ok(ndx)
-    }
-    /// add multiple nodes with the given weights and return their indices
-    #[cfg_attr(
-        feature = "tracing",
-        tracing::instrument(skip_all, level = "trace", target = "hash_graph")
-    )]
-    pub fn add_nodes<I>(&mut self, weights: I) -> crate::Result<Vec<VertexId<Idx>>>
-    where
-        I: IntoIterator<Item = N>,
-        Idx: Copy + crate::AddStep<Output = Idx>,
-    {
-        let ids = weights
-            .into_iter()
-            .filter_map(|weight| self.add_node(Weight(weight)).ok())
-            .collect::<Vec<_>>();
-        Ok(ids)
-    }
-    /// add a new vertex with the default weight and return its ID
+    /// add a new hypernode using the logical [`Default`] for the weight of type `N` and
+    /// return its index.
     pub fn add_vertex(&mut self) -> crate::Result<VertexId<Idx>>
     where
         N: Default,
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Copy,
     {
         self.add_node(Default::default())
     }
     /// reset the hypergraph by clearing all nodes, edges, and facets
     pub fn clear(&mut self) -> &mut Self {
+        // log the addition of the new hyperedge
+        #[cfg(feature = "tracing")]
+        tracing::info!("clearing the hypergraph...");
         self.surfaces_mut().clear();
         self.nodes_mut().clear();
         self
@@ -150,7 +208,7 @@ where
                 neighbors.extend(
                     surface
                         .edge()
-                        .points()
+                        .domain()
                         .iter()
                         .copied()
                         .filter(|v| v != index),
@@ -166,41 +224,41 @@ where
     )]
     pub fn get_edge_nodes<Q>(&self, index: &Q) -> crate::Result<Vec<&Node<N, Idx>>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         let surface = self.get_surface(index)?;
         let nodes = surface
-            .points()
+            .domain()
             .iter()
             .map(|v| self.get_node(v).expect("vertex not found"))
             .collect::<Vec<_>>();
         Ok(nodes)
     }
-    /// returns the number of vertices, or order, composing the hyperedge with the given id
+    /// returns the number of vertices within the given edge
     pub fn get_edge_order(&self, index: &EdgeId<Idx>) -> crate::Result<usize> {
         self.get_surface(index).map(|edge| edge.len())
     }
     /// returns the set of vertices composing the given edge
     pub fn get_edge_vertices<Q>(&self, index: &Q) -> crate::Result<&VertexSet<Idx, S>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.get_surface(index).map(|edge| edge.points())
+        self.get_surface(index).map(|edge| edge.domain())
     }
     /// returns a mutable reference to the set of vertices composing the given edge
     pub fn get_edge_vertices_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut VertexSet<Idx, S>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.get_surface_mut(index).map(|edge| edge.points_mut())
+        self.get_surface_mut(index).map(|edge| edge.domain_mut())
     }
     /// returns an immutable reference to the weight of a hyperedge
     pub fn get_edge_weight<Q>(&self, index: &Q) -> crate::Result<&Weight<E>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_surface(index).map(|edge| edge.weight())
@@ -208,7 +266,7 @@ where
     /// returns a mutable reference to the weight of a hyperedge
     pub fn get_edge_weight_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut Weight<E>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_surface_mut(index).map(|edge| edge.weight_mut())
@@ -217,19 +275,19 @@ where
     /// contain the vertex
     pub fn get_node_degree<Q>(&self, index: &Q) -> usize
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces()
             .values()
-            .filter(|facet| facet.edge().points().contains(index))
+            .filter(|facet| facet.edge().domain().contains(index))
             .count()
     }
     /// returns the weight of a particular vertex
     #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
     pub fn get_node<Q>(&self, index: &Q) -> crate::Result<&Node<N, Idx>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.nodes().get(index).ok_or(crate::Error::NodeNotFound)
@@ -237,7 +295,7 @@ where
     /// returns a mutable reference to the weight of a vertex
     pub fn get_node_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut Node<N, Idx>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.nodes_mut()
@@ -247,7 +305,7 @@ where
     /// returns an immutable reference to the weight of a vertex
     pub fn get_node_weight<Q>(&self, index: &Q) -> crate::Result<&Weight<N>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_node(index).map(|node| node.weight())
@@ -255,7 +313,7 @@ where
     /// returns a mutable reference to the weight of a vertex
     pub fn get_node_weight_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut Weight<N>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_node_mut(index).map(|node| node.weight_mut())
@@ -263,7 +321,7 @@ where
     /// returns an immutable reference to the [`HashFacet`] associated with the given index
     pub fn get_surface<Q>(&self, index: &Q) -> crate::Result<&HashFacet<E, K, Idx, S>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces()
@@ -273,7 +331,7 @@ where
     /// returns a mutable reference to the [`HashFacet`] associated with the given index
     pub fn get_surface_mut<Q>(&mut self, index: &Q) -> crate::Result<&mut HashFacet<E, K, Idx, S>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces_mut()
@@ -291,7 +349,7 @@ where
     where
         Q: Eq + Hash + core::fmt::Debug,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Copy,
         S: Default,
         for<'a> &'a E: core::ops::Add<Output = E>,
     {
@@ -308,24 +366,27 @@ where
     )]
     pub fn merge_edges_with<Q, F>(&mut self, e1: &Q, e2: &Q, f: F) -> crate::Result<EdgeId<Idx>>
     where
-        Q: Eq + Hash + core::fmt::Debug,
+        Q: ?Sized + Eq + Hash + core::fmt::Debug,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
-        Idx: Copy + crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Copy,
         F: FnOnce(&E, &E) -> E,
         S: Default,
     {
         // remove the edges from the surfaces map
         let s1 = self.remove_surface(e1)?;
         #[cfg(feature = "tracing")]
-        tracing::debug!("removed edge {e1:?} with vertices {ep:?}", ep = s1.points());
+        tracing::debug!("removed edge {e1:?} with vertices {ep:?}", ep = s1.domain());
         let s2 = self.remove_surface(e2)?;
         #[cfg(feature = "tracing")]
-        tracing::debug!("removed edge {e2:?} with vertices {ep:?}", ep = s2.points());
-        // merge the vertices of the two edges
-        let vertices = s1.points().union(s2.points()).copied();
-        let vertices = VertexSet::from_iter(vertices);
+        tracing::debug!("removed edge {e2:?} with vertices {ep:?}", ep = s2.domain());
+        // merge the vertices of the two edges by unionizing their domains
+        let vertices = s1
+            .domain()
+            .union(s2.domain())
+            .copied()
+            .collect::<VertexSet<Idx, S>>();
         // merge the two weights using the provided function
-        let weight = f(s1.weight().view().value(), s2.weight().view().value());
+        let weight = f(*s1.weight().view(), *s2.weight().view());
         // generate a new edge index
         let edge_id = self.next_edge_id();
         // initialize a new facet using the merged vertices, new index, and source weight
@@ -353,7 +414,7 @@ where
             .remove(index)
             .ok_or(crate::Error::NodeNotFound)
             .inspect(|node| {
-                self.history_mut().remove_vertex(node.index());
+                self.history_mut().remove_node(node.id());
                 #[cfg(feature = "tracing")]
                 tracing::trace!(
                     "successfully removed the node; removing edges that contained the vertex..."
@@ -366,7 +427,7 @@ where
                 );
             })
     }
-    /// remove the [`HyperFacet`] with the given index from the hypergraph
+    /// remove the hyperedge with the given index from the hypergraph
     #[inline]
     #[cfg_attr(
         feature = "tracing",
@@ -374,7 +435,7 @@ where
     )]
     pub fn remove_surface<Q>(&mut self, index: &Q) -> crate::Result<HashFacet<E, K, Idx, S>>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces_mut()
@@ -409,7 +470,7 @@ where
     #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
     pub fn set_edge_weight<Q>(&mut self, index: &Q, weight: Weight<E>) -> crate::Result<&mut Self>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_edge_weight_mut(index)
@@ -424,7 +485,7 @@ where
     #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
     pub fn set_node_weight<Q>(&mut self, index: &Q, weight: Weight<N>) -> crate::Result<&mut Self>
     where
-        Q: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.get_node_weight_mut(index)
@@ -438,78 +499,30 @@ where
 
 #[allow(deprecated)]
 #[doc(hidden)]
-impl<N, E, A, K, Idx, S> HashGraph<N, E, A, S>
+impl<N, E, A, S> HashGraph<N, E, A, S>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
-    A: GraphAttributes<Ix = Idx, Kind = K>,
-    K: GraphType,
-    Idx: Eq + RawIndex + Hash,
+    A: GraphAttributes,
     S: BuildHasher,
 {
     #[deprecated(
-        note = "use `total_nodes` instead; this method will be removed in a future release",
+        note = "use `size` instead; this method will be removed in a future release",
+        since = "0.1.2"
+    )]
+    pub fn total_edges(&self) -> usize {
+        self.surfaces().len()
+    }
+    #[deprecated(
+        note = "use `order` instead; this method will be removed in a future release",
+        since = "0.1.2"
+    )]
+    pub fn total_nodes(&self) -> usize {
+        self.nodes().len()
+    }
+    #[deprecated(
+        note = "use `order` instead; this method will be removed in a future release",
         since = "0.1.0"
     )]
     pub fn total_vertices(&self) -> usize {
-        self.total_nodes()
-    }
-    #[deprecated(
-        note = "use `contains_node_in_edge` instead; this method will be removed in a future release",
-        since = "0.0.10"
-    )]
-    pub fn is_vertex_in_edge<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
-    where
-        Q: Eq + Hash,
-        Q2: Eq + Hash,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-        VertexId<Idx>: core::borrow::Borrow<Q2>,
-    {
-        if let Some(surface) = self.surfaces().get(index) {
-            return surface.contains(vertex);
-        }
-        false
-    }
-    #[deprecated(
-        note = "use `find_edges_with_node` instead; this method will be removed in a future release",
-        since = "0.0.10"
-    )]
-    pub fn get_edges_with_vertex(&self, index: &VertexId<Idx>) -> crate::Result<Vec<EdgeId<Idx>>>
-    where
-        Idx: Copy,
-    {
-        self.find_edges_with_node(index)
-    }
-    #[deprecated(
-        note = "use `find_node_neighbors` instead; this method will be removed the next major release",
-        since = "0.0.10"
-    )]
-    pub fn neighbors(&self, index: &VertexId<Idx>) -> crate::Result<VertexSet<Idx>>
-    where
-        Idx: Copy,
-    {
-        self.find_node_neighbors(index)
-    }
-    #[deprecated(
-        note = "use `remove_node` instead; this method will be removed the next major release",
-        since = "0.0.10"
-    )]
-    pub fn remove_vertex<Q>(&mut self, index: &Q) -> crate::Result<Node<N, Idx>>
-    where
-        Q: Eq + core::fmt::Debug + Hash,
-        VertexId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.remove_node(index)
-    }
-    #[deprecated(
-        note = "use `set_node_weight` instead; this method will be removed in a future release",
-        since = "0.0.10"
-    )]
-    pub fn update_vertex_weight<Q>(&mut self, index: &Q, weight: N) -> crate::Result<&mut Self>
-    where
-        Q: Eq + Hash,
-        VertexId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.set_node_weight(index, Weight(weight))
+        self.order()
     }
 }

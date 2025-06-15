@@ -29,7 +29,7 @@ where
     Idx: RawIndex,
 {
     fn borrow(&self) -> &VertexId<Idx> {
-        self.index()
+        self.id()
     }
 }
 
@@ -86,7 +86,7 @@ where
     T: Default,
 {
     fn from(index: VertexId<Idx>) -> Self {
-        Node::from_index(index)
+        Node::from_id(index)
     }
 }
 
@@ -104,7 +104,7 @@ where
     Idx: RawIndex,
 {
     fn from(node: Node<T, Idx>) -> Self {
-        (node.index, node.weight)
+        (node.id, node.weight)
     }
 }
 
@@ -113,6 +113,6 @@ where
     Idx: RawIndex,
 {
     fn from(node: Node<T, Idx>) -> Self {
-        node.index
+        node.id
     }
 }

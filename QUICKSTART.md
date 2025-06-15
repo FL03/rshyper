@@ -1,45 +1,59 @@
----
-title: Quickstart
-description: A detailed guide on how to get started with the rshyper project.
----
+# Quickstart Guide
+
+***
+
+Welcome to the quickstart guide for `rshyper`, a hypergraph implementation for Rust. This guide will help you get started with building and running the project.
+
+## Table of Contents
+
+- [Prerequisites](#prerequisites)
+  - [Setup Rust](#setup-rust)
+- [Building from the source](#building-from-the-source)
 
 ## Prerequisites
 
-Listed below are the tools and dependencies required to build and run the project:
+Before you begin, ensure you have the following prerequisites installed on your system:
 
-- [Docker](https://docs.docker.com/get-docker/)
-- [Rust](https://www.rust-lang.org/tools/install)
+- [Rust](https://www.rust-lang.org/) (version 1.85 or later)
 
-### Additional Utilities
+Optionally, you may also want to install the following tools:
 
-#### `cargo-binstall`
+- [cargo-binstall](https://github.com/cargo-bins/cargo-binstall) - A utility designed to streamline the installation of Rust binaries.
 
-To streamline the installation of additional, cargo-based tooling ensure that [cargo-binstall](https://github.com/cargo-bins/cargo-binstall) is installed. This tool allows you to install Rust binaries easily and quickly.
+### Setup Rust
+
+Ensure you have the latest version of Rust installed. You can install Rust using [rustup](https://rustup.rs/).
 
 ```bash
-cargo install cargo-binstall
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-## Getting Started
-
-Ensure that `rustup` and all installed toolchains are updated:
+After installation, I always recommend ensuring that rustup is updated to the latest version:
 
 ```bash
 rustup update
 ```
 
-Optionally, instal the `wasm32-*` targets for WebAssembly development:
+And to add the latest nightly toolchain, which is often useful for development:
 
 ```bash
-rustup target add wasm32-unknown-unknown wasm32-wasip1 wasm32-wasip2
+rustup toolchain install nightly
 ```
 
-### Building from the source
+#### Adding additional targets
 
-Get started by cloning the repository:
+If necessary, add the `wasm32-*` target(s) if you plan to compile for WebAssembly:
 
 ```bash
-git clone https://github.com/FL03/rshyper.git --branch main
+rustup target add wasm32-unknown-unknown wasm32-p1 wasm32-p2
+```
+
+## Building from the source
+
+Start by cloning the repository:
+
+```bash
+git clone https://github.com/FL03/rshyper.git -b main --depth 1
 ```
 
 Then, navigate to the project directory:
@@ -48,36 +62,14 @@ Then, navigate to the project directory:
 cd rshyper
 ```
 
-#### Native
-
-For native development, you can run the server using cargo:
+Once you're in the project directory, you can build the project using `cargo`:
 
 ```bash
-cargo run --locked --release --features full --bin pzzld --
+cargo build --workspace --release --all-features
 ```
 
-#### WebAssembly
-
-##### WebAssembly System Interface (wasi)
-
-Build the project using the wasm32 target:
+Or, if you want to run the tests, you can use:
 
 ```bash
-cargo build --locked --workspace --release --features wasi --target wasm32-wasip2
+cargo test --workspace --release --all-features
 ```
-
-### Docker
-
-You can also build the project using Docker. Start by building the Docker image:
-
-```bash
-docker buildx build --platform linux/amd64 -t jo3mccain/rshyper:latest -f ./Dockerfile .
-```
-
-Then, run the Docker container:
-
-```bash
-docker run -d -it --rm -p 8080:8080 -v $(pwd):/app jo3mccain/rshyper:latest
-```
-
-This will start the server and bind it to port 8080 on your host machine. You can access the server by navigating to `http://localhost:8080` in your web browser.

@@ -6,24 +6,16 @@
 
 ***
 
-_**Warning: The library is still in development so prepare for a shifting api...**_
+_**Warning: The library is currently in the early stages of development and is not yet ready for production use.**_
 
 `rshyper` is a Rust library designed to provide a hypergraph implementation with a focus on performance and flexibility. It is built to handle complex relationships between data points efficiently, making it suitable for various applications in graph theory, data analysis, and more.
 
 ## Table of Contents
 
 - [Background](#background)
-  - [Terminology](#terminology)
-  - [Hypergraphs](#hypergraphs)
-    - [Definition](#definition)
-    - [Properties](#properties)
 - [Usage](#usage)
   - [Features](#features)
   - [Examples](#examples)
-- [Getting Started](#getting-started)
-- [Contributing](#contributing)
-- [License](#license)
-- [Security](#security)
 
 ## Background
 
@@ -59,7 +51,6 @@ Formally, a hypergraph is defined as a pair $H = (V, E)$ where:
 
 Listed below are some intrinsic properties of hypergraphs:
 
-- **domain:** the domain of a hypergraph `H` is the set of vertices `V` within the edge set `E`.
 - **order:** The order of a hypergraph `H` is the number of vertices in `V`.
 - **size:** The size of a hypergraph `H` is the number of hyperedges in `E`.
 
@@ -135,22 +126,3 @@ For more detailed examples, please refer to the [examples directory](https://git
     }
 
 ```
-
-## Getting Started
-
-View the [QUICKSTART](https://github.com/FL03/rshyper/blob/main/QUICKSTART.md) guide for a detailed introduction to using `rshyper`, including how to set up your environment, basic operations, and examples of hypergraph manipulation.
-
-## Contributing
-
-Pull requests are welcome. For major changes, please open an issue first
-to discuss what you would like to change.
-
-Please make sure to update tests as appropriate.
-
-## License
-
-This project is licensed under the Apache-2.0 License - see the [LICENSE](https://github.com/FL03/rshyper/blob/main/LICENSE) file for details.
-
-## Security
-
-View the [Security Policy](https://github.com/FL03/rshyper/blob/main/SECURITY.md) for details on how to report security vulnerabilities.

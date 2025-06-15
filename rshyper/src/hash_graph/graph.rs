@@ -2,12 +2,17 @@
     Appellation: hash_graph <module>
     Contrib: @FL03
 */
+//! this module provides the [`HashGraph`] definition along with a couple aliases for
+//! convenience.
 use super::aliases::*;
 
 use rshyper_core::attrs::{DiAttributes, GraphAttributes, UnAttributes};
-use rshyper_core::idx::{EdgeId, IndexCursor, IndexTracker, NumIndex, RawIndex, VertexId};
+use rshyper_core::idx::{EdgeId, Frame, IndexTracker, NumIndex, RawIndex, VertexId};
 use rshyper_core::node::Node;
-use rshyper_core::{GraphType, HyperGraph, Mode, RawHyperGraph, Weight};
+use rshyper_core::traits::{
+    AddStep, HyperGraph, HyperGraphIterEdge, HyperGraphIterNode, RawHyperGraph,
+};
+use rshyper_core::{GraphType, Mode, Weight};
 
 use core::hash::{BuildHasher, Hash};
 use std::hash::RandomState;
@@ -23,7 +28,6 @@ pub struct HashGraph<N = (), E = (), A = UnAttributes<usize>, S = RandomState>
 where
     S: BuildHasher,
     A: GraphAttributes,
-    A::Ix: Eq + Hash,
 {
     /// the attributes of a graph define its _kind_ and the type of index used
     pub(crate) attrs: A,
@@ -39,12 +43,10 @@ where
 
 impl<N, E, A, K, Idx, S> HashGraph<N, E, A, S>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
     S: BuildHasher,
     A: GraphAttributes<Ix = Idx, Kind = K>,
     K: GraphType,
-    Idx: Eq + RawIndex + Hash,
+    Idx: RawIndex,
 {
     /// initialize a new, empty hypergraph
     pub fn new() -> Self
@@ -104,11 +106,11 @@ where
     /// returns a copy of the position of the hypergraph; here, the [`position`](Position) is
     /// used to track the indices (edge & vertex) and define which ones are next to be used
     /// when inserting new hyperedges or vertices
-    pub const fn position(&self) -> &IndexCursor<Idx> {
+    pub const fn position(&self) -> &Frame<Idx> {
         self.history().cursor()
     }
     /// returns a mutable reference to the current position of the hypergraph;
-    pub const fn position_mut(&mut self) -> &mut IndexCursor<Idx> {
+    pub const fn position_mut(&mut self) -> &mut Frame<Idx> {
         self.history_mut().cursor_mut()
     }
     /// returns an immutable reference to the surfaces of the hypergraph
@@ -139,7 +141,7 @@ where
     }
     /// overrides the current position and returns a mutable reference to the hypergraph
     #[inline]
-    pub fn set_position(&mut self, position: IndexCursor<Idx>) -> &mut Self
+    pub fn set_position(&mut self, position: Frame<Idx>) -> &mut Self
     where
         Idx: Default,
     {
@@ -155,43 +157,20 @@ where
         self.surfaces = surfaces;
         self
     }
-    /// consumes the current instance to create another with the given nodes
-    #[inline]
-    pub fn with_nodes(self, nodes: NodeMap<N, Idx, S>) -> Self
+    /// returns true if the hypergraph contains an edge with the given index;
+    pub fn contains_edge<Q>(&self, index: &Q) -> bool
     where
-        Idx: Default,
+        Idx: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        Self { nodes, ..self }
-    }
-    /// consumes the current instance to create another with the given history
-    pub fn with_history(self, history: IndexTracker<Idx>) -> Self
-    where
-        Idx: Default,
-    {
-        Self { history, ..self }
-    }
-    /// consumes the current instance to create another with the given position
-    pub fn with_position(self, position: IndexCursor<Idx>) -> Self
-    where
-        Idx: Default,
-    {
-        Self {
-            history: self.history.with_cursor(position),
-            ..self
-        }
-    }
-    /// consumes the current instance to create another with the given edges
-    #[inline]
-    pub fn with_surfaces(self, surfaces: SurfaceMap<E, K, Idx, S>) -> Self
-    where
-        Idx: Default,
-    {
-        Self { surfaces, ..self }
+        self.surfaces().contains_key(index)
     }
     /// check if a vertex with the given id exists
     pub fn contains_node<Q>(&self, index: &Q) -> bool
     where
-        Q: Eq + Hash,
+        Idx: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.nodes().contains_key(index)
@@ -203,7 +182,8 @@ where
     )]
     pub fn contains_node_in_edge<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
     where
-        Q: Eq + Hash,
+        Idx: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         Q2: Eq + Hash,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
         VertexId<Idx>: core::borrow::Borrow<Q2>,
@@ -213,10 +193,12 @@ where
         }
         false
     }
-    /// returns true if the hypergraph contains an edge with the given index;
+    #[doc(hidden)]
+    #[deprecated(since = "0.1.2", note = "use `contains_edge` instead")]
     pub fn contains_surface<Q>(&self, index: &Q) -> bool
     where
-        Q: Eq + Hash,
+        Idx: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
         self.surfaces().contains_key(index)
@@ -235,52 +217,60 @@ where
     }
     /// returns an [`Entry`](std::collections::hash_map::Entry) for the node with the given
     /// index, allowing for modifications or insertions to the mapping
-    pub fn node(&mut self, index: VertexId<Idx>) -> NodeEntry<'_, N, Idx> {
+    pub fn node(&mut self, index: VertexId<Idx>) -> NodeEntry<'_, N, Idx>
+    where
+        Idx: Eq + Hash,
+    {
         self.nodes_mut().entry(index)
     }
     /// returns a [`SurfaceEntry`] for the surface with the given index, allowing for in-place
     /// mutations to the value associated with the index
-    pub fn surface(&mut self, index: EdgeId<Idx>) -> SurfaceEntry<'_, E, K, Idx, S> {
+    pub fn surface(&mut self, index: EdgeId<Idx>) -> SurfaceEntry<'_, E, K, Idx, S>
+    where
+        Idx: Eq + Hash,
+    {
         self.surfaces_mut().entry(index)
     }
     /// computes the next edge index before replacing and returning the previous value
     pub fn next_edge_id(&mut self) -> EdgeId<Idx>
     where
-        Idx: crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Clone + PartialEq,
     {
-        self.position_mut().next_edge().unwrap()
+        self.history_mut().next_edge().unwrap()
     }
     /// computes the next node index before replacing and returning the previous value
     pub fn next_vertex_id(&mut self) -> VertexId<Idx>
     where
-        Idx: crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Clone + PartialEq,
     {
-        self.position_mut().next_vertex().unwrap()
+        self.history_mut().next_vertex().unwrap()
     }
-    /// returns the total number of edges within the hypergraph
-    pub fn total_edges(&self) -> usize {
-        self.surfaces().len()
-    }
-    /// returns the total number of nodes within the hypergraph
-    pub fn total_nodes(&self) -> usize {
+    /// returns the order of the hypergraph, which is defined to be the number of nodes in `X`
+    /// where `H=(X,E)`.
+    pub fn order(&self) -> usize {
         self.nodes().len()
+    }
+    /// returns the size of the hypergraph, which is defined to be the number of edges in `E`
+    /// where `H=(X,E)`.
+    /// returns the total number of edges within the hypergraph
+    pub fn size(&self) -> usize {
+        self.surfaces().len()
     }
 }
 
 impl<N, E, A, S> core::fmt::Display for HashGraph<N, E, A, S>
 where
     A: GraphAttributes,
-    E: core::fmt::Debug + Eq + Hash,
-    N: core::fmt::Debug + Eq + Hash,
+    E: core::fmt::Debug,
+    N: core::fmt::Debug,
     S: BuildHasher,
-    A::Ix: Eq + Hash,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(
             f,
             "{{ nodes: {n:?}, edges: {e:?} }}",
-            n = self.nodes(),
-            e = self.surfaces()
+            n = self.nodes,
+            e = self.surfaces
         )
     }
 }
@@ -288,88 +278,135 @@ where
 impl<N, E, A, S> RawHyperGraph<A> for HashGraph<N, E, A, S>
 where
     A: GraphAttributes,
-    E: Eq + Hash,
-    N: Eq + Hash,
     S: BuildHasher,
-    A::Ix: Eq + Hash,
 {
     type Node<N2> = Node<N2, A::Ix>;
     type Edge<E2> = HashFacet<E2, A::Kind, A::Ix, S>;
 }
 
-impl<N, E, A, K, Ix, S> HyperGraph<N, E, A> for HashGraph<N, E, A, S>
+impl<N, E, A, S> HyperGraph<N, E, A> for HashGraph<N, E, A, S>
 where
-    A: GraphAttributes<Ix = Ix, Kind = K>,
-    E: Eq + Hash,
-    N: Eq + Hash,
+    A: GraphAttributes,
     S: BuildHasher + Default,
-    K: GraphType,
-    Ix: NumIndex,
+    A::Ix: NumIndex,
 {
-    fn add_node(&mut self, weight: Weight<N>) -> crate::Result<VertexId<Ix>> {
+    fn add_node(&mut self, weight: Weight<N>) -> crate::Result<VertexId<A::Ix>> {
         self.add_node(weight)
     }
 
-    fn add_surface<I>(&mut self, iter: I, weight: Weight<E>) -> crate::Result<EdgeId<Ix>>
+    fn add_surface<I>(&mut self, iter: I, weight: Weight<E>) -> crate::Result<EdgeId<A::Ix>>
     where
-        I: IntoIterator<Item = VertexId<Ix>>,
+        I: IntoIterator<Item = VertexId<A::Ix>>,
     {
         self.add_surface(iter, weight)
     }
 
-    fn get_edge_vertices(&self, index: &EdgeId<Ix>) -> crate::Result<&VertexSet<Ix, S>> {
+    fn get_edge_domain(&self, index: &EdgeId<A::Ix>) -> crate::Result<&VertexSet<A::Ix, S>> {
         self.get_edge_vertices(index)
     }
 
-    fn get_edge_vertices_mut(
+    fn get_edge_domain_mut(
         &mut self,
-        index: &EdgeId<Ix>,
-    ) -> crate::Result<&mut VertexSet<Ix, S>> {
+        index: &EdgeId<A::Ix>,
+    ) -> crate::Result<&mut VertexSet<A::Ix, S>> {
         self.get_edge_vertices_mut(index)
     }
 
-    fn get_edge_weight(&self, index: &EdgeId<Ix>) -> crate::Result<&Weight<E>> {
+    fn get_edge_weight(&self, index: &EdgeId<A::Ix>) -> crate::Result<&Weight<E>> {
         self.get_edge_weight(index)
     }
 
-    fn get_edge_weight_mut(&mut self, index: &EdgeId<Ix>) -> crate::Result<&mut Weight<E>> {
+    fn get_edge_weight_mut(&mut self, index: &EdgeId<A::Ix>) -> crate::Result<&mut Weight<E>> {
         self.get_edge_weight_mut(index)
     }
 
-    fn get_node(&self, index: &VertexId<Ix>) -> crate::Result<&Node<N, Ix>> {
+    fn get_node(&self, index: &VertexId<A::Ix>) -> crate::Result<&Node<N, A::Ix>> {
         self.get_node(index)
     }
 
-    fn get_node_mut(&mut self, index: &VertexId<Ix>) -> crate::Result<&mut Node<N, Ix>> {
+    fn get_node_mut(&mut self, index: &VertexId<A::Ix>) -> crate::Result<&mut Node<N, A::Ix>> {
         self.get_node_mut(index)
     }
 
-    fn get_surface(&self, index: &EdgeId<Ix>) -> crate::Result<&HashFacet<E, K, Ix, S>> {
+    fn get_surface(
+        &self,
+        index: &EdgeId<A::Ix>,
+    ) -> crate::Result<&HashFacet<E, A::Kind, A::Ix, S>> {
         self.get_surface(index)
     }
 
     fn get_surface_mut(
         &mut self,
-        index: &EdgeId<Ix>,
-    ) -> crate::Result<&mut HashFacet<E, K, Ix, S>> {
+        index: &EdgeId<A::Ix>,
+    ) -> crate::Result<&mut HashFacet<E, A::Kind, A::Ix, S>> {
         self.get_surface_mut(index)
     }
 
-    fn contains_edge(&self, index: &EdgeId<Ix>) -> bool {
-        self.contains_surface(index)
+    fn contains_edge(&self, index: &EdgeId<A::Ix>) -> bool {
+        self.contains_edge(index)
     }
 
-    fn contains_node(&self, index: &VertexId<Ix>) -> bool {
+    fn contains_node(&self, index: &VertexId<A::Ix>) -> bool {
         self.contains_node(index)
     }
 
-    fn find_edges_with_node(
-        &self,
-        index: &VertexId<Ix>,
-    ) -> crate::Result<impl Iterator<Item = EdgeId<Ix>>> {
-        match self.find_edges_with_node(index) {
-            Ok(edges) => Ok(edges.into_iter()),
-            Err(e) => Err(e),
-        }
+    fn find_edges_with_node(&self, index: &VertexId<A::Ix>) -> crate::Result<Vec<EdgeId<A::Ix>>> {
+        self.find_edges_with_node(index)
+    }
+}
+
+impl<N, E, A, S> HyperGraphIterNode<N, E, A> for HashGraph<N, E, A, S>
+where
+    A: GraphAttributes,
+    S: BuildHasher + Default,
+    E: Eq + Hash,
+    N: Eq + Hash,
+    A::Ix: NumIndex,
+{
+    type Nodes<'a>
+        = super::NodeIter<'a, N, A::Ix>
+    where
+        Self: 'a,
+        Self::Node<N>: 'a;
+    type Verts<'a>
+        = super::Vertices<'a, N, A::Ix>
+    where
+        Self: 'a;
+
+    fn iter_nodes(&self) -> Self::Nodes<'_> {
+        self.node_iter()
+    }
+
+    fn vertices(&self) -> Self::Verts<'_> {
+        self.vertices()
+    }
+}
+
+impl<N, E, A, S> HyperGraphIterEdge<N, E, A> for HashGraph<N, E, A, S>
+where
+    A: GraphAttributes,
+    S: BuildHasher + Default,
+    E: Eq + Hash,
+    N: Eq + Hash,
+    A::Ix: NumIndex,
+{
+    type Surfaces<'a>
+        = super::SurfaceIter<'a, E, A::Kind, A::Ix, S>
+    where
+        Self: 'a,
+        Self::Edge<E>: 'a;
+
+    type Edges<'a>
+        = super::Edges<'a, E, A::Kind, A::Ix, S>
+    where
+        Self: 'a,
+        Self::Edge<E>: 'a;
+
+    fn iter_surfaces(&self) -> Self::Surfaces<'_> {
+        self.surface_iter()
+    }
+
+    fn edges(&self) -> Self::Edges<'_> {
+        self.surface_keys()
     }
 }

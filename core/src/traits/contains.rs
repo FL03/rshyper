@@ -16,14 +16,14 @@ pub trait Contains<Q> {
 /*
  ************* Implementations *************
 */
-use crate::GraphType;
-use crate::edge::{Edge, EdgeStore, Surface};
+use crate::edge::{Edge, Surface};
 use crate::idx::{RawIndex, VertexId};
+use crate::{Domain, GraphType};
 
 impl<S, K, Idx, Q> Contains<Q> for Edge<S, K, Idx>
 where
     Q: PartialEq,
-    S: EdgeStore<Idx>,
+    S: Domain<Idx>,
     K: GraphType,
     Idx: RawIndex + PartialEq,
     for<'a> &'a S: IntoIterator<Item = &'a VertexId<Idx>>,
@@ -41,7 +41,7 @@ where
 impl<T, S, K, Idx, Q> Contains<Q> for Surface<T, S, K, Idx>
 where
     Q: PartialEq,
-    S: EdgeStore<Idx>,
+    S: Domain<Idx>,
     K: GraphType,
     Idx: RawIndex + PartialEq,
     for<'a> &'a S: IntoIterator<Item = &'a VertexId<Idx>>,

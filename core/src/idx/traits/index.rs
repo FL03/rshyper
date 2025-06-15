@@ -13,12 +13,12 @@ pub trait RawIndex: 'static + Send + Sync + core::fmt::Debug + core::fmt::Displa
         alloc::format!("{self}")
     }
 }
-/// The [`StdIndex`] trait extends the [`RawIndex`] trait to include additional operations and
-/// behaviours commonly expected from indices in a hypergraph.
+/// The [`HyperIndex`] trait extends the [`RawIndex`] trait to include additional operations
+/// and behaviours commonly expected from indices in a hypergraph.
 ///
 /// **note:** the trait is automatically implemented for all types that implement [`RawIndex`]
 /// alongside traits including: [Clone], [Default], [PartialEq], and [PartialOrd]
-pub trait StdIndex: RawIndex
+pub trait HyperIndex: RawIndex
 where
     Self: Clone + Default + PartialEq + PartialOrd,
 {
@@ -29,7 +29,7 @@ where
 /// **note:** the trait is automatically implemented for all types that implement [`Idx`]
 ///  alongside traits including: [Eq] and [Hash](core::hash::Hash)
 /// implementations.
-pub trait HashIndex: StdIndex
+pub trait HashIndex: HyperIndex
 where
     Self: Eq + core::hash::Hash,
 {
@@ -72,9 +72,9 @@ where
 /*
  ************* Implementations *************
 */
-impl<T> StdIndex for T where T: 'static + RawIndex + Clone + Default + PartialEq + PartialOrd {}
+impl<T> HyperIndex for T where T: 'static + RawIndex + Clone + Default + PartialEq + PartialOrd {}
 
-impl<T> HashIndex for T where T: StdIndex + Eq + core::hash::Hash {}
+impl<T> HashIndex for T where T: HyperIndex + Eq + core::hash::Hash {}
 
 impl<T> NumIndex for T where
     T: HashIndex

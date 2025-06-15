@@ -2,6 +2,17 @@
     appellation: kinds <module>
     authors: @FL03
 */
+//! this module defines the [`GraphIndex`] trait and the [`IndexKind`] enumeration, which are
+//! used to represent various kinds of indices in a hypergraph. Additionally, the module
+//! provides two specific implemenations of the `GraphIndex` trait: [`EdgeIndex`] and
+//! [`VertexIndex`], each of which are used to represent edge and vertex indices, respectively.
+//! The `IndexKind` enumeration is used primarily:
+//!
+//! - during the initialization process
+//! - enables dynamic dispatching of indices
+//! - allows for maps and other data structures to be keyed by index kind
+use crate::idx::{IndexBase, RawIndex};
+
 /// This trait is used to define various _kinds_ of indices that are used to compose graphical
 /// structures.
 pub trait GraphIndex
@@ -20,41 +31,65 @@ where
 {
     private!();
 }
-/// [`IndexKind`] is an enumeration that defines the kinds of indices that can be used in a
-/// hypergraph. It is used to distinguish between edge and vertex indices, allowing for
-/// specialized handling of each type within the hypergraph's indexing system.
 #[derive(
     Clone,
     Copy,
     Debug,
-    Default,
     Eq,
     Hash,
     PartialEq,
     Ord,
     PartialOrd,
-    scsys::VariantConstructors,
-    strum::AsRefStr,
-    strum::Display,
     strum::EnumCount,
+    strum::EnumDiscriminants,
     strum::EnumIs,
-    strum::EnumIter,
-    strum::EnumString,
-    strum::VariantArray,
-    strum::VariantNames,
 )]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize, serde::Serialize),
-    serde(rename_all = "snake_case")
+    serde(rename_all = "snake_case"),
+    strum_discriminants(derive(serde::Deserialize, serde::Serialize))
 )]
-pub enum IndexKind {
-    #[cfg_attr(feature = "serde", serde(alias = "facet", alias = "surface"))]
-    Edge,
-    #[default]
-    #[cfg_attr(feature = "serde", serde(alias = "node"))]
-    Vertex,
+#[strum_discriminants(
+    name(IndexKind),
+    derive(
+        Hash,
+        Ord,
+        PartialOrd,
+        scsys::VariantConstructors,
+        strum::AsRefStr,
+        strum::Display,
+        strum::EnumCount,
+        strum::EnumIs,
+        strum::EnumIter,
+        strum::EnumString,
+        strum::VariantArray,
+        strum::VariantNames,
+    ),
+    strum(serialize_all = "snake_case")
+)]
+pub enum Grid<Idx>
+where
+    Idx: RawIndex,
+{
+    #[cfg_attr(
+        feature = "serde",
+        strum_discriminants(serde(alias = "hyperedge", alias = "facet", alias = "surface"))
+    )]
+    Edge(IndexBase<Idx, EdgeIndex>),
+    #[cfg_attr(
+        feature = "serde",
+        strum_discriminants(serde(
+            alias = "hypernode",
+            alias = "node",
+            alias = "point",
+            alias = "vertex"
+        ))
+    )]
+    Vertex(IndexBase<Idx, VertexIndex>),
+    Raw(Idx),
 }
+
 macro_rules! impl_type_kind {
     (@impl $(#[doc $($doc:tt)*])? $vis:vis $i:ident $kind:ident) => {
         // create the implementation for the kind

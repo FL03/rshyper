@@ -2,6 +2,7 @@
     appellation: weight <module>
     authors: @FL03
 */
+use super::Weightless;
 
 /// The [`Weight`] type is a wrapper around a generic type `T` that provides additional
 /// functionality for working with weights in a graph context.
@@ -13,7 +14,7 @@
 )]
 #[repr(transparent)]
 pub struct Weight<T>(pub T);
-
+/// the base implemenation of [`Weight`] that is generic over type `T`
 impl<T> Weight<T> {
     /// returns a new instance of the [`Weight`] created from the given value.
     pub const fn new(value: T) -> Self {
@@ -26,8 +27,9 @@ impl<T> Weight<T> {
     {
         Self::new(value())
     }
+    #[allow(clippy::should_implement_trait)]
     /// returns a new instance of the [`Weight`] with the default value of the inner type.
-    pub fn init() -> Self
+    pub fn default() -> Self
     where
         T: Default,
     {
@@ -43,7 +45,7 @@ impl<T> Weight<T> {
     }
     /// consumes the current instance to return the inner value
     #[inline]
-    pub fn value(self) -> T {
+    pub fn into_inner(self) -> T {
         self.0
     }
     /// applies the provided function onto the inner value and returns a new [`Weight`] with
@@ -53,7 +55,7 @@ impl<T> Weight<T> {
     where
         F: FnOnce(T) -> U,
     {
-        Weight::new(f(self.value()))
+        Weight::new(f(self.into_inner()))
     }
     /// apply the function onto a mutable reference to the inner value and return a
     /// mutable reference to the current instanc storing the updating weight.
@@ -110,32 +112,41 @@ impl<T> Weight<T> {
     /// consumes the current instance to create another with the given value
     #[inline]
     pub fn with<U>(self, value: U) -> Weight<U> {
-        Weight::new(value)
+        self.map(|_| value)
+    }
+    /// returns true if:
+    ///
+    /// - the weight is not of type [`Weightless`]
+    /// - the inner value is not the default value of the type `T`
+    ///
+    /// rather than simply checking if the weight is not of type [`Weightless`], this method
+    /// includes additional assertions for quickly checking the state of a weight.
+    pub fn is_weighted(&self) -> bool
+    where
+        T: 'static + Default + PartialEq,
+    {
+        !self.is_weightless() && self.get() != &T::default()
+    }
+    /// returns true if the weight is of type [`Weightless`]
+    pub fn is_weightless(&self) -> bool
+    where
+        T: 'static,
+    {
+        use core::any::TypeId;
+        TypeId::of::<Self>() != TypeId::of::<Weightless<T>>()
     }
 }
 
 #[allow(deprecated)]
+#[doc(hidden)]
 impl<T> Weight<T> {
     #[deprecated(
-        note = "use `value` instead, this method will be removed in the next major version",
-        since = "0.0.8"
+        note = "use `into_inner` instead, this method will be removed in the next major version",
+        since = "0.1.2"
     )]
-    pub fn into_inner(self) -> T {
-        self.0
-    }
-    #[deprecated(
-        note = "use `view` instead, this method will be removed in the next major version",
-        since = "0.0.8"
-    )]
-    pub const fn as_view(&self) -> Weight<&T> {
-        Weight(self.get())
-    }
-    #[deprecated(
-        note = "use `view_mut` instead, this method will be removed in the next major version",
-        since = "0.0.8"
-    )]
-    pub const fn as_view_mut(&mut self) -> Weight<&mut T> {
-        Weight(self.get_mut())
+    #[inline]
+    pub fn value(self) -> T {
+        self.into_inner()
     }
 }
 

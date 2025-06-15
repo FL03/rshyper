@@ -7,6 +7,9 @@ use crate::idx::{EdgeId, VertexId};
 use crate::node::RawNode;
 use crate::{GraphAttributes, Weight};
 
+#[cfg(feature = "alloc")]
+use alloc::vec::Vec;
+
 /// [`RawHyperGraph`] is a trait that defines the basic operations for a hypergraph data
 /// structure.
 pub trait RawHyperGraph<A>
@@ -46,12 +49,12 @@ where
         self.add_node(Default::default())
     }
     /// returns the vertices of the edge with the given index
-    fn get_edge_vertices(
+    fn get_edge_domain(
         &self,
         index: &EdgeId<A::Ix>,
     ) -> crate::Result<&<Self::Edge<E> as RawEdge>::Store>;
     /// returns a mutable reference to the vertices of the edge with the given index
-    fn get_edge_vertices_mut(
+    fn get_edge_domain_mut(
         &mut self,
         index: &EdgeId<A::Ix>,
     ) -> crate::Result<&mut <Self::Edge<E> as RawEdge>::Store>;
@@ -76,19 +79,65 @@ where
     /// returns true if the graph contains the node with the given index
     fn contains_node(&self, index: &VertexId<A::Ix>) -> bool;
     /// returns an iterator over all edges that contain the given node
-    fn find_edges_with_node(
-        &self,
-        index: &VertexId<A::Ix>,
-    ) -> crate::Result<impl Iterator<Item = EdgeId<A::Ix>>>;
+    fn find_edges_with_node(&self, index: &VertexId<A::Ix>) -> crate::Result<Vec<EdgeId<A::Ix>>>;
 }
 
+/// The [`HyperGraphIterNode`] trait extends the [`HyperGraph`] trait to provide iterators over
+/// the nodes in the hypergraph.
+pub trait HyperGraphIterNode<N, E, A>: HyperGraph<N, E, A>
+where
+    A: GraphAttributes,
+{
+    type Nodes<'a>: Iterator<Item = (&'a VertexId<A::Ix>, &'a Self::Node<N>)>
+    where
+        Self: 'a,
+        <Self as RawHyperGraph<A>>::Node<N>: 'a;
+    type Verts<'a>: Iterator<Item = &'a VertexId<A::Ix>>
+    where
+        Self: 'a;
+    /// returns an iterator over the nodes of the graph
+    fn iter_nodes(&self) -> Self::Nodes<'_>;
+    /// returns an iterators over the indices of the nodes within the graph
+    fn vertices(&self) -> Self::Verts<'_>;
+}
+/// The [`HyperGraphIterEdge`] trait extends the [`HyperGraph`] trait to provide iterators over
+/// the edges in the hypergraph.
+pub trait HyperGraphIterEdge<N, E, A>: HyperGraph<N, E, A>
+where
+    A: GraphAttributes,
+{
+    type Surfaces<'a>: Iterator<Item = (&'a EdgeId<A::Ix>, &'a Self::Edge<E>)>
+    where
+        Self: 'a,
+        <Self as RawHyperGraph<A>>::Edge<E>: 'a;
+    type Edges<'a>: Iterator<Item = &'a EdgeId<A::Ix>>
+    where
+        Self: 'a;
+    /// returns an iterator over the edges of the graph
+    fn iter_surfaces(&self) -> Self::Surfaces<'_>;
+    /// returns an iterator over the indices of the edges within the graph
+    fn edges(&self) -> Self::Edges<'_>;
+}
+/// The [`HyperGraphIter`] trait combines the [`HyperGraphIterNode`] and [`HyperGraphIterEdge`]
+/// traits to provide a unified interface for iterating over both nodes
+pub trait HyperGraphIter<N, E, A>:
+    HyperGraphIterNode<N, E, A> + HyperGraphIterEdge<N, E, A>
+where
+    A: GraphAttributes,
+{
+    private!();
+}
 /// The [`StdGraph`] is used to denotes instances in-which the hypergraph contains binary edges
 /// meaning that each edge is composed of exactly two vertices.
+///
+/// **note:** the trait is automatically implemented for all hypergraphs that leverage a
+/// so-called [`BinaryEdge`] representation
 pub trait StdGraph<N, E, A>: RawHyperGraph<A>
 where
     A: GraphAttributes,
     Self::Edge<E>: BinaryEdge,
 {
+    private!();
 }
 
 /*
@@ -103,4 +152,13 @@ where
     H: HyperGraph<N, E, A>,
     H::Edge<E>: BinaryEdge,
 {
+    seal!();
+}
+
+impl<H, N, E, A> HyperGraphIter<N, E, A> for H
+where
+    A: GraphAttributes,
+    H: HyperGraphIterNode<N, E, A> + HyperGraphIterEdge<N, E, A>,
+{
+    seal!();
 }

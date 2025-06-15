@@ -17,7 +17,7 @@ pub struct Node<T, Idx>
 where
     Idx: RawIndex,
 {
-    pub(crate) index: VertexId<Idx>,
+    pub(crate) id: VertexId<Idx>,
     pub(crate) weight: Weight<T>,
 }
 
@@ -26,11 +26,11 @@ where
     Idx: RawIndex,
 {
     /// initialize a new instance with the given index and weight
-    pub fn new(index: VertexId<Idx>, weight: Weight<T>) -> Self {
-        Self { index, weight }
+    pub fn new(id: VertexId<Idx>, weight: Weight<T>) -> Self {
+        Self { id, weight }
     }
     /// returns a new weighted node using the given value and the logical default for the index
-    pub fn from_index(index: VertexId<Idx>) -> Self
+    pub fn from_id(index: VertexId<Idx>) -> Self
     where
         T: Default,
     {
@@ -44,22 +44,22 @@ where
         Self::new(Default::default(), weight)
     }
     /// consumes the current instance to create another with the given index.
-    pub fn with_index<I2: RawIndex>(self, index: VertexId<I2>) -> Node<T, I2> {
+    pub fn with_id<I2: RawIndex>(self, index: VertexId<I2>) -> Node<T, I2> {
         Node {
-            index,
+            id: index,
             weight: self.weight,
         }
     }
     /// consumes the current instance to create another with the given weight.
     pub fn with_weight<U>(self, weight: Weight<U>) -> Node<U, Idx> {
         Node {
-            index: self.index,
+            id: self.id,
             weight,
         }
     }
     /// returns an immutable reference to the node index
-    pub const fn index(&self) -> &VertexId<Idx> {
-        &self.index
+    pub const fn id(&self) -> &VertexId<Idx> {
+        &self.id
     }
     /// returns an immutable reference to the node weight
     pub const fn weight(&self) -> &Weight<T> {
@@ -68,6 +68,11 @@ where
     /// returns a mutable reference to the node weight
     pub const fn weight_mut(&mut self) -> &mut Weight<T> {
         &mut self.weight
+    }
+    /// update the node id and return a mutable reference to the current instance.
+    pub fn set_id(&mut self, id: VertexId<Idx>) -> &mut Self {
+        self.id = id;
+        self
     }
     /// update the weight and return a mutable reference to the current instance.
     pub fn set_weight(&mut self, weight: T) -> &mut Self {
@@ -92,7 +97,7 @@ where
         F: FnOnce(T) -> U,
     {
         Node {
-            index: self.index,
+            id: self.id,
             weight: self.weight.map(f),
         }
     }
@@ -106,6 +111,41 @@ where
     }
 }
 
+#[doc(hidden)]
+#[allow(deprecated)]
+impl<T, Idx> Node<T, Idx>
+where
+    Idx: RawIndex,
+{
+    #[deprecated(
+        note = "use `from_id` instead; the constructor will be removed in the next major release",
+        since = "0.1.2"
+    )]
+    pub fn from_index(index: VertexId<Idx>) -> Self
+    where
+        T: Default,
+    {
+        Self::new(index, Default::default())
+    }
+    #[deprecated(
+        note = "use `id` instead; the accessor will be removed in the next major release",
+        since = "0.1.2"
+    )]
+    pub const fn index(&self) -> &VertexId<Idx> {
+        self.id()
+    }
+    #[deprecated(
+        note = "use `with_id` instead; the setter will be removed in the next major release",
+        since = "0.1.2"
+    )]
+    pub fn with_index<I2: RawIndex>(self, index: VertexId<I2>) -> Node<T, I2> {
+        Node {
+            id: index,
+            weight: self.weight,
+        }
+    }
+}
+
 impl<T, Idx> Default for Node<T, Idx>
 where
     Idx: RawIndex + Default,
@@ -113,8 +153,8 @@ where
 {
     fn default() -> Self {
         Self {
-            index: VertexId::default(),
-            weight: Weight::init(),
+            id: VertexId::default(),
+            weight: Weight::default(),
         }
     }
 }
@@ -125,11 +165,6 @@ where
     T: core::fmt::Display,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(
-            f,
-            "{{ index: {}, weight: {} }}",
-            self.index(),
-            self.weight()
-        )
+        write!(f, "{{ index: {}, weight: {} }}", self.id(), self.weight())
     }
 }

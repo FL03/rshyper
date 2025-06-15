@@ -2,10 +2,8 @@
     appellation: astar_search <module>
     authors: @FL03
 */
-use rshyper::VertexId;
-use rshyper::hash_graph::UnHashGraph as HyperGraph;
+use rshyper::{HashGraph, VertexId};
 
-// #[ignore = "A* search cannot find min paths"]
 #[test]
 fn test_astar_shortest_path() -> rshyper::Result<()> {
     // Simple Euclidean distance heuristic (not used in this test)
@@ -13,7 +11,7 @@ fn test_astar_shortest_path() -> rshyper::Result<()> {
         0.0 // No heuristic, just a placeholder
     }
     // initialize a new graph
-    let mut graph = HyperGraph::<usize, usize>::undirected();
+    let mut graph = HashGraph::<usize, usize>::undirected();
 
     // use the macro create some new vertices
     rshyper::hypernode! {
@@ -60,7 +58,7 @@ fn test_astar_shortest_path() -> rshyper::Result<()> {
 
 #[test]
 fn test_astar_with_heuristic() -> rshyper::Result<()> {
-    let mut graph = HyperGraph::<usize, usize>::undirected();
+    let mut graph = HashGraph::<usize, usize>::undirected();
 
     // Create a simple grid-like graph
     // 0 -- 1 -- 2
@@ -149,7 +147,7 @@ fn test_astar_with_heuristic() -> rshyper::Result<()> {
 
 #[test]
 fn test_astar_disconnected() -> rshyper::Result<()> {
-    let mut graph = HyperGraph::<usize, usize>::undirected();
+    let mut graph = HashGraph::<usize, usize>::undirected();
 
     // Create two disconnected components
     // 0 -- 1    2 -- 3
@@ -178,7 +176,7 @@ fn test_astar_disconnected() -> rshyper::Result<()> {
 
 #[test]
 fn test_astar_complex_paths() -> rshyper::Result<()> {
-    let mut graph = HyperGraph::<usize, usize>::undirected();
+    let mut graph = HashGraph::<usize, usize>::undirected();
 
     // Create a graph with multiple paths of different lengths
     // 0 -- 1 -- 2 -- 3

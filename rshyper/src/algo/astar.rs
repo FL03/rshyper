@@ -2,29 +2,25 @@
     Appellation: impl_astar <module>
     Contrib: @FL03
 */
-use super::Heuristic;
-
 #[doc(inline)]
 pub use self::priority_node::PriorityNode;
 
 pub(crate) mod priority_node;
 
-use super::{Search, Traversal};
-use crate::hash_graph::{HashGraph, VertexSet};
+use crate::algo::{Heuristic, PathFinder, Search, Traversal};
+use crate::hash_graph::VertexSet;
 use core::hash::Hash;
+use rshyper_core::edge::RawEdge;
 use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphAttributes, GraphType, HyperGraph};
+use rshyper_core::{GraphAttributes, GraphType, HyperGraph, HyperGraphIter};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 
 /// An A* Search algorithm implementation for hypergraphs
-pub struct AStarSearch<'a, N, E, A, F, H = HashGraph<N, E, A>>
+pub struct AStarSearch<'a, N, E, A, F, H>
 where
     A: GraphAttributes,
     H: HyperGraph<N, E, A>,
     F: Heuristic<A::Ix>,
-    N: Eq + Hash,
-    E: Eq + Hash,
-    A::Ix: RawIndex + Eq + Hash,
 {
     pub(crate) graph: &'a H,
     pub(crate) open_set: VertexSet<A::Ix>,
@@ -38,13 +34,11 @@ where
 
 impl<'a, N, E, A, F, H, K, Idx> AStarSearch<'a, N, E, A, F, H>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
     A: GraphAttributes<Ix = Idx, Kind = K>,
     H: HyperGraph<N, E, A>,
     F: Heuristic<Idx>,
     K: GraphType,
-    Idx: RawIndex + Eq + Hash,
+    Idx: RawIndex,
 {
     /// Create a new A* search instance with the given heuristic function
     pub fn new(graph: &'a H, heuristic: F) -> Self {
@@ -123,7 +117,8 @@ where
     /// returns true if the given vertex has a f_score
     pub fn has_f_score<Q>(&self, vertex: &Q) -> bool
     where
-        Q: Eq + Hash,
+        Q: ?Sized + Eq + Hash,
+        Idx: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.f_score().contains_key(vertex)
@@ -131,7 +126,8 @@ where
     /// returns true if the given vertex has a g_score
     pub fn has_g_score<Q>(&self, vertex: &Q) -> bool
     where
-        Q: Eq + Hash,
+        Q: ?Sized + Eq + Hash,
+        Idx: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.g_score().contains_key(vertex)
@@ -139,7 +135,8 @@ where
     /// returns true if the given vertex has been visited
     pub fn has_visited<Q>(&self, vertex: &Q) -> bool
     where
-        Q: Eq + Hash,
+        Q: ?Sized + Eq + Hash,
+        Idx: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.closed_set().contains(vertex)
@@ -147,7 +144,8 @@ where
     /// returns true if the given vertex is in the open set
     pub fn in_open_set<Q>(&self, vertex: &Q) -> bool
     where
-        Q: Eq + Hash,
+        Q: ?Sized + Eq + Hash,
+        Idx: Eq + Hash,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
         self.open_set().contains(vertex)
@@ -156,7 +154,7 @@ where
     /// useful for updating the state, marking a node as processed.
     pub fn move_open_to_closed(&mut self, vertex: &VertexId<Idx>)
     where
-        Idx: Copy,
+        Idx: Copy + Eq + Hash,
     {
         self.open_set_mut().remove(vertex);
         self.closed_set_mut().insert(*vertex);
@@ -170,6 +168,17 @@ where
         self.f_score_mut().clear();
         self
     }
+    /// find a path between two nodes
+    pub fn find_path(
+        &mut self,
+        start: VertexId<Idx>,
+        goal: VertexId<Idx>,
+    ) -> crate::Result<<Self as PathFinder<Idx>>::Path>
+    where
+        Self: PathFinder<Idx>,
+    {
+        PathFinder::find_path(self, start, goal)
+    }
     /// a convience method to perform a search
     pub fn search(
         &mut self,
@@ -182,22 +191,21 @@ where
     }
 }
 
-impl<'a, N, E, F, A, S, K, Idx> AStarSearch<'a, N, E, A, F, HashGraph<N, E, A, S>>
+impl<'a, N, E, F, A, H> PathFinder<A::Ix> for AStarSearch<'a, N, E, A, F, H>
 where
-    A: GraphAttributes<Ix = Idx, Kind = K>,
-    S: core::hash::BuildHasher + Default,
-    E: Eq + Hash,
-    N: Eq + Hash,
-    F: Heuristic<Idx, Output = f64>,
-    K: GraphType,
-    Idx: NumIndex,
+    A: GraphAttributes,
+    H: HyperGraph<N, E, A>,
+    F: Heuristic<A::Ix, Output = f64>,
+    A::Ix: NumIndex,
+    for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
+    type Path = Vec<VertexId<A::Ix>>;
     /// Find the shortest path between start and goal vertices
-    pub fn find_path(
+    fn find_path(
         &mut self,
-        start: VertexId<Idx>,
-        goal: VertexId<Idx>,
-    ) -> crate::Result<Vec<VertexId<Idx>>> {
+        start: VertexId<A::Ix>,
+        goal: VertexId<A::Ix>,
+    ) -> crate::Result<Self::Path> {
         // Check if both vertices exist
         if !self.graph.contains_node(&start) {
             return Err(crate::Error::NodeNotFound);
@@ -247,51 +255,53 @@ where
             self.move_open_to_closed(&current);
 
             // Get all hyperedges containing the current vertex
-            let edges = self.graph.find_edges_with_node(&current)?;
+            self.graph
+                .find_edges_with_node(&current)?
+                .iter()
+                .for_each(|edge_id| {
+                    // Get all vertices in this hyperedge
+                    let vertices = self
+                        .graph
+                        .get_edge_domain(edge_id)
+                        .expect("Failed to get edge vertices");
 
-            edges.iter().for_each(|edge_id| {
-                // Get all vertices in this hyperedge
-                let vertices = self
-                    .graph
-                    .get_edge_vertices(edge_id)
-                    .expect("Failed to get edge vertices");
-
-                // Process each vertex in this hyperedge
-                for &neighbor in vertices {
-                    // Skip if this is the current vertex or already evaluated
-                    if neighbor == current || self.has_visited(&neighbor) {
-                        continue;
-                    }
-
-                    // Cost to reach neighbor through current vertex
-                    let tentative_g_score = self.g_score[&current] + 1.0;
-
-                    // Check if this path is better than any previous path
-                    let is_better_path =
-                        !self.has_g_score(&neighbor) || tentative_g_score < self.g_score[&neighbor];
-
-                    if is_better_path {
-                        // Update path info
-                        self.came_from_mut().insert(neighbor, current);
-                        self.g_score_mut().insert(neighbor, tentative_g_score);
-
-                        // Update f_score (g_score + heuristic)
-                        let f_score = tentative_g_score + self.heuristic().compute(neighbor, goal);
-                        self.f_score_mut().insert(neighbor, f_score);
-
-                        // Add to open set if not already there
-                        if !self.in_open_set(&neighbor) {
-                            self.open_set_mut().insert(neighbor);
+                    // Process each vertex in this hyperedge
+                    for &neighbor in vertices {
+                        // Skip if this is the current vertex or already evaluated
+                        if neighbor == current || self.has_visited(&neighbor) {
+                            continue;
                         }
 
-                        // push the neighbor into the priority queue with its f_score (negative for min-heap behavior)
-                        priority_queue.push(PriorityNode {
-                            vertex: neighbor,
-                            priority: -(f_score as i64),
-                        });
+                        // Cost to reach neighbor through current vertex
+                        let tentative_g_score = self.g_score[&current] + 1.0;
+
+                        // Check if this path is better than any previous path
+                        let is_better_path = !self.has_g_score(&neighbor)
+                            || tentative_g_score < self.g_score[&neighbor];
+
+                        if is_better_path {
+                            // Update path info
+                            self.came_from_mut().insert(neighbor, current);
+                            self.g_score_mut().insert(neighbor, tentative_g_score);
+
+                            // Update f_score (g_score + heuristic)
+                            let f_score =
+                                tentative_g_score + self.heuristic().compute(neighbor, goal);
+                            self.f_score_mut().insert(neighbor, f_score);
+
+                            // Add to open set if not already there
+                            if !self.in_open_set(&neighbor) {
+                                self.open_set_mut().insert(neighbor);
+                            }
+
+                            // push the neighbor into the priority queue with its f_score (negative for min-heap behavior)
+                            priority_queue.push(PriorityNode {
+                                vertex: neighbor,
+                                priority: -(f_score as i64),
+                            });
+                        }
                     }
-                }
-            });
+                });
         }
 
         // No path found
@@ -299,10 +309,7 @@ where
     }
 
     // Reconstruct path from came_from map
-    fn reconstruct_path(&self, goal: VertexId<Idx>) -> Vec<VertexId<Idx>>
-    where
-        Idx: NumIndex,
-    {
+    fn reconstruct_path(&self, goal: VertexId<A::Ix>) -> Self::Path {
         let mut path = vec![goal];
         let mut current = goal;
 
@@ -319,11 +326,9 @@ where
 impl<'a, N, E, F, A, H> Traversal<VertexId<A::Ix>> for AStarSearch<'a, N, E, A, F, H>
 where
     A: GraphAttributes,
+    F: Heuristic<A::Ix, Output = f64>,
     H: HyperGraph<N, E, A>,
     A::Ix: Eq + Hash,
-    E: Eq + Hash,
-    N: Eq + Hash,
-    F: Heuristic<A::Ix, Output = f64>,
 {
     type Store<U> = HashSet<U>;
 
@@ -336,15 +341,13 @@ where
     }
 }
 
-impl<'a, N, E, F, A, S> Search<VertexId<A::Ix>>
-    for AStarSearch<'a, N, E, A, F, HashGraph<N, E, A, S>>
+impl<'a, N, E, F, A, H> Search<VertexId<A::Ix>> for AStarSearch<'a, N, E, A, F, H>
 where
-    E: Eq + Hash,
-    N: Eq + Hash,
     A: GraphAttributes,
     F: Heuristic<A::Ix, Output = f64>,
-    S: core::hash::BuildHasher + Default,
+    H: HyperGraphIter<N, E, A>,
     A::Ix: NumIndex,
+    for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
     type Output = Vec<VertexId<A::Ix>>;
 
@@ -360,7 +363,7 @@ where
 
         // Using the vertex with the largest ID as a pseudo-goal
         // This is a hack to make A* behave more like a general search
-        let max_vertex_id = match self.graph.nodes().keys().max() {
+        let max_vertex_id = match self.graph.vertices().max() {
             Some(&id) => id,
             None => return Ok(vec![]),
         };
