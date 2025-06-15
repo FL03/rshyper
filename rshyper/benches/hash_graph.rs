@@ -156,6 +156,19 @@ fn bench_hash_graph_search(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
+    // benchmark the dijkstra path-finding algorithm
+    group.bench_function("dijkstra", |b| {
+        b.iter_batched(
+            setup,
+            |graph| {
+                let idx = VertexId::random_between(0..N);
+                // get the degree of each nodelet id = n.into();
+                // search the graph for some target vertex
+                graph.dijkstra().search(black_box(idx)).unwrap();
+            },
+            BatchSize::SmallInput,
+        )
+    });
     // finish the group
     group.finish();
 }
