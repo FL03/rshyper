@@ -21,7 +21,12 @@ use quote::quote;
 #[proc_macro]
 /// this macro is used to create new nodes and edges in a hypergraph
 pub fn hygraph(input: TokenStream) -> TokenStream {
-    let GraphAst { graph, nodes, edges, .. } = syn::parse_macro_input!(input as GraphAst);
+    let GraphAst {
+        graph,
+        nodes,
+        edges,
+        ..
+    } = syn::parse_macro_input!(input as GraphAst);
 
     let node_stmts = nodes.iter().map(|ast::NodeAst { key, value, .. }| {
         let ast::VertexAst { key, .. } = key;
@@ -54,7 +59,6 @@ pub fn hygraph(input: TokenStream) -> TokenStream {
     // convert the output into the correct TokenStream
     TokenStream::from(out)
 }
-
 
 mod kw {
     syn::custom_keyword!(graph);

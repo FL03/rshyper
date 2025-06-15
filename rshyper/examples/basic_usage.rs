@@ -4,7 +4,7 @@
 */
 use rshyper::HyperMap;
 
-fn main() -> rshyper::Result<()> {
+fn main() -> rshyper::HyperResult<()> {
     // initialize a new instance of a hypergraph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // use the macro to insert nodes into the graph

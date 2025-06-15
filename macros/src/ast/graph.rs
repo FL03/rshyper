@@ -4,9 +4,9 @@
 */
 use super::{EdgeAst, NodeAst};
 use crate::kw;
-use syn::{Ident, Token, braced};
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
+use syn::{Ident, Token, braced};
 
 /// The [`GraphAst`] struct represents the abstract syntax tree (AST) for a hypergraph macro.
 /// Overall, it is supposed to feel similar to
@@ -58,6 +58,10 @@ impl Parse for GraphAst {
                 input.parse::<Token![;]>()?;
             }
         }
-        Ok(GraphAst { graph, nodes, edges })
+        Ok(GraphAst {
+            graph,
+            nodes,
+            edges,
+        })
     }
 }

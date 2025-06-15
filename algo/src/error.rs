@@ -2,15 +2,15 @@
     Appellation: error <module>
     Contrib: @FL03
 */
-//! this module implements the [`Error`] type for the [`rshyper`](https://docs.rs/rshyper)
+//! this module implements the [`AlgoError`] type for algorithms in the [`rshyper`](https://docs.rs/rshyper)
 //! crate.
 
-/// A type alias for a [Result] with the crate-specific error type [Error]
-pub(crate) type Result<T = ()> = core::result::Result<T, Error>;
+/// A type alias for a [Result] with the crate-specific error type [`AlgoError`]
+pub type AlgoResult<T = ()> = core::result::Result<T, AlgoError>;
 
 /// The error type for this crate
 #[derive(Debug, thiserror::Error)]
-pub enum Error {
+pub enum AlgoError {
     #[error("No path found between the two points")]
     PathNotFound,
     #[error("The edge with the given id does not exist")]
@@ -22,18 +22,18 @@ pub enum Error {
     #[error("Cannot create an empty hyperedge")]
     EmptyHyperedge,
     #[error(transparent)]
-    CoreError(#[from] rshyper_core::error::Error),
+    CoreError(#[from] rshyper_core::error::HyperError),
 }
 
-impl From<Error> for rshyper_core::error::Error {
-    fn from(e: Error) -> Self {
+impl From<AlgoError> for rshyper_core::error::HyperError {
+    fn from(e: AlgoError) -> Self {
         match e {
-            Error::CoreError(e) => e,
-            Error::PathNotFound => rshyper_core::error::Error::PathNotFound,
-            Error::EdgeNotFound => rshyper_core::error::Error::EdgeNotFound,
-            Error::NodeNotFound => rshyper_core::error::Error::NodeNotFound,
-            Error::NoEdgesWithVertex => rshyper_core::error::Error::NoEdgesWithVertex,
-            Error::EmptyHyperedge => rshyper_core::error::Error::EmptyHyperedge,
+            AlgoError::CoreError(e) => e,
+            AlgoError::PathNotFound => rshyper_core::error::HyperError::PathNotFound,
+            AlgoError::EdgeNotFound => rshyper_core::error::HyperError::EdgeNotFound,
+            AlgoError::NodeNotFound => rshyper_core::error::HyperError::NodeNotFound,
+            AlgoError::NoEdgesWithVertex => rshyper_core::error::HyperError::NoEdgesWithVertex,
+            AlgoError::EmptyHyperedge => rshyper_core::error::HyperError::EmptyHyperedge,
         }
     }
 }

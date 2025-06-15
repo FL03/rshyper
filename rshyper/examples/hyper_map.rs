@@ -4,7 +4,7 @@
 */
 use rshyper::HyperMap;
 
-fn main() -> rshyper::Result<()> {
+fn main() -> rshyper::HyperResult<()> {
     tracing_subscriber::fmt()
         .with_line_number(true)
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())

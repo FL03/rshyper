@@ -39,7 +39,7 @@ pub(crate) mod macros {
 pub use self::{
     attrs::{Attributes, GraphAttributes},
     edge::{Edge, Surface},
-    error::{Error, Result},
+    error::{HyperError, HyperResult},
     idx::prelude::*,
     node::Node,
     traits::prelude::*,
@@ -109,7 +109,7 @@ pub mod types {
 }
 
 pub mod prelude {
-    pub use crate::error::Error as CoreError;
+    pub use crate::error::*;
 
     pub use crate::attrs::prelude::*;
     pub use crate::edge::prelude::*;

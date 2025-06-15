@@ -122,7 +122,7 @@ where
         &mut self,
         start: VertexId<A::Ix>,
         dest: VertexId<A::Ix>,
-    ) -> crate::Result<<Self as PathFinder<A::Ix>>::Path>
+    ) -> crate::AlgoResult<<Self as PathFinder<A::Ix>>::Path>
     where
         Self: PathFinder<A::Ix>,
     {
@@ -132,7 +132,7 @@ where
     pub fn search(
         &mut self,
         start: VertexId<A::Ix>,
-    ) -> crate::Result<<Self as Search<VertexId<A::Ix>>>::Output>
+    ) -> crate::AlgoResult<<Self as Search<VertexId<A::Ix>>>::Output>
     where
         Self: Search<VertexId<A::Ix>>,
     {
@@ -170,14 +170,14 @@ where
         &mut self,
         src: VertexId<A::Ix>,
         dest: VertexId<A::Ix>,
-    ) -> crate::Result<Self::Path> {
+    ) -> crate::AlgoResult<Self::Path> {
         self.reset();
 
         if !self.graph.contains_node(&src) {
-            return Err(crate::Error::NodeNotFound);
+            return Err(crate::AlgoError::NodeNotFound);
         }
         if !self.graph.contains_node(&dest) {
-            return Err(crate::Error::NodeNotFound);
+            return Err(crate::AlgoError::NodeNotFound);
         }
 
         let mut heap: BinaryHeap<QueueNode<A::Ix, E>> = BinaryHeap::new();
@@ -226,7 +226,7 @@ where
                 }
             }
         }
-        Err(crate::Error::PathNotFound)
+        Err(crate::AlgoError::PathNotFound)
     }
 
     fn reconstruct_path(&self, mut goal: VertexId<A::Ix>) -> Vec<VertexId<A::Ix>> {
@@ -273,7 +273,7 @@ where
 {
     type Output = Vec<VertexId<A::Ix>>;
 
-    fn search(&mut self, start: VertexId<A::Ix>) -> crate::Result<Self::Output> {
+    fn search(&mut self, start: VertexId<A::Ix>) -> crate::AlgoResult<Self::Output> {
         // Use the vertex with the largest ID as a pseudo-goal if not specified
         let max_vertex_id = match self.graph.vertices().max() {
             Some(&id) => id,

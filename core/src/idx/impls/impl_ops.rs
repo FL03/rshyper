@@ -67,7 +67,7 @@ where
     T: PartialEq,
 {
     fn eq(&self, other: &IndexBase<T, K>) -> bool {
-        &self.value == &other.value
+        self.value == other.value
     }
 }
 
@@ -76,7 +76,7 @@ where
     T: PartialEq,
 {
     fn eq(&self, other: &IndexBase<T, K>) -> bool {
-        &self.value == &other.value
+        self.value == other.value
     }
 }
 

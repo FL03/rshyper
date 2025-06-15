@@ -5,7 +5,7 @@
 use rshyper::hyper_map::UnHyperMap as HyperGraph;
 
 #[test]
-fn test_depth_first_traversal() -> rshyper::Result<()> {
+fn test_depth_first_traversal() -> rshyper::HyperResult<()> {
     let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Create a simple hypergraph
@@ -37,7 +37,7 @@ fn test_depth_first_traversal() -> rshyper::Result<()> {
 }
 
 #[test]
-fn test_dft_branching_graph() -> rshyper::Result<()> {
+fn test_dft_branching_graph() -> rshyper::HyperResult<()> {
     let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Create a branching hypergraph
@@ -75,7 +75,7 @@ fn test_dft_branching_graph() -> rshyper::Result<()> {
 }
 
 #[test]
-fn test_dft_cyclic_graph() -> rshyper::Result<()> {
+fn test_dft_cyclic_graph() -> rshyper::HyperResult<()> {
     let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Create a cyclic graph
@@ -110,7 +110,7 @@ fn test_dft_cyclic_graph() -> rshyper::Result<()> {
 }
 
 #[test]
-fn test_dft_isolated_vertex() -> rshyper::Result<()> {
+fn test_dft_isolated_vertex() -> rshyper::HyperResult<()> {
     let mut graph = HyperGraph::<usize, usize>::undirected();
 
     // Create a graph with an isolated vertex

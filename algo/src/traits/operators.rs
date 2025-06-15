@@ -10,7 +10,7 @@ pub trait GraphicAlgorithm<H> {
     type Output;
 
     /// run the algorithm on the graph and return the output
-    fn process(self, graph: H) -> crate::Result<Self::Output>;
+    fn process(self, graph: H) -> crate::AlgoResult<Self::Output>;
 }
 
 /// this trait is used to denote an algorithmic operator that can be applied to a hypergraph.

@@ -7,7 +7,7 @@ use crate::hyper_map::{HashFacet, HyperMap};
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::idx::{EdgeId, NumIndex, RawIndex, VertexId};
 use rshyper_core::node::Node;
-use rshyper_core::{Combine, GraphAttributes, GraphType};
+use rshyper_core::{Combine, GraphAttributes, GraphType, HyperResult};
 
 /// implementations for various algorithms and operators on the hypergraph
 impl<N, E, A, S> HyperMap<N, E, A, S>
@@ -52,9 +52,8 @@ where
         &mut self,
         src: EdgeId<Idx>,
         tgt: EdgeId<Idx>,
-    ) -> rshyper_core::Result<Self::Output> {
+    ) -> HyperResult<Self::Output> {
         self.merge_edges(&src, &tgt)
-            .map_err(|_e| format!("Failed to combine the hyperedges").into())
     }
 }
 
@@ -72,9 +71,8 @@ where
         &mut self,
         src: &'a EdgeId<Idx>,
         tgt: &'a EdgeId<Idx>,
-    ) -> Result<Self::Output, crate::Error> {
+    ) -> HyperResult<Self::Output> {
         self.merge_edges(src, tgt)
-            .map_err(|_e| format!("Failed to combine the hyperedges").into())
     }
 }
 

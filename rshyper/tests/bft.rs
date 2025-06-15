@@ -5,7 +5,7 @@
 use rshyper::HyperMap;
 
 #[test]
-fn test_breadth_first_traversal() -> rshyper::Result<()> {
+fn test_breadth_first_traversal() -> rshyper::HyperResult<()> {
     let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a simple hypergraph
@@ -43,7 +43,7 @@ fn test_breadth_first_traversal() -> rshyper::Result<()> {
 }
 
 #[test]
-fn test_bft_cyclic_graph() -> rshyper::Result<()> {
+fn test_bft_cyclic_graph() -> rshyper::HyperResult<()> {
     let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a cyclic hypergraph
@@ -78,7 +78,7 @@ fn test_bft_cyclic_graph() -> rshyper::Result<()> {
 }
 
 #[test]
-fn test_bft_disconnected_graph() -> rshyper::Result<()> {
+fn test_bft_disconnected_graph() -> rshyper::HyperResult<()> {
     let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a disconnected hypergraph
@@ -108,7 +108,7 @@ fn test_bft_disconnected_graph() -> rshyper::Result<()> {
 }
 
 #[test]
-fn test_bft_hyperedge_with_multiple_vertices() -> rshyper::Result<()> {
+fn test_bft_hyperedge_with_multiple_vertices() -> rshyper::HyperResult<()> {
     let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a hypergraph with a large hyperedge

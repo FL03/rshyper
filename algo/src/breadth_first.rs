@@ -69,7 +69,7 @@ where
         self
     }
     /// a convience method to perform a search
-    pub fn search(&mut self, start: VertexId<Idx>) -> crate::Result<Vec<VertexId<Idx>>>
+    pub fn search(&mut self, start: VertexId<Idx>) -> crate::AlgoResult<Vec<VertexId<Idx>>>
     where
         Idx: NumIndex,
         for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<Idx>>,
@@ -99,13 +99,13 @@ where
 {
     type Output = Vec<VertexId<Idx>>;
 
-    fn search(&mut self, start: VertexId<Idx>) -> crate::Result<Self::Output> {
+    fn search(&mut self, start: VertexId<Idx>) -> crate::AlgoResult<Self::Output> {
         // Reset state
         self.reset();
 
         // Check if starting vertex exists
         if !self.graph.contains_node(&start) {
-            return Err(crate::Error::NodeNotFound);
+            return Err(crate::AlgoError::NodeNotFound);
         }
 
         // Add start vertex to queue and mark as visited

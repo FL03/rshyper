@@ -3,9 +3,9 @@
     authors: @FL03
 */
 use super::WeightAst;
-use syn::{Attribute, Ident};
 use syn::parse::{Parse, ParseStream};
 use syn::token;
+use syn::{Attribute, Ident};
 
 #[allow(dead_code)]
 pub struct VertexAst {

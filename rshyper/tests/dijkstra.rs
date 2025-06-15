@@ -6,7 +6,7 @@
 use rshyper::HyperMap;
 
 #[test]
-fn test_dijkstra_direct_edge() -> rshyper::Result<()> {
+fn test_dijkstra_direct_edge() -> rshyper::HyperResult<()> {
     // initializea new undirected hashgraph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // add some nodes
@@ -24,7 +24,7 @@ fn test_dijkstra_direct_edge() -> rshyper::Result<()> {
 }
 
 #[test]
-fn test_dijkstra_shortest_path() -> rshyper::Result<()> {
+fn test_dijkstra_shortest_path() -> rshyper::HyperResult<()> {
     // Initialize a new graph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // add vertices to the graph
@@ -56,7 +56,7 @@ fn test_dijkstra_shortest_path() -> rshyper::Result<()> {
 }
 
 #[test]
-fn test_dijkstra_no_path() -> rshyper::Result<()> {
+fn test_dijkstra_no_path() -> rshyper::HyperResult<()> {
     // initializea new undirected hashgraph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // add vertices to the graph
@@ -81,7 +81,7 @@ fn test_dijkstra_no_path() -> rshyper::Result<()> {
 }
 
 #[test]
-fn test_dijkstra_same_start_end() -> rshyper::Result<()> {
+fn test_dijkstra_same_start_end() -> rshyper::HyperResult<()> {
     // initializea new undirected hashgraph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // setup the graph with some nodes and edges
@@ -109,7 +109,7 @@ fn test_dijkstra_same_start_end() -> rshyper::Result<()> {
 }
 
 #[test]
-fn test_dijkstra_multiple_paths() -> rshyper::Result<()> {
+fn test_dijkstra_multiple_paths() -> rshyper::HyperResult<()> {
     // initializea new undirected hashgraph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // add some nodes to the graph

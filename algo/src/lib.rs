@@ -17,6 +17,8 @@
     clippy::missing_safety_doc,
     clippy::module_inception,
     clippy::needless_doctest_main,
+    clippy::non_canonical_clone_impl,
+    clippy::non_canonical_partial_ord_impl,
     clippy::should_implement_trait
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -95,7 +97,7 @@ pub mod traits {
 #[doc(hidden)]
 pub mod prelude {
     #[doc(inline)]
-    pub use super::error::Error as AlgoError;
+    pub use super::error::AlgoError;
     #[doc(inline)]
     pub use super::traits::prelude::*;
 

@@ -28,7 +28,7 @@ where
     A: GraphAttributes,
 {
     /// given an iterable of vertex indices, add an edge to the graph and return its index
-    fn add_edge<I>(&mut self, iter: I) -> crate::Result<EdgeId<A::Ix>>
+    fn add_edge<I>(&mut self, iter: I) -> crate::HyperResult<EdgeId<A::Ix>>
     where
         I: IntoIterator<Item = VertexId<A::Ix>>,
         E: Default,
@@ -36,13 +36,13 @@ where
         self.add_surface(iter, Default::default())
     }
     /// given an iterable of vertex indices and a weight, add an edge to the graph and return its index
-    fn add_surface<I>(&mut self, iter: I, weight: Weight<E>) -> crate::Result<EdgeId<A::Ix>>
+    fn add_surface<I>(&mut self, iter: I, weight: Weight<E>) -> crate::HyperResult<EdgeId<A::Ix>>
     where
         I: IntoIterator<Item = VertexId<A::Ix>>;
     /// add a new node to the graph with the given weight and return its index
-    fn add_node(&mut self, weight: Weight<N>) -> crate::Result<VertexId<A::Ix>>;
+    fn add_node(&mut self, weight: Weight<N>) -> crate::HyperResult<VertexId<A::Ix>>;
     /// add a new default node to the graph and return its index
-    fn add_vertex(&mut self) -> crate::Result<VertexId<A::Ix>>
+    fn add_vertex(&mut self) -> crate::HyperResult<VertexId<A::Ix>>
     where
         N: Default,
     {

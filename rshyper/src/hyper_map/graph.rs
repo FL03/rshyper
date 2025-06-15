@@ -8,11 +8,10 @@ use super::aliases::*;
 
 use rshyper_core::attrs::{DiAttributes, GraphAttributes, UnAttributes};
 use rshyper_core::idx::{EdgeId, Frame, IndexTracker, NumIndex, RawIndex, VertexId};
-use rshyper_core::node::Node;
+use rshyper_core::prelude::{GraphType, HyperResult, Mode, Node, Weight};
 use rshyper_core::traits::{
     AddStep, HyperGraph, HyperGraphIterEdge, HyperGraphIterNode, RawHyperGraph,
 };
-use rshyper_core::{GraphType, Mode, Weight};
 
 use core::hash::{BuildHasher, Hash};
 use std::hash::RandomState;
@@ -315,17 +314,15 @@ where
     S: BuildHasher + Default,
     A::Ix: NumIndex,
 {
-    fn add_node(&mut self, weight: Weight<N>) -> rshyper_core::Result<VertexId<A::Ix>> {
+    fn add_node(&mut self, weight: Weight<N>) -> HyperResult<VertexId<A::Ix>> {
         self.add_node(weight)
-            .map_err(|_e| format!("Failed to add the hypernode").into())
     }
 
-    fn add_surface<I>(&mut self, iter: I, weight: Weight<E>) -> rshyper_core::Result<EdgeId<A::Ix>>
+    fn add_surface<I>(&mut self, iter: I, weight: Weight<E>) -> HyperResult<EdgeId<A::Ix>>
     where
         I: IntoIterator<Item = VertexId<A::Ix>>,
     {
         self.add_surface(iter, weight)
-            .map_err(|_e| format!("Failed to add the surface").into())
     }
 
     fn get_edge_domain(&self, index: &EdgeId<A::Ix>) -> Option<&VertexSet<A::Ix, S>> {

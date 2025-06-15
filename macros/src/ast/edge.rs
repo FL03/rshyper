@@ -3,9 +3,9 @@
     authors: @FL03
 */
 use super::WeightAst;
-use syn::{token, Attribute, Ident, Token, bracketed};
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
+use syn::{Attribute, Ident, Token, bracketed, token};
 
 /// The [`EdgeAst`] struct represents the abstract syntax tree (AST) for a edges within the
 /// hypergraph macro.
@@ -26,7 +26,6 @@ pub struct EdgeAst {
     pub nodes: Punctuated<Ident, Token![,]>,
     pub weight: Option<WeightAst>,
 }
-
 
 impl Parse for EdgeAst {
     fn parse(input: ParseStream) -> syn::Result<Self> {

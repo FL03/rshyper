@@ -172,7 +172,7 @@ where
         &mut self,
         start: VertexId<Idx>,
         goal: VertexId<Idx>,
-    ) -> crate::Result<<Self as PathFinder<Idx>>::Path>
+    ) -> crate::AlgoResult<<Self as PathFinder<Idx>>::Path>
     where
         Self: PathFinder<Idx>,
     {
@@ -182,7 +182,7 @@ where
     pub fn search(
         &mut self,
         start: VertexId<Idx>,
-    ) -> crate::Result<<Self as Search<VertexId<Idx>>>::Output>
+    ) -> crate::AlgoResult<<Self as Search<VertexId<Idx>>>::Output>
     where
         Self: Search<VertexId<Idx>>,
     {
@@ -204,13 +204,13 @@ where
         &mut self,
         start: VertexId<A::Ix>,
         goal: VertexId<A::Ix>,
-    ) -> crate::Result<Self::Path> {
+    ) -> crate::AlgoResult<Self::Path> {
         // Check if both vertices exist
         if !self.graph.contains_node(&start) {
-            return Err(crate::Error::NodeNotFound);
+            return Err(crate::AlgoError::NodeNotFound);
         }
         if !self.graph.contains_node(&goal) {
-            return Err(crate::Error::NodeNotFound);
+            return Err(crate::AlgoError::NodeNotFound);
         }
 
         // reset state
@@ -304,7 +304,7 @@ where
         }
 
         // No path found
-        Err(crate::Error::PathNotFound)
+        Err(crate::AlgoError::PathNotFound)
     }
 
     // Reconstruct path from came_from map
@@ -350,14 +350,14 @@ where
 {
     type Output = Vec<VertexId<A::Ix>>;
 
-    fn search(&mut self, start: VertexId<A::Ix>) -> crate::Result<Self::Output> {
+    fn search(&mut self, start: VertexId<A::Ix>) -> crate::AlgoResult<Self::Output> {
         // For A*, we need a goal vertex to compute the heuristic
         // This implementation of search will explore the graph and return
         // all reachable vertices ordered by their distance from start
         self.reset();
 
         if !self.graph.contains_node(&start) {
-            return Err(crate::Error::NodeNotFound);
+            return Err(crate::AlgoError::NodeNotFound);
         }
 
         // Using the vertex with the largest ID as a pseudo-goal

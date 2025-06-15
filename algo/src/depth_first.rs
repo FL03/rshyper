@@ -76,7 +76,7 @@ where
     pub fn search(
         &mut self,
         start: VertexId<Idx>,
-    ) -> crate::Result<<Self as Search<VertexId<Idx>>>::Output>
+    ) -> crate::AlgoResult<<Self as Search<VertexId<Idx>>>::Output>
     where
         Self: Search<VertexId<Idx>>,
         Idx: NumIndex,
@@ -120,13 +120,13 @@ where
 {
     type Output = Vec<VertexId<A::Ix>>;
 
-    fn search(&mut self, start: VertexId<A::Ix>) -> crate::Result<Self::Output> {
+    fn search(&mut self, start: VertexId<A::Ix>) -> crate::AlgoResult<Self::Output> {
         // Reset state
         self.reset();
 
         // Check if starting vertex exists
         if !self.graph.contains_node(&start) {
-            return Err(crate::Error::NodeNotFound);
+            return Err(crate::AlgoError::NodeNotFound);
         }
 
         // Add start vertex to stack and mark as visited

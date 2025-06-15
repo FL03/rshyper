@@ -6,7 +6,7 @@ extern crate rshyper_core as rshyper;
 use rshyper::idx::{EdgeId, Frame, IndexBase, IndexTracker, VertexId, VertexIndex};
 
 #[test]
-fn test_index() -> rshyper::Result<()> {
+fn test_index() -> rshyper::HyperResult<()> {
     let mut idx = IndexBase::<usize, VertexIndex>::new(1);
     assert_eq!(idx.get(), &1);
     idx.set(2);
@@ -15,7 +15,7 @@ fn test_index() -> rshyper::Result<()> {
 }
 
 #[test]
-fn test_edge_id() -> rshyper::Result<()> {
+fn test_edge_id() -> rshyper::HyperResult<()> {
     let mut edge_id = EdgeId::<usize>::default();
     let e0 = edge_id.step()?;
     let e1 = edge_id.step()?;
@@ -27,14 +27,14 @@ fn test_edge_id() -> rshyper::Result<()> {
 }
 
 #[test]
-fn test_vertex_id() -> rshyper::Result<()> {
+fn test_vertex_id() -> rshyper::HyperResult<()> {
     let vertex_id = VertexId::new(1);
     assert_eq!(vertex_id.get(), &1);
     Ok(())
 }
 
 #[test]
-fn test_position() -> rshyper::Result<()> {
+fn test_position() -> rshyper::HyperResult<()> {
     let mut index = Frame::<usize>::zero();
     // create some edge indices
     let e0 = index.next_edge()?;
@@ -56,7 +56,7 @@ fn test_position() -> rshyper::Result<()> {
 }
 
 #[test]
-fn test_tracker() -> rshyper::Result<()> {
+fn test_tracker() -> rshyper::HyperResult<()> {
     let mut history = IndexTracker::<usize>::zero();
     // create some edge indices
     let e0 = history.next_edge()?;
