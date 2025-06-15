@@ -43,6 +43,21 @@ where
     }
 }
 
+impl<T, S, K, Idx> core::fmt::Debug for Surface<T, S, K, Idx>
+where
+    Idx: RawIndex,
+    K: GraphType,
+    T: core::fmt::Debug,
+    S: Domain<Idx> + core::fmt::Debug,
+{
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Surface")
+            .field("edge", &self.edge())
+            .field("weight", &self.weight())
+            .finish()
+    }
+}
+
 impl<T, S, K, Idx> core::fmt::Display for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,

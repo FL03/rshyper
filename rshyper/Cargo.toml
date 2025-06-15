@@ -29,47 +29,28 @@ crate-type = [
     "cdylib",
     "rlib",
 ]
-bench = true
+bench = false
 doc = true
 doctest = true
 test = true
 
 [dependencies]
+# core modules
 rshyper-core = { workspace = true }
-# custom
-scsys = { workspace = true }
-# concurrency & parallelism
-rayon = { optional = true, workspace = true }
-# error handling
-thiserror = { workspace = true }
-# logging
-tracing = { optional = true, workspace = true }
-# macros
-paste = { workspace = true }
-smart-default = { workspace = true }
-strum = { features = ["derive"], workspace = true }
-# math
-num-traits = { workspace = true }
-ordered-float = { workspace = true }
-# random
-rand = { optional = true, workspace = true }
-rand_distr = { optional = true, workspace = true }
-# serialization
-serde = { features = ["derive"], optional = true, workspace = true }
-serde_derive = { optional = true, workspace = true }
-serde_json = { optional = true, workspace = true }
-# wasm
-wasm-bindgen = { optional = true, workspace = true }
+# optional dependencies
+rshyper-algo = { optional = true, workspace = true }
+rshyper-hmap = { optional = true, workspace = true }
 
 [dev-dependencies]
-criterion = { features = ["plotters"], workspace = true }
 lazy_static = { workspace = true }
+rand = { features = ["std"], workspace = true }
+tracing = { features = ["std"], workspace = true }
 tracing-subscriber = { features = ["ansi", "chrono", "serde", "std"], workspace = true }
 
 [features]
 default = [
     "algo",
-    "hash_graph",
+    "hyper_map",
     "macros",
     "std",
 ]
@@ -84,151 +65,125 @@ full = [
 ]
 
 # ************* [FF:Flags] *************
-algo = [
-    "std",
-]
+algo = ["dep:rshyper-algo"]
 
-hash_graph = [
+hash_grap = ["hyper_map"]
+
+hyper_map = [
+    "dep:rshyper-hmap",
     "std"
 ]
 
 macros = []
 
 # ************* [FF:Environments] *************
+nightly = [
+    "rshyper-algo?/nightly",
+    "rshyper-core/nightly",
+    "rshyper-hmap?/nightly",
+]
+
 std = [
     "alloc",
-    "num-traits/std",
-    "rand?/std",
+    "rshyper-algo?/std",
     "rshyper-core/std",
-    "scsys/std",
-    "serde?/std",
-    "strum/std",
-    "tracing?/std",
-    "thiserror/std",
+    "rshyper-hmap?/std",
 ]
 
 wasi = [
     "alloc",
+    "rshyper-algo?/wasi",
     "rshyper-core/wasi",
-    "scsys/wasi",
+    "rshyper-hmap?/wasi",
 ]
 
 wasm = [
     "alloc",
-    "rayon?/web_spin_lock",
+    "rshyper-algo?/wasm",
     "rshyper-core/wasm",
-    "scsys/wasm",
-    "wasm-bindgen",
+    "rshyper-hmap?/wasm",
 ]
 
 # ************* [FF:Dependencies] *************
 alloc = [
+    "rshyper-algo?/alloc",
     "rshyper-core/alloc",
-    "scsys/alloc",
-    "serde?/alloc",
-    "serde_json?/alloc",
+    "rshyper-hmap?/alloc",
 ]
 
 anyhow = [
+    "rshyper-algo?/anyhow",
     "rshyper-core/anyhow",
+    "rshyper-hmap?/anyhow",
 ]
 
 json = [
     "alloc",
-    "serde",
-    "serde_json",
     "rshyper-core/json",
-    "scsys/json",
+    "rshyper-hmap?/json",
 ]
 
 rand = [
-    "dep:rand",
-    "dep:rand_distr",
-    "ordered-float/rand",
     "rng",
     "rshyper-core/rand",
-    "scsys/rand",
+    "rshyper-hmap?/rand",
 ]
 
 rayon = [
-    "dep:rayon",
+    "rshyper-algo?/rayon",
     "rshyper-core/rayon",
+    "rshyper-hmap?/rayon",
 ]
 
 rng = [
-    "rand?/small_rng",
-    "rand?/thread_rng",
     "rshyper-core/rng",
-    "scsys/rng",
+    "rshyper-hmap?/rng",
 ]
 
 serde = [
-    "dep:serde",
-    "dep:serde_derive",
-    "ordered-float/serde",
-    "rand?/serde",
+    "rshyper-algo?/serde",
     "rshyper-core/serde",
-    "scsys/serde",
+    "rshyper-hmap?/serde",
 ]
 
 serde_json = [
-    "dep:serde_json",
     "rshyper-core/serde_json",
+    "rshyper-hmap?/serde_json",
 ]
 
 tracing = [
-    "dep:tracing",
+    "rshyper-algo?/tracing",
     "rshyper-core/tracing",
-    "scsys/tracing",
+    "rshyper-hmap?/tracing",
 ]
 
 wasm-bindgen = [
-    "dep:wasm-bindgen",
     "rshyper-core/wasm-bindgen",
-]
-
-# ************* [Benchmarks] *************
-[[bench]]
-harness = false
-name = "hash_graph"
-required-features = [
-    "hash_graph",
-    "rand",
 ]
 
 # ************* [Examples] *************
 [[example]]
 name = "basic_usage"
-required-features = ["hash_graph", "macros"]
+required-features = [
+    "hyper_map",
+    "macros",
+]
 
 [[example]]
-name = "hash_graph"
-required-features = ["hash_graph", "macros", "tracing"]
+name ="hyper_map"
+required-features = [
+    "hyper_map",
+    "macros",
+    "tracing",
+]
 
 # ************* [Tests] *************
 [[test]]
 name = "default"
 
 [[test]]
-name = "astar"
-required-features = ["hash_graph", "macros"]
-
-[[test]]
-name = "bft"
-required-features = ["hash_graph", "macros"]
-
-[[test]]
-name = "dft"
-required-features = ["hash_graph", "macros"]
-
-[[test]]
-name = "dijkstra"
-required-features = ["hash_graph", "macros"]
-
-[[test]]
-name = "hash_graph"
-required-features = ["hash_graph"]
-
-[[test]]
 name = "macros"
-required-features = ["alloc", "macros"]
+required-features = [
+    "hyper_map",
+    "macros",
+]

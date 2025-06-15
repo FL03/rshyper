@@ -22,8 +22,8 @@
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![doc(
-    html_logo_url = "https://raw.githubusercontent.com/rshyper/rshyper/main/assets/logo.svg",
-    html_favicon_url = "https://raw.githubusercontent.com/rshyper/rshyper/main/assets/logo.svg"
+    html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
 )]
 
 #[cfg(feature = "alloc")]
@@ -39,7 +39,7 @@ pub(crate) mod macros {
 pub use self::{
     attrs::{Attributes, GraphAttributes},
     edge::{Edge, Surface},
-    error::{Error, Result},
+    error::{HyperError, HyperResult},
     idx::prelude::*,
     node::Node,
     traits::prelude::*,

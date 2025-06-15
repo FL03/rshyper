@@ -9,7 +9,7 @@ use crate::{Domain, GraphType, Weight};
 /// The [`Surface`] implementation associates some weight with a hyperedge.
 /// Typically, the term **facet** is used to denote the surface of a particular polytope,
 /// however, here it is used to aptly define a _**weighted**_ hyperedge.
-#[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize, serde::Serialize),

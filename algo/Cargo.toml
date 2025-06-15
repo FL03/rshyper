@@ -1,0 +1,136 @@
+[package]
+build = "build.rs"
+description = "this crate implements various algorithms for the rshyper framework"
+name = "rshyper-algo"
+
+authors.workspace = true
+categories.workspace = true
+edition.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[package.metadata.docs.rs]
+all-features = false
+features = ["full"]
+rustc-args = ["--cfg", "docsrs" ]
+version = "v{{version}}"
+
+[package.metadata.release]
+no-dev-version = true
+tag-name = "{{version}}"
+
+[lib]
+crate-type = [
+    "cdylib",
+    "rlib",
+]
+bench = false
+doc = true
+doctest = true
+test = true
+
+[dependencies]
+rshyper-core = { workspace = true }
+# custom
+scsys = { workspace = true }
+# concurrency & parallelism
+rayon = { optional = true, workspace = true }
+# error handling
+thiserror = { workspace = true }
+# logging
+tracing = { optional = true, workspace = true }
+# macros
+paste = { workspace = true }
+smart-default = { workspace = true }
+strum = { features = ["derive"], workspace = true }
+# math
+num-traits = { workspace = true }
+ordered-float = { workspace = true }
+# serialization
+serde = { features = ["derive"], optional = true, workspace = true }
+serde_derive = { optional = true, workspace = true }
+
+[features]
+default = [
+    "std",
+]
+
+full = [
+    "default",
+    "anyhow",
+    "serde",
+    "tracing",
+]
+
+# ************* [FF:Dependencies] *************
+
+
+# ************* [FF:Environments] *************
+nightly = [
+    "rshyper-core/nightly",
+]
+
+std = [
+    "alloc",
+    "num-traits/std",
+    "rshyper-core/std",
+    "scsys/std",
+    "serde?/std",
+    "strum/std",
+    "tracing?/std",
+    "thiserror/std",
+]
+
+wasi = [
+    "alloc",
+    "rshyper-core/wasi",
+    "scsys/wasi",
+]
+
+wasm = [
+    "alloc",
+    "rayon?/web_spin_lock",
+    "rshyper-core/wasm",
+    "scsys/wasm",
+]
+
+# ************* [FF:Dependencies] *************
+alloc = [
+    "rshyper-core/alloc",
+    "scsys/alloc",
+    "serde?/alloc",
+]
+
+anyhow = [
+    "rshyper-core/anyhow",
+    "scsys/anyhow",
+]
+
+rayon = [
+    "dep:rayon",
+    "rshyper-core/rayon",
+]
+
+serde = [
+    "dep:serde",
+    "dep:serde_derive",
+    "ordered-float/serde",
+    "rshyper-core/serde",
+    "scsys/serde",
+]
+
+tracing = [
+    "dep:tracing",
+    "rshyper-core/tracing",
+    "scsys/tracing",
+]
+
+# ************* [Tests] *************
+[[test]]
+name = "default"
+

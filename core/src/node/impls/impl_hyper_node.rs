@@ -2,9 +2,26 @@
     appellation: impl_hyper_node <module>
     authors: @FL03
 */
-use crate::Weight;
 use crate::idx::{RawIndex, VertexId};
 use crate::node::Node;
+use crate::weight::{UnWeight, Weight};
+
+impl<T, Idx> Node<UnWeight<T>, Idx>
+where
+    Idx: RawIndex,
+{
+    /// returns a new, weightless node with the given index
+    pub const fn weightless(id: VertexId<Idx>) -> Self {
+        Self::new(id, UnWeight::new())
+    }
+    /// initialize the weight of the node with the given value
+    pub fn init_weight<F>(self, init: F) -> Node<T, Idx>
+    where
+        F: FnOnce() -> T,
+    {
+        Node::new(self.id, init())
+    }
+}
 
 impl<T, Idx> AsRef<Weight<T>> for Node<T, Idx>
 where
@@ -94,7 +111,7 @@ impl<T, Idx> From<(VertexId<Idx>, Weight<T>)> for Node<T, Idx>
 where
     Idx: RawIndex,
 {
-    fn from((index, weight): (VertexId<Idx>, Weight<T>)) -> Self {
+    fn from((index, Weight(weight)): (VertexId<Idx>, Weight<T>)) -> Self {
         Node::new(index, weight)
     }
 }

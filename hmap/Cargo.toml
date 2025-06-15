@@ -1,0 +1,217 @@
+[package]
+description = "This crate implements the hypermap implementation (a map-based hypergraph) for the rshyper framework"
+name = "rshyper-hmap"
+
+authors.workspace = true
+categories.workspace = true
+edition.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[package.metadata.docs.rs]
+all-features = false
+features = ["full"]
+rustc-args = ["--cfg", "docsrs" ]
+version = "v{{version}}"
+
+[package.metadata.release]
+no-dev-version = true
+tag-name = "{{version}}"
+
+[lib]
+crate-type = [
+    "cdylib",
+    "rlib",
+]
+bench = true
+doc = true
+doctest = true
+test = true
+
+[dependencies]
+# sdk
+rshyper-algo = { optional = true, workspace = true }
+rshyper-core = { workspace = true }
+# custom
+scsys = { workspace = true }
+# concurrency & parallelism
+rayon = { optional = true, workspace = true }
+# error handling
+thiserror = { workspace = true }
+# logging
+tracing = { optional = true, workspace = true }
+# macros
+paste = { workspace = true }
+smart-default = { workspace = true }
+strum = { workspace = true }
+# math
+num-traits = { workspace = true }
+# random
+rand = { optional = true, workspace = true }
+rand_distr = { optional = true, workspace = true }
+# serialization
+serde = { optional = true, workspace = true }
+serde_derive = { optional = true, workspace = true }
+serde_json = { optional = true, workspace = true }
+
+[dev-dependencies]
+criterion = { features = ["plotters"], workspace = true }
+lazy_static = { workspace = true }
+
+[features]
+default = [
+    "algo",
+    "std",
+]
+
+full = [
+    "default",
+    "anyhow",
+    "json",
+    "rand",
+    "serde",
+    "tracing",
+]
+
+nightly = [
+    "rshyper-algo?/nightly",
+    "rshyper-core/nightly",
+]
+
+# ************* [FF:Flags] *************
+
+algo = ["dep:rshyper-algo"]
+
+# ************* [FF:Environments] *************
+# std is required, this is more symbolic then anything
+std = [
+    "num-traits/std",
+    "rand?/std",
+    "rshyper-algo?/std",
+    "rshyper-core/std",
+    "scsys/std",
+    "serde?/std",
+    "strum/std",
+    "tracing?/std",
+    "thiserror/std",
+]
+
+wasi = [
+    "alloc",
+    "rshyper-algo?/wasi",
+    "rshyper-core/wasi",
+    "scsys/wasi",
+]
+
+wasm = [
+    "alloc",
+    "rayon?/web_spin_lock",
+    "rshyper-algo?/wasm",
+    "rshyper-core/wasm",
+    "scsys/wasm",
+]
+
+# ************* [FF:Dependencies] *************
+alloc = [
+    "rshyper-algo?/alloc",
+    "rshyper-core/alloc",
+    "scsys/alloc",
+    "serde?/alloc",
+    "serde_json?/alloc",
+]
+
+anyhow = [
+    "rshyper-algo?/anyhow",
+    "rshyper-core/anyhow",
+    "scsys/anyhow",
+]
+
+json = [
+    "alloc",
+    "serde",
+    "serde_json",
+    "rshyper-core/json",
+    "scsys/json",
+]
+
+rand = [
+    "dep:rand",
+    "dep:rand_distr",
+    "rng",
+    "rshyper-core/rand",
+    "scsys/rand",
+]
+
+rayon = [
+    "dep:rayon",
+    "rshyper-core/rayon",
+]
+
+rng = [
+    "rand?/small_rng",
+    "rand?/thread_rng",
+    "rshyper-core/rng",
+    "scsys/rng",
+]
+
+serde = [
+    "dep:serde",
+    "dep:serde_derive",
+    "rand?/serde",
+    "rshyper-core/serde",
+    "scsys/serde",
+]
+
+serde_json = [
+    "dep:serde_json",
+    "rshyper-core/serde_json",
+]
+
+tracing = [
+    "dep:tracing",
+    "rshyper-algo?/tracing",
+    "rshyper-core/tracing",
+    "scsys/tracing",
+]
+
+wasm-bindgen = [
+    "rshyper-core/wasm-bindgen",
+]
+
+# ************* [Benchmarks] *************
+[[bench]]
+harness = false
+name ="hyper_map"
+required-features = [
+    "rand",
+    "std",
+]
+
+# ************* [Tests] *************
+[[test]]
+name = "default"
+
+[[test]]
+name = "astar"
+required-features = ["algo", "std"]
+
+[[test]]
+name = "bft"
+required-features = ["algo", "std"]
+
+[[test]]
+name = "dft"
+required-features = ["algo", "std"]
+
+[[test]]
+name = "dijkstra"
+required-features = ["algo", "std"]
+
+[[test]]
+name ="hyper_map"
+required-features = ["std"]

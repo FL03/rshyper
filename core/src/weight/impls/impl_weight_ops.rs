@@ -3,6 +3,40 @@
     authors: @FL03
 */
 use crate::weight::Weight;
+use num_traits::{Num, One, Zero};
+
+impl<T> One for Weight<T>
+where
+    T: One,
+{
+    fn one() -> Self {
+        Weight(T::one())
+    }
+}
+
+impl<T> Zero for Weight<T>
+where
+    T: Zero,
+{
+    fn zero() -> Self {
+        Weight(T::zero())
+    }
+
+    fn is_zero(&self) -> bool {
+        self.get().is_zero()
+    }
+}
+
+impl<T> Num for Weight<T>
+where
+    T: Num,
+{
+    type FromStrRadixErr = T::FromStrRadixErr;
+
+    fn from_str_radix(s: &str, radix: u32) -> Result<Self, Self::FromStrRadixErr> {
+        Ok(Weight(T::from_str_radix(s, radix)?))
+    }
+}
 
 macro_rules! impl_wrapper_binary_op {
     ($s:ident::<[$($op:ident.$call:ident),* $(,)?]>) => {

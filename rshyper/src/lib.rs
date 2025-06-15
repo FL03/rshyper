@@ -76,36 +76,60 @@
     html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
 )]
 
+/*
+ ************* ROOT *************
+*/
+
 #[cfg(feature = "alloc")]
 extern crate alloc;
-/// declare the macros module for use throughout the crate
+
 #[macro_use]
-pub(crate) mod macros;
+#[cfg(feature = "macros")]
+pub(crate) mod macros {
+    //! this module defines the various macros used throughout the crate to streamline the
+    //! creation and maniuplation of hypergraphs and their constituent components.
+    #[macro_use]
+    pub mod hypergraph;
+}
+
+/*
+ ************* REIMPORTS *************
+*/
 
 #[doc(inline)]
-#[cfg(all(feature = "std", feature = "algo"))]
-pub use self::algo::prelude::*;
+#[cfg(feature = "hyper_map")]
+pub use self::hyper_map::{DiHyperMap, HyperMap, UnHyperMap};
 #[doc(inline)]
 pub use rshyper_core::*;
 
-#[doc(inline)]
-#[cfg(feature = "hash_graph")]
-pub use self::hash_graph::{DiHashGraph, HashGraph, UnHashGraph};
+/*
+ ************* FEATURE-GATED MODULES *************
+*/
 
+#[doc(inline)]
+#[cfg(feature = "algo")]
 /// the `algo` module focuses on implementing algorithms and operators for hypergraphs
-#[cfg(all(feature = "std", feature = "algo"))]
-pub mod algo;
-/// this module contains the [`HashGraph`], a hash-based hypergraph implementation
-#[cfg(feature = "hash_graph")]
-pub mod hash_graph;
+pub use rshyper_algo as algo;
+#[doc(inline)]
+#[cfg(feature = "hyper_map")]
+/// this module contains the [`HyperMap`](rshyper_hmap::HyperMap), a hash-based hypergraph
+/// implementation
+pub use rshyper_hmap as hyper_map;
+
+/*
+ ************* PRELUDE *************
+*/
 
 /// the prelude module for the crate contains all commonly used traits, types, and functions
 #[allow(missing_docs)]
 pub mod prelude {
+    // pub use super::error::*;
     pub use rshyper_core::prelude::*;
 
-    #[cfg(all(feature = "std", feature = "algo"))]
-    pub use crate::algo::prelude::*;
-    #[cfg(feature = "hash_graph")]
-    pub use crate::hash_graph::prelude::*;
+    #[cfg(feature = "macros")]
+    pub use crate::{hyperedge, hypergraph, hypernode};
+    #[cfg(feature = "algo")]
+    pub use rshyper_algo::prelude::*;
+    #[cfg(feature = "hyper_map")]
+    pub use rshyper_hmap::prelude::*;
 }
