@@ -49,11 +49,10 @@
 /// declare the macros module for use throughout the crate
 #[macro_use]
 pub(crate) mod macros {
-
     #[macro_use]
     pub mod seal;
 }
-/// the `algo` module focuses on implementing algorithms and operators for hypergraphs
+#[cfg(feature = "algo")]
 extern crate rshyper_algo as algo;
 extern crate rshyper_core as rshyper;
 
