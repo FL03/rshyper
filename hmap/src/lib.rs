@@ -11,9 +11,9 @@
 //! ***
 //!
 //! Welcome to the `rshyper-hmap` crate! This package provides the [`HyperMap`] implementation,
-//! a map-based hypergraph structure designed for efficient storage and manipulation using the 
+//! a map-based hypergraph structure designed for efficient storage and manipulation using the
 //! native [`HashMap`](std::collections::HashMap) type.
-//! 
+//!
 //! - `N`: the type of weight associated with a hypernode
 //! - `E`: the type of weight associated with a hyperedge
 //! - `A`: the attributes of the hypergraph
@@ -34,7 +34,7 @@
 //! ## Examples
 //!
 //! For more detailed examples, please refer to the [examples directory](https://github.com/FL03/rshyper/blob/main/rshyper/examples).
-//! 
+//!
 #![crate_type = "lib"]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg",
@@ -86,17 +86,14 @@ pub mod iter {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    pub mod node;
-    pub mod seq;
-    pub mod surface;
+    pub mod edges;
+    pub mod nodes;
 
     pub(crate) mod prelude {
         #[doc(inline)]
-        pub use super::node::*;
+        pub use super::edges::*;
         #[doc(inline)]
-        pub use super::seq::*;
-        #[doc(inline)]
-        pub use super::surface::*;
+        pub use super::nodes::*;
     }
 }
 

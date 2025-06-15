@@ -98,9 +98,6 @@ pub mod traits {
 #[doc(hidden)]
 #[allow(missing_docs)]
 pub mod prelude {
-    pub use super::error::AlgoError;
-    #[doc(inline)]
-    pub use super::traits::prelude::*;
     #[cfg(feature = "std")]
     pub use super::astar::AStarSearch;
     #[cfg(feature = "std")]
@@ -109,6 +106,9 @@ pub mod prelude {
     pub use super::depth_first::DepthFirstTraversal;
     #[cfg(feature = "std")]
     pub use super::dijkstra::Dijkstra;
+    pub use super::error::AlgoError;
+    #[doc(inline)]
+    pub use super::traits::prelude::*;
 }
 
 /// a type alias for a [`HashSet`](std::collections::HashSet) of [`VertexId`](rshyper::VertexId)'s

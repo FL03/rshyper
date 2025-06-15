@@ -138,10 +138,15 @@ fn hash_graph_iter() -> HyperResult<()> {
     let e2 = graph.add_edge([v2, v3])?;
     let e3 = graph.add_edge([v3, v4])?;
     let e4 = graph.add_edge([v4, v5])?;
-    // get an iterator over the nodes of the graph
-    let node_iter = graph.node_iter();
-    // verify the node iterator yields the correct number of nodes
-    assert_eq!(node_iter.count(), graph.order());
+    // get a sequential iterator over the nodes
+    let node_iter = graph.iter_nodes_seq();
+    // create an array of ids in the order they should be produced
+    let verts = [v0, v1, v2, v3, v4, v5, v6];
+    // ensure each element is produced
+    for (i, node) in node_iter.enumerate() {
+        // verify the nodes are in the correct order
+        assert_eq!(node.id(), &verts[i]);
+    }
     // finish
     Ok(())
 }

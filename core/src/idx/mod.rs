@@ -34,6 +34,20 @@ mod impls {
     pub mod impl_repr;
 }
 
+pub mod iter {
+    //! this module provides various iterators for indices, such as [`IndexIter`], which
+    //! iterates over the indices in a hypergraph.
+    #[doc(inline)]
+    pub use self::prelude::*;
+
+    mod stepper;
+
+    pub(crate) mod prelude {
+        #[doc(inline)]
+        pub use super::stepper::*;
+    }
+}
+
 pub mod traits {
     //! this module defines the [`RawIndex`] trait along with its related traits and
     //! implementations.

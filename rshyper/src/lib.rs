@@ -62,10 +62,10 @@
 //! For more detailed examples, please refer to the [examples directory](https://github.com/FL03/rshyper/blob/main/rshyper/examples).
 //!
 //! ### _Example 1: Basic Usage_
-//! 
+//!
 //! ```rust
 //! use rshyper::{HyperMap, IntoWeight};
-//! 
+//!
 //! let mut graph = HyperMap::<usize, usize>::undirected();
 //! // add some unweighted vertices
 //! let v0 = graph.add_vertex().expect("failed to add vertex");
