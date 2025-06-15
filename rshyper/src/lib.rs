@@ -61,6 +61,24 @@
 //!
 //! For more detailed examples, please refer to the [examples directory](https://github.com/FL03/rshyper/blob/main/rshyper/examples).
 //!
+//! ### _Example 1: Basic Usage_
+//! 
+//! ```rust
+//! use rshyper::{HyperMap, IntoWeight};
+//! 
+//! let mut graph = HyperMap::<usize, usize>::undirected();
+//! // add some unweighted vertices
+//! let v0 = graph.add_vertex().expect("failed to add vertex");
+//! let v1 = graph.add_vertex().expect("failed to add vertex");
+//! // add a weighted node
+//! let v2 = graph.add_node(10.into_weight()).expect("failed to add node");
+//! // create some edges using those nodes
+//! let e0 = graph.add_edge([v0, v1]).expect("failed to add edge");
+//! let e1 = graph.add_edge([v1, v2]).expect("failed to add edge");
+//! // create a surface (weighted edge) using the nodes
+//! let e3 = graph.add_surface([v0, v2], 5.into_weight()).expect("failed to add surface");
+//! ```
+//!
 #![crate_name = "rshyper"]
 #![crate_type = "lib"]
 #![doc(

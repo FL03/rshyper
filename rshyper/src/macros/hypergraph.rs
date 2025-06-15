@@ -12,11 +12,11 @@
 /// The `hypergraph` macro allows you to define nodes and edges in a hypergraph
 ///
 /// ```rust
-/// use rshyper::HyperMap;
+/// use rshyper::{hypergraph, UnHyperMap};
 /// // initialize a new undirected hypergraph
-/// let mut graph = HyperMap::<usize, usize>::undirected();
+/// let mut graph = UnHyperMap::<usize, usize>::undirected();
 /// // use the macro to insert nodes and edges into the graph
-/// rshyper::hypergraph! {
+/// hypergraph! {
 ///     graph {
 ///         nodes: {
 ///             let v0;
@@ -34,19 +34,20 @@
 /// or
 ///
 /// ```rust
-/// use rshyper::UnHyperMap;
+/// use rshyper::{hypergraph, UnHyperMap};
 ///
-/// // use the macro to initialize a new hypergraph
-/// rshyper::hypergraph! {
+/// // use the macro to initialize a new hypergraph, then insert nodes and edges
+/// hypergraph! {
 ///     let mut graph: UnHyperMap::<usize, usize> {
 ///         nodes: {
 ///             let v0;
-///             let v1;
-///             let v2 = 10;
+///             let v1 = 1;
+///             let v2;
 ///         };
 ///         edges: {
 ///             let e0: [v0, v1];
-///             let e1: [v0, v1, v2] = 10;
+///             let e1: [v0, v2];
+///             let e2: [v0, v1, v2] = 10;
 ///         };
 ///     }
 /// }
@@ -58,7 +59,6 @@ macro_rules! hypergraph {
             nodes: {$($nodes:tt)*};
             edges: {$($edges:tt)*};
         }
-
     ) => {
         // initialize a new hypergraph with the given type
         let mut $graph: $H = <$H>::new();
@@ -72,7 +72,6 @@ macro_rules! hypergraph {
             nodes: {$($nodes:tt)*};
             edges: {$($edges:tt)*};
         }
-
     ) => {
         // insert nodes into the graph
         $crate::hypernode!($graph {$($nodes)*});

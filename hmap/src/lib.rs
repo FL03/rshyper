@@ -10,58 +10,31 @@
 //!
 //! ***
 //!
-//! Welcome to the `rshyper` crate - a Rust package providing a comprehensive framework for
-//! creating, manipulating, and analyzing hypergraphs using a myriad of mathematical and
-//! algorithmic techniques. The crate is designed to be flexible and modular enabled via heavy
-//! feature-gating throughout the framework.
-//!
-//! ## Background
-//!
-//! Before diving in to the technical side of things, let's start by defining several terms
-//! commonly used in the definition and implementation of hypergraphs.
-//!
-//! ### Terms
-//!
-//! - **edge:** a hyperedge is a generalization of an edge in a graph, allowing it to connect
-//!   any number of vertices.
-//! - **facet:** a facet, or surface, defines a weighted hyperedge composed of one or more
-//!   vertices.
-//! - **node** a node is a complete _vertex_ in that it is considered to be weighted.
-//! - **point:** here, a point is a synonym for a vertex, and is used to define the position of
-//!   a vertex within the hypergraph.
-//! - **surface:** a surface is a synonym for a facet, speaking to an edge and its associated
-//!   weight.
-//! - **vertex:** a vertex is an _unweighted_ node defining a point within the hypergraph.
-//!
-//! ### Hypergraphs
-//!
-//! A hypergraph is an abstraction of a graph that allows edges to connect any number of
-//! vertices. This flexible data-strcture is highly mathematical, yet, extremely useful in
-//! many applications such as database design, network analysis, combinatorial optimization,
-//! modeling topological spaces, and more.
-//!
-//! #### _Definition 1:_
-//! Formally, a directed hypergraph is a pair `H = (V,E)` where `V` is a set of vertices and
-//! `E` is a set of hyperedges. Each hyperedge `e ∈ E` is a subset of `V` that can contain
+//! Welcome to the `rshyper-hmap` crate! This package provides the [`HyperMap`] implementation,
+//! a map-based hypergraph structure designed for efficient storage and manipulation using the 
+//! native [`HashMap`](std::collections::HashMap) type.
+//! 
+//! - `N`: the type of weight associated with a hypernode
+//! - `E`: the type of weight associated with a hyperedge
+//! - `A`: the attributes of the hypergraph
+//!   - `A::Kind`: the _kind_ of hypergraph, either [`Directed`](rshyper_core::Directed) or [`Undirected`](rshyper_core::Undirected)
+//!   - `A::Ix`: the type of index used by components within the graph
+//! - `S`: the type of [`BuildHasher`](core::hash::BuildHasher) used for the underling stores
 //!
 //! ## Features
 //!
-//! - `hash_graph`: enables the [`HashGraph`] implementation, a hash-based hypergraph structure
+//! - `hyper_map`: enables the [`HyperMap`] implementation, a hash-based hypergraph structure
 //! - `macros`: enables the implemented macros for streamlining graph management
 //!
 //! ### _Dependencies_
 //!
-//! **Note:** While the `alloc` and `std` libraries are feature-gated, they are required for
-//! anything useful in this crate; both are enabled by default.
-//!
-//! - `anyhow`: enables the use of the `anyhow` crate for error handling
 //! - `rayon`: enables parallel processing capabilities using the `rayon` crate
 //! - `serde`: enables serialization and deserialization of hypergraphs using the `serde` crate
 //!
 //! ## Examples
 //!
 //! For more detailed examples, please refer to the [examples directory](https://github.com/FL03/rshyper/blob/main/rshyper/examples).
-//!
+//! 
 #![crate_type = "lib"]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg",
