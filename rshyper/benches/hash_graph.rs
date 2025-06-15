@@ -150,6 +150,16 @@ fn bench_hash_graph_search(c: &mut Criterion) {
 
 /// benchmarks for search algorithms in the [`HashGraph`] implementation.
 fn _bench_hash_graph_path_finders(c: &mut Criterion) {
+    
+
+    // a dummy hueristic function that returns a constant value
+    pub fn hue<T>(_a: VertexId, _b: VertexId) -> T
+    where
+        T: num_traits::One,
+    {
+        // a dummy heuristic function that returns a constant value
+        T::one()
+    }
     let mut group = c.benchmark_group("HashGraph::pathfinder");
     // set the sample size for the group
     group.sample_size(SAMPLES);
@@ -205,7 +215,7 @@ criterion::criterion_main! {
 #[cfg(feature = "rand")]
 mod ext {
     use rshyper::edge::generate_random_edge;
-    use rshyper::{HashGraph, IntoWeight, VertexId};
+    use rshyper::{HashGraph, IntoWeight};
 
     /// the duration, in seconds, for which the benchmarks should run
     pub const DURATION: u64 = 7;
@@ -252,14 +262,5 @@ mod ext {
         }
 
         graph
-    }
-
-    // a dummy hueristic function that returns a constant value
-    pub fn hue<T>(_a: VertexId, _b: VertexId) -> T
-    where
-        T: num_traits::One,
-    {
-        // a dummy heuristic function that returns a constant value
-        T::one()
     }
 }
