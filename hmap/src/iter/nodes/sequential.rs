@@ -4,7 +4,7 @@
 */
 //! this module implements sequential iterator for the [`HyperMap`](crate::HyperMap)
 //! which iterates over the nodes in the hypergraph in an ordered, sequential manner.
-use super::NodeIterValues;
+use super::Vertices;
 use core::hash::Hash;
 use rshyper_core::idx::{RawIndex, VertexId};
 use rshyper_core::node::Node;
@@ -16,8 +16,8 @@ where
     N: 'a,
     Idx: RawIndex + Eq + Hash,
 {
-    pub(crate) nodes: NodeIterValues<'a, N, Idx>,
-    pub(crate) verts: core::slice::Iter<'a, VertexId<Idx>>,
+    pub(crate) keys: core::slice::Iter<'a, VertexId<Idx>>,
+    pub(crate) values: Vertices<'a, N, Idx>,
 }
 
 /*
@@ -32,9 +32,9 @@ where
     type Item = &'a Node<N, Idx>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(next) = self.verts.next() {
+        if let Some(next) = self.keys.next() {
             // Find the node with the matching id in the nodes iterator
-            let node = self.nodes.find(|node| node.id() == next)?;
+            let node = self.values.find(|node| node.id() == next)?;
             // Return the found node
             return Some(node);
         }

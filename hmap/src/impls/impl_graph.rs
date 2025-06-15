@@ -2,7 +2,7 @@
     appellation: impl_graph <module>
     authors: @FL03
 */
-use crate::{HashFacet, HyperMap};
+use crate::{HashSurface, HyperMap};
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::idx::{EdgeId, RawIndex, VertexId, VertexSet};
 use rshyper_core::{AddStep, GraphAttributes, GraphType};
@@ -30,7 +30,7 @@ where
     /// surface is empty or if the associated edge id is not recorded in the history.
     pub(crate) fn add_hyperedge(
         &mut self,
-        surface: HashFacet<E, K, Idx, S>,
+        surface: HashSurface<E, K, Idx, S>,
     ) -> HyperResult<EdgeId<Idx>>
     where
         Idx: Clone,
@@ -319,7 +319,7 @@ where
         self.get_node_mut(index).map(|node| node.weight_mut())
     }
     /// returns an immutable reference to the [`HashFacet`] associated with the given index
-    pub fn get_surface<Q>(&self, index: &Q) -> HyperResult<&HashFacet<E, K, Idx, S>>
+    pub fn get_surface<Q>(&self, index: &Q) -> HyperResult<&HashSurface<E, K, Idx, S>>
     where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -329,7 +329,7 @@ where
             .ok_or_else(|| HyperError::EdgeNotFound)
     }
     /// returns a mutable reference to the [`HashFacet`] associated with the given index
-    pub fn get_surface_mut<Q>(&mut self, index: &Q) -> HyperResult<&mut HashFacet<E, K, Idx, S>>
+    pub fn get_surface_mut<Q>(&mut self, index: &Q) -> HyperResult<&mut HashSurface<E, K, Idx, S>>
     where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -433,7 +433,7 @@ where
         feature = "tracing",
         tracing::instrument(skip_all, name = "remove_surface", target = "hash_graph")
     )]
-    pub fn remove_surface<Q>(&mut self, index: &Q) -> HyperResult<HashFacet<E, K, Idx, S>>
+    pub fn remove_surface<Q>(&mut self, index: &Q) -> HyperResult<HashSurface<E, K, Idx, S>>
     where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -460,7 +460,7 @@ where
     /// retain surfaces in the hypergraph based on a predicate;
     pub fn retain_surfaces<F>(&mut self, f: F) -> &mut Self
     where
-        F: FnMut(&EdgeId<Idx>, &mut HashFacet<E, K, Idx, S>) -> bool,
+        F: FnMut(&EdgeId<Idx>, &mut HashSurface<E, K, Idx, S>) -> bool,
     {
         self.surfaces_mut().retain(f);
         self

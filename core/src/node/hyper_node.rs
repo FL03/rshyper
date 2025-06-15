@@ -94,11 +94,6 @@ where
     pub const fn weight_mut(&mut self) -> &mut Weight<T> {
         &mut self.weight
     }
-    /// update the node id and return a mutable reference to the current instance.
-    pub fn set_id(&mut self, id: VertexId<Idx>) -> &mut Self {
-        self.id = id;
-        self
-    }
     /// update the weight and return a mutable reference to the current instance.
     pub fn set_weight(&mut self, weight: T) -> &mut Self {
         self.weight_mut().set(weight);

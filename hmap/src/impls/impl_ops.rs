@@ -2,7 +2,7 @@
     appellation: impl_ops <module>
     authors: @FL03
 */
-use crate::{HashFacet, HyperMap};
+use crate::{HashSurface, HyperMap};
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::idx::{EdgeId, NumIndex, RawIndex, VertexId};
 use rshyper_core::node::Node;
@@ -75,7 +75,7 @@ where
     Idx: RawIndex + Eq + Hash,
     S: BuildHasher,
 {
-    type Output = HashFacet<E, K, Idx, S>;
+    type Output = HashSurface<E, K, Idx, S>;
 
     fn index(&self, index: &EdgeId<Idx>) -> &Self::Output {
         self.get_surface(index).expect("Edge not found")

@@ -9,7 +9,7 @@ use rshyper_hmap::HyperMap;
 use std::collections::HashSet;
 
 #[test]
-fn test_hash_graph_error() -> HyperResult<()> {
+fn test_error() -> HyperResult<()> {
     // initialize a new, undirected hash-graph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // try adding an empty edge
@@ -21,7 +21,7 @@ fn test_hash_graph_error() -> HyperResult<()> {
 }
 
 #[test]
-fn test_hash_graph() -> HyperResult<()> {
+fn test_hyper_map() -> HyperResult<()> {
     let mut graph = HyperMap::<usize, usize>::undirected();
     // Add nodes with weights
     let v0 = graph.add_node(10.into_weight())?;
@@ -59,7 +59,7 @@ fn test_hash_graph() -> HyperResult<()> {
 }
 
 #[test]
-fn test_merge_hash_edge() -> HyperResult<()> {
+fn test_merge_edges() -> HyperResult<()> {
     // initialize a new, undirected hash-graph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // add some nodes with weights
@@ -84,7 +84,7 @@ fn test_merge_hash_edge() -> HyperResult<()> {
 }
 
 #[test]
-fn test_update_hash_node() -> HyperResult<()> {
+fn test_node_mut() -> HyperResult<()> {
     // initialize a new, undirected hash-graph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // add a node using the default weight
@@ -100,7 +100,7 @@ fn test_update_hash_node() -> HyperResult<()> {
 }
 
 #[test]
-fn test_remove_hash_edges() -> HyperResult<()> {
+fn test_remove_edge() -> HyperResult<()> {
     // initialize a new, undirected hash-graph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // add some vertices
@@ -121,7 +121,7 @@ fn test_remove_hash_edges() -> HyperResult<()> {
 }
 
 #[test]
-fn hash_graph_iter() -> HyperResult<()> {
+fn test_seq_iter() -> HyperResult<()> {
     // initialize a new undirected hash graph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // add some nodes
@@ -139,13 +139,22 @@ fn hash_graph_iter() -> HyperResult<()> {
     let e3 = graph.add_edge([v3, v4])?;
     let e4 = graph.add_edge([v4, v5])?;
     // get a sequential iterator over the nodes
-    let node_iter = graph.iter_nodes_seq();
+    let iter = graph.iter_nodes_seq();
     // create an array of ids in the order they should be produced
-    let verts = [v0, v1, v2, v3, v4, v5, v6];
+    let exp = [v0, v1, v2, v3, v4, v5, v6];
     // ensure each element is produced
-    for (i, node) in node_iter.enumerate() {
+    for (i, val) in iter.enumerate() {
         // verify the nodes are in the correct order
-        assert_eq!(node.id(), &verts[i]);
+        assert_eq!(val.id(), &exp[i]);
+    }
+    // get a sequential iterator over the edges
+    let iter = graph.iter_edges_seq();
+    // create an array of ids in the order they should be produced
+    let exp = [e0, e1, e2, e3, e4];
+    // ensure each element is produced
+    for (i, val) in iter.enumerate() {
+        // verify the nodes are in the correct order
+        assert_eq!(val.id(), &exp[i]);
     }
     // finish
     Ok(())

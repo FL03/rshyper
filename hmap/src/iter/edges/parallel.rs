@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use super::surface::{Edges, SurfaceIter, SurfaceIterMut};
-use crate::types::HashFacet;
+use crate::types::HashSurface;
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::GraphType;
 use rshyper_core::idx::{EdgeId, RawIndex};
@@ -67,7 +67,7 @@ where
     Idx: RawIndex + Eq + Hash + Send + Sync,
     S: BuildHasher + Send + Sync,
 {
-    type Item = (&'a EdgeId<Idx>, &'a HashFacet<E, K, Idx, S>);
+    type Item = (&'a EdgeId<Idx>, &'a HashSurface<E, K, Idx, S>);
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
@@ -84,7 +84,7 @@ where
     Idx: RawIndex + Eq + Hash + Send + Sync,
     S: BuildHasher + Send + Sync,
 {
-    type Item = (&'a EdgeId<Idx>, &'a mut HashFacet<E, K, Idx, S>);
+    type Item = (&'a EdgeId<Idx>, &'a mut HashSurface<E, K, Idx, S>);
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
@@ -104,7 +104,7 @@ where
     Idx: RawIndex + Eq + Hash + Send + Sync,
     S: BuildHasher + Send + Sync,
 {
-    type Item = (&'a EdgeId<Idx>, &'a HashFacet<E, K, Idx, S>);
+    type Item = (&'a EdgeId<Idx>, &'a HashSurface<E, K, Idx, S>);
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
@@ -121,7 +121,7 @@ where
     Idx: RawIndex + Eq + Hash + Send + Sync,
     S: BuildHasher + Send + Sync,
 {
-    type Item = (&'a EdgeId<Idx>, &'a mut HashFacet<E, K, Idx, S>);
+    type Item = (&'a EdgeId<Idx>, &'a mut HashSurface<E, K, Idx, S>);
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where

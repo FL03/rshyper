@@ -2,7 +2,7 @@
     appellation: impl_hyper_graph <module>
     authors: @FL03
 */
-use crate::{HashFacet, HyperMap, iter};
+use crate::{HashSurface, HyperMap, iter};
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::idx::{EdgeId, NumIndex, VertexId};
 use rshyper_core::prelude::{GraphAttributes, HyperResult, Node, VertexSet, Weight};
@@ -14,7 +14,7 @@ where
     S: BuildHasher,
 {
     type Node<N2> = Node<N2, A::Ix>;
-    type Edge<E2> = HashFacet<E2, A::Kind, A::Ix, S>;
+    type Edge<E2> = HashSurface<E2, A::Kind, A::Ix, S>;
 }
 
 impl<N, E, A, S> HyperGraph<N, E, A> for HyperMap<N, E, A, S>
@@ -58,14 +58,14 @@ where
         self.get_node_mut(index).ok()
     }
 
-    fn get_surface(&self, index: &EdgeId<A::Ix>) -> Option<&HashFacet<E, A::Kind, A::Ix, S>> {
+    fn get_surface(&self, index: &EdgeId<A::Ix>) -> Option<&HashSurface<E, A::Kind, A::Ix, S>> {
         self.get_surface(index).ok()
     }
 
     fn get_surface_mut(
         &mut self,
         index: &EdgeId<A::Ix>,
-    ) -> Option<&mut HashFacet<E, A::Kind, A::Ix, S>> {
+    ) -> Option<&mut HashSurface<E, A::Kind, A::Ix, S>> {
         self.get_surface_mut(index).ok()
     }
 
@@ -96,7 +96,7 @@ where
         Self: 'a,
         Self::Node<N>: 'a;
     type Verts<'a>
-        = iter::Vertices<'a, N, A::Ix>
+        = iter::Points<'a, N, A::Ix>
     where
         Self: 'a;
 
@@ -105,7 +105,7 @@ where
     }
 
     fn vertices(&self) -> Self::Verts<'_> {
-        self.vertices()
+        self.points()
     }
 }
 
@@ -134,6 +134,6 @@ where
     }
 
     fn edges(&self) -> Self::Edges<'_> {
-        self.surface_keys()
+        self.edges()
     }
 }

@@ -5,13 +5,22 @@
 //! this module provides various iterators over the nodes of a hypergraph, allowing users to
 //! traverse sequentially, directionally, or even in parallel.
 #[doc(inline)]
-#[cfg(feature = "rayon")]
-pub use self::parallel::*;
-#[doc(inline)]
-pub use self::{directional::*, node::*, sequential::*};
+pub use self::prelude::*;
 
 mod directional;
+mod node;
+#[cfg(feature = "rayon")]
 mod parallel;
 mod sequential;
 
-mod node;
+mod prelude {
+    #[doc(inline)]
+    pub use super::directional::*;
+    #[doc(inline)]
+    pub use super::node::*;
+    #[doc(inline)]
+    #[cfg(feature = "rayon")]
+    pub use super::parallel::*;
+    #[doc(inline)]
+    pub use super::sequential::*;
+}

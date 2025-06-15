@@ -15,7 +15,7 @@ use std::hash::RandomState;
 /// a type alias for a [`Edge`] with [`VertexSet`] as its vertices
 pub type HashEdge<K, I = usize, S = RandomState> = Edge<VertexSet<I, S>, K, I>;
 /// a type alias for a [`Surface`] with [`VertexSet`] as its vertices
-pub type HashFacet<E, K, I = usize, S = RandomState> = Surface<E, VertexSet<I, S>, K, I>;
+pub type HashSurface<E, K, I = usize, S = RandomState> = Surface<E, VertexSet<I, S>, K, I>;
 
 /// a type alias for a [`Entry`] that maps [`VertexId`] to a [`HyperNode`]
 pub type NodeEntry<'a, N, I = usize> = Entry<'a, VertexId<I>, Node<N, I>>;
@@ -23,12 +23,14 @@ pub type NodeEntry<'a, N, I = usize> = Entry<'a, VertexId<I>, Node<N, I>>;
 pub type NodeMap<N, I, S = RandomState> = HashMap<VertexId<I>, Node<N, I>, S>;
 
 /// a type alias for a [`HashMap`] that maps [`EdgeId`] to a [`HashFacet`]
-pub type SurfaceMap<E, K, I, S = RandomState> = HashMap<EdgeId<I>, HashFacet<E, K, I, S>, S>;
+pub type SurfaceMap<E, K, I, S = RandomState> = HashMap<EdgeId<I>, HashSurface<E, K, I, S>, S>;
 /// a type alias for a [`Entry`] that maps [`EdgeId`] to a [`VertexSet`]
-pub type SurfaceEntry<'a, T, K, I, S = RandomState> = Entry<'a, EdgeId<I>, HashFacet<T, K, I, S>>;
+pub type SurfaceEntry<'a, T, K, I, S = RandomState> = Entry<'a, EdgeId<I>, HashSurface<T, K, I, S>>;
 
 #[allow(deprecated)]
 mod impl_deprecated {
+    #[deprecated(since = "0.1.3", note = "use `HashSurface` instead")]
+    pub type HashFacet<E, K, I, S> = super::HashSurface<E, K, I, S>;
     #[deprecated(since = "0.1.3", note = "use `HyperMap` instead")]
     pub type HashGraph<N, E, A, S> = crate::HyperMap<N, E, A, S>;
     #[deprecated(since = "0.1.3", note = "use `DiHyperMap` instead")]
