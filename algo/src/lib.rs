@@ -96,22 +96,17 @@ pub mod traits {
 }
 
 #[doc(hidden)]
+#[allow(missing_docs)]
 pub mod prelude {
-    #[doc(inline)]
     pub use super::error::AlgoError;
     #[doc(inline)]
     pub use super::traits::prelude::*;
-
-    #[doc(inline)]
     #[cfg(feature = "std")]
     pub use super::astar::AStarSearch;
-    #[doc(inline)]
     #[cfg(feature = "std")]
     pub use super::breadth_first::BreadthFirstTraversal;
-    #[doc(inline)]
     #[cfg(feature = "std")]
     pub use super::depth_first::DepthFirstTraversal;
-    #[doc(inline)]
     #[cfg(feature = "std")]
     pub use super::dijkstra::Dijkstra;
 }

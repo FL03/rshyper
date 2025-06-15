@@ -102,6 +102,11 @@ pub use self::hyper_map::{DiHyperMap, HyperMap, UnHyperMap};
 #[doc(inline)]
 pub use rshyper_core::*;
 
+#[allow(deprecated)]
+#[cfg(feature = "hyper_map")]
+#[deprecated(since = "0.1.3", note = "use `HyperMap` instead")]
+pub use self::hyper_map::{DiHashGraph, HashGraph, UnHashGraph};
+
 /*
  ************* FEATURE-GATED MODULES *************
 */
@@ -120,10 +125,9 @@ pub use rshyper_hmap as hyper_map;
  ************* PRELUDE *************
 */
 
-/// the prelude module for the crate contains all commonly used traits, types, and functions
+#[doc(hidden)]
 #[allow(missing_docs)]
 pub mod prelude {
-    // pub use super::error::*;
     pub use rshyper_core::prelude::*;
 
     #[cfg(feature = "macros")]

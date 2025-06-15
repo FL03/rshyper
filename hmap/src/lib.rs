@@ -142,6 +142,7 @@ pub mod types {
 }
 
 #[doc(hidden)]
+#[allow(missing_docs)]
 pub mod prelude {
     #[doc(inline)]
     pub use super::graph::*;
