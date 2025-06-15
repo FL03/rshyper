@@ -28,12 +28,12 @@ license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/FL03/rshyper.git"
 rust-version = "1.85.0"
-version = "0.1.2"
+version = "0.1.3"
 
 [workspace.dependencies]
 # local
-rshyper = { default-features = false, path = "rshyper", version = "0.1.2" }
-rshyper-core = { default-features = false, path = "core", version = "0.1.2" }
+rshyper = { default-features = false, path = "rshyper", version = "0.1.3" }
+rshyper-core = { default-features = false, path = "core", version = "0.1.3" }
 # custom
 scsys = { default-features = false, features = ["derive"], version = "0.3.0" }
 # benchmarking
