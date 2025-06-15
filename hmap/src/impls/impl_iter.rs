@@ -8,11 +8,10 @@ use crate::iter::*;
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::{GraphAttributes, GraphType, RawIndex};
 
+/// implements various iterators for the [`HyperMap`]
 impl<N, E, A, S, K, Idx> HyperMap<N, E, A, S>
 where
-    N: Eq + Hash,
-    E: Eq + Hash,
-    S: BuildHasher + Default,
+    S: BuildHasher,
     A: GraphAttributes<Kind = K, Ix = Idx>,
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
@@ -86,16 +85,16 @@ where
         }
     }
     /// returns a sequential iterator over the edges of the hypergraph
-    pub fn iter_edges_seq(&self) -> SeqEdgeIter<'_, E, K, Idx, S> {
-        SeqEdgeIter {
+    pub fn iter_seq_facets(&self) -> SeqFacetIter<'_, E, K, Idx, S> {
+        SeqFacetIter {
             values: self.facets(),
             keys: self.history().edges().iter(),
         }
     }
-    /// returns a sequential iterator over the nodes of the hypergraph, yielding pairs of
-    /// [`VertexId`](rshyper_core::VertexId) and the corresponding [`Node`](rshyper_core::Node).
-    pub fn iter_nodes_seq(&self) -> SeqNodeIter<'_, N, Idx> {
-        SeqNodeIter {
+    /// returns a sequential iterator over the nodes of the hypergraph producing items of type
+    /// [`Node`](rshyper_core::Node) in the order they were inserted.
+    pub fn iter_seq_vertices(&self) -> SeqVertexIter<'_, N, Idx> {
+        SeqVertexIter {
             values: self.vertices(),
             keys: self.history().nodes().iter(),
         }

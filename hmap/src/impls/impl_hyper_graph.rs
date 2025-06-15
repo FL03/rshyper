@@ -13,8 +13,8 @@ where
     A: GraphAttributes,
     S: BuildHasher,
 {
-    type Node<N2> = Node<N2, A::Ix>;
-    type Edge<E2> = HashSurface<E2, A::Kind, A::Ix, S>;
+    type Node<_N> = Node<_N, A::Ix>;
+    type Edge<_E> = HashSurface<_E, A::Kind, A::Ix, S>;
 }
 
 impl<N, E, A, S> HyperGraph<N, E, A> for HyperMap<N, E, A, S>

@@ -139,7 +139,7 @@ fn test_seq_iter() -> HyperResult<()> {
     let e3 = graph.add_edge([v3, v4])?;
     let e4 = graph.add_edge([v4, v5])?;
     // get a sequential iterator over the nodes
-    let iter = graph.iter_nodes_seq();
+    let iter = graph.iter_seq_vertices();
     // create an array of ids in the order they should be produced
     let exp = [v0, v1, v2, v3, v4, v5, v6];
     // ensure each element is produced
@@ -148,7 +148,7 @@ fn test_seq_iter() -> HyperResult<()> {
         assert_eq!(val.id(), &exp[i]);
     }
     // get a sequential iterator over the edges
-    let iter = graph.iter_edges_seq();
+    let iter = graph.iter_seq_facets();
     // create an array of ids in the order they should be produced
     let exp = [e0, e1, e2, e3, e4];
     // ensure each element is produced

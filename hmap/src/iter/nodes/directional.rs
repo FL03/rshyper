@@ -1,3 +1,7 @@
+/*
+    appellation: directional <nodes>
+    authors: @FL03
+*/
 use core::hash::Hash;
 use rshyper_core::Node;
 use rshyper_core::idx::{RawIndex, VertexId};

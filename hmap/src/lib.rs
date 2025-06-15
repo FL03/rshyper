@@ -72,6 +72,9 @@ pub use self::{graph::*, types::prelude::*};
 pub mod graph;
 
 mod impls {
+
+    #[cfg(feature = "algo")]
+    pub mod impl_algo;
     pub mod impl_graph;
     pub mod impl_hyper_graph;
     pub mod impl_iter;

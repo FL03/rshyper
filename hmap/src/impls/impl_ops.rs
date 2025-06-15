@@ -8,35 +8,6 @@ use rshyper_core::idx::{EdgeId, NumIndex, RawIndex, VertexId};
 use rshyper_core::node::Node;
 use rshyper_core::{Combine, GraphAttributes, GraphType, HyperResult};
 
-/// implementations for various algorithms and operators on the hypergraph
-#[cfg(feature = "algo")]
-impl<N, E, A, S> HyperMap<N, E, A, S>
-where
-    S: BuildHasher + Default,
-    A: GraphAttributes,
-    A::Ix: NumIndex + Eq + Hash,
-{
-    /// search the hypergraph using the A* algorithm with the given heuristic function
-    pub fn astar<F>(&self, heuristic: F) -> algo::AStarSearch<'_, N, E, A, F, Self>
-    where
-        F: algo::Heuristic<A::Ix, Output = f64>,
-    {
-        algo::AStarSearch::new(self, heuristic)
-    }
-    /// search the hypergraph using the breadth-first traversal algorithm
-    pub fn bft(&self) -> algo::BreadthFirstTraversal<'_, N, E, A, Self> {
-        algo::BreadthFirstTraversal::new(self)
-    }
-    /// search the hypergraph using the depth-first traversal algorithm
-    pub fn dft(&self) -> algo::DepthFirstTraversal<'_, N, E, A, Self> {
-        algo::DepthFirstTraversal::new(self)
-    }
-    /// returns a new instance of the Dijkstra's algorithm for the hypergraph
-    pub fn dijkstra(&self) -> algo::Dijkstra<'_, N, E, A, Self> {
-        algo::Dijkstra::new(self)
-    }
-}
-
 impl<N, E, A, S, K, Idx> Combine<EdgeId<Idx>, EdgeId<Idx>> for HyperMap<N, E, A, S>
 where
     A: GraphAttributes<Ix = Idx, Kind = K>,
