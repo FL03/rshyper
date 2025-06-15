@@ -30,12 +30,12 @@
 ///     }
 /// }
 /// ```
-/// 
-/// or 
-/// 
+///
+/// or
+///
 /// ```rust
 /// use rshyper::UnHyperMap;
-/// 
+///
 /// // use the macro to initialize a new hypergraph
 /// rshyper::hypergraph! {
 ///     let mut graph: UnHyperMap::<usize, usize> {

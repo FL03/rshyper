@@ -3,6 +3,7 @@
     authors: @FL03
 */
 use super::WeightAst;
+use quote::ToTokens;
 use syn::parse::{Parse, ParseStream};
 use syn::token;
 use syn::{Attribute, Ident};
@@ -35,6 +36,13 @@ impl Parse for VertexAst {
         let key = input.parse()?;
 
         Ok(Self { let_token, key })
+    }
+}
+
+impl ToTokens for VertexAst {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        self.let_token.to_tokens(tokens);
+        self.key.to_tokens(tokens);
     }
 }
 

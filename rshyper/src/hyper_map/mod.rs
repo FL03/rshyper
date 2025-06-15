@@ -16,6 +16,7 @@ pub mod graph;
 
 mod impls {
     pub mod impl_graph;
+    pub mod impl_hyper_graph;
     pub mod impl_iter;
     pub mod impl_ops;
     pub mod impl_repr;
@@ -42,16 +43,12 @@ pub mod iter {
     }
 }
 pub(crate) mod aliases {
+    /// privately redeclare the [`VertexSet`] type from [`rshyper_core`]
+    pub(crate) use rshyper_core::VertexSet;
     use rshyper_core::idx::{EdgeId, VertexId};
     use rshyper_core::{Edge, Node, Surface};
-    use std::collections::{
-        HashSet,
-        hash_map::{Entry, HashMap},
-    };
+    use std::collections::hash_map::{Entry, HashMap};
     use std::hash::RandomState;
-
-    /// a type alias for a [`HashSet`] of [`VertexId`]
-    pub type VertexSet<I = usize, S = RandomState> = HashSet<VertexId<I>, S>;
 
     /// a type alias for a [`Edge`] with [`VertexSet`] as its vertices
     pub type HashEdge<K, I = usize, S = RandomState> = Edge<VertexSet<I, S>, K, I>;

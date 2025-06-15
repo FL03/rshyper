@@ -27,7 +27,10 @@ where
 {
     /// initialize a new instance with the given index and weight
     pub const fn new(id: VertexId<Idx>, weight: T) -> Self {
-        Self { id, weight: Weight(weight) }
+        Self {
+            id,
+            weight: Weight(weight),
+        }
     }
     /// returns a new weighted node using the given value and the logical default for the index
     pub fn from_id(index: VertexId<Idx>) -> Self

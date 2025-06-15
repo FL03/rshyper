@@ -2,14 +2,12 @@
     Appellation: graph <module>
     Contrib: @FL03
 */
-use rshyper::HyperMap;
+use rshyper::UnHyperMap;
 
 fn main() -> rshyper::HyperResult<()> {
-    // initialize a new instance of a hypergraph
-    let mut graph = HyperMap::<usize, usize>::undirected();
     // use the macro to insert nodes into the graph
     rshyper::hypergraph! {
-        graph {
+        let mut graph: UnHyperMap::<usize, usize> {
             nodes: {
                 let v0;
                 let v1 = 2;

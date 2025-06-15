@@ -7,11 +7,8 @@
 use super::aliases::*;
 
 use rshyper_core::attrs::{DiAttributes, GraphAttributes, UnAttributes};
-use rshyper_core::idx::{EdgeId, Frame, IndexTracker, NumIndex, RawIndex, VertexId};
-use rshyper_core::prelude::{GraphType, HyperResult, Mode, Node, Weight};
-use rshyper_core::traits::{
-    AddStep, HyperGraph, HyperGraphIterEdge, HyperGraphIterNode, RawHyperGraph,
-};
+use rshyper_core::idx::{EdgeId, Frame, IndexTracker, RawIndex, VertexId};
+use rshyper_core::prelude::{AddStep, GraphType, Mode};
 
 use core::hash::{BuildHasher, Hash};
 use std::hash::RandomState;
@@ -85,7 +82,7 @@ where
     }
     /// returns a copy of the graph attributes; almost never used, however, it is useful for
     /// extracting certain truths about the hypergraph.
-    pub const fn attrs(&self) -> A {
+    pub(crate) const fn attrs(&self) -> A {
         self.attrs
     }
     /// returns the [`Mode`] of the hypergraph
@@ -185,9 +182,9 @@ where
     /// returns true if the vertex is contained in the hyperedge with the given id
     #[cfg_attr(
         feature = "tracing",
-        tracing::instrument(skip_all, name = "is_vertex_in_edge", target = "hash_graph")
+        tracing::instrument(skip_all, target = "hash_graph")
     )]
-    pub fn contains_node_in_edge<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
+    pub fn is_node_in_domain<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
     where
         Idx: Eq + Hash,
         Q: Eq + Hash + ?Sized,
@@ -199,16 +196,6 @@ where
             return surface.contains(vertex);
         }
         false
-    }
-    #[doc(hidden)]
-    #[deprecated(since = "0.1.2", note = "use `contains_edge` instead")]
-    pub fn contains_surface<Q>(&self, index: &Q) -> bool
-    where
-        Idx: Eq + Hash,
-        Q: Eq + Hash + ?Sized,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-    {
-        self.surfaces().contains_key(index)
     }
     /// returns true if the hypergraph is empty, meaning it has no edges, facets, or nodes
     pub fn is_empty(&self) -> bool {
@@ -299,132 +286,58 @@ where
     }
 }
 
-impl<N, E, A, S> RawHyperGraph<A> for HyperMap<N, E, A, S>
+#[doc(hidden)]
+#[allow(deprecated)]
+impl<N, E, A, S, Idx, K> HyperMap<N, E, A, S>
 where
-    A: GraphAttributes,
+    A: GraphAttributes<Kind = K, Ix = Idx>,
     S: BuildHasher,
+    Idx: RawIndex,
+    K: GraphType,
 {
-    type Node<N2> = Node<N2, A::Ix>;
-    type Edge<E2> = HashFacet<E2, A::Kind, A::Ix, S>;
-}
-
-impl<N, E, A, S> HyperGraph<N, E, A> for HyperMap<N, E, A, S>
-where
-    A: GraphAttributes,
-    S: BuildHasher + Default,
-    A::Ix: NumIndex,
-{
-    fn add_node(&mut self, weight: Weight<N>) -> HyperResult<VertexId<A::Ix>> {
-        self.add_node(weight)
-    }
-
-    fn add_surface<I>(&mut self, iter: I, weight: Weight<E>) -> HyperResult<EdgeId<A::Ix>>
+    #[deprecated(since = "0.1.3", note = "use is_node_in_domain` instead")]
+    pub fn contains_node_in_edge<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
     where
-        I: IntoIterator<Item = VertexId<A::Ix>>,
+        A::Ix: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
+        Q2: Eq + Hash,
+        EdgeId<A::Ix>: core::borrow::Borrow<Q>,
+        VertexId<A::Ix>: core::borrow::Borrow<Q2>,
     {
-        self.add_surface(iter, weight)
+        if let Some(surface) = self.surfaces().get(index) {
+            return surface.contains(vertex);
+        }
+        false
     }
-
-    fn get_edge_domain(&self, index: &EdgeId<A::Ix>) -> Option<&VertexSet<A::Ix, S>> {
-        self.get_edge_vertices(index).ok()
-    }
-
-    fn get_edge_domain_mut(&mut self, index: &EdgeId<A::Ix>) -> Option<&mut VertexSet<A::Ix, S>> {
-        self.get_edge_vertices_mut(index).ok()
-    }
-
-    fn get_edge_weight(&self, index: &EdgeId<A::Ix>) -> Option<&Weight<E>> {
-        self.get_edge_weight(index).ok()
-    }
-
-    fn get_edge_weight_mut(&mut self, index: &EdgeId<A::Ix>) -> Option<&mut Weight<E>> {
-        self.get_edge_weight_mut(index).ok()
-    }
-
-    fn get_node(&self, index: &VertexId<A::Ix>) -> Option<&Node<N, A::Ix>> {
-        self.get_node(index).ok()
-    }
-
-    fn get_node_mut(&mut self, index: &VertexId<A::Ix>) -> Option<&mut Node<N, A::Ix>> {
-        self.get_node_mut(index).ok()
-    }
-
-    fn get_surface(&self, index: &EdgeId<A::Ix>) -> Option<&HashFacet<E, A::Kind, A::Ix, S>> {
-        self.get_surface(index).ok()
-    }
-
-    fn get_surface_mut(
-        &mut self,
-        index: &EdgeId<A::Ix>,
-    ) -> Option<&mut HashFacet<E, A::Kind, A::Ix, S>> {
-        self.get_surface_mut(index).ok()
-    }
-
-    fn contains_edge(&self, index: &EdgeId<A::Ix>) -> bool {
-        self.contains_edge(index)
-    }
-
-    fn contains_node(&self, index: &VertexId<A::Ix>) -> bool {
-        self.contains_node(index)
-    }
-
-    fn find_edges_with_node(&self, index: &VertexId<A::Ix>) -> Vec<EdgeId<A::Ix>> {
-        self.find_edges_with_node(index).unwrap_or_default()
-    }
-}
-
-impl<N, E, A, S> HyperGraphIterNode<N, E, A> for HyperMap<N, E, A, S>
-where
-    A: GraphAttributes,
-    S: BuildHasher + Default,
-    E: Eq + Hash,
-    N: Eq + Hash,
-    A::Ix: NumIndex,
-{
-    type Nodes<'a>
-        = super::NodeIter<'a, N, A::Ix>
+    #[doc(hidden)]
+    #[deprecated(since = "0.1.2", note = "use `contains_edge` instead")]
+    pub fn contains_surface<Q>(&self, index: &Q) -> bool
     where
-        Self: 'a,
-        Self::Node<N>: 'a;
-    type Verts<'a>
-        = super::Vertices<'a, N, A::Ix>
-    where
-        Self: 'a;
-
-    fn iter_nodes(&self) -> Self::Nodes<'_> {
-        self.node_iter()
+        A::Ix: Eq + Hash,
+        Q: Eq + Hash + ?Sized,
+        EdgeId<A::Ix>: core::borrow::Borrow<Q>,
+    {
+        self.surfaces().contains_key(index)
     }
-
-    fn vertices(&self) -> Self::Verts<'_> {
-        self.vertices()
+    #[deprecated(
+        note = "use `size` instead; this method will be removed in a future release",
+        since = "0.1.2"
+    )]
+    pub fn total_edges(&self) -> usize {
+        self.surfaces().len()
     }
-}
-
-impl<N, E, A, S> HyperGraphIterEdge<N, E, A> for HyperMap<N, E, A, S>
-where
-    A: GraphAttributes,
-    S: BuildHasher + Default,
-    E: Eq + Hash,
-    N: Eq + Hash,
-    A::Ix: NumIndex,
-{
-    type Surfaces<'a>
-        = super::SurfaceIter<'a, E, A::Kind, A::Ix, S>
-    where
-        Self: 'a,
-        Self::Edge<E>: 'a;
-
-    type Edges<'a>
-        = super::Edges<'a, E, A::Kind, A::Ix, S>
-    where
-        Self: 'a,
-        Self::Edge<E>: 'a;
-
-    fn iter_surfaces(&self) -> Self::Surfaces<'_> {
-        self.surface_iter()
+    #[deprecated(
+        note = "use `order` instead; this method will be removed in a future release",
+        since = "0.1.2"
+    )]
+    pub fn total_nodes(&self) -> usize {
+        self.nodes().len()
     }
-
-    fn edges(&self) -> Self::Edges<'_> {
-        self.surface_keys()
+    #[deprecated(
+        note = "use `order` instead; this method will be removed in a future release",
+        since = "0.1.0"
+    )]
+    pub fn total_vertices(&self) -> usize {
+        self.order()
     }
 }

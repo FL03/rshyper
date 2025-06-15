@@ -82,6 +82,15 @@ pub mod types {
         pub type EdgeId<T = Udx> = IndexBase<T, EdgeIndex>;
         /// a type alias for an [`Index`] whose _kind_ is [`VertexIndex`]
         pub type VertexId<T = Udx> = IndexBase<T, VertexIndex>;
+        #[cfg(feature = "alloc")]
+        /// a type alias for a [`Vec`](alloc::vec::Vec) of [`VertexId`] that is generic over
+        /// the index type `I`
+        pub type VertexVec<I = usize> = alloc::vec::Vec<VertexId<I>>;
+        #[cfg(feature = "std")]
+        /// a type alias for a [`HashSet`](std::collections::HashSet) of [`VertexId`] that is generic over
+        /// the index type `I`
+        pub type VertexSet<I = usize, S = std::hash::RandomState> =
+            std::collections::HashSet<VertexId<I>, S>;
     }
 }
 
@@ -93,5 +102,5 @@ pub(crate) mod prelude {
     #[doc(inline)]
     pub use super::traits::{NumIndex, RawIndex};
     #[doc(inline)]
-    pub use super::types::prelude::{EdgeId, Udx, VertexId};
+    pub use super::types::prelude::*;
 }

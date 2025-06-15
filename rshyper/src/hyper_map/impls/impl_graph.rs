@@ -498,33 +498,3 @@ where
         Ok(self)
     }
 }
-
-#[allow(deprecated)]
-#[doc(hidden)]
-impl<N, E, A, S> HyperMap<N, E, A, S>
-where
-    A: GraphAttributes,
-    S: BuildHasher,
-{
-    #[deprecated(
-        note = "use `size` instead; this method will be removed in a future release",
-        since = "0.1.2"
-    )]
-    pub fn total_edges(&self) -> usize {
-        self.surfaces().len()
-    }
-    #[deprecated(
-        note = "use `order` instead; this method will be removed in a future release",
-        since = "0.1.2"
-    )]
-    pub fn total_nodes(&self) -> usize {
-        self.nodes().len()
-    }
-    #[deprecated(
-        note = "use `order` instead; this method will be removed in a future release",
-        since = "0.1.0"
-    )]
-    pub fn total_vertices(&self) -> usize {
-        self.order()
-    }
-}
