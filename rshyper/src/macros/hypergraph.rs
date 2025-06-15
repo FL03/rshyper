@@ -65,18 +65,18 @@ macro_rules! hypergraph {
 /// }
 /// ```
 ///
-/// ## Example
+/// ## Basic Usage
 ///
 /// ```rust
-/// use rshyper::{HyperMap, Weight};
+/// use rshyper::{HyperMap, IntoWeight};
 ///
-/// fn main() -> rshyper::Result<()> {
+/// fn main() -> rshyper::HyperResult<()> {
 ///     // initialize a new undirected hypergraph
 ///     let mut graph = HyperMap::<usize, usize>::undirected();
-///     // insert some vertices
-///     let v0 = graph.add_node(Weight(1))?;
-///     let v1 = graph.add_node(Weight(2))?;
-///     let v2 = graph.add_node(Weight(3))?;
+///     // add some vertices
+///     let v0 = graph.add_node(1.into_weight())?;
+///     let v1 = graph.add_node(2.into_weight())?;
+///     let v2 = graph.add_node(3.into_weight())?;
 ///     // use the macro to insert edges into the graph
 ///     rshyper::hyperedge! {
 ///         graph {
@@ -90,7 +90,7 @@ macro_rules! hypergraph {
 ///     // verify the weights of the edges
 ///     assert_eq!(graph.get_edge_weight(&e0)?, &<usize>::default());
 ///     assert_eq!(graph.get_edge_weight(&e1)?, &10);
-///
+///     // finish
 ///     Ok(())
 /// }
 /// ```
@@ -133,8 +133,8 @@ macro_rules! hyperedge {
 ///
 /// ```rust
 /// use rshyper::HyperMap;
-///
-/// let mut graph = HyperMap::<usize, usize>::new();
+/// // initialize a new, undirected hypergraph
+/// let mut graph = HyperMap::<usize, usize>::undirected();
 /// // use the macro to insert nodes into the graph
 /// rshyper::hypernode! {
 ///     graph {

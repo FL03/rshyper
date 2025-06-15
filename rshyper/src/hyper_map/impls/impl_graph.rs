@@ -87,7 +87,7 @@ where
         feature = "tracing",
         tracing::instrument(skip_all, level = "trace", target = "hash_graph")
     )]
-    pub fn add_node(&mut self, weight: Weight<N>) -> HyperResult<VertexId<Idx>>
+    pub fn add_node(&mut self, Weight(weight): Weight<N>) -> HyperResult<VertexId<Idx>>
     where
         Idx: AddStep<Output = Idx> + Copy,
     {
