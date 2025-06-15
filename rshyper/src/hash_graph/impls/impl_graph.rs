@@ -26,6 +26,89 @@ where
     {
         self.add_surface(vertices, Default::default())
     }
+    /// add a new hyperedge directly using an externally defined surfac, returns an error if the
+    /// surface is empty or if the associated edge id is not recorded in the history.
+    pub(crate) fn add_hyperedge(
+        &mut self,
+        surface: HashFacet<E, K, Idx, S>,
+    ) -> crate::Result<EdgeId<Idx>>
+    where
+        Idx: Clone,
+    {
+        // ensure the surface is valid
+        if surface.is_empty() {
+            return Err(crate::Error::EmptyHyperedge);
+        }
+        // verify the edge id is already recorded in the history
+        if !self.history().contains_edge(surface.id()) {
+            #[cfg(feature = "tracing")]
+            tracing::error!(
+                "the surface with id {} is not recorded in the history",
+                surface.id()
+            );
+            // self.history_mut().add_edge(surface.id().clone());
+            return Err(crate::Error::EdgeNotFound);
+        }
+        // get the id of the surface
+        let id = surface.id().clone();
+        #[cfg(feature = "tracing")]
+        tracing::debug!("inserting a new hyperedge ({id}) into the graph...");
+        // insert the new hyperedge into the adjacency map
+        self.surfaces_mut().insert(id.clone(), surface);
+        // return the id
+        Ok(id)
+    }
+    /// directly insert a new hypernode
+    pub(crate) fn add_hypernode(&mut self, data: Node<N, Idx>) -> crate::Result<VertexId<Idx>>
+    where
+        Idx: Clone,
+    {
+        // verify the edge id is already recorded in the history
+        if !self.history().contains_node(data.id()) {
+            #[cfg(feature = "tracing")]
+            tracing::error!(
+                "the surface with id {} is not recorded in the history",
+                data.id()
+            );
+            // self.history_mut().add_edge(surface.id().clone());
+            return Err(crate::Error::NodeNotFound);
+        }
+        // get the id of the surface
+        let id = data.id().clone();
+        #[cfg(feature = "tracing")]
+        tracing::debug!("inserting a new hypernode ({id}) into the graph...");
+        // insert the new hyperedge into the adjacency map
+        self.nodes_mut().insert(id.clone(), data);
+        // return the id
+        Ok(id)
+    }
+    /// add a new node with the given weight and return its index
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, level = "trace", target = "hash_graph")
+    )]
+    pub fn add_node(&mut self, weight: Weight<N>) -> crate::Result<VertexId<Idx>>
+    where
+        Idx: AddStep<Output = Idx> + Copy,
+    {
+        // generate a new index to identify the new node
+        let ndx = self.next_vertex_id();
+        // initialize a new node with the given weight & index
+        let node = Node::new(ndx, weight);
+        // insert the new node into the vertices map
+        self.add_hypernode(node)?;
+        Ok(ndx)
+    }
+    /// add multiple nodes with the given weights and return their indices
+    pub fn add_nodes<I>(&mut self, weights: I) -> impl Iterator<Item = VertexId<Idx>>
+    where
+        I: IntoIterator<Item = N>,
+        Idx: AddStep<Output = Idx> + Copy,
+    {
+        weights
+            .into_iter()
+            .filter_map(|weight| self.add_node(Weight(weight)).ok())
+    }
     /// add a new hyperedge with the given vertices and weight, returning the corresponding
     /// edge index.
     #[cfg_attr(
@@ -61,61 +144,6 @@ where
         tracing::debug!("added a new hyperedge with id {edge_id}");
         // return the edge id
         Ok(edge_id)
-    }
-    /// add a new hyperedge directly using an externally defined surfac, returns an error if the
-    /// surface is empty or if the associated edge id is not recorded in the history.
-    pub fn add_hyperedge(&mut self, surface: HashFacet<E, K, Idx, S>) -> crate::Result<EdgeId<Idx>>
-    where
-        Idx: Clone,
-    {
-        // ensure the surface is valid
-        if surface.is_empty() {
-            return Err(crate::Error::EmptyHyperedge);
-        }
-        // verify the edge id is already recorded in the history
-        if !self.history().contains_edge(surface.id()) {
-            #[cfg(feature = "tracing")]
-            tracing::error!(
-                "the surface with id {} is not recorded in the history",
-                surface.id()
-            );
-            return Err(crate::idx::IndexError::InvalidIndex.into());
-        }
-        // get the id of the surface
-        let id = surface.id().clone();
-        // insert the new hyperedge into the adjacency map
-        self.surfaces_mut().insert(id.clone(), surface);
-        // return the id
-        Ok(id)
-    }
-    /// add a new node with the given weight and return its index
-    #[cfg_attr(
-        feature = "tracing",
-        tracing::instrument(skip_all, level = "trace", target = "hash_graph")
-    )]
-    pub fn add_node(&mut self, weight: Weight<N>) -> crate::Result<VertexId<Idx>>
-    where
-        Idx: AddStep<Output = Idx> + Copy,
-    {
-        // generate a new index to identify the new node
-        let ndx = self.next_vertex_id();
-        #[cfg(feature = "tracing")]
-        tracing::debug!("adding a new node with index {ndx}");
-        // initialize a new node with the given weight & index
-        let node = Node::new(ndx, weight);
-        // insert the new node into the vertices map
-        self.nodes_mut().insert(ndx, node);
-        Ok(ndx)
-    }
-    /// add multiple nodes with the given weights and return their indices
-    pub fn add_nodes<I>(&mut self, weights: I) -> impl Iterator<Item = VertexId<Idx>>
-    where
-        I: IntoIterator<Item = N>,
-        Idx: AddStep<Output = Idx> + Copy,
-    {
-        weights
-            .into_iter()
-            .filter_map(|weight| self.add_node(Weight(weight)).ok())
     }
     /// add a new hypernode using the logical [`Default`] for the weight of type `N` and
     /// return its index.
@@ -338,7 +366,7 @@ where
     )]
     pub fn merge_edges_with<Q, F>(&mut self, e1: &Q, e2: &Q, f: F) -> crate::Result<EdgeId<Idx>>
     where
-        Q: Eq + Hash + core::fmt::Debug,
+        Q: ?Sized + Eq + Hash + core::fmt::Debug,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
         Idx: AddStep<Output = Idx> + Copy,
         F: FnOnce(&E, &E) -> E,
@@ -386,7 +414,7 @@ where
             .remove(index)
             .ok_or(crate::Error::NodeNotFound)
             .inspect(|node| {
-                self.history_mut().remove_point(node.index());
+                self.history_mut().remove_node(node.id());
                 #[cfg(feature = "tracing")]
                 tracing::trace!(
                     "successfully removed the node; removing edges that contained the vertex..."

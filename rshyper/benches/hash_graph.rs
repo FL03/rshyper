@@ -97,7 +97,7 @@ fn bench_hash_graph_nodes(c: &mut Criterion) {
         b.iter_batched(
             setup,
             |mut graph| {
-                graph.history().points().clone().iter().for_each(|id| {
+                graph.history().nodes().clone().iter().for_each(|id| {
                     graph
                         .remove_node(black_box(id))
                         .expect("failed to remove node");

@@ -9,7 +9,9 @@ use super::aliases::*;
 use rshyper_core::attrs::{DiAttributes, GraphAttributes, UnAttributes};
 use rshyper_core::idx::{EdgeId, Frame, IndexTracker, NumIndex, RawIndex, VertexId};
 use rshyper_core::node::Node;
-use rshyper_core::traits::{HyperGraph, HyperGraphIterEdge, HyperGraphIterNode, RawHyperGraph};
+use rshyper_core::traits::{
+    AddStep, HyperGraph, HyperGraphIterEdge, HyperGraphIterNode, RawHyperGraph,
+};
 use rshyper_core::{GraphType, Mode, Weight};
 
 use core::hash::{BuildHasher, Hash};
@@ -232,16 +234,16 @@ where
     /// computes the next edge index before replacing and returning the previous value
     pub fn next_edge_id(&mut self) -> EdgeId<Idx>
     where
-        Idx: crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Clone + PartialEq,
     {
-        self.position_mut().next_edge().unwrap()
+        self.history_mut().next_edge().unwrap()
     }
     /// computes the next node index before replacing and returning the previous value
     pub fn next_vertex_id(&mut self) -> VertexId<Idx>
     where
-        Idx: crate::AddStep<Output = Idx>,
+        Idx: AddStep<Output = Idx> + Clone + PartialEq,
     {
-        self.position_mut().next_point().unwrap()
+        self.history_mut().next_vertex().unwrap()
     }
     /// returns the order of the hypergraph, which is defined to be the number of nodes in `X`
     /// where `H=(X,E)`.

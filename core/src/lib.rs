@@ -62,8 +62,6 @@ pub mod traits {
     pub use self::prelude::*;
     /// the [`Contains`] trait provides a way to check if a graph contains a specific component
     pub mod contains;
-    /// this module provides various conversion traits and implementations
-    pub mod convert;
     /// this module implements the [`RawDomain`] trait for defining the type of collection used
     /// to compose the hyperedge
     pub mod domain;
@@ -82,8 +80,6 @@ pub mod traits {
     pub(crate) mod prelude {
         #[doc(inline)]
         pub use super::contains::*;
-        #[doc(inline)]
-        pub use super::convert::*;
         #[doc(inline)]
         pub use super::domain::*;
         #[doc(inline)]

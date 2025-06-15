@@ -100,7 +100,7 @@ where
     Idx: RawIndex,
 {
     fn index(&self) -> &VertexId<Idx> {
-        &self.index
+        &self.id
     }
     fn weight(&self) -> &Weight<T> {
         self.weight()
@@ -142,6 +142,6 @@ where
     Id: RawIndex,
 {
     fn index(&self) -> &VertexId<Self::Key> {
-        self.index()
+        self.id()
     }
 }

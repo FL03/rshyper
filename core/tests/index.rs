@@ -65,10 +65,10 @@ fn test_tracker() -> rshyper::Result<()> {
     // veryify the edge indices
     assert_eq!(history.edges(), &[e0, e1, e2]);
     // create some vertex indices
-    let v0 = history.next_point()?;
-    let v1 = history.next_point()?;
-    let v2 = history.next_point()?;
+    let v0 = history.next_vertex()?;
+    let v1 = history.next_vertex()?;
+    let v2 = history.next_vertex()?;
     // verify the vertex indices
-    assert_eq!(history.points(), &[v0, v1, v2]);
+    assert_eq!(history.nodes(), &[v0, v1, v2]);
     Ok(())
 }

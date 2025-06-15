@@ -39,6 +39,9 @@ pub mod traits {
     //! implementations.
     #[doc(inline)]
     pub use self::prelude::*;
+
+    /// this module defines various conversion routines for converting types into valid indices
+    pub mod convert;
     /// this module provides the [`RawIndex`] trait
     pub mod index;
     /// this module provides the [`Indexed`] trait for defining various representations of a
@@ -46,6 +49,8 @@ pub mod traits {
     pub mod indexed;
 
     pub(crate) mod prelude {
+        #[doc(inline)]
+        pub use super::convert::*;
         #[doc(inline)]
         pub use super::index::*;
         #[doc(inline)]
