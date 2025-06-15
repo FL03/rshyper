@@ -4,7 +4,9 @@ default-members = [
 ]
 members = [
     "rshyper",
-    "core",
+    "algo",
+    "core", 
+    "macros",
 ]
 resolver = "3"
 
@@ -33,7 +35,9 @@ version = "0.1.3"
 [workspace.dependencies]
 # local
 rshyper = { default-features = false, path = "rshyper", version = "0.1.3" }
+rshyper-algo = { default-features = false, path = "algo", version = "0.1.3" }
 rshyper-core = { default-features = false, path = "core", version = "0.1.3" }
+rshyper-macros = { default-features = false, path = "macros", version = "0.1.3" }
 # custom
 scsys = { default-features = false, features = ["derive"], version = "0.3.0" }
 # benchmarking

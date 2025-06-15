@@ -23,13 +23,13 @@ where
     {
         algo::AStarSearch::new(self, heuristic)
     }
-    /// returns a new instance of the Dijkstra's algorithm for the hypergraph
-    pub fn dijkstra(&self) -> algo::Dijkstra<'_, N, E, A, Self>
+    /// search the hypergraph using the breadth-first traversal algorithm
+    pub fn bft(&self) -> algo::BreadthFirstTraversal<'_, N, E, A, Self>
     where
         N: Default,
         E: Default,
     {
-        algo::Dijkstra::new(self)
+        algo::BreadthFirstTraversal::new(self)
     }
     /// search the hypergraph using the depth-first traversal algorithm
     pub fn dft(&self) -> algo::DepthFirstTraversal<'_, N, E, A, Self>
@@ -39,13 +39,13 @@ where
     {
         algo::DepthFirstTraversal::new(self)
     }
-    /// search the hypergraph using the breadth-first traversal algorithm
-    pub fn bft(&self) -> algo::BreadthFirstTraversal<'_, N, E, A, Self>
+    /// returns a new instance of the Dijkstra's algorithm for the hypergraph
+    pub fn dijkstra(&self) -> algo::Dijkstra<'_, N, E, A, Self>
     where
         N: Default,
         E: Default,
     {
-        algo::BreadthFirstTraversal::new(self)
+        algo::Dijkstra::new(self)
     }
 }
 
@@ -61,8 +61,13 @@ where
 {
     type Output = EdgeId<Idx>;
 
-    fn combine(&mut self, src: EdgeId<Idx>, tgt: EdgeId<Idx>) -> crate::Result<Self::Output> {
+    fn combine(
+        &mut self,
+        src: EdgeId<Idx>,
+        tgt: EdgeId<Idx>,
+    ) -> rshyper_core::Result<Self::Output> {
         self.merge_edges(&src, &tgt)
+            .map_err(|_e| format!("Failed to combine the hyperedges").into())
     }
 }
 
@@ -80,8 +85,9 @@ where
         &mut self,
         src: &'a EdgeId<Idx>,
         tgt: &'a EdgeId<Idx>,
-    ) -> crate::Result<Self::Output> {
+    ) -> Result<Self::Output, crate::Error> {
         self.merge_edges(src, tgt)
+            .map_err(|_e| format!("Failed to combine the hyperedges").into())
     }
 }
 

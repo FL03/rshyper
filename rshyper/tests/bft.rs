@@ -2,7 +2,7 @@
     Appellation: search <test>
     Contrib: @FL03
 */
-use rshyper::{HashGraph, Traversal};
+use rshyper::HashGraph;
 
 #[test]
 fn test_breadth_first_traversal() -> rshyper::Result<()> {

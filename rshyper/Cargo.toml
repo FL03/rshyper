@@ -36,6 +36,9 @@ test = true
 
 [dependencies]
 rshyper-core = { workspace = true }
+
+rshyper-algo = { optional = true, workspace = true }
+rshyper-macros = { optional = true, workspace = true }
 # custom
 scsys = { workspace = true }
 # concurrency & parallelism
@@ -50,7 +53,6 @@ smart-default = { workspace = true }
 strum = { features = ["derive"], workspace = true }
 # math
 num-traits = { workspace = true }
-ordered-float = { workspace = true }
 # random
 rand = { optional = true, workspace = true }
 rand_distr = { optional = true, workspace = true }
@@ -58,8 +60,6 @@ rand_distr = { optional = true, workspace = true }
 serde = { features = ["derive"], optional = true, workspace = true }
 serde_derive = { optional = true, workspace = true }
 serde_json = { optional = true, workspace = true }
-# wasm
-wasm-bindgen = { optional = true, workspace = true }
 
 [dev-dependencies]
 criterion = { features = ["plotters"], workspace = true }
@@ -84,21 +84,26 @@ full = [
 ]
 
 # ************* [FF:Flags] *************
-algo = [
-    "std",
-]
+algo = ["dep:rshyper-algo"]
 
 hash_graph = [
     "std"
 ]
 
-macros = []
+macros = ["dep:rshyper-macros"]
 
 # ************* [FF:Environments] *************
+nightly = [
+    "rshyper-algo/nightly",
+    "rshyper-core/nightly",
+    "rshyper-macros?/nightly",
+]
+
 std = [
     "alloc",
     "num-traits/std",
     "rand?/std",
+    "rshyper-algo/std",
     "rshyper-core/std",
     "scsys/std",
     "serde?/std",
@@ -109,6 +114,7 @@ std = [
 
 wasi = [
     "alloc",
+    "rshyper-algo/wasi",
     "rshyper-core/wasi",
     "scsys/wasi",
 ]
@@ -116,6 +122,7 @@ wasi = [
 wasm = [
     "alloc",
     "rayon?/web_spin_lock",
+    "rshyper-algo/wasm",
     "rshyper-core/wasm",
     "scsys/wasm",
     "wasm-bindgen",
@@ -123,6 +130,7 @@ wasm = [
 
 # ************* [FF:Dependencies] *************
 alloc = [
+    "rshyper-algo/alloc",
     "rshyper-core/alloc",
     "scsys/alloc",
     "serde?/alloc",
@@ -130,7 +138,9 @@ alloc = [
 ]
 
 anyhow = [
+    "rshyper-algo?/anyhow",
     "rshyper-core/anyhow",
+    "scsys/anyhow",
 ]
 
 json = [
@@ -144,7 +154,6 @@ json = [
 rand = [
     "dep:rand",
     "dep:rand_distr",
-    "ordered-float/rand",
     "rng",
     "rshyper-core/rand",
     "scsys/rand",
@@ -165,7 +174,6 @@ rng = [
 serde = [
     "dep:serde",
     "dep:serde_derive",
-    "ordered-float/serde",
     "rand?/serde",
     "rshyper-core/serde",
     "scsys/serde",
@@ -178,12 +186,12 @@ serde_json = [
 
 tracing = [
     "dep:tracing",
+    "rshyper-algo?/tracing",
     "rshyper-core/tracing",
     "scsys/tracing",
 ]
 
 wasm-bindgen = [
-    "dep:wasm-bindgen",
     "rshyper-core/wasm-bindgen",
 ]
 
@@ -199,11 +207,18 @@ required-features = [
 # ************* [Examples] *************
 [[example]]
 name = "basic_usage"
-required-features = ["hash_graph", "macros"]
+required-features = [
+    "hash_graph", 
+    "macros",
+]
 
 [[example]]
 name = "hash_graph"
-required-features = ["hash_graph", "macros", "tracing"]
+required-features = [
+    "hash_graph", 
+    "macros", 
+    "tracing",
+]
 
 # ************* [Tests] *************
 [[test]]
@@ -211,19 +226,34 @@ name = "default"
 
 [[test]]
 name = "astar"
-required-features = ["hash_graph", "macros"]
+required-features = [
+    "algo", 
+    "hash_graph",
+]
 
 [[test]]
 name = "bft"
-required-features = ["hash_graph", "macros"]
+required-features = [
+    "algo", 
+    "hash_graph",
+]
+
 
 [[test]]
 name = "dft"
-required-features = ["hash_graph", "macros"]
+required-features = [
+    "algo", 
+    "hash_graph",
+]
+
 
 [[test]]
 name = "dijkstra"
-required-features = ["hash_graph", "macros"]
+required-features = [
+    "algo", 
+    "hash_graph",
+]
+
 
 [[test]]
 name = "hash_graph"
@@ -231,4 +261,7 @@ required-features = ["hash_graph"]
 
 [[test]]
 name = "macros"
-required-features = ["alloc", "macros"]
+required-features = [
+    "alloc", 
+    "macros",
+]

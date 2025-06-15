@@ -1,0 +1,44 @@
+[package]
+# build = "build.rs"
+description = "procedural macros for the rshyper framework"
+name = "rshyper-macros"
+
+authors.workspace = true
+categories.workspace = true
+edition.workspace = true
+homepage.workspace = true
+keywords.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
+
+[package.metadata.docs.rs]
+all-features = false
+features = ["full"]
+rustc-args = ["--cfg", "docsrs" ]
+version = "v{{version}}"
+
+[package.metadata.release]
+no-dev-version = true
+tag-name = "{{version}}"
+
+[lib]
+bench = false
+doc = true
+doctest = true
+proc-macro = true
+test = false
+
+[dependencies]
+proc-macro2 = { version = "1"  }
+quote = { version = "1" }
+syn = { features = ["full"], version = "2" }
+
+[features]
+default = []
+
+nightly = [
+    "proc-macro2/nightly",
+]

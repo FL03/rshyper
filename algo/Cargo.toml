@@ -1,10 +1,10 @@
 [package]
 build = "build.rs"
-name = "rshyper-core"
+description = "this crate implements various algorithms for the rshyper framework"
+name = "rshyper-algo"
 
 authors.workspace = true
 categories.workspace = true
-description.workspace = true
 edition.workspace = true
 homepage.workspace = true
 keywords.workspace = true
@@ -27,41 +27,33 @@ tag-name = "{{version}}"
 [lib]
 crate-type = [
     "cdylib",
-    "rlib"
+    "rlib",
 ]
 bench = false
 doc = true
-doctest = false
+doctest = true
 test = true
 
 [dependencies]
+rshyper-core = { workspace = true }
 # custom
 scsys = { workspace = true }
 # concurrency & parallelism
 rayon = { optional = true, workspace = true }
 # error handling
-anyhow = { optional = true, workspace = true }
 thiserror = { workspace = true }
-# math
-num-traits = { workspace = true }
-# random
-rand = { optional = true, workspace = true }
-rand_distr = { optional = true, workspace = true }
-# serialization
-serde = { features = ["derive"], optional = true, workspace = true }
-serde_derive = { optional = true, workspace = true }
-serde_json = { optional = true, workspace = true }
+# logging
+tracing = { optional = true, workspace = true }
 # macros
 paste = { workspace = true }
 smart-default = { workspace = true }
 strum = { features = ["derive"], workspace = true }
-# logging
-tracing = { features = ["attributes"], optional = true, workspace = true }
-# wasm
-wasm-bindgen = { optional = true, workspace = true }
-
-[dev-dependencies]
-lazy_static = { workspace = true }
+# math
+num-traits = { workspace = true }
+ordered-float = { workspace = true }
+# serialization
+serde = { features = ["derive"], optional = true, workspace = true }
+serde_derive = { optional = true, workspace = true }
 
 [features]
 default = [
@@ -71,20 +63,22 @@ default = [
 full = [
     "default",
     "anyhow",
-    "json",
-    "rand",
     "serde",
     "tracing",
 ]
 
+# ************* [FF:Dependencies] *************
+
+
 # ************* [FF:Environments] *************
-nightly = []
+nightly = [
+    "rshyper-core/nightly",
+]
 
 std = [
     "alloc",
-    "anyhow?/std",
     "num-traits/std",
-    "rand?/std",
+    "rshyper-core/std",
     "scsys/std",
     "serde?/std",
     "strum/std",
@@ -94,69 +88,49 @@ std = [
 
 wasi = [
     "alloc",
+    "rshyper-core/wasi",
     "scsys/wasi",
 ]
 
 wasm = [
     "alloc",
     "rayon?/web_spin_lock",
+    "rshyper-core/wasm",
     "scsys/wasm",
-    "wasm-bindgen",
 ]
+
 # ************* [FF:Dependencies] *************
 alloc = [
+    "rshyper-core/alloc",
     "scsys/alloc",
     "serde?/alloc",
-    "serde_json?/alloc",
 ]
 
 anyhow = [
-    "dep:anyhow",
+    "rshyper-core/anyhow",
+    "scsys/anyhow",
 ]
 
-json = [
-    "alloc",
-    "serde",
-    "serde_json",
-    "scsys/json",
-]
-
-rand = [
-    "dep:rand",
-    "dep:rand_distr",
-    "rng",
-    "scsys/rand",
-]
-
-rayon = ["dep:rayon"]
-
-rng = [
-    "rand?/small_rng",
-    "rand?/thread_rng",
-    "scsys/rng",
+rayon = [
+    "dep:rayon",
+    "rshyper-core/rayon",
 ]
 
 serde = [
     "dep:serde",
     "dep:serde_derive",
-    "rand?/serde",
+    "ordered-float/serde",
+    "rshyper-core/serde",
     "scsys/serde",
 ]
 
-serde_json = ["dep:serde_json"]
-
 tracing = [
     "dep:tracing",
+    "rshyper-core/tracing",
     "scsys/tracing",
 ]
-
-wasm-bindgen = ["dep:wasm-bindgen"]
 
 # ************* [Tests] *************
 [[test]]
 name = "default"
-required-features = []
 
-[[test]]
-name = "index"
-required-features = ["std"]

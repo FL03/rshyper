@@ -7,8 +7,7 @@ pub use self::priority_node::PriorityNode;
 
 pub(crate) mod priority_node;
 
-use crate::algo::{Heuristic, PathFinder, Search, Traversal};
-use crate::hash_graph::VertexSet;
+use crate::{Heuristic, PathFinder, Search, Traversal, VertexSet};
 use core::hash::Hash;
 use rshyper_core::edge::RawEdge;
 use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
@@ -256,7 +255,7 @@ where
 
             // Get all hyperedges containing the current vertex
             self.graph
-                .find_edges_with_node(&current)?
+                .find_edges_with_node(&current)
                 .iter()
                 .for_each(|edge_id| {
                     // Get all vertices in this hyperedge

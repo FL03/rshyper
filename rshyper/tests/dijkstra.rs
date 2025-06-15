@@ -2,35 +2,46 @@
     appellation: dijkstra <module>
     authors: @FL03
 */
+#![allow(unused_variables)]
 use rshyper::HashGraph;
+
+#[test]
+fn test_dijkstra_direct_edge() -> rshyper::Result<()> {
+    // initializea new undirected hashgraph
+    let mut graph = HashGraph::<usize, usize>::undirected();
+    // add some nodes
+    let v0 = graph.add_vertex()?;
+    let v1 = graph.add_vertex()?;
+    let v2 = graph.add_vertex()?;
+    // add a direct edge from v0 to v2
+    graph.add_edge([v0, v1, v2])?;
+    // find the shortest path from v0 to v2
+    let path = graph.dijkstra().find_path(v0, v2)?;
+    // verify the results
+    assert_eq!(path, [v0, v2], "Direct edge should return direct path");
+    // return
+    Ok(())
+}
 
 #[test]
 fn test_dijkstra_shortest_path() -> rshyper::Result<()> {
     // Initialize a new graph
     let mut graph = HashGraph::<usize, usize>::undirected();
-
-    // Use the macro to create some new vertices
-    rshyper::hypergraph! {
-        graph {
-            nodes: {
-                let v0;
-                let v1;
-                let v2;
-                let v3;
-                let v4;
-                let v5;
-            };
-            edges: {
-                let _e0: [v0, v1] = 1; // v0 -> v1
-                let _e1: [v1, v2] = 1; // v1 -> v2
-                let _e2: [v2, v5] = 1; // v2 -> v5
-                let _e3: [v5, v4] = 1; // v5 -> v4
-                let _e4: [v0, v4] = 1; // v0 -> v4
-                let _e5: [v4, v3] = 1; // v4 -> v3
-                let _e6: [v0, v5, v3] = 1; // v0 -> v5 -> v3
-            };
-        }
-    }
+    // add vertices to the graph
+    let v0 = graph.add_vertex()?;
+    let v1 = graph.add_vertex()?;
+    let v2 = graph.add_vertex()?;
+    let v3 = graph.add_vertex()?;
+    let v4 = graph.add_vertex()?;
+    let v5 = graph.add_vertex()?;
+    // Add edges to the graph
+    graph.add_edge([v0, v1])?;
+    graph.add_edge([v1, v2])?;
+    graph.add_edge([v2, v5])?;
+    graph.add_edge([v5, v4])?;
+    graph.add_edge([v0, v4])?;
+    graph.add_edge([v4, v3])?;
+    graph.add_edge([v0, v5, v3])?;
 
     // Use Dijkstra's algorithm to find the shortest path from v0 to v3
     let path = graph.dijkstra().find_path(v0, v3)?;
@@ -48,21 +59,16 @@ fn test_dijkstra_shortest_path() -> rshyper::Result<()> {
 fn test_dijkstra_no_path() -> rshyper::Result<()> {
     // initializea new undirected hashgraph
     let mut graph = HashGraph::<usize, usize>::undirected();
-    // setup the graph with some nodes and edges
-    rshyper::hypergraph! {
-        graph {
-            nodes: {
-                let v0;
-                let v1;
-                let _v2;
-                let v3;
-            };
-            edges: {
-                let _e0: [v0, v1] = 1;
-                // v2 and v3 are disconnected
-            };
-        }
-    }
+    // add vertices to the graph
+    let v0 = graph.add_vertex()?;
+    let v1 = graph.add_vertex()?;
+    let v2 = graph.add_vertex()?;
+    let v3 = graph.add_vertex()?;
+    // Add edges to the graph
+    let e0 = graph.add_edge([v0, v1])?;
+    // v2 and v3 are not connected to v0 or v1
+    let e1 = graph.add_edge([v0, v2])?;
+    // v2 and v3 are disconnected from v0 and v1
     // find the shortest path between v0 and v3
     let path = graph.dijkstra().find_path(v0, v3);
     // verify that there is no path between v0 and v3
@@ -106,24 +112,17 @@ fn test_dijkstra_same_start_end() -> rshyper::Result<()> {
 fn test_dijkstra_multiple_paths() -> rshyper::Result<()> {
     // initializea new undirected hashgraph
     let mut graph = HashGraph::<usize, usize>::undirected();
-    // setup the graph with some nodes and edges
-    rshyper::hypergraph! {
-        graph {
-            nodes: {
-                let v0;
-                let v1;
-                let v2;
-                let v3;
-                let v4;
-            };
-            edges: {
-                let _e0: [v0, v1, v3] = 1; // v0 -> v1 -> v3
-                let _e2: [v0, v2] = 1; // v0 -> v2
-                let _e4: [v2, v4] = 1; // v2 -> v4
-                let _e5: [v3, v4] = 1; // v3 -> v4
-            };
-        }
-    }
+    // add some nodes to the graph
+    let v0 = graph.add_vertex()?;
+    let v1 = graph.add_vertex()?;
+    let v2 = graph.add_vertex()?;
+    let v3 = graph.add_vertex()?;
+    let v4 = graph.add_vertex()?;
+    // Add edges to the graph
+    let e0 = graph.add_edge([v0, v1, v3])?;
+    let e1 = graph.add_edge([v0, v2])?;
+    let e2 = graph.add_edge([v2, v4])?;
+    let e3 = graph.add_edge([v3, v4])?;
     // find the shortest path from v0 to v4
     let path = graph.dijkstra().find_path(v0, v4)?;
 
@@ -133,30 +132,5 @@ fn test_dijkstra_multiple_paths() -> rshyper::Result<()> {
         "Path should be one of the two shortest paths"
     );
 
-    Ok(())
-}
-
-#[test]
-fn test_dijkstra_direct_edge() -> rshyper::Result<()> {
-    // initializea new undirected hashgraph
-    let mut graph = HashGraph::<usize, usize>::undirected();
-    // setup the graph with some nodes and edges
-    rshyper::hypergraph! {
-        graph {
-            nodes: {
-                let v0;
-                let v1;
-                let v2;
-            };
-            edges: {
-                let _e0: [v0, v1, v2] = 1;
-            };
-        }
-    }
-    // find the shortest path from v0 to v2
-    let path = graph.dijkstra().find_path(v0, v2)?;
-    // verify the results
-    assert_eq!(path, [v0, v2], "Direct edge should return direct path");
-    // return
     Ok(())
 }

@@ -87,8 +87,6 @@ pub mod types {
 
 pub(crate) mod prelude {
     #[doc(inline)]
-    pub use super::error::*;
-    #[doc(inline)]
     pub use super::index::IndexBase;
     #[doc(inline)]
     pub use super::position::*;

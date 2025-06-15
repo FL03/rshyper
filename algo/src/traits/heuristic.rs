@@ -2,10 +2,10 @@
     appellation: heuristic <module>
     authors: @FL03
 */
-use crate::idx::{RawIndex, VertexId};
+use rshyper_core::idx::{RawIndex, Udx, VertexId};
 /// [`Heuristic`] defines a common interface for heuristic functions compatible with the [`A*`](AStarSearch)
 /// search implementation
-pub trait Heuristic<T = crate::Udx> {
+pub trait Heuristic<T = Udx> {
     type Output;
 
     fn compute(&self, start: VertexId<T>, goal: VertexId<T>) -> Self::Output;

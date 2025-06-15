@@ -2,8 +2,7 @@
     appellation: operators <module>
     authors: @FL03
 */
-use crate::HyperGraph;
-use rshyper_core::GraphAttributes;
+use rshyper_core::{GraphAttributes, HyperGraph};
 
 /// this trait is used to denote an algorithm that can be applied to a hypergraph
 pub trait GraphicAlgorithm<H> {

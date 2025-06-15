@@ -6,7 +6,7 @@ use crate::hash_graph::{HashFacet, HashGraph, VertexSet};
 use crate::{AddStep, GraphAttributes, GraphType};
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::idx::{EdgeId, RawIndex, VertexId};
-use rshyper_core::{Node, Surface, Weight};
+use rshyper_core::{Error, Node, Surface, Weight};
 
 impl<N, E, A, K, Idx, S> HashGraph<N, E, A, S>
 where
@@ -26,18 +26,18 @@ where
     {
         self.add_surface(vertices, Default::default())
     }
-    /// add a new hyperedge directly using an externally defined surfac, returns an error if the
+    /// add a new hyperedge directly using an externally defined surface, returns an error if the
     /// surface is empty or if the associated edge id is not recorded in the history.
     pub(crate) fn add_hyperedge(
         &mut self,
         surface: HashFacet<E, K, Idx, S>,
-    ) -> crate::Result<EdgeId<Idx>>
+    ) -> Result<EdgeId<Idx>, Error>
     where
         Idx: Clone,
     {
         // ensure the surface is valid
         if surface.is_empty() {
-            return Err(crate::Error::EmptyHyperedge);
+            return Err(Error::EmptyHyperedge);
         }
         // verify the edge id is already recorded in the history
         if !self.history().contains_edge(surface.id()) {
@@ -47,7 +47,7 @@ where
                 surface.id()
             );
             // self.history_mut().add_edge(surface.id().clone());
-            return Err(crate::Error::EdgeNotFound);
+            return Err(Error::EdgeNotFound);
         }
         // get the id of the surface
         let id = surface.id().clone();

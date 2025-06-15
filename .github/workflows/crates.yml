@@ -35,6 +35,8 @@ jobs:
       matrix:
         package:
           - rshyper-core
+          - rshyper-algo
+          - rshyper-macros
           - rshyper
     steps:
       -

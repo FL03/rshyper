@@ -49,37 +49,34 @@ where
         self.add_node(Default::default())
     }
     /// returns the vertices of the edge with the given index
-    fn get_edge_domain(
-        &self,
-        index: &EdgeId<A::Ix>,
-    ) -> crate::Result<&<Self::Edge<E> as RawEdge>::Store>;
+    fn get_edge_domain(&self, index: &EdgeId<A::Ix>) -> Option<&<Self::Edge<E> as RawEdge>::Store>;
     /// returns a mutable reference to the vertices of the edge with the given index
     fn get_edge_domain_mut(
         &mut self,
         index: &EdgeId<A::Ix>,
-    ) -> crate::Result<&mut <Self::Edge<E> as RawEdge>::Store>;
+    ) -> Option<&mut <Self::Edge<E> as RawEdge>::Store>;
     /// returns a reference to the weight of the edge with the given index
-    fn get_edge_weight(&self, index: &EdgeId<A::Ix>) -> crate::Result<&Weight<E>> {
+    fn get_edge_weight(&self, index: &EdgeId<A::Ix>) -> Option<&Weight<E>> {
         self.get_surface(index).map(|edge| edge.weight())
     }
     /// returns a mutable reference to the weight of the edge with the given index
-    fn get_edge_weight_mut(&mut self, index: &EdgeId<A::Ix>) -> crate::Result<&mut Weight<E>> {
+    fn get_edge_weight_mut(&mut self, index: &EdgeId<A::Ix>) -> Option<&mut Weight<E>> {
         self.get_surface_mut(index).map(|edge| edge.weight_mut())
     }
     /// returns an immutable reference to the edge with the given index
-    fn get_surface(&self, index: &EdgeId<A::Ix>) -> crate::Result<&Self::Edge<E>>;
+    fn get_surface(&self, index: &EdgeId<A::Ix>) -> Option<&Self::Edge<E>>;
     /// returns a mutable reference to the edge with the given index
-    fn get_surface_mut(&mut self, index: &EdgeId<A::Ix>) -> crate::Result<&mut Self::Edge<E>>;
+    fn get_surface_mut(&mut self, index: &EdgeId<A::Ix>) -> Option<&mut Self::Edge<E>>;
     /// returns a reference to the node with the given index
-    fn get_node(&self, index: &VertexId<A::Ix>) -> crate::Result<&Self::Node<N>>;
+    fn get_node(&self, index: &VertexId<A::Ix>) -> Option<&Self::Node<N>>;
     /// returns a mutable reference to the node with the given index
-    fn get_node_mut(&mut self, index: &VertexId<A::Ix>) -> crate::Result<&mut Self::Node<N>>;
+    fn get_node_mut(&mut self, index: &VertexId<A::Ix>) -> Option<&mut Self::Node<N>>;
     /// returns true if the graph contains the edge with the given index
     fn contains_edge(&self, index: &EdgeId<A::Ix>) -> bool;
     /// returns true if the graph contains the node with the given index
     fn contains_node(&self, index: &VertexId<A::Ix>) -> bool;
     /// returns an iterator over all edges that contain the given node
-    fn find_edges_with_node(&self, index: &VertexId<A::Ix>) -> crate::Result<Vec<EdgeId<A::Ix>>>;
+    fn find_edges_with_node(&self, index: &VertexId<A::Ix>) -> Vec<EdgeId<A::Ix>>;
 }
 
 /// The [`HyperGraphIterNode`] trait extends the [`HyperGraph`] trait to provide iterators over

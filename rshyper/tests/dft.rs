@@ -2,7 +2,6 @@
     appellation: dft <test>
     authors: @FL03
 */
-use rshyper::Traversal;
 use rshyper::hash_graph::UnHashGraph as HyperGraph;
 
 #[test]
@@ -15,9 +14,9 @@ fn test_depth_first_traversal() -> rshyper::Result<()> {
     let v2 = graph.add_vertex()?;
     let v3 = graph.add_vertex()?;
 
-    let _e1 = graph.add_edge(vec![v0, v1])?;
-    let _e2 = graph.add_edge(vec![v1, v2])?;
-    let _e3 = graph.add_edge(vec![v2, v3])?;
+    let _e1 = graph.add_edge([v0, v1])?;
+    let _e2 = graph.add_edge([v1, v2])?;
+    let _e3 = graph.add_edge([v2, v3])?;
 
     let mut dft = graph.dft();
     let path = dft.search(v0)?;
@@ -54,10 +53,10 @@ fn test_dft_branching_graph() -> rshyper::Result<()> {
     let v3 = graph.add_vertex()?;
     let v4 = graph.add_vertex()?;
 
-    let _e1 = graph.add_edge(vec![v0, v1])?;
-    let _e2 = graph.add_edge(vec![v0, v2])?;
-    let _e3 = graph.add_edge(vec![v0, v3])?;
-    let _e4 = graph.add_edge(vec![v2, v4])?;
+    let _e1 = graph.add_edge([v0, v1])?;
+    let _e2 = graph.add_edge([v0, v2])?;
+    let _e3 = graph.add_edge([v0, v3])?;
+    let _e4 = graph.add_edge([v2, v4])?;
 
     let mut dft = graph.dft();
     let path = dft.search(v0)?;
@@ -89,10 +88,10 @@ fn test_dft_cyclic_graph() -> rshyper::Result<()> {
     let v2 = graph.add_vertex()?;
     let v3 = graph.add_vertex()?;
 
-    let _e1 = graph.add_edge(vec![v0, v1])?;
-    let _e2 = graph.add_edge(vec![v1, v2])?;
-    let _e3 = graph.add_edge(vec![v2, v3])?;
-    let _e4 = graph.add_edge(vec![v3, v0])?;
+    let _e1 = graph.add_edge([v0, v1])?;
+    let _e2 = graph.add_edge([v1, v2])?;
+    let _e3 = graph.add_edge([v2, v3])?;
+    let _e4 = graph.add_edge([v3, v0])?;
 
     let mut dft = graph.dft();
     let path = dft.search(v0)?;
@@ -121,7 +120,7 @@ fn test_dft_isolated_vertex() -> rshyper::Result<()> {
     let v1 = graph.add_vertex()?;
     let v2 = graph.add_vertex()?; // isolated
 
-    let _e1 = graph.add_edge(vec![v0, v1])?;
+    let _e1 = graph.add_edge([v0, v1])?;
     // create a new dft instance
     let mut dft = graph.dft();
     // test search starting from `v0`

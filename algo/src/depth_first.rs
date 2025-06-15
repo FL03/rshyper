@@ -2,7 +2,7 @@
     Appellation: dft <module>
     Contrib: @FL03
 */
-use crate::algo::{Search, Traversal};
+use crate::{Search, Traversal};
 use core::hash::Hash;
 use rshyper_core::edge::RawEdge;
 use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
@@ -29,7 +29,7 @@ where
     Idx: RawIndex,
 {
     /// Create a new DepthFirstTraversal instance
-    pub(crate) fn new(graph: &'a H) -> Self {
+    pub fn new(graph: &'a H) -> Self {
         Self {
             graph,
             stack: Vec::new(),
@@ -45,13 +45,22 @@ where
     pub const fn stack_mut(&mut self) -> &mut Vec<VertexId<Idx>> {
         &mut self.stack
     }
-    /// returns an immutable reference to the indices of the visited nodes
+    /// returns an immutable reference to the visited vertices
     pub const fn visited(&self) -> &HashSet<VertexId<Idx>> {
         &self.visited
     }
-    /// returns a mutable reference to the indices of the visited nodes
+    /// returns a mutable reference to the visited vertices
     pub const fn visited_mut(&mut self) -> &mut HashSet<VertexId<Idx>> {
         &mut self.visited
+    }
+    /// returns true if the vertex has been visited
+    pub fn has_visited<Q>(&self, vertex: &Q) -> bool
+    where
+        Idx: Eq + Hash,
+        Q: ?Sized + Eq + Hash,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.visited().contains(vertex)
     }
     /// reset the traversal state
     pub fn reset(&mut self) -> &mut Self {
@@ -130,26 +139,23 @@ where
         while let Some(current) = self.stack.pop() {
             path.push(current);
 
-            // Get all hyperedges containing the current vertex
-            if let Ok(edges) = self.graph.find_edges_with_node(&current) {
-                // For each hyperedge, visit all vertices that haven't been visited yet
-                for edge_id in edges {
-                    let vertices = self.graph.get_edge_domain(&edge_id)?;
+            // For each hyperedge, visit all vertices that haven't been visited yet
+            for edge_id in self.graph.find_edges_with_node(&current) {
+                let vertices = self.graph.get_edge_domain(&edge_id).expect("Edge is empty");
 
-                    // Add vertices in reverse order to maintain expected DFS behavior
-                    let mut new_vertices = vertices
-                        .into_iter()
-                        .filter(|&v| !self.has_visited(v))
-                        .copied()
-                        .collect::<Vec<_>>();
+                // Add vertices in reverse order to maintain expected DFS behavior
+                let mut new_vertices = vertices
+                    .into_iter()
+                    .filter(|&v| !self.has_visited(v))
+                    .copied()
+                    .collect::<Vec<_>>();
 
-                    // Sort in reverse order (arbitrary but consistent)
-                    new_vertices.sort_by(|&a, &b| b.cmp(a));
+                // Sort in reverse order (arbitrary but consistent)
+                new_vertices.sort_by(|&a, &b| b.cmp(a));
 
-                    for v in new_vertices {
-                        // add the index to the stack and indicate it has been viewed
-                        self.register_vertex(v);
-                    }
+                for v in new_vertices {
+                    // add the index to the stack and indicate it has been viewed
+                    self.register_vertex(v);
                 }
             }
         }

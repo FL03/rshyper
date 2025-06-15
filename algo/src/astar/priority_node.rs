@@ -2,8 +2,8 @@
     appellation: priority_node <module>
     authors: @FL03
 */
-use crate::idx::{RawIndex, VertexId};
 use core::cmp::Ordering;
+use rshyper_core::idx::{RawIndex, VertexId};
 
 /// Priority queue node for A* algorithm
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]

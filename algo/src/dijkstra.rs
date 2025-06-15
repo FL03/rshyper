@@ -7,21 +7,19 @@ pub use self::queue_node::QueueNode;
 /// this module implements the queue node used in Dijkstra's algorithm
 mod queue_node;
 
-use crate::algo::{PathFinder, Search, Traversal};
+use crate::{PathFinder, Search, Traversal, VertexSet};
 use core::hash::Hash;
 use num_traits::bounds::UpperBounded;
 use num_traits::{FromPrimitive, Num};
 use rshyper_core::edge::RawEdge;
 use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
 use rshyper_core::{GraphAttributes, HyperGraph, HyperGraphIter};
-use std::collections::{BinaryHeap, HashSet};
+use std::collections::BinaryHeap;
 
 /// a type alias for a map of distances for vertices in the graph
 pub(crate) type Distances<K, V = f64> = std::collections::HashMap<VertexId<K>, V>;
 /// a type alias for the history of previous vertices in the graph, maps vertices to vertices
 pub(crate) type PreviousHistory<K> = std::collections::HashMap<VertexId<K>, VertexId<K>>;
-/// a type alias for a [`HashSet`](std::collections::HashSet) of visited vertices
-pub(crate) type Visited<K> = std::collections::HashSet<VertexId<K>>;
 
 /// Dijkstra's shortest path algorithm for hypergraphs
 pub struct Dijkstra<'a, N, E, A, H>
@@ -32,7 +30,7 @@ where
     pub(crate) graph: &'a H,
     pub(crate) distances: Distances<A::Ix, E>,
     pub(crate) previous: PreviousHistory<A::Ix>,
-    pub(crate) visited: Visited<A::Ix>,
+    pub(crate) visited: VertexSet<A::Ix>,
     _marker: core::marker::PhantomData<(N, E)>,
 }
 
@@ -48,7 +46,7 @@ where
             graph,
             distances: Distances::new(),
             previous: PreviousHistory::new(),
-            visited: Visited::new(),
+            visited: VertexSet::new(),
             _marker: core::marker::PhantomData::<(N, E)>,
         }
     }
@@ -73,11 +71,11 @@ where
         &mut self.previous
     }
     /// returns a reference to the visited vertices
-    pub const fn visited(&self) -> &Visited<A::Ix> {
+    pub const fn visited(&self) -> &VertexSet<A::Ix> {
         &self.visited
     }
     /// returns a mutable reference to the visited vertices
-    pub const fn visited_mut(&mut self) -> &mut Visited<A::Ix> {
+    pub const fn visited_mut(&mut self) -> &mut VertexSet<A::Ix> {
         &mut self.visited
     }
     /// update the distances and returns a mutable reference to the instance
@@ -91,7 +89,7 @@ where
         self
     }
     /// update the visited vertices and returns a mutable reference to the instance
-    pub fn set_visited(&mut self, visited: Visited<A::Ix>) -> &mut Self {
+    pub fn set_visited(&mut self, visited: VertexSet<A::Ix>) -> &mut Self {
         *self.visited_mut() = visited;
         self
     }
@@ -202,12 +200,21 @@ where
             }
 
             // For each neighbor via hyperedges
-            let edges = self.graph().find_edges_with_node(&u)?;
+            let edges = self.graph().find_edges_with_node(&u);
             for edge_id in edges {
                 // load the weight of the edge
-                let weight = self.graph.get_edge_weight(&edge_id)?.view();
+                let weight = self
+                    .graph
+                    .get_edge_weight(&edge_id)
+                    .expect("no weight for the edge")
+                    .view();
                 // visit each node within the hyperedge
-                for v in self.graph.get_edge_domain(&edge_id)?.clone() {
+                for v in self
+                    .graph
+                    .get_edge_domain(&edge_id)
+                    .expect("empty hyperedge")
+                    .clone()
+                {
                     if v == u {
                         continue;
                     }
@@ -245,7 +252,7 @@ where
     H: HyperGraph<N, E, A>,
     A::Ix: Eq + Hash,
 {
-    type Store<I2> = HashSet<I2>;
+    type Store<I2> = std::collections::HashSet<I2>;
 
     fn has_visited(&self, vertex: &VertexId<A::Ix>) -> bool {
         self.visited().contains(vertex)

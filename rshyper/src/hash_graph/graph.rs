@@ -290,56 +290,52 @@ where
     S: BuildHasher + Default,
     A::Ix: NumIndex,
 {
-    fn add_node(&mut self, weight: Weight<N>) -> crate::Result<VertexId<A::Ix>> {
+    fn add_node(&mut self, weight: Weight<N>) -> rshyper_core::Result<VertexId<A::Ix>> {
         self.add_node(weight)
+            .map_err(|_e| format!("Failed to add the hypernode").into())
     }
 
-    fn add_surface<I>(&mut self, iter: I, weight: Weight<E>) -> crate::Result<EdgeId<A::Ix>>
+    fn add_surface<I>(&mut self, iter: I, weight: Weight<E>) -> rshyper_core::Result<EdgeId<A::Ix>>
     where
         I: IntoIterator<Item = VertexId<A::Ix>>,
     {
         self.add_surface(iter, weight)
+            .map_err(|_e| format!("Failed to add the surface").into())
     }
 
-    fn get_edge_domain(&self, index: &EdgeId<A::Ix>) -> crate::Result<&VertexSet<A::Ix, S>> {
-        self.get_edge_vertices(index)
+    fn get_edge_domain(&self, index: &EdgeId<A::Ix>) -> Option<&VertexSet<A::Ix, S>> {
+        self.get_edge_vertices(index).ok()
     }
 
-    fn get_edge_domain_mut(
-        &mut self,
-        index: &EdgeId<A::Ix>,
-    ) -> crate::Result<&mut VertexSet<A::Ix, S>> {
-        self.get_edge_vertices_mut(index)
+    fn get_edge_domain_mut(&mut self, index: &EdgeId<A::Ix>) -> Option<&mut VertexSet<A::Ix, S>> {
+        self.get_edge_vertices_mut(index).ok()
     }
 
-    fn get_edge_weight(&self, index: &EdgeId<A::Ix>) -> crate::Result<&Weight<E>> {
-        self.get_edge_weight(index)
+    fn get_edge_weight(&self, index: &EdgeId<A::Ix>) -> Option<&Weight<E>> {
+        self.get_edge_weight(index).ok()
     }
 
-    fn get_edge_weight_mut(&mut self, index: &EdgeId<A::Ix>) -> crate::Result<&mut Weight<E>> {
-        self.get_edge_weight_mut(index)
+    fn get_edge_weight_mut(&mut self, index: &EdgeId<A::Ix>) -> Option<&mut Weight<E>> {
+        self.get_edge_weight_mut(index).ok()
     }
 
-    fn get_node(&self, index: &VertexId<A::Ix>) -> crate::Result<&Node<N, A::Ix>> {
-        self.get_node(index)
+    fn get_node(&self, index: &VertexId<A::Ix>) -> Option<&Node<N, A::Ix>> {
+        self.get_node(index).ok()
     }
 
-    fn get_node_mut(&mut self, index: &VertexId<A::Ix>) -> crate::Result<&mut Node<N, A::Ix>> {
-        self.get_node_mut(index)
+    fn get_node_mut(&mut self, index: &VertexId<A::Ix>) -> Option<&mut Node<N, A::Ix>> {
+        self.get_node_mut(index).ok()
     }
 
-    fn get_surface(
-        &self,
-        index: &EdgeId<A::Ix>,
-    ) -> crate::Result<&HashFacet<E, A::Kind, A::Ix, S>> {
-        self.get_surface(index)
+    fn get_surface(&self, index: &EdgeId<A::Ix>) -> Option<&HashFacet<E, A::Kind, A::Ix, S>> {
+        self.get_surface(index).ok()
     }
 
     fn get_surface_mut(
         &mut self,
         index: &EdgeId<A::Ix>,
-    ) -> crate::Result<&mut HashFacet<E, A::Kind, A::Ix, S>> {
-        self.get_surface_mut(index)
+    ) -> Option<&mut HashFacet<E, A::Kind, A::Ix, S>> {
+        self.get_surface_mut(index).ok()
     }
 
     fn contains_edge(&self, index: &EdgeId<A::Ix>) -> bool {
@@ -350,8 +346,8 @@ where
         self.contains_node(index)
     }
 
-    fn find_edges_with_node(&self, index: &VertexId<A::Ix>) -> crate::Result<Vec<EdgeId<A::Ix>>> {
-        self.find_edges_with_node(index)
+    fn find_edges_with_node(&self, index: &VertexId<A::Ix>) -> Vec<EdgeId<A::Ix>> {
+        self.find_edges_with_node(index).unwrap_or_default()
     }
 }
 

@@ -22,8 +22,8 @@
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![doc(
-    html_logo_url = "https://raw.githubusercontent.com/rshyper/rshyper/main/assets/logo.svg",
-    html_favicon_url = "https://raw.githubusercontent.com/rshyper/rshyper/main/assets/logo.svg"
+    html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
 )]
 
 #[cfg(feature = "alloc")]
@@ -109,7 +109,7 @@ pub mod types {
 }
 
 pub mod prelude {
-    pub use crate::error::*;
+    pub use crate::error::Error as CoreError;
 
     pub use crate::attrs::prelude::*;
     pub use crate::edge::prelude::*;

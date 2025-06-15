@@ -14,34 +14,22 @@ fn test_astar_shortest_path() -> rshyper::Result<()> {
     let mut graph = HashGraph::<usize, usize>::undirected();
 
     // use the macro create some new vertices
-    rshyper::hypernode! {
-        graph {
-            let v0;
-            let v1;
-            let v2;
-            let v3;
-            let v4;
-            let v5;
-        }
-    }
+    let v0 = graph.add_vertex()?;
+    let v1 = graph.add_vertex()?;
+    let v2 = graph.add_vertex()?;
+    let v3 = graph.add_vertex()?;
+    let v4 = graph.add_vertex()?;
+    let v5 = graph.add_vertex()?;
     // create two paths with varying lengths
     // Path 1: v0 -> v1 -> v3
-    rshyper::hyperedge! {
-        graph {
-            let _e0: [v0, v1]; // Direct path: v0 -> v1
-            let _e1: [v1, v3]; // Direct path: v1 -> v3
-        }
-    }
+    graph.add_edge([v0, v1])?;
+    graph.add_edge([v1, v3])?;
     // Path 2: v0 -> v2 -> v4 -> v1 -> v5 -> v3
-    rshyper::hyperedge! {
-        graph {
-            let _e2: [v0, v2]; // Longer path: v0 -> v2
-            let _e3: [v2, v4]; // Longer path: v2 -> v4
-            let _e4: [v4, v1]; // Longer path: v4 -> vv
-            let _e5: [v1, v5]; // Longer path: v1 -> v5
-            let _e6: [v5, v3]; // Longer path: v5 -> v3
-        }
-    }
+    graph.add_edge([v0, v2])?;
+    graph.add_edge([v2, v4])?;
+    graph.add_edge([v4, v1])?;
+    graph.add_edge([v1, v5])?;
+    graph.add_edge([v5, v3])?;
 
     // use the a* search algorithm to find a set of paths
     let path = graph.astar(heuristic).find_path(v0, v3)?;
@@ -66,19 +54,16 @@ fn test_astar_with_heuristic() -> rshyper::Result<()> {
     // 3 -- 4 -- 5
     // |    |    |
     // 6 -- 7 -- 8
-    rshyper::hypernode! {
-        graph {
-            let v0; // (0,0)
-            let v1; // (1,0)
-            let v2; // (2,0)
-            let v3; // (0,1)
-            let v4; // (1,1)
-            let v5; // (2,1)
-            let v6; // (0,2)
-            let v7; // (1,2)
-            let v8; // (2,2)
-        }
-    }
+
+    let v0 = graph.add_vertex()?;
+    let v1 = graph.add_vertex()?;
+    let v2 = graph.add_vertex()?;
+    let v3 = graph.add_vertex()?;
+    let v4 = graph.add_vertex()?;
+    let v5 = graph.add_vertex()?;
+    let v6 = graph.add_vertex()?;
+    let v7 = graph.add_vertex()?;
+    let v8 = graph.add_vertex()?;
 
     // Create horizontal connections
     graph.add_edge([v0, v1])?;
