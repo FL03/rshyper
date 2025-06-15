@@ -12,9 +12,9 @@
 /// The `hypergraph` macro allows you to define nodes and edges in a hypergraph
 ///
 /// ```rust
-/// use rshyper::HashGraph;
+/// use rshyper::HyperGraph;
 /// // initialize a new undirected hypergraph
-/// let mut graph = HashGraph::<usize, usize>::undirected();
+/// let mut graph = HyperGraph::<usize, usize>::undirected();
 /// // use the macro to insert nodes and edges into the graph
 /// rshyper::hypergraph! {
 ///     graph {
@@ -68,11 +68,11 @@ macro_rules! hypergraph {
 /// ## Example
 ///
 /// ```rust
-/// use rshyper::{HashGraph, Weight};
+/// use rshyper::{HyperGraph, Weight};
 ///
 /// fn main() -> rshyper::Result<()> {
 ///     // initialize a new undirected hypergraph
-///     let mut graph = HashGraph::<usize, usize>::undirected();
+///     let mut graph = HyperGraph::<usize, usize>::undirected();
 ///     // insert some vertices
 ///     let v0 = graph.add_node(Weight(1))?;
 ///     let v1 = graph.add_node(Weight(2))?;
@@ -132,9 +132,9 @@ macro_rules! hyperedge {
 /// ### Example
 ///
 /// ```rust
-/// use rshyper::HashGraph;
+/// use rshyper::HyperGraph;
 ///
-/// let mut graph: HashGraph<usize, usize> = HashGraph::new();
+/// let mut graph: HyperGraph<usize, usize> = HashGraph::new();
 /// // use the macro to insert nodes into the graph
 /// rshyper::hypernode! {
 ///     graph {
