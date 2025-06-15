@@ -4,7 +4,7 @@
 */
 use crate::idx::{EdgeId, IndexResult, RawIndex, Udx, VertexId};
 
-/// The [`IndexCursor`] stores the current edge and vertex indices in a hypergraph, allowing
+/// The [`Frame`] stores the current edge and vertex indices in a hypergraph, allowing
 /// for efficient traversal and manipulation of the hypergraph structure. Here, when we say
 /// current we mean the next indices used to create a new edge or vertex, respectively. It is
 /// designed to be used in conjunction with hypergraph operations that require knowledge of the
@@ -19,7 +19,7 @@ use crate::idx::{EdgeId, IndexResult, RawIndex, Udx, VertexId};
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "lowercase")
 )]
-pub struct IndexCursor<T = Udx>
+pub struct Frame<T = Udx>
 where
     T: RawIndex,
 {
@@ -29,7 +29,7 @@ where
     pub(crate) point: VertexId<T>,
 }
 
-impl<T> IndexCursor<T>
+impl<T> Frame<T>
 where
     T: RawIndex,
 {
@@ -138,7 +138,7 @@ where
 
 #[allow(deprecated)]
 #[doc(hidden)]
-impl<T> IndexCursor<T>
+impl<T> Frame<T>
 where
     T: RawIndex,
 {

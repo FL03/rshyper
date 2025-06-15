@@ -27,27 +27,11 @@ pub mod tracker;
 
 #[doc(hidden)]
 mod impls {
+    pub mod impl_index;
     pub mod impl_ops;
     #[cfg(feature = "rand")]
     pub mod impl_rand;
     pub mod impl_repr;
-}
-
-pub(crate) mod prelude {
-    #[doc(inline)]
-    pub use super::error::*;
-    #[doc(inline)]
-    pub use super::index::IndexBase;
-    #[doc(inline)]
-    pub use super::position::*;
-    #[doc(inline)]
-    pub use super::traits::prelude::*;
-    #[doc(inline)]
-    pub use super::types::prelude::*;
-
-    #[doc(inline)]
-    #[cfg(feature = "alloc")]
-    pub use super::tracker::IndexTracker;
 }
 
 pub mod traits {
@@ -94,4 +78,17 @@ pub mod types {
         /// a type alias for an [`Index`] whose _kind_ is [`VertexIndex`]
         pub type VertexId<T = Udx> = IndexBase<T, VertexIndex>;
     }
+}
+
+pub(crate) mod prelude {
+    #[doc(inline)]
+    pub use super::error::*;
+    #[doc(inline)]
+    pub use super::index::IndexBase;
+    #[doc(inline)]
+    pub use super::position::*;
+    #[doc(inline)]
+    pub use super::traits::{NumIndex, RawIndex};
+    #[doc(inline)]
+    pub use super::types::prelude::{EdgeId, Udx, VertexId};
 }

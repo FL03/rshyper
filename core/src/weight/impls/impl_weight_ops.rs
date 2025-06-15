@@ -19,7 +19,7 @@ macro_rules! impl_wrapper_binary_op {
             type Output = $s<C>;
 
             fn $call(self, rhs: $s<B>) -> Self::Output {
-                $s(::core::ops::$op::$call(self.value(), rhs.value()))
+                $s(::core::ops::$op::$call(self.into_inner(), rhs.into_inner()))
             }
         }
 
@@ -30,7 +30,7 @@ macro_rules! impl_wrapper_binary_op {
             type Output = $s<C>;
 
             fn $call(self, rhs: $s<B>) -> Self::Output {
-                $s(::core::ops::$op::$call(self.get(), rhs.value()))
+                $s(::core::ops::$op::$call(self.get(), rhs.into_inner()))
             }
         }
 
@@ -52,7 +52,7 @@ macro_rules! impl_wrapper_binary_op {
             type Output = $s<C>;
 
             fn $call(self, rhs: &'a $s<B>) -> Self::Output {
-                $s(::core::ops::$op::$call(self.value(), rhs.get()))
+                $s(::core::ops::$op::$call(self.into_inner(), rhs.get()))
             }
         }
 
@@ -109,7 +109,7 @@ macro_rules! impl_binary_op_mut {
         {
 
             fn $call(&mut self, rhs: $s<B>) {
-                core::ops::$op::$call(self.get_mut(), rhs.value())
+                core::ops::$op::$call(self.get_mut(), rhs.into_inner())
             }
         }
 
@@ -119,7 +119,7 @@ macro_rules! impl_binary_op_mut {
         {
 
             fn $call(&mut self, rhs: $s<B>) {
-                core::ops::$op::$call(self.get_mut(), rhs.value())
+                core::ops::$op::$call(self.get_mut(), rhs.into_inner())
             }
         }
     };
@@ -139,7 +139,7 @@ macro_rules! impl_unary_op {
             type Output = $s<B>;
 
             fn $call(self) -> Self::Output {
-                $s(core::ops::$op::$call(self.value()))
+                $s(core::ops::$op::$call(self.into_inner()))
             }
         }
 

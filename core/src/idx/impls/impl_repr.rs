@@ -15,13 +15,11 @@ impl<K: GraphIndex> IndexBase<usize, K> {
     pub fn atomic() -> Self {
         Self::new(INDEX_COUNTER.fetch_add(1, Ordering::Relaxed))
     }
-    /// consumes the current index and returns a new, atomic index.
-    pub fn atomic_next(&mut self) -> Self {
-        let prev = self.replace(INDEX_COUNTER.fetch_add(1, Ordering::Relaxed));
-        Self::new(prev)
-    }
-    /// initialize a new
-    pub fn init() -> Self {
+    /// a helper method that dynamically initializes the index based on the enabled features:
+    ///
+    /// - `rand`: if enabled, use random number generation to generate the index.
+    /// - `fallback`: otherwise, use an atomic counter to generate the index.
+    pub fn create() -> Self {
         #[cfg(feature = "rand")]
         {
             Self::rand()
@@ -31,12 +29,22 @@ impl<K: GraphIndex> IndexBase<usize, K> {
             Self::atomic()
         }
     }
-    /// the [`next_step`](IndexBase::next_step) is useful for instances where the type `Idx` of
+    /// atomically generates a the next index, replacing the current value with the generated
+    /// one and returning the previous value.
+    pub fn atomic_next(&mut self) -> Self {
+        // generate the next id atomically
+        let mut id = Self::atomic();
+        // swap values, replacing the current instances value with the new one
+        self.swap(&mut id);
+        // return the previous instance
+        id
+    }
+    /// the [`generate`](IndexBase::generate) is useful for instances where the type `Idx` of
     /// the [`IndexBase`] is not generalized, automatically using random number generation
     /// if the `rand` feature is enabled, or an atomic counter otherwise. The method is also
-    /// useful in that it generates `usize` indices, whcih are the most common instances, yet
-    /// aren't direct implementors of the [`SampleUniform`](rand_distr::SampleUniform) trait.
-    pub fn next_step(&mut self) -> Self {
+    /// useful in that it generates [`usize`] indices, whcih are the most common instances, yet
+    /// aren't direct implementors of [`StandardUniform`](rand_distr::StandardUniform).
+    pub fn generate(&mut self) -> Self {
         // declare the prev param
         let prev: usize;
         // use random number generation if the `rand` feature is enabled
@@ -57,13 +65,19 @@ impl<K: GraphIndex> IndexBase<usize, K> {
     }
 }
 
-impl<T: RawIndex> IndexBase<T, EdgeIndex> {
+impl<T> IndexBase<T, EdgeIndex>
+where
+    T: RawIndex,
+{
     pub fn vertex(value: T) -> Self {
         Self::new(value)
     }
 }
 
-impl<T: RawIndex> IndexBase<T, VertexIndex> {
+impl<T> IndexBase<T, VertexIndex>
+where
+    T: RawIndex,
+{
     pub fn vertex(value: T) -> Self {
         Self::new(value)
     }

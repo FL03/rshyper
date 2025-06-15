@@ -114,7 +114,7 @@ where
     fn default() -> Self {
         Self {
             index: VertexId::default(),
-            weight: Weight::init(),
+            weight: Weight::default(),
         }
     }
 }

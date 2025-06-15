@@ -2,7 +2,7 @@
     appellation: tracker <module>
     authors: @FL03
 */
-use super::{EdgeId, IndexCursor, IndexError, RawIndex, VertexId};
+use super::{EdgeId, Frame, IndexError, RawIndex, VertexId};
 use crate::AddStep;
 use alloc::vec::Vec;
 
@@ -18,7 +18,7 @@ pub struct IndexTracker<Ix = usize>
 where
     Ix: RawIndex,
 {
-    pub(crate) cursor: IndexCursor<Ix>,
+    pub(crate) cursor: Frame<Ix>,
     pub(crate) edges: Vec<EdgeId<Ix>>,
     pub(crate) points: Vec<VertexId<Ix>>,
 }
@@ -32,10 +32,10 @@ where
     where
         Ix: Default,
     {
-        Self::from_cursor(IndexCursor::default())
+        Self::from_cursor(Frame::default())
     }
     /// creates a new instance with an empty history and the given cursor.
-    pub fn from_cursor(cursor: IndexCursor<Ix>) -> Self {
+    pub fn from_cursor(cursor: Frame<Ix>) -> Self {
         Self {
             cursor,
             edges: Vec::new(),
@@ -47,21 +47,21 @@ where
     where
         Ix: num_traits::One,
     {
-        Self::from_cursor(IndexCursor::one())
+        Self::from_cursor(Frame::one())
     }
     /// create a new history with the cursor initialized to `0`
     pub fn zero() -> Self
     where
         Ix: num_traits::Zero,
     {
-        Self::from_cursor(IndexCursor::zero())
+        Self::from_cursor(Frame::zero())
     }
     /// returns a reference to the current cursor.
-    pub const fn cursor(&self) -> &IndexCursor<Ix> {
+    pub const fn cursor(&self) -> &Frame<Ix> {
         &self.cursor
     }
     /// returns a mutable reference to the current cursor.
-    pub const fn cursor_mut(&mut self) -> &mut IndexCursor<Ix> {
+    pub const fn cursor_mut(&mut self) -> &mut Frame<Ix> {
         &mut self.cursor
     }
     /// returns an immutable reference to the edge history
@@ -82,7 +82,7 @@ where
     }
     /// set the current position and return a mutable reference to the tracker
     #[inline]
-    pub fn set_cursor(&mut self, cursor: IndexCursor<Ix>) -> &mut Self {
+    pub fn set_cursor(&mut self, cursor: Frame<Ix>) -> &mut Self {
         *self.cursor_mut() = cursor;
         self
     }
@@ -100,7 +100,7 @@ where
     }
     /// consumes the current instance to create another with the given position
     #[inline]
-    pub fn with_cursor(self, cursor: IndexCursor<Ix>) -> Self {
+    pub fn with_cursor(self, cursor: Frame<Ix>) -> Self {
         Self { cursor, ..self }
     }
     /// consumes the current instance to create another with the given edge history

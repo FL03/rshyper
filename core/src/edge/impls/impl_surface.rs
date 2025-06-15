@@ -38,7 +38,7 @@ where
     fn default() -> Self {
         Self {
             edge: Edge::default(),
-            weight: Weight::init(),
+            weight: Weight::default(),
         }
     }
 }

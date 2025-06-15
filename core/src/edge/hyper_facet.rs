@@ -56,7 +56,7 @@ where
     {
         Self {
             edge: Edge::from_id(id),
-            weight: Weight::init(),
+            weight: Weight::default(),
         }
     }
     /// creates a new edge with the given nodes
@@ -67,7 +67,7 @@ where
     {
         Self {
             edge: Edge::from_domain(nodes),
-            weight: Weight::init(),
+            weight: Weight::default(),
         }
     }
     /// creates a new instance from the given value

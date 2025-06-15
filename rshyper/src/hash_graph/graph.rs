@@ -7,7 +7,7 @@
 use super::aliases::*;
 
 use rshyper_core::attrs::{DiAttributes, GraphAttributes, UnAttributes};
-use rshyper_core::idx::{EdgeId, IndexCursor, IndexTracker, NumIndex, RawIndex, VertexId};
+use rshyper_core::idx::{EdgeId, Frame, IndexTracker, NumIndex, RawIndex, VertexId};
 use rshyper_core::node::Node;
 use rshyper_core::{GraphType, HyperGraph, Mode, RawHyperGraph, Weight};
 
@@ -103,11 +103,11 @@ where
     /// returns a copy of the position of the hypergraph; here, the [`position`](Position) is
     /// used to track the indices (edge & vertex) and define which ones are next to be used
     /// when inserting new hyperedges or vertices
-    pub const fn position(&self) -> &IndexCursor<Idx> {
+    pub const fn position(&self) -> &Frame<Idx> {
         self.history().cursor()
     }
     /// returns a mutable reference to the current position of the hypergraph;
-    pub const fn position_mut(&mut self) -> &mut IndexCursor<Idx> {
+    pub const fn position_mut(&mut self) -> &mut Frame<Idx> {
         self.history_mut().cursor_mut()
     }
     /// returns an immutable reference to the surfaces of the hypergraph
@@ -138,7 +138,7 @@ where
     }
     /// overrides the current position and returns a mutable reference to the hypergraph
     #[inline]
-    pub fn set_position(&mut self, position: IndexCursor<Idx>) -> &mut Self
+    pub fn set_position(&mut self, position: Frame<Idx>) -> &mut Self
     where
         Idx: Default,
     {

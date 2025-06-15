@@ -20,7 +20,7 @@ where
     pub fn add_edge<I>(&mut self, vertices: I) -> crate::Result<EdgeId<Idx>>
     where
         I: IntoIterator<Item = VertexId<Idx>>,
-        Idx: AddStep<Output = Idx> + Copy,
+        Idx: AddStep<Output = Idx> + Clone,
         E: Default,
         S: Default,
     {
@@ -35,7 +35,7 @@ where
     pub fn add_surface<I>(&mut self, vertices: I, weight: Weight<E>) -> crate::Result<EdgeId<Idx>>
     where
         I: IntoIterator<Item = VertexId<Idx>>,
-        Idx: AddStep<Output = Idx> + Copy,
+        Idx: AddStep<Output = Idx> + Clone,
         S: Default,
     {
         // collect the vertices into a HashSet to ensure uniqueness
@@ -48,19 +48,37 @@ where
                 }
                 Ok(v)
             })
-            .filter_map(Result::ok);
-        let vset = VertexSet::from_iter(verts);
+            .filter_map(Result::ok)
+            .collect::<VertexSet<Idx, S>>();
         // fetch the next edge index
         let edge_id = self.next_edge_id();
-        // handle the case where the edge has no associated vertices
-        if vset.is_empty() {
+        // create a new surface
+        let surface = Surface::new(edge_id.clone(), verts, weight);
+        // ensure the surface is valid
+        if surface.is_empty() && self.history().contains_edge(surface.id()) {
             return Err(crate::Error::EmptyHyperedge);
         }
-        let surface = crate::Surface::new(edge_id, vset, weight);
-        // insert the new hyperedge into the adjacency map
-        self.surfaces_mut().insert(edge_id, surface);
+        // add the hyperedge to the graph
+        self.add_hyperedge(surface)?;
         Ok(edge_id)
     }
+    /// add a new hyperedge directly using an externally defined surface;
+    ///
+    /// **note:** it is up to the user to ensure the surface id is recordered, otherwise
+    /// dupliciated may occur. For this reason, it is recommended to use any other insertion
+    /// routine for new hyperedges unless you are sure the surface is valid.
+    pub fn add_hyperedge(&mut self, surface: HashFacet<E, K, Idx, S>) -> crate::Result<EdgeId<Idx>>
+    where
+        Idx: Clone,
+    {
+        // get the id of the surface
+        let id = surface.id().clone();
+        // insert the new hyperedge into the adjacency map
+        self.surfaces_mut().insert(id.clone(), surface);
+        // return the id
+        Ok(id)
+    }
+
     /// add a new node with the given weight and return its index
     #[cfg_attr(
         feature = "tracing",
@@ -321,11 +339,14 @@ where
         let s2 = self.remove_surface(e2)?;
         #[cfg(feature = "tracing")]
         tracing::debug!("removed edge {e2:?} with vertices {ep:?}", ep = s2.domain());
-        // merge the vertices of the two edges
-        let vertices = s1.domain().union(s2.domain()).copied();
-        let vertices = VertexSet::from_iter(vertices);
+        // merge the vertices of the two edges by unionizing their domains
+        let vertices = s1
+            .domain()
+            .union(s2.domain())
+            .copied()
+            .collect::<VertexSet<Idx, S>>();
         // merge the two weights using the provided function
-        let weight = f(s1.weight().view().value(), s2.weight().view().value());
+        let weight = f(*s1.weight().view(), *s2.weight().view());
         // generate a new edge index
         let edge_id = self.next_edge_id();
         // initialize a new facet using the merged vertices, new index, and source weight
