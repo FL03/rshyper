@@ -70,7 +70,7 @@ Add this to your `Cargo.toml`:
 ```toml
 [dependencies.rshyper]
 features = [
-    "hash_graph",
+    "hyper_map",
     "macros",
 ]
 version = "0.1.x"
@@ -80,7 +80,7 @@ version = "0.1.x"
 
 The `rshyper` library provides several features to enhance and isolate its functionality:
 
-- `hash_graph` - A hash-based hypergraph implementation.
+- `hyper_map` - A map-based hypergraph implementation.
 - `macros` - A set of macros to simplify hypergraph creation and manipulation.
 
 #### Dependency related features
@@ -101,23 +101,24 @@ For more detailed examples, please refer to the [examples directory](https://git
 
     fn main() -> rshyper::Result<()> {
         // initialize a new instance of a hypergraph
-        let mut graph: HashGraph<usize, usize> = HashGraph::new();
+        let mut graph: HyperMap<usize, usize> = HyperMap::new();
         // use the macro to insert nodes into the graph
-        rshyper::hypernode! {
+        rshyper::hypergraph! {
             graph {
-                let v0;
-                let v1 = 2;
-                let v2 = 3;
-                let v3 = 4;
+                nodes: {
+                  let v0;
+                  let v1 = 2;
+                  let v2 = 3;
+                  let v3 = 4;
+                };
+                esges: {
+                  let e0: [v0, v1, v2];
+                  let e1: [v0, v2, v3];
+                };
             }
         }
-        // Add some hyperedges
-        let e1 = graph.insert_edge(vec![v0, v1, v2])?;
-        println!("Added hyperedge {e1}: {:?}", [v0, v1, v2]);
-
-        let e2 = graph.insert_edge(vec![v1, v2, v3])?;
-        println!("Added hyperedge {e2}: {:?}", [v1, v2, v3]);
-
+        // view the initial properties
+        println!("Initial graph state: {:?}", graph);
         // Get neighbors of vertex v1
         let neighbors = graph.neighbors(&v1)?;
         println!("Neighbors of {}: {:?}", v1, neighbors);
@@ -130,7 +131,7 @@ For more detailed examples, please refer to the [examples directory](https://git
         graph.remove_vertex(&v2)?;
         println!("Removed vertex {v2}");
 
-        println!("---------\nFinal graph state: {:?}", graph);
+        println!("*********\nFinal graph state:\n*********\n{:?}", graph);
         Ok(())
     }
 

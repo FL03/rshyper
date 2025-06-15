@@ -2,17 +2,17 @@
     Appellation: error <module>
     Contrib: @FL03
 */
-//! this module implements the [`Error`] type for the [`rshyper`](https://docs.rs/rshyper)
+//! this module implements the [`HyperError`] type for the [`rshyper`](https://docs.rs/rshyper)
 //! crate.
 #[cfg(feature = "alloc")]
 use alloc::{boxed::Box, string::String};
 
-/// A type alias for a [Result] with the crate-specific error type [Error]
-pub type Result<T = ()> = core::result::Result<T, Error>;
+/// A type alias for a [Result] with the crate-specific error type [`HyperError`]
+pub type HyperResult<T = ()> = core::result::Result<T, HyperError>;
 
 /// The error type for this crate
 #[derive(Debug, thiserror::Error)]
-pub enum Error {
+pub enum HyperError {
     #[error("No path found between the two points")]
     PathNotFound,
     #[error("The edge with the given id does not exist")]
@@ -48,15 +48,15 @@ pub enum Error {
 }
 
 #[cfg(feature = "alloc")]
-impl From<&str> for Error {
+impl From<&str> for HyperError {
     fn from(s: &str) -> Self {
-        Error::Unknown(String::from(s))
+        HyperError::Unknown(String::from(s))
     }
 }
 
 #[cfg(feature = "alloc")]
-impl From<String> for Error {
+impl From<String> for HyperError {
     fn from(s: String) -> Self {
-        Error::Unknown(s)
+        HyperError::Unknown(s)
     }
 }

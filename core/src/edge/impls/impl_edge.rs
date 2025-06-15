@@ -39,6 +39,20 @@ where
     }
 }
 
+impl<S, K, Idx> core::fmt::Debug for Edge<S, K, Idx>
+where
+    Idx: RawIndex,
+    K: GraphType,
+    S: Domain<Idx> + core::fmt::Debug,
+{
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Edge")
+            .field("id", &self.id())
+            .field("domain", &self.domain())
+            .finish()
+    }
+}
+
 impl<S, K, Idx> core::fmt::Display for Edge<S, K, Idx>
 where
     Idx: RawIndex,

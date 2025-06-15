@@ -9,7 +9,7 @@ use num_traits::{One, Zero};
 
 /// A generic [`IndexBase`] implementation used to represent various [_kinds_](GraphIndex) of
 /// indices
-#[derive(Clone, Copy, Eq, Hash, PartialEq, Ord, PartialOrd)]
+#[derive(Clone, Copy, Hash, Ord, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct IndexBase<Idx = super::Udx, K = super::VertexIndex> {
     pub(crate) value: Idx,
@@ -233,8 +233,7 @@ macro_rules! impl_fmt {
     (@impl $s:ident($trait:ident)) => {
         impl<T, K> ::core::fmt::$trait for $s<T, K>
         where
-            K: GraphIndex,
-            T: RawIndex + ::core::fmt::$trait,
+            T: ::core::fmt::$trait,
         {
             fn fmt(&self, f: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
                 ::core::fmt::$trait::fmt(&self.value, f)

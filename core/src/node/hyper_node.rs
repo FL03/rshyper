@@ -26,8 +26,11 @@ where
     Idx: RawIndex,
 {
     /// initialize a new instance with the given index and weight
-    pub fn new(id: VertexId<Idx>, weight: Weight<T>) -> Self {
-        Self { id, weight }
+    pub const fn new(id: VertexId<Idx>, weight: T) -> Self {
+        Self {
+            id,
+            weight: Weight(weight),
+        }
     }
     /// returns a new weighted node using the given value and the logical default for the index
     pub fn from_id(index: VertexId<Idx>) -> Self
@@ -37,7 +40,7 @@ where
         Self::new(index, Default::default())
     }
     /// creates a new node with the given index using the logical default for the weight.
-    pub fn from_weight(weight: Weight<T>) -> Self
+    pub fn from_weight(Weight(weight): Weight<T>) -> Self
     where
         Idx: Default,
     {
@@ -57,6 +60,28 @@ where
             weight,
         }
     }
+    /// converts the node into a 2-tuple consisting of the node index and the weight:
+    ///
+    /// - `0`: a reference to the node index
+    /// - `1`: a reference to the node weight
+    pub const fn as_tuple(&self) -> (&VertexId<Idx>, &Weight<T>) {
+        (self.id(), self.weight())
+    }
+    /// consumes the node to convert it into a 2-tuple consisting of the node index and the
+    /// weight
+    pub fn into_tuple(self) -> (VertexId<Idx>, Weight<T>) {
+        (self.id, self.weight)
+    }
+    /// returns the node as a tuple with a mutable reference to the weight such that:
+    ///
+    /// -  `0`: a reference to the node index
+    /// -  `1`: a mutable reference to the node weight
+    ///
+    /// this method is useful for converting the node into a standard item produced by mutable
+    /// key-value iterators where `Item = (&'a K, &'a mut V)`
+    pub fn as_tuple_mut(&mut self) -> (&VertexId<Idx>, &mut Weight<T>) {
+        (&self.id, &mut self.weight)
+    }
     /// returns an immutable reference to the node index
     pub const fn id(&self) -> &VertexId<Idx> {
         &self.id
@@ -68,11 +93,6 @@ where
     /// returns a mutable reference to the node weight
     pub const fn weight_mut(&mut self) -> &mut Weight<T> {
         &mut self.weight
-    }
-    /// update the node id and return a mutable reference to the current instance.
-    pub fn set_id(&mut self, id: VertexId<Idx>) -> &mut Self {
-        self.id = id;
-        self
     }
     /// update the weight and return a mutable reference to the current instance.
     pub fn set_weight(&mut self, weight: T) -> &mut Self {

@@ -78,6 +78,8 @@ full = [
 ]
 
 # ************* [FF:Environments] *************
+nightly = []
+
 std = [
     "alloc",
     "anyhow?/std",

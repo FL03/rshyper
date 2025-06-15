@@ -5,7 +5,9 @@ updates:
     directories:  
       - /
       - rshyper
+      - algo
       - core
+      - hmap
     schedule:
       interval: monthly
   - package-ecosystem: devcontainers

@@ -15,16 +15,17 @@
 //! - [`node`]: provides the [`Node`] implementation for representing hypernodes
 //! - [`weight`]: gives the [`Weight`] type for representing weights in a hypergraph
 //!
+#![crate_type = "lib"]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
+)]
 #![allow(
     clippy::should_implement_trait,
     clippy::module_inception,
     clippy::missing_safety_doc
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![doc(
-    html_logo_url = "https://raw.githubusercontent.com/rshyper/rshyper/main/assets/logo.svg",
-    html_favicon_url = "https://raw.githubusercontent.com/rshyper/rshyper/main/assets/logo.svg"
-)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -39,7 +40,7 @@ pub(crate) mod macros {
 pub use self::{
     attrs::{Attributes, GraphAttributes},
     edge::{Edge, Surface},
-    error::{Error, Result},
+    error::{HyperError, HyperResult},
     idx::prelude::*,
     node::Node,
     traits::prelude::*,

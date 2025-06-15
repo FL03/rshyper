@@ -46,7 +46,7 @@
 //!
 //! ## Features
 //!
-//! - `hash_graph`: enables the [`HashGraph`] implementation, a hash-based hypergraph structure
+//! - `hyper_map`: enables the [`HyperMap`] implementation, a hash-based hypergraph structure
 //! - `macros`: enables the implemented macros for streamlining graph management
 //!
 //! ### _Dependencies_
@@ -54,7 +54,6 @@
 //! **Note:** While the `alloc` and `std` libraries are feature-gated, they are required for
 //! anything useful in this crate; both are enabled by default.
 //!
-//! - `anyhow`: enables the use of the `anyhow` crate for error handling
 //! - `rayon`: enables parallel processing capabilities using the `rayon` crate
 //! - `serde`: enables serialization and deserialization of hypergraphs using the `serde` crate
 //!
@@ -62,6 +61,30 @@
 //!
 //! For more detailed examples, please refer to the [examples directory](https://github.com/FL03/rshyper/blob/main/rshyper/examples).
 //!
+//! ### _Example 1: Basic Usage_
+//!
+//! ```rust
+//! use rshyper::{HyperMap, IntoWeight};
+//!
+//! let mut graph = HyperMap::<usize, usize>::undirected();
+//! // add some unweighted vertices
+//! let v0 = graph.add_vertex().expect("failed to add vertex");
+//! let v1 = graph.add_vertex().expect("failed to add vertex");
+//! // add a weighted node
+//! let v2 = graph.add_node(10.into_weight()).expect("failed to add node");
+//! // create some edges using those nodes
+//! let e0 = graph.add_edge([v0, v1]).expect("failed to add edge");
+//! let e1 = graph.add_edge([v1, v2]).expect("failed to add edge");
+//! // create a surface (weighted edge) using the nodes
+//! let e3 = graph.add_surface([v0, v2], 5.into_weight()).expect("failed to add surface");
+//! ```
+//!
+#![crate_name = "rshyper"]
+#![crate_type = "lib"]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg",
+    html_favicon_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
+)]
 #![allow(
     clippy::should_implement_trait,
     clippy::module_inception,
@@ -70,42 +93,65 @@
     clippy::non_canonical_partial_ord_impl
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
-#![crate_name = "rshyper"]
-#![crate_type = "lib"]
-#![doc(
-    html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
-)]
+
+/*
+ ************* ROOT *************
+*/
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
-/// declare the macros module for use throughout the crate
+
 #[macro_use]
-pub(crate) mod macros;
+#[cfg(feature = "macros")]
+pub(crate) mod macros {
+    //! this module defines the various macros used throughout the crate to streamline the
+    //! creation and maniuplation of hypergraphs and their constituent components.
+    #[macro_use]
+    pub mod hypergraph;
+}
+
+/*
+ ************* REIMPORTS *************
+*/
 
 #[doc(inline)]
-#[cfg(all(feature = "std", feature = "algo"))]
-pub use self::algo::prelude::*;
+#[cfg(feature = "hyper_map")]
+pub use self::hyper_map::{DiHyperMap, HyperMap, UnHyperMap};
 #[doc(inline)]
 pub use rshyper_core::*;
 
+#[allow(deprecated)]
+#[cfg(feature = "hyper_map")]
+#[deprecated(since = "0.1.3", note = "use `HyperMap` instead")]
+pub use self::hyper_map::{DiHashGraph, HashGraph, UnHashGraph};
+
+/*
+ ************* FEATURE-GATED MODULES *************
+*/
+
 #[doc(inline)]
-#[cfg(feature = "hash_graph")]
-pub use self::hash_graph::{DiHashGraph, HashGraph, UnHashGraph};
-
+#[cfg(feature = "algo")]
 /// the `algo` module focuses on implementing algorithms and operators for hypergraphs
-#[cfg(all(feature = "std", feature = "algo"))]
-pub mod algo;
-/// this module contains the [`HashGraph`], a hash-based hypergraph implementation
-#[cfg(feature = "hash_graph")]
-pub mod hash_graph;
+pub use rshyper_algo as algo;
+#[doc(inline)]
+#[cfg(feature = "hyper_map")]
+/// this module contains the [`HyperMap`](rshyper_hmap::HyperMap), a hash-based hypergraph
+/// implementation
+pub use rshyper_hmap as hyper_map;
 
-/// the prelude module for the crate contains all commonly used traits, types, and functions
+/*
+ ************* PRELUDE *************
+*/
+
+#[doc(hidden)]
 #[allow(missing_docs)]
 pub mod prelude {
     pub use rshyper_core::prelude::*;
 
-    #[cfg(all(feature = "std", feature = "algo"))]
-    pub use crate::algo::prelude::*;
-    #[cfg(feature = "hash_graph")]
-    pub use crate::hash_graph::prelude::*;
+    #[cfg(feature = "macros")]
+    pub use crate::{hyperedge, hypergraph, hypernode};
+    #[cfg(feature = "algo")]
+    pub use rshyper_algo::prelude::*;
+    #[cfg(feature = "hyper_map")]
+    pub use rshyper_hmap::prelude::*;
 }

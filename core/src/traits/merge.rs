@@ -7,7 +7,7 @@
 pub trait Combine<A, B> {
     type Output;
 
-    fn combine(&mut self, src: A, tgt: B) -> crate::Result<Self::Output>;
+    fn combine(&mut self, src: A, tgt: B) -> crate::HyperResult<Self::Output>;
 }
 /// [`Concat`] defines an interface for _concatenating_ two entities into another
 pub trait Concat<Rhs = Self> {
