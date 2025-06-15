@@ -48,11 +48,7 @@ where
 {
     type Output = EdgeId<Idx>;
 
-    fn combine(
-        &mut self,
-        src: EdgeId<Idx>,
-        tgt: EdgeId<Idx>,
-    ) -> HyperResult<Self::Output> {
+    fn combine(&mut self, src: EdgeId<Idx>, tgt: EdgeId<Idx>) -> HyperResult<Self::Output> {
         self.merge_edges(&src, &tgt)
     }
 }
@@ -67,11 +63,7 @@ where
 {
     type Output = EdgeId<Idx>;
 
-    fn combine(
-        &mut self,
-        src: &'a EdgeId<Idx>,
-        tgt: &'a EdgeId<Idx>,
-    ) -> HyperResult<Self::Output> {
+    fn combine(&mut self, src: &'a EdgeId<Idx>, tgt: &'a EdgeId<Idx>) -> HyperResult<Self::Output> {
         self.merge_edges(src, tgt)
     }
 }

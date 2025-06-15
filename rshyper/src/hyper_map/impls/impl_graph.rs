@@ -6,7 +6,7 @@ use crate::hyper_map::{HashFacet, HyperMap, VertexSet};
 use crate::{AddStep, GraphAttributes, GraphType};
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::idx::{EdgeId, RawIndex, VertexId};
-use rshyper_core::{HyperError, Node, HyperResult, Surface, Weight};
+use rshyper_core::{HyperError, HyperResult, Node, Surface, Weight};
 
 impl<N, E, A, K, Idx, S> HyperMap<N, E, A, S>
 where
@@ -28,7 +28,10 @@ where
     }
     /// add a new hyperedge directly using an externally defined surface, returns an error if the
     /// surface is empty or if the associated edge id is not recorded in the history.
-    pub(crate) fn add_hyperedge(&mut self, surface: HashFacet<E, K, Idx, S>) -> HyperResult<EdgeId<Idx>>
+    pub(crate) fn add_hyperedge(
+        &mut self,
+        surface: HashFacet<E, K, Idx, S>,
+    ) -> HyperResult<EdgeId<Idx>>
     where
         Idx: Clone,
     {
