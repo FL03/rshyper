@@ -40,7 +40,7 @@ where
     T: PartialEq,
 {
     fn eq(&self, other: &IndexBase<T, K>) -> bool {
-        &self.value == &other.value
+        self.value == other.value
     }
 }
 
@@ -49,7 +49,7 @@ where
     T: PartialEq,
 {
     fn eq(&self, other: &&'a IndexBase<T, K>) -> bool {
-        &self.value == &other.value
+        self.value == other.value
     }
 }
 
@@ -58,11 +58,11 @@ where
     T: PartialEq,
 {
     fn eq(&self, other: &&'a mut IndexBase<T, K>) -> bool {
-        &self.value == &other.value
+        self.value == other.value
     }
 }
 
-impl<'a, T, K> PartialEq<IndexBase<T, K>> for &'a IndexBase<T, K>
+impl<T, K> PartialEq<IndexBase<T, K>> for &IndexBase<T, K>
 where
     T: PartialEq,
 {
@@ -71,7 +71,7 @@ where
     }
 }
 
-impl<'a, T, K> PartialEq<IndexBase<T, K>> for &'a mut IndexBase<T, K>
+impl<T, K> PartialEq<IndexBase<T, K>> for &mut IndexBase<T, K>
 where
     T: PartialEq,
 {

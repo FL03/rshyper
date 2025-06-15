@@ -2,8 +2,11 @@
     appellation: graph <ast>
     authors: @FL03
 */
+use super::{EdgeAst, NodeAst};
+use crate::kw;
 use syn::{Ident, Token, braced};
 use syn::parse::{Parse, ParseStream};
+use syn::punctuated::Punctuated;
 
 /// The [`GraphAst`] struct represents the abstract syntax tree (AST) for a hypergraph macro.
 /// Overall, it is supposed to feel similar to
@@ -25,38 +28,36 @@ use syn::parse::{Parse, ParseStream};
 /// ```
 pub struct GraphAst {
     pub graph: Ident,
-    pub nodes: Vec<Ident>,
-    pub edges: Vec<(Ident, Vec<Ident>)>,
+    pub nodes: Punctuated<NodeAst, Token![;]>,
+    pub edges: Punctuated<EdgeAst, Token![;]>,
 }
 
 impl Parse for GraphAst {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let content; // the graph {} outer brace
         let graph: Ident = input.parse()?;
+        let content; // the graph {} outer brace
         braced!(content in input);
-        input.parse::<Ident>()?; // nodes
-        input.parse::<Token![:]>()?;
-        let node_content; // the nodes: {} brace
-        braced!(node_content in input);
-        let nodes = node_content.parse_terminated(Ident::parse, Token![,])?.into_iter().collect();
-        input.parse::<Token![;]>()?;
-        input.parse::<Ident>()?; // edges
-        input.parse::<Token![:]>()?;
-        let edge_content; // the edges: {} brace
-        braced!(edge_content in input);
-        let mut edges = Vec::new();
-        while !edge_content.is_empty() {
-            let e_name: Ident = edge_content.parse()?;
-            edge_content.parse::<Token![:]>()?;
-            let inner;
-            syn::bracketed!(inner in content);
-            let edge_nodes = inner.parse_terminated(Ident::parse, Token![,])?.into_iter().collect();
-            edges.push((e_name, edge_nodes));
-            if content.peek(Token![,]) {
-                content.parse::<Token![,]>()?;
+
+        let mut nodes = Punctuated::new();
+        let mut edges = Punctuated::new();
+        while !content.is_empty() {
+            if input.peek(kw::nodes) {
+                input.parse::<kw::nodes>()?;
+                input.parse::<Token![:]>()?;
+                let node_content;
+                braced!(node_content in input);
+                nodes = node_content.parse_terminated(NodeAst::parse, Token![;])?;
+                input.parse::<Token![;]>()?;
+            }
+            if input.peek(kw::edges) {
+                input.parse::<kw::edges>()?;
+                input.parse::<Token![:]>()?;
+                let edge_content;
+                braced!(edge_content in input);
+                edges = edge_content.parse_terminated(EdgeAst::parse, Token![;])?;
+                input.parse::<Token![;]>()?;
             }
         }
-        input.parse::<Token![;]>()?;
         Ok(GraphAst { graph, nodes, edges })
     }
 }
