@@ -7,14 +7,15 @@
 #[doc(inline)]
 #[allow(unused_imports)]
 pub use self::{
-    hyper_edge::Edge, hyper_facet::Surface, traits::prelude::*, types::prelude::*,
+    hyper_edge::Edge, hyper_surface::Surface, traits::prelude::*, types::prelude::*,
     utils::prelude::*,
 };
 
-/// the [`hyper_edge`] module defines the [`Edge`] type representing the basis of a hyperedge
+/// here, a [`hyper_edge`] essentially represents an _unweighted_ hyperedge, consisting of an
+/// identifier, a domain (i.e. a collection of vertices), and a graph type.
 pub mod hyper_edge;
-/// the [`hyper_facet`] module defines the [`Surface`] type representing a "complete" hyperedge
-pub mod hyper_facet;
+/// a [`hyper_surface`] speaks to a _weighted_ hyperedge, materialized here as a [`Surface`]
+pub mod hyper_surface;
 
 mod impls {
     pub mod impl_edge;
@@ -78,7 +79,7 @@ pub(crate) mod prelude {
     #[doc(inline)]
     pub use super::hyper_edge::*;
     #[doc(inline)]
-    pub use super::hyper_facet::*;
+    pub use super::hyper_surface::*;
     #[doc(inline)]
     pub use super::traits::prelude::*;
     #[doc(inline)]

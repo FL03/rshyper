@@ -2,7 +2,7 @@
     Appellation: hgraph <module>
     Contrib: @FL03
 */
-use crate::edge::{BinaryEdge, RawEdge, RawFacet};
+use crate::edge::{BinaryEdge, RawEdge, RawSurface};
 use crate::error::Result;
 use crate::idx::{EdgeId, VertexId};
 use crate::node::RawNode;
@@ -17,7 +17,7 @@ pub trait RawHyperGraph<A>
 where
     A: GraphProps,
 {
-    type Edge<E>: RawFacet<E, Index = A::Ix, Kind = A::Kind>;
+    type Edge<E>: RawSurface<E, Index = A::Ix, Kind = A::Kind>;
     type Node<N>: RawNode<N, Key = A::Ix>;
 }
 /// The [`HyperGraph`] trait directly extends the [`RawHyperGraph`] trait to provide additional

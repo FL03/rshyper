@@ -2,7 +2,7 @@
     Appellation: node <module>
     Contrib: @FL03
 */
-use super::{Edge, RawEdge, RawFacet};
+use super::{Edge, RawEdge, RawSurface};
 use crate::idx::{EdgeId, RawIndex, VertexId};
 use crate::{Domain, GraphType, Weight};
 
@@ -218,7 +218,7 @@ where
     }
 }
 
-impl<T, S, Idx, K> RawFacet<T> for Surface<T, S, K, Idx>
+impl<T, S, Idx, K> RawSurface<T> for Surface<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,

@@ -46,6 +46,7 @@ thiserror = { workspace = true }
 tracing = { optional = true, workspace = true }
 # math
 num-traits = { workspace = true }
+ordered-float = { optional = true, workspace = true }
 # macros & utilities
 strum = { features = ["derive"], workspace = true }
 # serialization
@@ -74,6 +75,7 @@ nightly = [
 std = [
     "alloc",
     "num-traits/std",
+    "ordered-float?/std",
     "rshyper-core/std",
     "scsys/std",
     "serde?/std",
@@ -108,6 +110,8 @@ anyhow = [
     "scsys/anyhow",
 ]
 
+ordered-float = ["dep:ordered-float"]
+
 rayon = [
     "dep:rayon-core",
     "rshyper-core/rayon",
@@ -116,6 +120,7 @@ rayon = [
 serde = [
     "dep:serde",
     "dep:serde_derive",
+    "ordered-float?/serde",
     "rshyper-core/serde",
     "scsys/serde",
 ]
