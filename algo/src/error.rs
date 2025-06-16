@@ -6,7 +6,7 @@
 //! the [`rshyper`](https://docs.rs/rshyper) crate.
 
 #[cfg(feature = "alloc")]
-use alloc::string::ToString;
+use alloc::boxed::Box;
 use rshyper_core::error::Error as CoreError;
 /// a type alias for a [Result] with the crate-specific error type [`AlgoError`]
 pub type Result<T = ()> = core::result::Result<T, Error>;
@@ -29,24 +29,12 @@ pub enum Error {
     CoreError(#[from] CoreError),
 }
 
-impl Error {
-    fn variant(&self) -> &str {
-        match self {
-            Error::PathNotFound => "No path found between the two points",
-            Error::EdgeNotFound => "The edge with the given id does not exist",
-            Error::NodeNotFound => "The node with the given id does not exist",
-            Error::NoEdgesWithVertex => "No edges contain the given vertex",
-            Error::EmptyHyperedge => "Cannot create an empty hyperedge",
-            Error::CoreError(_e) => "core error",
-        }
-    }
-}
 #[cfg(feature = "alloc")]
 impl From<Error> for CoreError {
     fn from(e: Error) -> Self {
         match e {
             Error::CoreError(e) => e,
-            _ => CoreError::Unknown(e.variant().to_string()),
+            _ => CoreError::BoxError(Box::new(e)),
         }
     }
 }
