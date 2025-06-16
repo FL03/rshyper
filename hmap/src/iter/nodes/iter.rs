@@ -3,8 +3,7 @@
     authors: @FL03
 */
 use core::hash::Hash;
-use rshyper_core::Node;
-use rshyper_core::idx::{RawIndex, VertexId};
+use rshyper::prelude::{Node, RawIndex, VertexId};
 use std::collections::hash_map;
 
 /// [`NodeIter`] is an iterator over the node entries within the `HyperMap`, yielding a 2-tuple

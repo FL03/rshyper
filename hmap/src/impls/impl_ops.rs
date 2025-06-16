@@ -4,10 +4,10 @@
 */
 use crate::{HashSurface, HyperMap};
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::error::Result;
-use rshyper_core::idx::{EdgeId, NumIndex, RawIndex, VertexId};
-use rshyper_core::node::Node;
-use rshyper_core::{Combine, GraphProps, GraphType};
+use rshyper::error::Result;
+use rshyper::idx::{EdgeId, NumIndex, RawIndex, VertexId};
+use rshyper::node::Node;
+use rshyper::{Combine, GraphProps, GraphType};
 
 impl<N, E, A, S, K, Idx> Combine<EdgeId<Idx>, EdgeId<Idx>> for HyperMap<N, E, A, S>
 where

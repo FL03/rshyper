@@ -3,8 +3,8 @@
     authors: @FL03
 */
 use core::hash::Hash;
-use rshyper_core::Node;
-use rshyper_core::idx::{RawIndex, VertexId};
+use rshyper::idx::{RawIndex, VertexId};
+use rshyper::node::Node;
 use std::collections::hash_map;
 
 #[doc(hidden)]

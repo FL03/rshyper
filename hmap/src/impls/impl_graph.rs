@@ -4,10 +4,10 @@
 */
 use crate::{HashSurface, HyperMap};
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::error::{Error, Result};
-use rshyper_core::idx::{EdgeId, RawIndex, VertexId, VertexSet};
-use rshyper_core::{AddStep, GraphProps, GraphType};
-use rshyper_core::{Node, Surface, Weight};
+use rshyper::error::{Error, Result};
+use rshyper::idx::{EdgeId, RawIndex, VertexId, VertexSet};
+use rshyper::{AddStep, GraphProps, GraphType};
+use rshyper::{Node, Surface, Weight};
 
 /// private implementations of the [`HyperMap`] providing methods, for convenience and
 /// consistency.

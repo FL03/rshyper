@@ -4,7 +4,7 @@
 */
 use crate::HyperMap;
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::GraphProps;
+use rshyper::GraphProps;
 use serde::de::{Deserialize, DeserializeOwned, MapAccess, Visitor};
 use serde::ser::Serialize;
 

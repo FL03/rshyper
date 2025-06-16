@@ -2,12 +2,12 @@
     appellation: parallel <nodes>
     authors: @FL03
 */
-use super::node::*;
+use super::iter::*;
 use core::hash::Hash;
 use rayon::iter::plumbing::UnindexedConsumer;
 use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
-use rshyper_core::Node;
-use rshyper_core::idx::{RawIndex, VertexId};
+use rshyper::idx::{RawIndex, VertexId};
+use rshyper::node::Node;
 
 /// [`NodeParIter`] is a parallel iterator over the nodes of a hypergraph, yielding pairs of
 /// [`VertexId`] and the corresponding [`HyperNode`].

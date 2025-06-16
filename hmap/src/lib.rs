@@ -65,6 +65,10 @@ mod impls {
     pub mod impl_repr;
     #[cfg(feature = "serde")]
     pub mod impl_serde;
+
+    #[doc(hidden)]
+    #[allow(deprecated, unused)]
+    pub mod impl_deprecated;
 }
 
 pub mod iter {

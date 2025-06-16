@@ -125,6 +125,10 @@ where
             _type: core::marker::PhantomData::<K>,
         }
     }
+    /// returns a new counter iterator over the index
+    pub fn counter(self) -> super::iter::Counter<Self> {
+        super::Counter::new(self)
+    }
     /// decrements the index value by [one](One) and returns a new instance
     #[inline]
     pub fn dec(self) -> IndexBase<<T as core::ops::Sub>::Output, K>

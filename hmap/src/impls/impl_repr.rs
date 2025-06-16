@@ -4,9 +4,9 @@
 */
 use crate::{DiHyperMap, HyperMap, UnHyperMap};
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::error::Result;
-use rshyper_core::idx::{RawIndex, VertexId};
-use rshyper_core::{AddStep, GraphProps, Mode, Weight};
+use rshyper::error::Result;
+use rshyper::idx::{RawIndex, VertexId};
+use rshyper::{AddStep, GraphProps, Mode, Weight};
 
 impl<N, E, A, S> HyperMap<N, E, A, S>
 where

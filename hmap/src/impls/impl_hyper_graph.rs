@@ -4,10 +4,10 @@
 */
 use crate::{HashSurface, HyperMap, iter};
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::error::Result;
-use rshyper_core::idx::{EdgeId, NumIndex, VertexId};
-use rshyper_core::prelude::{GraphProps, Node, VertexSet, Weight};
-use rshyper_core::traits::{HyperGraph, HyperGraphIterEdge, HyperGraphIterNode, RawHyperGraph};
+use rshyper::error::Result;
+use rshyper::idx::{EdgeId, NumIndex, VertexId};
+use rshyper::prelude::{GraphProps, Node, VertexSet, Weight};
+use rshyper::traits::{HyperGraph, HyperGraphIterEdge, HyperGraphIterNode, RawHyperGraph};
 
 impl<N, E, A, S> RawHyperGraph<A> for HyperMap<N, E, A, S>
 where

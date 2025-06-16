@@ -10,7 +10,7 @@
 #[cfg(feature = "alloc")]
 pub use self::{error::*, tracker::IndexTracker};
 #[doc(inline)]
-pub use self::{index::*, position::*, traits::prelude::*, types::prelude::*};
+pub use self::{index::*, iter::*, position::*, traits::prelude::*, types::prelude::*};
 
 #[cfg(feature = "alloc")]
 /// this module defines the [`IndexError`] type, establishing the various errors encountered by
@@ -41,9 +41,12 @@ pub mod iter {
     #[doc(inline)]
     pub use self::prelude::*;
 
+    mod counter;
     mod stepper;
 
     pub(crate) mod prelude {
+        #[doc(inline)]
+        pub use super::counter::*;
         #[doc(inline)]
         pub use super::stepper::*;
     }

@@ -9,15 +9,15 @@ use crate::types::prelude::*;
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::{
     AddStep, GraphType, Mode,
-    attrs::{DiAttributes, GraphProps, UnAttributes},
+    attrs::{DiAttrs, GraphProps, UnAttrs},
     idx::{EdgeId, Frame, IndexTracker, RawIndex, VertexId},
 };
 use std::hash::RandomState;
 
 /// a type alias for a [directed](crate::Directed) [`HyperMap`]
-pub type DiHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, DiAttributes<Idx>, S>;
+pub type DiHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, DiAttrs<Idx>, S>;
 /// a type alias for an [undirected](crate::Undirected) [`HyperMap`]
-pub type UnHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, UnAttributes<Idx>, S>;
+pub type UnHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, UnAttrs<Idx>, S>;
 
 /// The [`HyperMap`] is a map-based implementation of a hypergraph that is generic over the
 /// types:
@@ -37,7 +37,7 @@ pub type UnHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, UnAttri
 /// created.
 ///
 #[derive(Clone, Default)]
-pub struct HyperMap<N = (), E = (), A = UnAttributes<usize>, S = RandomState>
+pub struct HyperMap<N = (), E = (), A = UnAttrs<usize>, S = RandomState>
 where
     S: BuildHasher,
     A: GraphProps,
@@ -292,61 +292,5 @@ where
             e = self.surfaces(),
             h = self.history()
         )
-    }
-}
-
-#[doc(hidden)]
-#[allow(deprecated)]
-impl<N, E, A, S, Idx, K> HyperMap<N, E, A, S>
-where
-    A: GraphProps<Kind = K, Ix = Idx>,
-    S: BuildHasher,
-    Idx: RawIndex,
-    K: GraphType,
-{
-    #[deprecated(since = "0.1.3", note = "use is_node_in_domain` instead")]
-    pub fn contains_node_in_edge<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
-    where
-        A::Ix: Eq + Hash,
-        Q: Eq + Hash + ?Sized,
-        Q2: Eq + Hash,
-        EdgeId<A::Ix>: core::borrow::Borrow<Q>,
-        VertexId<A::Ix>: core::borrow::Borrow<Q2>,
-    {
-        if let Some(surface) = self.surfaces().get(index) {
-            return surface.contains(vertex);
-        }
-        false
-    }
-    #[doc(hidden)]
-    #[deprecated(since = "0.1.2", note = "use `contains_edge` instead")]
-    pub fn contains_surface<Q>(&self, index: &Q) -> bool
-    where
-        A::Ix: Eq + Hash,
-        Q: Eq + Hash + ?Sized,
-        EdgeId<A::Ix>: core::borrow::Borrow<Q>,
-    {
-        self.surfaces().contains_key(index)
-    }
-    #[deprecated(
-        note = "use `size` instead; this method will be removed in a future release",
-        since = "0.1.2"
-    )]
-    pub fn total_edges(&self) -> usize {
-        self.surfaces().len()
-    }
-    #[deprecated(
-        note = "use `order` instead; this method will be removed in a future release",
-        since = "0.1.2"
-    )]
-    pub fn total_nodes(&self) -> usize {
-        self.nodes().len()
-    }
-    #[deprecated(
-        note = "use `order` instead; this method will be removed in a future release",
-        since = "0.1.0"
-    )]
-    pub fn total_vertices(&self) -> usize {
-        self.order()
     }
 }

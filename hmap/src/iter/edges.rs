@@ -11,11 +11,12 @@ mod directional;
 #[cfg(feature = "rayon")]
 mod parallel;
 mod sequential;
-mod surface;
+mod iter;
 
-#[allow(unused_imports)]
+
 mod prelude {
     #[doc(inline)]
+    #[allow(unused_imports)]
     pub use super::directional::*;
     #[doc(inline)]
     #[cfg(feature = "rayon")]
@@ -23,5 +24,5 @@ mod prelude {
     #[doc(inline)]
     pub use super::sequential::*;
     #[doc(inline)]
-    pub use super::surface::*;
+    pub use super::iter::*;
 }

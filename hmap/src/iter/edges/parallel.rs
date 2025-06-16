@@ -2,7 +2,7 @@
     appellation: surface <module>
     authors: @FL03
 */
-use super::surface::{Edges, SurfaceIter, SurfaceIterMut};
+use super::iter::{Edges, SurfaceIter, SurfaceIterMut};
 use crate::types::HashSurface;
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::GraphType;
