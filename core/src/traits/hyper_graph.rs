@@ -2,7 +2,7 @@
     Appellation: hgraph <module>
     Contrib: @FL03
 */
-use crate::edge::{BinaryEdge, RawEdge, RawSurface};
+use crate::edge::{BinaryLayout, RawLayout, RawSurface};
 use crate::error::Result;
 use crate::idx::{EdgeId, VertexId};
 use crate::node::RawNode;
@@ -50,12 +50,15 @@ where
         self.add_node(Default::default())
     }
     /// returns the vertices of the edge with the given index
-    fn get_edge_domain(&self, index: &EdgeId<A::Ix>) -> Option<&<Self::Edge<E> as RawEdge>::Store>;
+    fn get_edge_domain(
+        &self,
+        index: &EdgeId<A::Ix>,
+    ) -> Option<&<Self::Edge<E> as RawLayout>::Store>;
     /// returns a mutable reference to the vertices of the edge with the given index
     fn get_edge_domain_mut(
         &mut self,
         index: &EdgeId<A::Ix>,
-    ) -> Option<&mut <Self::Edge<E> as RawEdge>::Store>;
+    ) -> Option<&mut <Self::Edge<E> as RawLayout>::Store>;
     /// returns a reference to the weight of the edge with the given index
     fn get_edge_weight(&self, index: &EdgeId<A::Ix>) -> Option<&Weight<E>> {
         self.get_surface(index).map(|edge| edge.weight())
@@ -133,7 +136,7 @@ where
 pub trait StdGraph<N, E, A>: RawHyperGraph<A>
 where
     A: GraphProps,
-    Self::Edge<E>: BinaryEdge,
+    Self::Edge<E>: BinaryLayout,
 {
     private!();
 }
@@ -148,7 +151,7 @@ where
     N: Default,
     E: Default,
     H: HyperGraph<N, E, A>,
-    H::Edge<E>: BinaryEdge,
+    H::Edge<E>: BinaryLayout,
 {
     seal!();
 }

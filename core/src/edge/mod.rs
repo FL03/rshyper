@@ -2,20 +2,18 @@
     appellation: edges <module>
     authors: @FL03
 */
-//! this module contains the [`Edge`] and [`Surface`] implementations, which are
-//! respectively used to represent unweighted and weighted hyperedges in a hypergraph.
+//! this module focuses on the [`Edge`] implementation, providing additional types, traits, and
+//! representations for edges in a hypergraph.
 #[doc(inline)]
-#[allow(unused_imports)]
 pub use self::{
-    hyper_edge::Edge, hyper_surface::Surface, traits::prelude::*, types::prelude::*,
-    utils::prelude::*,
+    hyper_edge::Edge, layout::EdgeLayout, traits::prelude::*, types::prelude::*, utils::prelude::*,
 };
 
+/// a [`hyper_surface`] speaks to a _weighted_ hyperedge, materialized here as a [`Surface`]
+pub mod hyper_edge;
 /// here, a [`hyper_edge`] essentially represents an _unweighted_ hyperedge, consisting of an
 /// identifier, a domain (i.e. a collection of vertices), and a graph type.
-pub mod hyper_edge;
-/// a [`hyper_surface`] speaks to a _weighted_ hyperedge, materialized here as a [`Surface`]
-pub mod hyper_surface;
+pub mod layout;
 
 mod impls {
     pub mod impl_edge;
@@ -28,15 +26,15 @@ pub mod traits {
     //!
     #[doc(inline)]
     pub use self::prelude::*;
-    /// this module defines the [`RawEdge`] trait for establishing a common interface for
+    /// this module defines the [`RawLayout`] trait for establishing a common interface for
     /// representations of a hyperedge
-    pub mod edge;
-    /// this module defines the [`RawFacet`] trait
-    pub mod surface;
+    mod layout;
+    /// this module defines the [`RawEdge`] trait
+    mod surface;
 
     pub(crate) mod prelude {
         #[doc(inline)]
-        pub use super::edge::*;
+        pub use super::layout::*;
         #[doc(inline)]
         pub use super::surface::*;
     }
@@ -48,7 +46,7 @@ pub mod types {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    pub(crate) mod aliases;
+    mod aliases;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -58,8 +56,8 @@ pub mod types {
 
 pub mod utils {
     //! this module implements various utility functions for working with edges in a hypergraph
-    #[allow(unused_imports)]
     #[doc(inline)]
+    #[allow(unused_imports)]
     pub use self::prelude::*;
 
     mod base;
@@ -69,8 +67,8 @@ pub mod utils {
     pub(crate) mod prelude {
         #[doc(inline)]
         pub use super::base::*;
-        #[cfg(feature = "rand")]
         #[doc(inline)]
+        #[cfg(feature = "rand")]
         pub use super::rand::*;
     }
 }
@@ -79,7 +77,7 @@ pub(crate) mod prelude {
     #[doc(inline)]
     pub use super::hyper_edge::*;
     #[doc(inline)]
-    pub use super::hyper_surface::*;
+    pub use super::layout::*;
     #[doc(inline)]
     pub use super::traits::prelude::*;
     #[doc(inline)]

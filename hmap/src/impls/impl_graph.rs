@@ -7,7 +7,7 @@ use core::hash::{BuildHasher, Hash};
 use rshyper::error::{Error, Result};
 use rshyper::idx::{EdgeId, RawIndex, VertexId, VertexSet};
 use rshyper::{AddStep, GraphProps, GraphType};
-use rshyper::{Node, Surface, Weight};
+use rshyper::{Edge, Node, Weight};
 
 /// private implementations of the [`HyperMap`] providing methods, for convenience and
 /// consistency.
@@ -166,7 +166,7 @@ where
         // fetch the next edge index
         let id = self.next_edge_id();
         // create a new surface
-        let surface = Surface::new(id.clone(), verts, weight);
+        let surface = Edge::new(id.clone(), verts, weight);
         // add the hyperedge to the graph
         self.add_hyperedge(surface)
     }
@@ -434,7 +434,7 @@ where
         // generate a new edge index
         let edge_id = self.next_edge_id();
         // initialize a new facet using the merged vertices, new index, and source weight
-        let surface = Surface::new(edge_id, vertices, Weight(weight));
+        let surface = Edge::new(edge_id, vertices, Weight(weight));
         // insert the new hyperedge into the surfaces map
         self.surfaces_mut().insert(edge_id, surface);
         // return the new edge ID

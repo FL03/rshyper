@@ -13,7 +13,7 @@ use crate::{PathFinder, Search, Traversal, VertexSet};
 use core::hash::Hash;
 use num_traits::bounds::UpperBounded;
 use num_traits::{FromPrimitive, Num};
-use rshyper::edge::RawEdge;
+use rshyper::edge::RawLayout;
 use rshyper::idx::{NumIndex, RawIndex, VertexId};
 use rshyper::{GraphProps, HyperGraph, HyperGraphIter};
 use std::collections::BinaryHeap;
@@ -164,7 +164,7 @@ where
     A: GraphProps,
     H: HyperGraph<N, E, A>,
     A::Ix: NumIndex,
-    <H::Edge<E> as RawEdge>::Store: Clone + IntoIterator<Item = VertexId<A::Ix>>,
+    <H::Edge<E> as RawLayout>::Store: Clone + IntoIterator<Item = VertexId<A::Ix>>,
 {
     type Path = Vec<VertexId<A::Ix>>;
 
@@ -267,7 +267,7 @@ where
     A: GraphProps,
     H: HyperGraphIter<N, E, A>,
     A::Ix: NumIndex,
-    <H::Edge<E> as RawEdge>::Store: Clone + IntoIterator<Item = VertexId<A::Ix>>,
+    <H::Edge<E> as RawLayout>::Store: Clone + IntoIterator<Item = VertexId<A::Ix>>,
 {
     type Output = Vec<VertexId<A::Ix>>;
 

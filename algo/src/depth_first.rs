@@ -6,7 +6,7 @@
 use crate::error::{Error, Result};
 use crate::{Search, Traversal};
 use core::hash::Hash;
-use rshyper::edge::RawEdge;
+use rshyper::edge::RawLayout;
 use rshyper::idx::{NumIndex, RawIndex, VertexId};
 use rshyper::{GraphProps, GraphType, HyperGraph};
 use std::collections::HashSet;
@@ -118,7 +118,7 @@ where
     A: GraphProps,
     H: HyperGraph<N, E, A>,
     A::Ix: NumIndex,
-    for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
+    for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
     type Output = Vec<VertexId<A::Ix>>;
 

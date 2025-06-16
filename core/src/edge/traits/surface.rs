@@ -2,12 +2,12 @@
     appellation: surface <module>
     authors: @FL03
 */
-use super::RawEdge;
+use super::RawLayout;
 use crate::idx::EdgeId;
 use crate::weight::Weight;
 
-/// [`RawFacet`] extends the behaviour of a [`RawEdge`] to include a weight
-pub trait RawSurface<T>: RawEdge {
+/// [`RawSurface`] extends the behaviour of a [`RawEdge`] to include a weight
+pub trait RawSurface<T>: RawLayout {
     private!();
     /// Returns the index of the edge.
     fn weight(&self) -> &Weight<T>;

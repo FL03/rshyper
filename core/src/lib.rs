@@ -38,7 +38,7 @@ pub(crate) mod macros {
 #[doc(inline)]
 pub use self::{
     attrs::{Attrs, GraphProps},
-    edge::{Edge, Surface},
+    edge::Edge,
     error::{Error, Result},
     idx::prelude::*,
     node::Node,

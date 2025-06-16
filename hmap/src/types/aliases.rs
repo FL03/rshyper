@@ -8,14 +8,12 @@ pub(crate) use rshyper::VertexSet;
 pub use self::impl_deprecated::*;
 
 use rshyper::idx::{EdgeId, VertexId};
-use rshyper::{Edge, Node, Surface};
+use rshyper::{Edge, Node};
 use std::collections::hash_map::{Entry, HashMap};
 use std::hash::RandomState;
 
-/// a type alias for a [`Edge`] with [`VertexSet`] as its vertices
-pub type HashEdge<K, I = usize, S = RandomState> = Edge<VertexSet<I, S>, K, I>;
 /// a type alias for a [`Surface`] with [`VertexSet`] as its vertices
-pub type HashSurface<E, K, I = usize, S = RandomState> = Surface<E, VertexSet<I, S>, K, I>;
+pub type HashSurface<E, K, I = usize, S = RandomState> = Edge<E, VertexSet<I, S>, K, I>;
 
 /// a type alias for a [`Entry`] that whose key is a [`VertexId`] and value is a [`Node`]
 pub type NodeEntry<'a, N, I = usize> = Entry<'a, VertexId<I>, Node<N, I>>;

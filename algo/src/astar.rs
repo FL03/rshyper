@@ -11,7 +11,7 @@ mod priority_node;
 use crate::error::{Error, Result};
 use crate::{Heuristic, PathFinder, Search, Traversal, VertexSet};
 use core::hash::Hash;
-use rshyper::edge::RawEdge;
+use rshyper::edge::RawLayout;
 use rshyper::idx::{NumIndex, RawIndex, VertexId};
 use rshyper::{GraphProps, GraphType, HyperGraph, HyperGraphIter};
 use std::collections::{BinaryHeap, HashMap, HashSet};
@@ -198,7 +198,7 @@ where
     H: HyperGraph<N, E, A>,
     F: Heuristic<A::Ix, Output = f64>,
     A::Ix: NumIndex,
-    for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
+    for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
     type Path = Vec<VertexId<A::Ix>>;
     /// Find the shortest path between start and goal vertices
@@ -344,7 +344,7 @@ where
     F: Heuristic<A::Ix, Output = f64>,
     H: HyperGraphIter<N, E, A>,
     A::Ix: NumIndex,
-    for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
+    for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
     type Output = Vec<VertexId<A::Ix>>;
 

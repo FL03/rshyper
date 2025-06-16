@@ -16,11 +16,11 @@ pub trait Contains<Q> {
 /*
  ************* Implementations *************
 */
-use crate::edge::{Edge, Surface};
+use crate::edge::{Edge, EdgeLayout};
 use crate::idx::{RawIndex, VertexId};
 use crate::{Domain, GraphType};
 
-impl<S, K, Idx, Q> Contains<Q> for Edge<S, K, Idx>
+impl<S, K, Idx, Q> Contains<Q> for EdgeLayout<S, K, Idx>
 where
     Q: PartialEq,
     S: Domain<Idx>,
@@ -38,7 +38,7 @@ where
     }
 }
 
-impl<T, S, K, Idx, Q> Contains<Q> for Surface<T, S, K, Idx>
+impl<T, S, K, Idx, Q> Contains<Q> for Edge<T, S, K, Idx>
 where
     Q: PartialEq,
     S: Domain<Idx>,

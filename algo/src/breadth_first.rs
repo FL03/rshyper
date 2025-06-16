@@ -6,7 +6,7 @@
 use crate::error::{Error, Result};
 use crate::{Search, Traversal};
 use core::hash::Hash;
-use rshyper::edge::RawEdge;
+use rshyper::edge::RawLayout;
 use rshyper::idx::{NumIndex, RawIndex, VertexId};
 use rshyper::{GraphProps, GraphType, HyperGraph};
 use std::collections::{HashSet, VecDeque};
@@ -74,7 +74,7 @@ where
     pub fn search(&mut self, start: VertexId<Idx>) -> Result<Vec<VertexId<Idx>>>
     where
         Idx: NumIndex,
-        for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<Idx>>,
+        for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<Idx>>,
     {
         Search::search(self, start)
     }
@@ -97,7 +97,7 @@ where
     H: HyperGraph<N, E, A>,
     K: GraphType,
     Idx: NumIndex,
-    for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<Idx>>,
+    for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<Idx>>,
 {
     type Output = Vec<VertexId<Idx>>;
 
