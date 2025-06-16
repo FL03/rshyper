@@ -4,13 +4,14 @@
 */
 use crate::{HashSurface, HyperMap, iter};
 use core::hash::{BuildHasher, Hash};
+use rshyper_core::error::Result;
 use rshyper_core::idx::{EdgeId, NumIndex, VertexId};
-use rshyper_core::prelude::{GraphAttributes, HyperResult, Node, VertexSet, Weight};
+use rshyper_core::prelude::{GraphProps, Node, VertexSet, Weight};
 use rshyper_core::traits::{HyperGraph, HyperGraphIterEdge, HyperGraphIterNode, RawHyperGraph};
 
 impl<N, E, A, S> RawHyperGraph<A> for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     S: BuildHasher,
 {
     type Node<_N> = Node<_N, A::Ix>;
@@ -19,15 +20,15 @@ where
 
 impl<N, E, A, S> HyperGraph<N, E, A> for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     S: BuildHasher + Default,
     A::Ix: NumIndex,
 {
-    fn add_node(&mut self, weight: Weight<N>) -> HyperResult<VertexId<A::Ix>> {
+    fn add_node(&mut self, weight: Weight<N>) -> Result<VertexId<A::Ix>> {
         self.add_node(weight)
     }
 
-    fn add_surface<I>(&mut self, iter: I, weight: Weight<E>) -> HyperResult<EdgeId<A::Ix>>
+    fn add_surface<I>(&mut self, iter: I, weight: Weight<E>) -> Result<EdgeId<A::Ix>>
     where
         I: IntoIterator<Item = VertexId<A::Ix>>,
     {
@@ -84,7 +85,7 @@ where
 
 impl<N, E, A, S> HyperGraphIterNode<N, E, A> for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     S: BuildHasher + Default,
     E: Eq + Hash,
     N: Eq + Hash,
@@ -111,7 +112,7 @@ where
 
 impl<N, E, A, S> HyperGraphIterEdge<N, E, A> for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     S: BuildHasher + Default,
     E: Eq + Hash,
     N: Eq + Hash,

@@ -9,7 +9,7 @@ use crate::types::prelude::*;
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::{
     AddStep, GraphType, Mode,
-    attrs::{DiAttributes, GraphAttributes, UnAttributes},
+    attrs::{DiAttributes, GraphProps, UnAttributes},
     idx::{EdgeId, Frame, IndexTracker, RawIndex, VertexId},
 };
 use std::hash::RandomState;
@@ -40,7 +40,7 @@ pub type UnHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, UnAttri
 pub struct HyperMap<N = (), E = (), A = UnAttributes<usize>, S = RandomState>
 where
     S: BuildHasher,
-    A: GraphAttributes,
+    A: GraphProps,
 {
     /// the attributes of a graph define its _kind_ and the type of index used
     pub(crate) attrs: A,
@@ -57,7 +57,7 @@ where
 impl<N, E, A, K, Idx, S> HyperMap<N, E, A, S>
 where
     S: BuildHasher,
-    A: GraphAttributes<Ix = Idx, Kind = K>,
+    A: GraphProps<Ix = Idx, Kind = K>,
     K: GraphType,
     Idx: RawIndex,
 {
@@ -263,7 +263,7 @@ where
 
 impl<N, E, A, S> core::fmt::Debug for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     E: core::fmt::Debug,
     N: core::fmt::Debug,
     S: BuildHasher,
@@ -279,7 +279,7 @@ where
 
 impl<N, E, A, S> core::fmt::Display for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     E: core::fmt::Debug,
     N: core::fmt::Debug,
     S: BuildHasher,
@@ -299,7 +299,7 @@ where
 #[allow(deprecated)]
 impl<N, E, A, S, Idx, K> HyperMap<N, E, A, S>
 where
-    A: GraphAttributes<Kind = K, Ix = Idx>,
+    A: GraphProps<Kind = K, Ix = Idx>,
     S: BuildHasher,
     Idx: RawIndex,
     K: GraphType,

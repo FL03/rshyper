@@ -2,14 +2,14 @@
     appellation: rshyper-hmap <library>
     authors: @FL03
 */
-//! This crate provides the [`HyperMap`] implementation for the [`rshyper`](https://docs.rs/rshyper) 
-//! framework. The [`HyperMap`] is a map-based hypergraph structure designed for efficient 
-//! storage and manipulation. To achieve the maximum flexibility the implementation is generic 
+//! This crate provides the [`HyperMap`] implementation for the [`rshyper`](https://docs.rs/rshyper)
+//! framework. The [`HyperMap`] is a map-based hypergraph structure designed for efficient
+//! storage and manipulation. To achieve the maximum flexibility the implementation is generic
 //! over 6 total types represented within 4 generic parameters:
 //!
 //! - `N`: the type of weight associated with a hypernode
 //! - `E`: the type of weight associated with a hyperedge
-//! - `A`: the attributes of the graph; an implementor of the [`GraphAttributes`](rshyper_core::GraphAttributes) 
+//! - `A`: the attributes of the graph; an implementor of the [`GraphAttributes`](rshyper_core::GraphAttributes)
 //!   trait
 //!   - `A::Kind`: the _kind_ of hypergraph, either [`Directed`](rshyper_core::Directed) or [`Undirected`](rshyper_core::Undirected)
 //!   - `A::Ix`: the type of indices used by the instance; bounded by the [`RawIndex`](rshyper_core::RawIndex) trait

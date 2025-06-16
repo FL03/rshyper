@@ -5,13 +5,13 @@
 use crate::HyperMap;
 use algo::{AStarSearch, BreadthFirstTraversal, DepthFirstTraversal, Dijkstra, Heuristic};
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::prelude::{GraphAttributes, NumIndex};
+use rshyper_core::prelude::{GraphProps, NumIndex};
 
 /// implementations for various algorithms and operators on the hypergraph
 impl<N, E, A, S> HyperMap<N, E, A, S>
 where
     S: BuildHasher + Default,
-    A: GraphAttributes,
+    A: GraphProps,
     A::Ix: NumIndex + Eq + Hash,
 {
     /// returns a new [`A*`](AStarSearch) search operator configured with the current

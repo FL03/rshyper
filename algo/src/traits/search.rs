@@ -9,7 +9,7 @@ pub trait Search<N> {
     type Output;
 
     /// Execute the search algorithm starting from the given vertex
-    fn search(&mut self, start: N) -> crate::AlgoResult<Self::Output>;
+    fn search(&mut self, start: N) -> crate::Result<Self::Output>;
 }
 /// The [`GraphSearch`] trait is an automatically implemented trait for types that implement
 /// both the [`Search`] and [`Traversal`] traits indicating it can successfully perform a

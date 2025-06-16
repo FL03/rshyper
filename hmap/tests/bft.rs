@@ -2,11 +2,11 @@
     Appellation: search <test>
     Contrib: @FL03
 */
-use rshyper_core::HyperResult;
+use rshyper_core::Result;
 use rshyper_hmap::HyperMap;
 
 #[test]
-fn test_breadth_first_traversal() -> HyperResult<()> {
+fn test_breadth_first_traversal() -> Result<()> {
     let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a simple hypergraph
@@ -44,7 +44,7 @@ fn test_breadth_first_traversal() -> HyperResult<()> {
 }
 
 #[test]
-fn test_bft_cyclic_graph() -> HyperResult<()> {
+fn test_bft_cyclic_graph() -> Result<()> {
     let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a cyclic hypergraph
@@ -79,7 +79,7 @@ fn test_bft_cyclic_graph() -> HyperResult<()> {
 }
 
 #[test]
-fn test_bft_disconnected_graph() -> HyperResult<()> {
+fn test_bft_disconnected_graph() -> Result<()> {
     let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a disconnected hypergraph
@@ -109,7 +109,7 @@ fn test_bft_disconnected_graph() -> HyperResult<()> {
 }
 
 #[test]
-fn test_bft_hyperedge_with_multiple_vertices() -> HyperResult<()> {
+fn test_bft_hyperedge_with_multiple_vertices() -> Result<()> {
     let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a hypergraph with a large hyperedge

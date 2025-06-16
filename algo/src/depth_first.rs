@@ -2,17 +2,19 @@
     Appellation: dft <module>
     Contrib: @FL03
 */
+//! this module provide the depth-first traversal algorithm for hypergraphs.
+use crate::error::{Error, Result};
 use crate::{Search, Traversal};
 use core::hash::Hash;
 use rshyper_core::edge::RawEdge;
 use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphAttributes, GraphType, HyperGraph};
+use rshyper_core::{GraphProps, GraphType, HyperGraph};
 use std::collections::HashSet;
 
 /// Depth-First Traversal algorithm for hypergraphs
 pub struct DepthFirstTraversal<'a, N, E, A, H>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     H: HyperGraph<N, E, A>,
 {
     pub(crate) graph: &'a H,
@@ -23,7 +25,7 @@ where
 
 impl<'a, N, E, H, A, K, Idx> DepthFirstTraversal<'a, N, E, A, H>
 where
-    A: GraphAttributes<Ix = Idx, Kind = K>,
+    A: GraphProps<Ix = Idx, Kind = K>,
     H: HyperGraph<N, E, A>,
     K: GraphType,
     Idx: RawIndex,
@@ -76,7 +78,7 @@ where
     pub fn search(
         &mut self,
         start: VertexId<Idx>,
-    ) -> crate::AlgoResult<<Self as Search<VertexId<Idx>>>::Output>
+    ) -> Result<<Self as Search<VertexId<Idx>>>::Output>
     where
         Self: Search<VertexId<Idx>>,
         Idx: NumIndex,
@@ -96,7 +98,7 @@ where
 
 impl<'a, N, E, A, H> Traversal<VertexId<A::Ix>> for DepthFirstTraversal<'a, N, E, A, H>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     H: HyperGraph<N, E, A>,
     A::Ix: Eq + Hash,
 {
@@ -113,20 +115,20 @@ where
 
 impl<'a, N, E, A, H> Search<VertexId<A::Ix>> for DepthFirstTraversal<'a, N, E, A, H>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     H: HyperGraph<N, E, A>,
     A::Ix: NumIndex,
     for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
     type Output = Vec<VertexId<A::Ix>>;
 
-    fn search(&mut self, start: VertexId<A::Ix>) -> crate::AlgoResult<Self::Output> {
+    fn search(&mut self, start: VertexId<A::Ix>) -> Result<Self::Output> {
         // Reset state
         self.reset();
 
         // Check if starting vertex exists
         if !self.graph.contains_node(&start) {
-            return Err(crate::AlgoError::NodeNotFound);
+            return Err(Error::NodeNotFound);
         }
 
         // Add start vertex to stack and mark as visited

@@ -4,7 +4,7 @@
 */
 use crate::HyperMap;
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::GraphAttributes;
+use rshyper_core::GraphProps;
 use serde::de::{Deserialize, DeserializeOwned, MapAccess, Visitor};
 use serde::ser::Serialize;
 
@@ -12,7 +12,7 @@ const FIELDS: &[&str] = &["nodes", "surfaces", "position", "_attrs"];
 
 impl<'a, N, E, A, S> Deserialize<'a> for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes + DeserializeOwned,
+    A: GraphProps + DeserializeOwned,
     E: DeserializeOwned,
     N: DeserializeOwned,
     S: BuildHasher + Default,
@@ -35,7 +35,7 @@ where
 
 impl<N, E, A, S> Serialize for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes + Serialize,
+    A: GraphProps + Serialize,
     E: Serialize,
     N: Serialize,
     S: BuildHasher + Default,
@@ -50,7 +50,7 @@ where
         let mut state = serializer.serialize_struct("HashGraph", 4)?;
         state.serialize_field("nodes", self.nodes())?;
         state.serialize_field("surfaces", self.surfaces())?;
-        state.serialize_field("position", self.position())?;
+        state.serialize_field("history", self.history())?;
         state.serialize_field("_attrs", &self.attrs)?;
         state.end()
     }
@@ -62,7 +62,7 @@ struct HashGraphVisitor<N, E, A, S> {
 
 impl<'de, N, E, A, S> Visitor<'de> for HashGraphVisitor<N, E, A, S>
 where
-    A: GraphAttributes + DeserializeOwned,
+    A: GraphProps + DeserializeOwned,
     E: DeserializeOwned,
     N: DeserializeOwned,
     S: BuildHasher + Default,

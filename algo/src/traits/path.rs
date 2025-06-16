@@ -10,11 +10,7 @@ use rshyper_core::idx::VertexId;
 pub trait PathFinder<Idx> {
     type Path;
     /// returns a
-    fn find_path(
-        &mut self,
-        from: VertexId<Idx>,
-        to: VertexId<Idx>,
-    ) -> crate::AlgoResult<Self::Path>;
+    fn find_path(&mut self, from: VertexId<Idx>, to: VertexId<Idx>) -> crate::Result<Self::Path>;
 
     fn reconstruct_path(&self, tgt: VertexId<Idx>) -> Self::Path;
 }

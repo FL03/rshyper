@@ -2,7 +2,7 @@
     appellation: attributes <module>
     authors: @FL03
 */
-//! this module implements the [`GraphAttributes`] trait and provides a concrete implementation
+//! this module implements the [`GraphProps`] trait and provides a concrete implementation
 //! with the [`Attributes`] struct. These objects are used to define the _attributes_ of a
 //! hypergraph such as the type of index used to identify vertices and edges as well as the
 //! type of graph (directed or undirected).
@@ -16,7 +16,7 @@ pub(crate) mod prelude {
     #[doc(inline)]
     pub use super::attributes::Attributes;
     #[doc(inline)]
-    pub use super::{DiAttributes, GraphAttributes, UnAttributes};
+    pub use super::{DiAttributes, GraphProps, UnAttributes};
 }
 use crate::{Directed, GraphType, Mode, RawIndex, Undirected};
 
@@ -25,9 +25,9 @@ pub type DiAttributes<Idx> = Attributes<Idx, Directed>;
 /// a type alias for graph [`Attributes`] configured with an [`Undirected`] graph type.
 pub type UnAttributes<Idx> = Attributes<Idx, Undirected>;
 
-/// The [`GraphAttributes`] trait abstracts several generic types used to define a hyper graph
+/// The [`GraphProps`] trait abstracts several generic types used to define a hyper graph
 /// into a single entity.
-pub trait GraphAttributes: 'static + Copy + Send + Sync {
+pub trait GraphProps: 'static + Copy + Send + Sync {
     type Ix: RawIndex;
     type Kind: GraphType;
 
@@ -64,7 +64,7 @@ pub trait GraphAttributes: 'static + Copy + Send + Sync {
 */
 use core::marker::PhantomData;
 
-impl<I, K> GraphAttributes for Attributes<I, K>
+impl<I, K> GraphProps for Attributes<I, K>
 where
     I: RawIndex,
     K: GraphType,
@@ -79,7 +79,7 @@ where
     }
 }
 
-impl<I, K> GraphAttributes for PhantomData<(K, I)>
+impl<I, K> GraphProps for PhantomData<(K, I)>
 where
     I: RawIndex,
     K: GraphType,
@@ -94,7 +94,7 @@ where
     }
 }
 
-impl<I, K> GraphAttributes for (PhantomData<I>, PhantomData<K>)
+impl<I, K> GraphProps for (PhantomData<I>, PhantomData<K>)
 where
     I: RawIndex,
     K: GraphType,

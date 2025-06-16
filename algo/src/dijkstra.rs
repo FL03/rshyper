@@ -2,18 +2,20 @@
     appellation: dijkstra <module>
     authors: @FL03
 */
+//! this module implements Dijkstra's shortest-path algorithm for hypergraphs
 #[doc(inline)]
 pub use self::queue_node::QueueNode;
-/// this module implements the queue node used in Dijkstra's algorithm
+
 mod queue_node;
 
+use crate::error::{Error, Result};
 use crate::{PathFinder, Search, Traversal, VertexSet};
 use core::hash::Hash;
 use num_traits::bounds::UpperBounded;
 use num_traits::{FromPrimitive, Num};
 use rshyper_core::edge::RawEdge;
 use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphAttributes, HyperGraph, HyperGraphIter};
+use rshyper_core::{GraphProps, HyperGraph, HyperGraphIter};
 use std::collections::BinaryHeap;
 
 /// a type alias for a map of distances for vertices in the graph
@@ -24,7 +26,7 @@ pub(crate) type PreviousHistory<K> = std::collections::HashMap<VertexId<K>, Vert
 /// Dijkstra's shortest path algorithm for hypergraphs
 pub struct Dijkstra<'a, N, E, A, H>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     H: HyperGraph<N, E, A>,
 {
     pub(crate) graph: &'a H,
@@ -36,7 +38,7 @@ where
 
 impl<'a, N, E, A, H> Dijkstra<'a, N, E, A, H>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     H: HyperGraph<N, E, A>,
     A::Ix: RawIndex,
 {
@@ -122,7 +124,7 @@ where
         &mut self,
         start: VertexId<A::Ix>,
         dest: VertexId<A::Ix>,
-    ) -> crate::AlgoResult<<Self as PathFinder<A::Ix>>::Path>
+    ) -> Result<<Self as PathFinder<A::Ix>>::Path>
     where
         Self: PathFinder<A::Ix>,
     {
@@ -132,7 +134,7 @@ where
     pub fn search(
         &mut self,
         start: VertexId<A::Ix>,
-    ) -> crate::AlgoResult<<Self as Search<VertexId<A::Ix>>>::Output>
+    ) -> Result<<Self as Search<VertexId<A::Ix>>>::Output>
     where
         Self: Search<VertexId<A::Ix>>,
     {
@@ -159,25 +161,21 @@ where
 impl<'a, N, E, A, H> PathFinder<A::Ix> for Dijkstra<'a, N, E, A, H>
 where
     E: Copy + Default + PartialOrd + FromPrimitive + Num + UpperBounded,
-    A: GraphAttributes,
+    A: GraphProps,
     H: HyperGraph<N, E, A>,
     A::Ix: NumIndex,
     <H::Edge<E> as RawEdge>::Store: Clone + IntoIterator<Item = VertexId<A::Ix>>,
 {
     type Path = Vec<VertexId<A::Ix>>;
 
-    fn find_path(
-        &mut self,
-        src: VertexId<A::Ix>,
-        dest: VertexId<A::Ix>,
-    ) -> crate::AlgoResult<Self::Path> {
+    fn find_path(&mut self, src: VertexId<A::Ix>, dest: VertexId<A::Ix>) -> Result<Self::Path> {
         self.reset();
 
         if !self.graph.contains_node(&src) {
-            return Err(crate::AlgoError::NodeNotFound);
+            return Err(Error::NodeNotFound);
         }
         if !self.graph.contains_node(&dest) {
-            return Err(crate::AlgoError::NodeNotFound);
+            return Err(Error::NodeNotFound);
         }
 
         let mut heap: BinaryHeap<QueueNode<A::Ix, E>> = BinaryHeap::new();
@@ -226,7 +224,7 @@ where
                 }
             }
         }
-        Err(crate::AlgoError::PathNotFound)
+        Err(Error::PathNotFound)
     }
 
     fn reconstruct_path(&self, mut goal: VertexId<A::Ix>) -> Vec<VertexId<A::Ix>> {
@@ -248,7 +246,7 @@ where
 
 impl<'a, N, E, A, H> Traversal<VertexId<A::Ix>> for Dijkstra<'a, N, E, A, H>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     H: HyperGraph<N, E, A>,
     A::Ix: Eq + Hash,
 {
@@ -266,14 +264,14 @@ where
 impl<'a, N, E, A, H> Search<VertexId<A::Ix>> for Dijkstra<'a, N, E, A, H>
 where
     E: Copy + Default + PartialOrd + FromPrimitive + Num + UpperBounded,
-    A: GraphAttributes,
+    A: GraphProps,
     H: HyperGraphIter<N, E, A>,
     A::Ix: NumIndex,
     <H::Edge<E> as RawEdge>::Store: Clone + IntoIterator<Item = VertexId<A::Ix>>,
 {
     type Output = Vec<VertexId<A::Ix>>;
 
-    fn search(&mut self, start: VertexId<A::Ix>) -> crate::AlgoResult<Self::Output> {
+    fn search(&mut self, start: VertexId<A::Ix>) -> Result<Self::Output> {
         // Use the vertex with the largest ID as a pseudo-goal if not specified
         let max_vertex_id = match self.graph.vertices().max() {
             Some(&id) => id,

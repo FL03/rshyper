@@ -3,9 +3,10 @@
     Contrib: @FL03
 */
 use crate::edge::{BinaryEdge, RawEdge, RawFacet};
+use crate::error::Result;
 use crate::idx::{EdgeId, VertexId};
 use crate::node::RawNode;
-use crate::{GraphAttributes, Weight};
+use crate::{GraphProps, Weight};
 
 #[cfg(feature = "alloc")]
 use alloc::vec::Vec;
@@ -14,7 +15,7 @@ use alloc::vec::Vec;
 /// structure.
 pub trait RawHyperGraph<A>
 where
-    A: GraphAttributes,
+    A: GraphProps,
 {
     type Edge<E>: RawFacet<E, Index = A::Ix, Kind = A::Kind>;
     type Node<N>: RawNode<N, Key = A::Ix>;
@@ -25,10 +26,10 @@ where
 /// enabling the generalization of implements algorithms and operators.
 pub trait HyperGraph<N, E, A>: RawHyperGraph<A>
 where
-    A: GraphAttributes,
+    A: GraphProps,
 {
     /// given an iterable of vertex indices, add an edge to the graph and return its index
-    fn add_edge<I>(&mut self, iter: I) -> crate::HyperResult<EdgeId<A::Ix>>
+    fn add_edge<I>(&mut self, iter: I) -> Result<EdgeId<A::Ix>>
     where
         I: IntoIterator<Item = VertexId<A::Ix>>,
         E: Default,
@@ -36,13 +37,13 @@ where
         self.add_surface(iter, Default::default())
     }
     /// given an iterable of vertex indices and a weight, add an edge to the graph and return its index
-    fn add_surface<I>(&mut self, iter: I, weight: Weight<E>) -> crate::HyperResult<EdgeId<A::Ix>>
+    fn add_surface<I>(&mut self, iter: I, weight: Weight<E>) -> Result<EdgeId<A::Ix>>
     where
         I: IntoIterator<Item = VertexId<A::Ix>>;
     /// add a new node to the graph with the given weight and return its index
-    fn add_node(&mut self, weight: Weight<N>) -> crate::HyperResult<VertexId<A::Ix>>;
+    fn add_node(&mut self, weight: Weight<N>) -> Result<VertexId<A::Ix>>;
     /// add a new default node to the graph and return its index
-    fn add_vertex(&mut self) -> crate::HyperResult<VertexId<A::Ix>>
+    fn add_vertex(&mut self) -> Result<VertexId<A::Ix>>
     where
         N: Default,
     {
@@ -83,7 +84,7 @@ where
 /// the nodes in the hypergraph.
 pub trait HyperGraphIterNode<N, E, A>: HyperGraph<N, E, A>
 where
-    A: GraphAttributes,
+    A: GraphProps,
 {
     type Nodes<'a>: Iterator<Item = (&'a VertexId<A::Ix>, &'a Self::Node<N>)>
     where
@@ -101,7 +102,7 @@ where
 /// the edges in the hypergraph.
 pub trait HyperGraphIterEdge<N, E, A>: HyperGraph<N, E, A>
 where
-    A: GraphAttributes,
+    A: GraphProps,
 {
     type Surfaces<'a>: Iterator<Item = (&'a EdgeId<A::Ix>, &'a Self::Edge<E>)>
     where
@@ -120,7 +121,7 @@ where
 pub trait HyperGraphIter<N, E, A>:
     HyperGraphIterNode<N, E, A> + HyperGraphIterEdge<N, E, A>
 where
-    A: GraphAttributes,
+    A: GraphProps,
 {
     private!();
 }
@@ -131,7 +132,7 @@ where
 /// so-called [`BinaryEdge`] representation
 pub trait StdGraph<N, E, A>: RawHyperGraph<A>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     Self::Edge<E>: BinaryEdge,
 {
     private!();
@@ -143,7 +144,7 @@ where
 
 impl<N, E, A, H> StdGraph<N, E, A> for H
 where
-    A: GraphAttributes,
+    A: GraphProps,
     N: Default,
     E: Default,
     H: HyperGraph<N, E, A>,
@@ -154,7 +155,7 @@ where
 
 impl<H, N, E, A> HyperGraphIter<N, E, A> for H
 where
-    A: GraphAttributes,
+    A: GraphProps,
     H: HyperGraphIterNode<N, E, A> + HyperGraphIterEdge<N, E, A>,
 {
     seal!();

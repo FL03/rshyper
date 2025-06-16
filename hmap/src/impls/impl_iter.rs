@@ -6,13 +6,13 @@ use crate::HyperMap;
 use crate::iter::*;
 
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::{GraphAttributes, GraphType, RawIndex};
+use rshyper_core::{GraphProps, GraphType, RawIndex};
 
 /// implements various iterators for the [`HyperMap`]
 impl<N, E, A, S, K, Idx> HyperMap<N, E, A, S>
 where
     S: BuildHasher,
-    A: GraphAttributes<Kind = K, Ix = Idx>,
+    A: GraphProps<Kind = K, Ix = Idx>,
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
 {

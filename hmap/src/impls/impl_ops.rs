@@ -4,13 +4,14 @@
 */
 use crate::{HashSurface, HyperMap};
 use core::hash::{BuildHasher, Hash};
+use rshyper_core::error::Result;
 use rshyper_core::idx::{EdgeId, NumIndex, RawIndex, VertexId};
 use rshyper_core::node::Node;
-use rshyper_core::{Combine, GraphAttributes, GraphType, HyperResult};
+use rshyper_core::{Combine, GraphProps, GraphType};
 
 impl<N, E, A, S, K, Idx> Combine<EdgeId<Idx>, EdgeId<Idx>> for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes<Ix = Idx, Kind = K>,
+    A: GraphProps<Ix = Idx, Kind = K>,
     E: Clone + core::ops::Add<Output = E>,
     K: GraphType,
     Idx: NumIndex,
@@ -19,14 +20,14 @@ where
 {
     type Output = EdgeId<Idx>;
 
-    fn combine(&mut self, src: EdgeId<Idx>, tgt: EdgeId<Idx>) -> HyperResult<Self::Output> {
+    fn combine(&mut self, src: EdgeId<Idx>, tgt: EdgeId<Idx>) -> Result<Self::Output> {
         self.merge_edges(&src, &tgt)
     }
 }
 
 impl<'a, N, E, A, S, K, Idx> Combine<&'a EdgeId<Idx>, &'a EdgeId<Idx>> for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes<Ix = Idx, Kind = K>,
+    A: GraphProps<Ix = Idx, Kind = K>,
     K: GraphType,
     Idx: NumIndex,
     S: BuildHasher + Default,
@@ -34,14 +35,14 @@ where
 {
     type Output = EdgeId<Idx>;
 
-    fn combine(&mut self, src: &'a EdgeId<Idx>, tgt: &'a EdgeId<Idx>) -> HyperResult<Self::Output> {
+    fn combine(&mut self, src: &'a EdgeId<Idx>, tgt: &'a EdgeId<Idx>) -> Result<Self::Output> {
         self.merge_edges(src, tgt)
     }
 }
 
 impl<N, E, A, S, K, Idx> core::ops::Index<&EdgeId<Idx>> for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes<Ix = Idx, Kind = K>,
+    A: GraphProps<Ix = Idx, Kind = K>,
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
     S: BuildHasher,
@@ -55,7 +56,7 @@ where
 
 impl<N, E, A, S, K, Idx> core::ops::IndexMut<&EdgeId<Idx>> for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes<Ix = Idx, Kind = K>,
+    A: GraphProps<Ix = Idx, Kind = K>,
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
     S: BuildHasher,
@@ -67,7 +68,7 @@ where
 
 impl<N, E, A, S, K, Idx> core::ops::Index<&VertexId<Idx>> for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes<Ix = Idx, Kind = K>,
+    A: GraphProps<Ix = Idx, Kind = K>,
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
     S: BuildHasher,
@@ -81,7 +82,7 @@ where
 
 impl<N, E, A, S, K, Idx> core::ops::IndexMut<&VertexId<Idx>> for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes<Ix = Idx, Kind = K>,
+    A: GraphProps<Ix = Idx, Kind = K>,
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
     S: BuildHasher,

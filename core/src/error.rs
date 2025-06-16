@@ -2,19 +2,17 @@
     Appellation: error <module>
     Contrib: @FL03
 */
-//! this module implements the [`HyperError`] type for the [`rshyper`](https://docs.rs/rshyper)
+//! this module implements the [`Error`] type for the [`rshyper`](https://docs.rs/rshyper)
 //! crate.
 #[cfg(feature = "alloc")]
 use alloc::{boxed::Box, string::String};
 
-/// A type alias for a [Result] with the crate-specific error type [`HyperError`]
-pub type HyperResult<T = ()> = core::result::Result<T, HyperError>;
+/// A type alias for a [Result] with the crate-specific error type [`Error`]
+pub type Result<T = ()> = core::result::Result<T, Error>;
 
 /// The error type for this crate
 #[derive(Debug, thiserror::Error)]
-pub enum HyperError {
-    #[error("No path found between the two points")]
-    PathNotFound,
+pub enum Error {
     #[error("The edge with the given id does not exist")]
     EdgeNotFound,
     #[error("The node with the given id does not exist")]
@@ -30,7 +28,7 @@ pub enum HyperError {
     AnyError(#[from] anyhow::Error),
     #[cfg(feature = "alloc")]
     #[error(transparent)]
-    BoxError(#[from] Box<dyn core::error::Error + Send + Sync + 'static>),
+    BoxError(#[from] Box<dyn core::error::Error + Send + Sync>),
     #[cfg(feature = "serde")]
     #[error(transparent)]
     DeserializeError(#[from] serde::de::value::Error),
@@ -43,20 +41,20 @@ pub enum HyperError {
     #[error(transparent)]
     JsonError(#[from] serde_json::Error),
     #[cfg(feature = "alloc")]
-    #[error("Unknown error: {0}")]
+    #[error("{0}")]
     Unknown(String),
 }
 
 #[cfg(feature = "alloc")]
-impl From<&str> for HyperError {
+impl From<&str> for Error {
     fn from(s: &str) -> Self {
-        HyperError::Unknown(String::from(s))
+        Error::Unknown(String::from(s))
     }
 }
 
 #[cfg(feature = "alloc")]
-impl From<String> for HyperError {
+impl From<String> for Error {
     fn from(s: String) -> Self {
-        HyperError::Unknown(s)
+        Error::Unknown(s)
     }
 }

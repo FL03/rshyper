@@ -6,20 +6,16 @@ use crate::idx::RawIndex;
 use crate::{Directed, GraphType, Mode, Undirected};
 use core::marker::PhantomData;
 
-/// [`Attributes`] is a generic implementation of the [`GraphAttributes`](super::GraphAttributes) trait enabling the
-/// definition of hypergraphs with different index types and graph kinds (directed or
-/// undirected).
+/// [`Attributes`] is a generic implementation of the [`GraphAttributes`](super::GraphAttributes)
+/// trait enabling the definition of hypergraphs with different index types and graph kinds
+/// (i.e., [`Directed`] or [`Undirected`]).
 #[derive(Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize, serde::Serialize),
     serde(default, rename_all = "snake_case")
 )]
-pub struct Attributes<I = usize, K = Undirected>
-where
-    I: RawIndex,
-    K: GraphType,
-{
+pub struct Attributes<I = usize, K = Undirected> {
     /// the inner type of index used by the graph
     pub(crate) index: PhantomData<I>,
     /// the kind of graph, either directed or undirected

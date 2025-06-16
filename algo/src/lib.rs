@@ -47,20 +47,18 @@ pub use self::{
 #[doc(inline)]
 pub use self::{error::*, traits::prelude::*};
 
-// pub(crate) use rshyper_core
-
-/// this module implements the A* search algorithm
 #[cfg(feature = "std")]
 pub mod astar;
+#[cfg(feature = "std")]
 /// this module implements the breadth-first search algorithm
-#[cfg(feature = "std")]
 pub mod breadth_first;
+#[cfg(feature = "std")]
 /// this module implements the depth-first search algorithm
-#[cfg(feature = "std")]
 pub mod depth_first;
-/// this module implements the Dijkstra's algorithm for finding the shortest path in a hypergraph
 #[cfg(feature = "std")]
+/// this module implements the Dijkstra's algorithm for finding the shortest path in a hypergraph
 pub mod dijkstra;
+
 pub mod error;
 
 pub mod traits {
@@ -98,17 +96,13 @@ pub mod traits {
 #[doc(hidden)]
 #[allow(missing_docs)]
 pub mod prelude {
-    #[cfg(feature = "std")]
-    pub use super::astar::AStarSearch;
-    #[cfg(feature = "std")]
-    pub use super::breadth_first::BreadthFirstTraversal;
-    #[cfg(feature = "std")]
-    pub use super::depth_first::DepthFirstTraversal;
-    #[cfg(feature = "std")]
-    pub use super::dijkstra::Dijkstra;
-    pub use super::error::AlgoError;
     #[doc(inline)]
     pub use super::traits::prelude::*;
+    #[cfg(feature = "std")]
+    pub use super::{
+        astar::AStarSearch, breadth_first::BreadthFirstTraversal, depth_first::DepthFirstTraversal,
+        dijkstra::Dijkstra,
+    };
 }
 
 /// a type alias for a [`HashSet`](std::collections::HashSet) of [`VertexId`](rshyper::VertexId)'s

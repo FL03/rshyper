@@ -4,7 +4,7 @@
 */
 use rshyper::{UnHyperMap, hypergraph};
 
-fn main() -> rshyper::HyperResult<()> {
+fn main() -> rshyper::Result<()> {
     tracing_subscriber::fmt()
         .with_line_number(false)
         .with_file(false)
