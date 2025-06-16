@@ -6,15 +6,16 @@
 //! entries within the hypergraph. Additionally, the module provides the [`Weightless`] type
 //! alias for cases where there is no associated weight.
 #[doc(inline)]
-pub use self::{traits::prelude::*, unweighted::*, wrapper::*};
-
-pub mod unweighted;
-pub mod wrapper;
+pub use self::{traits::prelude::*, types::prelude::*};
 
 mod impls {
     pub mod impl_weight;
     pub mod impl_weight_ops;
     pub mod impl_weight_repr;
+
+    #[doc(hidden)]
+    #[allow(deprecated)]
+    pub mod impl_weight_deprecated;
 }
 
 pub mod traits {
@@ -23,9 +24,9 @@ pub mod traits {
     pub use self::prelude::*;
     /// this module provides the [`AsWeight`] and [`IntoWeight`] traits for converting types to
     /// [`Weight`]
-    pub mod convert;
+    mod convert;
     /// this module implements the [`Weighted`] trait for types that have an associated weight
-    pub mod weighted;
+    mod weighted;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -35,11 +36,53 @@ pub mod traits {
     }
 }
 
+pub mod types {
+    //! this implements addtional types related to weights
+    #[doc(inline)]
+    pub use self::prelude::*;
+    /// this module provides two distinct marker types for indicating the state of a weight
+    pub mod kinds;
+    /// this module implements the [`Weighted`] trait for types that have an associated weight
+    pub mod unweighted;
+
+    pub(crate) mod prelude {
+        #[doc(inline)]
+        pub use super::kinds::*;
+        #[doc(inline)]
+        pub use super::unweighted::*;
+    }
+}
+
 pub(crate) mod prelude {
+    #[doc(inline)]
+    pub use super::Weight;
     #[doc(inline)]
     pub use super::traits::prelude::*;
     #[doc(inline)]
-    pub use super::unweighted::{UnWeight, Weightless};
-    #[doc(inline)]
-    pub use super::wrapper::Weight;
+    pub use super::types::prelude::*;
+}
+
+/// The [`Weight`] type is a wrapper around a generic type `T` that provides additional
+/// functionality for working with weights in a graph context.
+#[derive(Clone, Copy, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+#[cfg_attr(
+    feature = "serde",
+    derive(serde::Deserialize, serde::Serialize),
+    serde(transparent, rename_all = "lowercase")
+)]
+#[repr(transparent)]
+pub struct Weight<T>(pub T);
+
+scsys::fmt_wrapper! {
+    Weight<T>(
+        Binary,
+        Debug,
+        Display,
+        LowerExp,
+        LowerHex,
+        UpperExp,
+        UpperHex,
+        Octal,
+        Pointer,
+    )
 }

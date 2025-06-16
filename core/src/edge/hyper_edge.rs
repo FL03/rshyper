@@ -1,14 +1,14 @@
 /*
-    appellation: hyper_edge <module>
-    authors: @FL03
+    Appellation: edge <module>
+    Contrib: @FL03
 */
-use super::RawEdge;
+use super::{EdgeLayout, RawLayout, RawSurface};
 use crate::idx::{EdgeId, RawIndex, VertexId};
-use crate::{Domain, GraphType};
+use crate::{Domain, GraphType, Weight};
 
-/// [`Edge`] is the base type for hyperedges in a graph. These edges are generic over the
-/// edge store type `S`, the graph kind `K`, and the index type `Idx`. This allows for
-/// flexibility in how edges store their vertices and how they are identified within the graph.
+/// The [`Edge`] implementation associates some weight with a hyperedge.
+/// Typically, the term **facet** is used to denote the surface of a particular polytope,
+/// however, here it is used to aptly define a _**weighted**_ hyperedge.
 #[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
 #[cfg_attr(
     feature = "serde",
@@ -16,171 +16,184 @@ use crate::{Domain, GraphType};
     serde(rename_all = "snake_case")
 )]
 #[repr(C)]
-pub struct Edge<S, K, Idx = usize>
+pub struct Edge<T, S, K, Idx = usize>
 where
     Idx: RawIndex,
     K: GraphType,
     S: Domain<Idx>,
 {
-    pub(crate) id: EdgeId<Idx>,
-    pub(crate) domain: S,
-    pub(crate) _kind: core::marker::PhantomData<K>,
+    pub(crate) edge: EdgeLayout<S, K, Idx>,
+    pub(crate) weight: Weight<T>,
 }
 
-impl<S, K, Idx> Edge<S, K, Idx>
+impl<T, S, K, Idx> Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
     S: Domain<Idx>,
 {
-    pub fn new(id: EdgeId<Idx>, domain: S) -> Self {
-        Self {
-            id,
-            domain,
-            _kind: core::marker::PhantomData::<K>,
-        }
+    /// create a new instance of the [`Edge`] from the given id, nodes, and weight
+    pub fn new(id: EdgeId<Idx>, nodes: S, weight: Weight<T>) -> Self {
+        let edge = EdgeLayout::new(id, nodes);
+        Self { edge, weight }
+    }
+    /// creates a new edge with the given id
+    pub fn from_edge(edge: EdgeLayout<S, K, Idx>) -> Self
+    where
+        T: Default,
+    {
+        Self::from_edge_with_weight(edge, Default::default())
+    }
+    /// creates a new instance from the given edge and weight
+    pub fn from_edge_with_weight(edge: EdgeLayout<S, K, Idx>, weight: Weight<T>) -> Self {
+        Self { edge, weight }
     }
     /// creates a new edge with the given id
     pub fn from_id(id: EdgeId<Idx>) -> Self
     where
         S: Default,
+        T: Default,
     {
-        Self::new(id, Default::default())
+        Self {
+            edge: EdgeLayout::from_id(id),
+            weight: Weight::default(),
+        }
     }
     /// creates a new edge with the given nodes
     pub fn from_domain(nodes: S) -> Self
     where
         Idx: Default,
+        T: Default,
     {
-        Self::new(Default::default(), nodes)
+        Self {
+            edge: EdgeLayout::from_domain(nodes),
+            weight: Weight::default(),
+        }
+    }
+    /// creates a new instance from the given value
+    pub fn from_weight(weight: Weight<T>) -> Self
+    where
+        Idx: Default,
+        S: Default,
+    {
+        Self {
+            edge: EdgeLayout::default(),
+            weight,
+        }
+    }
+    /// returns an immutable reference to the edge
+    pub const fn edge(&self) -> &EdgeLayout<S, K, Idx> {
+        &self.edge
+    }
+    /// returns a mutable reference to the edge
+    pub const fn edge_mut(&mut self) -> &mut EdgeLayout<S, K, Idx> {
+        &mut self.edge
+    }
+    /// returns an immutable reference to the weight
+    pub const fn weight(&self) -> &Weight<T> {
+        &self.weight
+    }
+    /// returns a mutable reference to the weight
+    pub const fn weight_mut(&mut self) -> &mut Weight<T> {
+        &mut self.weight
     }
     /// returns an immutable reference to the id
     pub const fn id(&self) -> &EdgeId<Idx> {
-        &self.id
+        self.edge().id()
     }
     /// returns a mutable reference to the id
     pub const fn id_mut(&mut self) -> &mut EdgeId<Idx> {
-        &mut self.id
+        self.edge_mut().id_mut()
     }
     /// returns an immutable reference to the nodes
     pub const fn domain(&self) -> &S {
-        &self.domain
+        self.edge().domain()
     }
     /// returns a mutable reference to the nodes
     pub const fn domain_mut(&mut self) -> &mut S {
-        &mut self.domain
+        self.edge_mut().domain_mut()
     }
     /// updates the id and returns a mutable reference to the instance
     pub fn set_id(&mut self, id: EdgeId<Idx>) -> &mut Self {
-        self.id = id;
+        self.edge_mut().set_id(id);
         self
     }
     /// updates the nodes and returns a mutable reference to the instance
     pub fn set_domain(&mut self, nodes: S) -> &mut Self {
-        self.domain = nodes;
+        self.edge_mut().set_domain(nodes);
+        self
+    }
+    /// updates the weight and returns a mutable reference to the instance
+    pub fn set_weight(&mut self, weight: Weight<T>) -> &mut Self {
+        self.weight = weight;
         self
     }
     /// consumes the current instance to create another with the given id.
     pub fn with_id(self, id: EdgeId<Idx>) -> Self {
-        Self { id, ..self }
-    }
-    /// consumes the current instance to create another with the given nodes.
-    pub fn with_domain<S2: Domain<Idx>>(self, nodes: S2) -> Edge<S2, K, Idx> {
         Edge {
-            id: self.id,
-            domain: nodes,
-            _kind: self._kind,
+            edge: self.edge.with_id(id),
+            weight: self.weight,
         }
     }
-    /// returns true if the edge contains the given vertex index
+    /// consumes the current instance to create another with the given nodes.
+    pub fn with_domain<S2: Domain<Idx>>(self, nodes: S2) -> Edge<T, S2, K, Idx> {
+        Edge {
+            edge: self.edge.with_domain(nodes),
+            weight: self.weight,
+        }
+    }
+    /// consumes the current instance to create another with the given weight.
+    pub fn with_weight<U>(self, weight: Weight<U>) -> Edge<U, S, K, Idx> {
+        Edge {
+            edge: self.edge,
+            weight,
+        }
+    }
+    /// returns true if the edge contains the given vertex
     pub fn contains<Q>(&self, index: &Q) -> bool
     where
-        Idx: PartialEq,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
         Q: ?Sized + PartialEq,
-        VertexId<Idx>: core::borrow::Borrow<Q>,
-        for<'a> &'a S: IntoIterator<Item = &'a VertexId<Idx>>,
-    {
-        use core::borrow::Borrow;
-        self.domain().into_iter().any(|v| v.borrow() == index)
-    }
-    /// returns true if the edge contains all the given vertex indices
-    pub fn contains_all<Q, I>(&self, indices: I) -> bool
-    where
         Idx: PartialEq,
-        I: IntoIterator<Item = Q>,
-        Q: PartialEq,
-        VertexId<Idx>: core::borrow::Borrow<Q>,
         for<'a> &'a S: IntoIterator<Item = &'a VertexId<Idx>>,
     {
-        indices.into_iter().all(|index| self.contains(&index))
+        self.edge().contains(index)
     }
-    /// returns the number of vertices in the edge
-    pub fn len(&self) -> usize
-    where
-        S: Domain<Idx>,
-    {
-        self.domain().len()
+    /// returns true if the edge is empty
+    pub fn is_empty(&self) -> bool {
+        self.edge().is_empty()
     }
-    /// returns true if the edge has no vertices
-    pub fn is_empty(&self) -> bool
-    where
-        S: Domain<Idx>,
-    {
-        self.domain().is_empty()
+    /// returns the number of nodes in the edge
+    pub fn len(&self) -> usize {
+        self.edge().len()
     }
 }
 
 #[allow(deprecated)]
 #[doc(hidden)]
-impl<S, K, Idx> Edge<S, K, Idx>
+impl<T, S, K, Idx> Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
     S: Domain<Idx>,
 {
     #[deprecated(
-        note = "Use `Edge::from_domain` instead. This method will be removed in a future version",
+        note = "Use `domain` instead. This method will be removed in the next major version.",
         since = "0.1.2"
     )]
-    pub fn from_points(nodes: S) -> Self
-    where
-        Idx: Default,
-    {
-        Self::from_domain(nodes)
+    pub const fn nodes(&self) -> &S {
+        self.edge().domain()
     }
     #[deprecated(
-        note = "Use `Edge::domain` instead. This method will be removed in a future version",
+        note = "Use `domain_mut` instead. This method will be removed in the next major version.",
         since = "0.1.2"
     )]
-    /// returns an immutable reference to the nodes
-    pub const fn points(&self) -> &S {
-        self.domain()
-    }
-    #[deprecated(
-        note = "Use `Edge::domain_mut` instead. This method will be removed in a future version",
-        since = "0.1.2"
-    )]
-    /// returns a mutable reference to the nodes
-    pub const fn points_mut(&mut self) -> &mut S {
-        self.domain_mut()
-    }
-    #[deprecated(
-        note = "Use `Edge::set_domain` instead. This method will be removed in a future version",
-        since = "0.1.2"
-    )]
-    pub fn set_points(&mut self, nodes: S) -> &mut Self {
-        self.set_domain(nodes)
-    }
-    #[deprecated(
-        note = "Use `Edge::with_domain` instead. This method will be removed in a future version",
-        since = "0.1.2"
-    )]
-    pub fn with_points<S2: Domain<Idx>>(self, nodes: S2) -> Edge<S2, K, Idx> {
-        self.with_domain(nodes)
+    pub const fn nodes_mut(&mut self) -> &mut S {
+        self.edge_mut().domain_mut()
     }
 }
 
-impl<S, K, Idx> RawEdge for Edge<S, K, Idx>
+impl<T, S, Idx, K> RawLayout for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -193,25 +206,31 @@ where
     seal!();
 
     fn index(&self) -> &EdgeId<Idx> {
-        self.id()
+        self.edge().id()
     }
 
     fn domain(&self) -> &S {
-        self.domain()
+        self.edge().domain()
     }
 
     fn domain_mut(&mut self) -> &mut S {
-        self.domain_mut()
+        self.edge_mut().domain_mut()
     }
 }
 
-impl<S, K, Idx> super::HyperEdge for Edge<S, K, Idx>
+impl<T, S, Idx, K> RawSurface<T> for Edge<T, S, K, Idx>
 where
-    S: Domain<Idx>,
     Idx: RawIndex,
     K: GraphType,
+    S: Domain<Idx>,
 {
-    fn new(id: EdgeId<Idx>, vertices: S) -> Self {
-        Self::new(id, vertices)
+    seal!();
+
+    fn weight(&self) -> &Weight<T> {
+        self.as_ref()
+    }
+
+    fn weight_mut(&mut self) -> &mut Weight<T> {
+        self.as_mut()
     }
 }

@@ -2,11 +2,11 @@
     appellation: dft <test>
     authors: @FL03
 */
-use rshyper_core::HyperResult;
+use rshyper_core::Result;
 use rshyper_hmap::HyperMap;
 
 #[test]
-fn test_depth_first_traversal() -> HyperResult<()> {
+fn test_depth_first_traversal() -> Result<()> {
     let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a simple hypergraph
@@ -38,7 +38,7 @@ fn test_depth_first_traversal() -> HyperResult<()> {
 }
 
 #[test]
-fn test_dft_branching_graph() -> HyperResult<()> {
+fn test_dft_branching_graph() -> Result<()> {
     let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a branching hypergraph
@@ -76,7 +76,7 @@ fn test_dft_branching_graph() -> HyperResult<()> {
 }
 
 #[test]
-fn test_dft_cyclic_graph() -> HyperResult<()> {
+fn test_dft_cyclic_graph() -> Result<()> {
     let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a cyclic graph
@@ -111,7 +111,7 @@ fn test_dft_cyclic_graph() -> HyperResult<()> {
 }
 
 #[test]
-fn test_dft_isolated_vertex() -> HyperResult<()> {
+fn test_dft_isolated_vertex() -> Result<()> {
     let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a graph with an isolated vertex

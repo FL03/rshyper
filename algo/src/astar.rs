@@ -2,22 +2,24 @@
     Appellation: impl_astar <module>
     Contrib: @FL03
 */
+//! this module implements the A* search algorithm
 #[doc(inline)]
 pub use self::priority_node::PriorityNode;
 
-pub(crate) mod priority_node;
+mod priority_node;
 
+use crate::error::{Error, Result};
 use crate::{Heuristic, PathFinder, Search, Traversal, VertexSet};
 use core::hash::Hash;
-use rshyper_core::edge::RawEdge;
-use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphAttributes, GraphType, HyperGraph, HyperGraphIter};
+use rshyper::edge::RawLayout;
+use rshyper::idx::{NumIndex, RawIndex, VertexId};
+use rshyper::{GraphProps, GraphType, HyperGraph, HyperGraphIter};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 
 /// An A* Search algorithm implementation for hypergraphs
 pub struct AStarSearch<'a, N, E, A, F, H>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     H: HyperGraph<N, E, A>,
     F: Heuristic<A::Ix>,
 {
@@ -33,7 +35,7 @@ where
 
 impl<'a, N, E, A, F, H, K, Idx> AStarSearch<'a, N, E, A, F, H>
 where
-    A: GraphAttributes<Ix = Idx, Kind = K>,
+    A: GraphProps<Ix = Idx, Kind = K>,
     H: HyperGraph<N, E, A>,
     F: Heuristic<Idx>,
     K: GraphType,
@@ -172,7 +174,7 @@ where
         &mut self,
         start: VertexId<Idx>,
         goal: VertexId<Idx>,
-    ) -> crate::AlgoResult<<Self as PathFinder<Idx>>::Path>
+    ) -> Result<<Self as PathFinder<Idx>>::Path>
     where
         Self: PathFinder<Idx>,
     {
@@ -182,7 +184,7 @@ where
     pub fn search(
         &mut self,
         start: VertexId<Idx>,
-    ) -> crate::AlgoResult<<Self as Search<VertexId<Idx>>>::Output>
+    ) -> Result<<Self as Search<VertexId<Idx>>>::Output>
     where
         Self: Search<VertexId<Idx>>,
     {
@@ -192,25 +194,21 @@ where
 
 impl<'a, N, E, F, A, H> PathFinder<A::Ix> for AStarSearch<'a, N, E, A, F, H>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     H: HyperGraph<N, E, A>,
     F: Heuristic<A::Ix, Output = f64>,
     A::Ix: NumIndex,
-    for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
+    for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
     type Path = Vec<VertexId<A::Ix>>;
     /// Find the shortest path between start and goal vertices
-    fn find_path(
-        &mut self,
-        start: VertexId<A::Ix>,
-        goal: VertexId<A::Ix>,
-    ) -> crate::AlgoResult<Self::Path> {
+    fn find_path(&mut self, start: VertexId<A::Ix>, goal: VertexId<A::Ix>) -> Result<Self::Path> {
         // Check if both vertices exist
         if !self.graph.contains_node(&start) {
-            return Err(crate::AlgoError::NodeNotFound);
+            return Err(Error::NodeNotFound);
         }
         if !self.graph.contains_node(&goal) {
-            return Err(crate::AlgoError::NodeNotFound);
+            return Err(Error::NodeNotFound);
         }
 
         // reset state
@@ -304,7 +302,7 @@ where
         }
 
         // No path found
-        Err(crate::AlgoError::PathNotFound)
+        Err(Error::PathNotFound)
     }
 
     // Reconstruct path from came_from map
@@ -324,7 +322,7 @@ where
 
 impl<'a, N, E, F, A, H> Traversal<VertexId<A::Ix>> for AStarSearch<'a, N, E, A, F, H>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     F: Heuristic<A::Ix, Output = f64>,
     H: HyperGraph<N, E, A>,
     A::Ix: Eq + Hash,
@@ -342,22 +340,22 @@ where
 
 impl<'a, N, E, F, A, H> Search<VertexId<A::Ix>> for AStarSearch<'a, N, E, A, F, H>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     F: Heuristic<A::Ix, Output = f64>,
     H: HyperGraphIter<N, E, A>,
     A::Ix: NumIndex,
-    for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
+    for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
     type Output = Vec<VertexId<A::Ix>>;
 
-    fn search(&mut self, start: VertexId<A::Ix>) -> crate::AlgoResult<Self::Output> {
+    fn search(&mut self, start: VertexId<A::Ix>) -> Result<Self::Output> {
         // For A*, we need a goal vertex to compute the heuristic
         // This implementation of search will explore the graph and return
         // all reachable vertices ordered by their distance from start
         self.reset();
 
         if !self.graph.contains_node(&start) {
-            return Err(crate::AlgoError::NodeNotFound);
+            return Err(Error::NodeNotFound);
         }
 
         // Using the vertex with the largest ID as a pseudo-goal

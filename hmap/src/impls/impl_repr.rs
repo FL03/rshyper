@@ -4,12 +4,13 @@
 */
 use crate::{DiHyperMap, HyperMap, UnHyperMap};
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::idx::{RawIndex, VertexId};
-use rshyper_core::{AddStep, GraphAttributes, HyperResult, Mode, Weight};
+use rshyper::error::Result;
+use rshyper::idx::{RawIndex, VertexId};
+use rshyper::{AddStep, GraphProps, Mode, Weight};
 
 impl<N, E, A, S> HyperMap<N, E, A, S>
 where
-    A: GraphAttributes<Kind = Mode>,
+    A: GraphProps<Kind = Mode>,
     S: BuildHasher,
 {
     /// initialize a new, empty hypergraph with a dynamic [`Mode`] kind and the logical default
@@ -54,11 +55,11 @@ where
 
 impl<E, A, S> HyperMap<(), E, A, S>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     S: BuildHasher,
     A::Ix: Eq + Hash,
 {
-    pub fn add_empty_node(&mut self) -> HyperResult<VertexId<A::Ix>>
+    pub fn add_empty_node(&mut self) -> Result<VertexId<A::Ix>>
     where
         A::Ix: AddStep<Output = A::Ix> + Copy,
     {
@@ -66,7 +67,7 @@ where
         self.add_node(weight)
     }
     #[deprecated(since = "0.9.0", note = "use `add_empty_node` instead")]
-    pub fn insert_empty_node(&mut self) -> HyperResult<VertexId<A::Ix>>
+    pub fn insert_empty_node(&mut self) -> Result<VertexId<A::Ix>>
     where
         A::Ix: AddStep<Output = A::Ix> + Copy,
     {
@@ -76,26 +77,26 @@ where
 
 impl<N, E, A, S> HyperMap<Option<N>, E, A, S>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     S: BuildHasher,
     A::Ix: Eq + Hash,
 {
     /// insert [`Some`] vertex with weight `T` and return its ID
-    pub fn add_some_node(&mut self, weight: N) -> HyperResult<VertexId<A::Ix>>
+    pub fn add_some_node(&mut self, weight: N) -> Result<VertexId<A::Ix>>
     where
         A::Ix: AddStep<Output = A::Ix> + Copy,
     {
         self.add_node(Weight::some(weight))
     }
     /// insert [`None`] vertex with weight `T` and return its ID
-    pub fn add_none_node(&mut self) -> HyperResult<VertexId<A::Ix>>
+    pub fn add_none_node(&mut self) -> Result<VertexId<A::Ix>>
     where
         A::Ix: AddStep<Output = A::Ix> + Copy,
     {
         self.add_node(Weight::none())
     }
     #[deprecated(since = "0.9.0", note = "use `add_some_node` instead")]
-    pub fn insert_some_node(&mut self, weight: N) -> HyperResult<VertexId<A::Ix>>
+    pub fn insert_some_node(&mut self, weight: N) -> Result<VertexId<A::Ix>>
     where
         A::Ix: AddStep<Output = A::Ix> + Copy,
     {

@@ -1,10 +1,10 @@
 [package]
 build = "build.rs"
+description = "this crate implements the core functionality of rshyper, focusing on providing the essential components that compose a hypergraph"
 name = "rshyper-core"
 
 authors.workspace = true
 categories.workspace = true
-description.workspace = true
 edition.workspace = true
 homepage.workspace = true
 keywords.workspace = true
@@ -38,7 +38,7 @@ test = true
 # custom
 scsys = { workspace = true }
 # concurrency & parallelism
-rayon = { optional = true, workspace = true }
+rayon-core = { optional = true, workspace = true }
 # error handling
 anyhow = { optional = true, workspace = true }
 thiserror = { workspace = true }
@@ -99,7 +99,7 @@ wasi = [
 
 wasm = [
     "alloc",
-    "rayon?/web_spin_lock",
+    "rayon-core?/web_spin_lock",
     "scsys/wasm",
     "wasm-bindgen",
 ]
@@ -128,7 +128,7 @@ rand = [
     "scsys/rand",
 ]
 
-rayon = ["dep:rayon"]
+rayon = ["dep:rayon-core"]
 
 rng = [
     "rand?/small_rng",

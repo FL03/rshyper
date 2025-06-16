@@ -2,11 +2,11 @@
     appellation: impl_hyper_facet <module>
     authors: @FL03
 */
-use crate::edge::{Edge, Surface};
+use crate::edge::{Edge, EdgeLayout};
 use crate::idx::{EdgeId, RawIndex};
 use crate::{Directed, Domain, GraphType, Undirected, Weight};
 
-impl<T, S, Idx> Surface<T, S, Directed, Idx>
+impl<T, S, Idx> Edge<T, S, Directed, Idx>
 where
     Idx: RawIndex,
     S: Domain<Idx>,
@@ -17,7 +17,7 @@ where
     }
 }
 
-impl<T, S, I> Surface<T, S, Undirected, I>
+impl<T, S, I> Edge<T, S, Undirected, I>
 where
     I: RawIndex,
     S: Domain<I>,
@@ -28,7 +28,7 @@ where
     }
 }
 
-impl<T, S, K, Idx> Default for Surface<T, S, K, Idx>
+impl<T, S, K, Idx> Default for Edge<T, S, K, Idx>
 where
     Idx: Default + RawIndex,
     K: GraphType,
@@ -37,13 +37,13 @@ where
 {
     fn default() -> Self {
         Self {
-            edge: Edge::default(),
+            edge: EdgeLayout::default(),
             weight: Weight::default(),
         }
     }
 }
 
-impl<T, S, K, Idx> core::fmt::Debug for Surface<T, S, K, Idx>
+impl<T, S, K, Idx> core::fmt::Debug for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -58,7 +58,7 @@ where
     }
 }
 
-impl<T, S, K, Idx> core::fmt::Display for Surface<T, S, K, Idx>
+impl<T, S, K, Idx> core::fmt::Display for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -75,30 +75,30 @@ where
     }
 }
 
-impl<T, S, K, Idx> From<Edge<S, K, Idx>> for Surface<T, S, K, Idx>
+impl<T, S, K, Idx> From<EdgeLayout<S, K, Idx>> for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
     S: Domain<Idx>,
     T: Default,
 {
-    fn from(edge: Edge<S, K, Idx>) -> Self {
+    fn from(edge: EdgeLayout<S, K, Idx>) -> Self {
         Self::from_edge(edge)
     }
 }
 
-impl<T, S, K, Idx> From<Surface<T, S, K, Idx>> for Edge<S, K, Idx>
+impl<T, S, K, Idx> From<Edge<T, S, K, Idx>> for EdgeLayout<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
     S: Domain<Idx>,
 {
-    fn from(facet: Surface<T, S, K, Idx>) -> Self {
+    fn from(facet: Edge<T, S, K, Idx>) -> Self {
         facet.edge
     }
 }
 
-impl<T, S, K, Idx> From<EdgeId<Idx>> for Surface<T, S, K, Idx>
+impl<T, S, K, Idx> From<EdgeId<Idx>> for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -110,7 +110,7 @@ where
     }
 }
 
-impl<T, S, K, Idx> AsRef<Weight<T>> for Surface<T, S, K, Idx>
+impl<T, S, K, Idx> AsRef<Weight<T>> for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -121,7 +121,7 @@ where
     }
 }
 
-impl<T, S, K, Idx> AsMut<Weight<T>> for Surface<T, S, K, Idx>
+impl<T, S, K, Idx> AsMut<Weight<T>> for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -132,7 +132,7 @@ where
     }
 }
 
-impl<T, S, K, Idx> core::borrow::Borrow<EdgeId<Idx>> for Surface<T, S, K, Idx>
+impl<T, S, K, Idx> core::borrow::Borrow<EdgeId<Idx>> for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -143,7 +143,7 @@ where
     }
 }
 
-impl<T, S, K, Idx> core::borrow::BorrowMut<EdgeId<Idx>> for Surface<T, S, K, Idx>
+impl<T, S, K, Idx> core::borrow::BorrowMut<EdgeId<Idx>> for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -154,20 +154,20 @@ where
     }
 }
 
-impl<T, S, K, Idx> core::ops::Deref for Surface<T, S, K, Idx>
+impl<T, S, K, Idx> core::ops::Deref for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
     S: Domain<Idx>,
 {
-    type Target = Edge<S, K, Idx>;
+    type Target = EdgeLayout<S, K, Idx>;
 
     fn deref(&self) -> &Self::Target {
         self.edge()
     }
 }
 
-impl<T, S, K, Idx> core::ops::DerefMut for Surface<T, S, K, Idx>
+impl<T, S, K, Idx> core::ops::DerefMut for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,

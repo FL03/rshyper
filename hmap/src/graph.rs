@@ -9,15 +9,15 @@ use crate::types::prelude::*;
 use core::hash::{BuildHasher, Hash};
 use rshyper_core::{
     AddStep, GraphType, Mode,
-    attrs::{DiAttributes, GraphAttributes, UnAttributes},
+    attrs::{DiAttrs, GraphProps, UnAttrs},
     idx::{EdgeId, Frame, IndexTracker, RawIndex, VertexId},
 };
 use std::hash::RandomState;
 
 /// a type alias for a [directed](crate::Directed) [`HyperMap`]
-pub type DiHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, DiAttributes<Idx>, S>;
+pub type DiHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, DiAttrs<Idx>, S>;
 /// a type alias for an [undirected](crate::Undirected) [`HyperMap`]
-pub type UnHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, UnAttributes<Idx>, S>;
+pub type UnHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, UnAttrs<Idx>, S>;
 
 /// The [`HyperMap`] is a map-based implementation of a hypergraph that is generic over the
 /// types:
@@ -37,10 +37,10 @@ pub type UnHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, UnAttri
 /// created.
 ///
 #[derive(Clone, Default)]
-pub struct HyperMap<N = (), E = (), A = UnAttributes<usize>, S = RandomState>
+pub struct HyperMap<N = (), E = (), A = UnAttrs<usize>, S = RandomState>
 where
     S: BuildHasher,
-    A: GraphAttributes,
+    A: GraphProps,
 {
     /// the attributes of a graph define its _kind_ and the type of index used
     pub(crate) attrs: A,
@@ -50,14 +50,14 @@ where
     /// the `nodes` of a hypergraph are the vertices, each identified by a `VertexId` and
     /// associated with a weight of type `N`.
     pub(crate) nodes: NodeMap<N, A::Ix, S>,
-    /// `surfaces` represent the hyperedges of the hypergraph, each identified by an `EdgeId`
-    pub(crate) surfaces: SurfaceMap<E, A::Kind, A::Ix, S>,
+    /// `edges` represent the hyperedges of the hypergraph, each identified by an `EdgeId`
+    pub(crate) edges: SurfaceMap<E, A::Kind, A::Ix, S>,
 }
 
 impl<N, E, A, K, Idx, S> HyperMap<N, E, A, S>
 where
     S: BuildHasher,
-    A: GraphAttributes<Ix = Idx, Kind = K>,
+    A: GraphProps<Ix = Idx, Kind = K>,
     K: GraphType,
     Idx: RawIndex,
 {
@@ -71,7 +71,7 @@ where
         HyperMap {
             attrs: A::new(),
             history: IndexTracker::new(),
-            surfaces: SurfaceMap::with_hasher(hasher.clone()),
+            edges: SurfaceMap::with_hasher(hasher.clone()),
             nodes: NodeMap::with_hasher(hasher),
         }
     }
@@ -83,7 +83,7 @@ where
     {
         let hasher = S::default();
         HyperMap {
-            surfaces: SurfaceMap::with_capacity_and_hasher(edges, hasher.clone()),
+            edges: SurfaceMap::with_capacity_and_hasher(edges, hasher.clone()),
             nodes: NodeMap::with_capacity_and_hasher(nodes, hasher),
             history: IndexTracker::new(),
             attrs: A::new(),
@@ -127,12 +127,12 @@ where
         self.history_mut().cursor_mut()
     }
     /// returns an immutable reference to the surfaces of the hypergraph
-    pub const fn surfaces(&self) -> &SurfaceMap<E, K, Idx, S> {
-        &self.surfaces
+    pub const fn edges(&self) -> &SurfaceMap<E, K, Idx, S> {
+        &self.edges
     }
     /// returns a mutable reference to the surfaces of the hypergraph
-    pub const fn surfaces_mut(&mut self) -> &mut SurfaceMap<E, K, Idx, S> {
-        &mut self.surfaces
+    pub const fn edges_mut(&mut self) -> &mut SurfaceMap<E, K, Idx, S> {
+        &mut self.edges
     }
     /// overrides the current nodes and returns a mutable reference to the hypergraph
     #[inline]
@@ -167,7 +167,7 @@ where
     where
         Idx: Default,
     {
-        self.surfaces = surfaces;
+        self.edges = surfaces;
         self
     }
     /// returns true if the hypergraph contains an edge with the given index;
@@ -177,7 +177,7 @@ where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.surfaces().contains_key(index)
+        self.edges().contains_key(index)
     }
     /// check if a vertex with the given id exists
     pub fn contains_node<Q>(&self, index: &Q) -> bool
@@ -201,14 +201,14 @@ where
         EdgeId<Idx>: core::borrow::Borrow<Q>,
         VertexId<Idx>: core::borrow::Borrow<Q2>,
     {
-        if let Some(surface) = self.surfaces().get(index) {
+        if let Some(surface) = self.edges().get(index) {
             return surface.contains(vertex);
         }
         false
     }
     /// returns true if the hypergraph is empty, meaning it has no edges, facets, or nodes
     pub fn is_empty(&self) -> bool {
-        self.surfaces().is_empty() && self.nodes().is_empty()
+        self.edges().is_empty() && self.nodes().is_empty()
     }
     /// returns true if the hypergraph is directed;
     pub fn is_directed(&self) -> bool {
@@ -232,7 +232,7 @@ where
     where
         Idx: Eq + Hash,
     {
-        self.surfaces_mut().entry(index)
+        self.edges_mut().entry(index)
     }
     /// computes the next edge index before replacing and returning the previous value
     pub fn next_edge_id(&mut self) -> EdgeId<Idx>
@@ -257,13 +257,13 @@ where
     /// where `H=(X,E)`.
     /// returns the total number of edges within the hypergraph
     pub fn size(&self) -> usize {
-        self.surfaces().len()
+        self.edges().len()
     }
 }
 
 impl<N, E, A, S> core::fmt::Debug for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     E: core::fmt::Debug,
     N: core::fmt::Debug,
     S: BuildHasher,
@@ -272,14 +272,14 @@ where
         f.debug_struct("HyperMap")
             .field("history", self.history())
             .field("nodes", self.nodes())
-            .field("surfaces", self.surfaces())
+            .field("surfaces", self.edges())
             .finish()
     }
 }
 
 impl<N, E, A, S> core::fmt::Display for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     E: core::fmt::Debug,
     N: core::fmt::Debug,
     S: BuildHasher,
@@ -289,64 +289,8 @@ where
             f,
             "{{ history: {h:?}, edges: {e:?}, nodes: {n:?} }}",
             n = self.nodes(),
-            e = self.surfaces(),
+            e = self.edges(),
             h = self.history()
         )
-    }
-}
-
-#[doc(hidden)]
-#[allow(deprecated)]
-impl<N, E, A, S, Idx, K> HyperMap<N, E, A, S>
-where
-    A: GraphAttributes<Kind = K, Ix = Idx>,
-    S: BuildHasher,
-    Idx: RawIndex,
-    K: GraphType,
-{
-    #[deprecated(since = "0.1.3", note = "use is_node_in_domain` instead")]
-    pub fn contains_node_in_edge<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
-    where
-        A::Ix: Eq + Hash,
-        Q: Eq + Hash + ?Sized,
-        Q2: Eq + Hash,
-        EdgeId<A::Ix>: core::borrow::Borrow<Q>,
-        VertexId<A::Ix>: core::borrow::Borrow<Q2>,
-    {
-        if let Some(surface) = self.surfaces().get(index) {
-            return surface.contains(vertex);
-        }
-        false
-    }
-    #[doc(hidden)]
-    #[deprecated(since = "0.1.2", note = "use `contains_edge` instead")]
-    pub fn contains_surface<Q>(&self, index: &Q) -> bool
-    where
-        A::Ix: Eq + Hash,
-        Q: Eq + Hash + ?Sized,
-        EdgeId<A::Ix>: core::borrow::Borrow<Q>,
-    {
-        self.surfaces().contains_key(index)
-    }
-    #[deprecated(
-        note = "use `size` instead; this method will be removed in a future release",
-        since = "0.1.2"
-    )]
-    pub fn total_edges(&self) -> usize {
-        self.surfaces().len()
-    }
-    #[deprecated(
-        note = "use `order` instead; this method will be removed in a future release",
-        since = "0.1.2"
-    )]
-    pub fn total_nodes(&self) -> usize {
-        self.nodes().len()
-    }
-    #[deprecated(
-        note = "use `order` instead; this method will be removed in a future release",
-        since = "0.1.0"
-    )]
-    pub fn total_vertices(&self) -> usize {
-        self.order()
     }
 }

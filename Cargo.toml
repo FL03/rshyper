@@ -5,7 +5,7 @@ default-members = [
 members = [
     "rshyper",
     "algo",
-    "core", 
+    "core",
     "hmap",
 ]
 resolver = "3"
@@ -30,39 +30,36 @@ license = "Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/FL03/rshyper.git"
 rust-version = "1.85.0"
-version = "0.1.4"
+version = "0.1.5"
 
 [workspace.dependencies]
 # local
-rshyper = { default-features = false, path = "rshyper", version = "0.1.4" }
-rshyper-algo = { default-features = false, path = "algo", version = "0.1.4" }
-rshyper-core = { default-features = false, path = "core", version = "0.1.4" }
-rshyper-hmap = { default-features = false, path = "hmap", version = "0.1.4" }
+rshyper = { default-features = false, path = "rshyper", version = "0.1.5" }
+rshyper-algo = { default-features = false, path = "algo", version = "0.1.5" }
+rshyper-core = { default-features = false, path = "core", version = "0.1.5" }
+rshyper-hmap = { default-features = false, path = "hmap", version = "0.1.5" }
 # custom
 scsys = { default-features = false, features = ["derive"], version = "0.3.0" }
 # benchmarking
 criterion = { version = "0.6" }
 # concurrency & parallelism
-crossbeam = { default-features = false, version = "0.8" }
 rayon = { default-features = false, version = "1" }
 rayon-core = { default-features = false, version = "1" }
 # error-handling
 anyhow = { default-features = false, version = "1" }
 thiserror = { default-features = false, version = "2" }
 # numbers
-num = { default-features = false, version = "0.4" }
 num-traits = { default-features = false, version = "0.2" }
 ordered-float = { default-features = false, version = "5" }
 # randomization
-getrandom = { default-features = false, version = "0.3" }
 rand = { default-features = false, version = "0.9" }
 rand_distr = { default-features = false, version = "0.5" }
 # data & serialization
 serde = { default-features = false, features = ["derive"], version = "1" }
 serde_derive = { version = "1" }
-serde_json = { version = "1" }
+serde_json = { default-features = false, version = "1" }
 # macros & utilities
-itertools = { default-features = false, features = ["macros"], version = "0.14" }
+# itertools = { default-features = false, features = ["macros"], version = "0.14.0" }
 lazy_static = { version = "1" }
 paste = { version = "1" }
 smart-default = { version = "0.7" }

@@ -3,13 +3,15 @@
     authors: @FL03
 */
 use super::Traversal;
+use crate::error::Result;
 
-/// A trait defining a search algorithm for a hypergraph
+/// The [`Search`] establishes a common interface for operators on hypergraphs capable of
+/// performing a search.
 pub trait Search<N> {
     type Output;
 
-    /// Execute the search algorithm starting from the given vertex
-    fn search(&mut self, start: N) -> crate::AlgoResult<Self::Output>;
+    /// begins a search of the graph, starting with the given index.
+    fn search(&mut self, start: N) -> Result<Self::Output>;
 }
 /// The [`GraphSearch`] trait is an automatically implemented trait for types that implement
 /// both the [`Search`] and [`Traversal`] traits indicating it can successfully perform a

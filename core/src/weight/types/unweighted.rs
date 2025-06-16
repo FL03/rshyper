@@ -4,7 +4,7 @@
 */
 //! this module provides the [`UnWeight`] marker type and the [`Weightless`] type alias for
 //! types that are said to have no weight.
-use super::Weight;
+use crate::weight::Weight;
 
 /// An [`Weightless`] types is a type alias for a [`Weight`] that uses the [`UnWeight`] marker
 /// type to indicate that it has no weight.

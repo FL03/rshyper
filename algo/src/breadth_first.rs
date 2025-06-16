@@ -2,17 +2,19 @@
     Appellation: bft <module>
     Contrib: @FL03
 */
+//! this module implements the breadth-first search algorithm as an operator on the hypergraph.
+use crate::error::{Error, Result};
 use crate::{Search, Traversal};
 use core::hash::Hash;
-use rshyper_core::edge::RawEdge;
-use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphAttributes, GraphType, HyperGraph};
+use rshyper::edge::RawLayout;
+use rshyper::idx::{NumIndex, RawIndex, VertexId};
+use rshyper::{GraphProps, GraphType, HyperGraph};
 use std::collections::{HashSet, VecDeque};
 
 /// Breadth-First Traversal algorithm for hypergraphs
 pub struct BreadthFirstTraversal<'a, N, E, A, H>
 where
-    A: GraphAttributes,
+    A: GraphProps,
     H: HyperGraph<N, E, A>,
 {
     pub(crate) graph: &'a H,
@@ -23,7 +25,7 @@ where
 
 impl<'a, N, E, A, H, K, Idx> BreadthFirstTraversal<'a, N, E, A, H>
 where
-    A: GraphAttributes<Ix = Idx, Kind = K>,
+    A: GraphProps<Ix = Idx, Kind = K>,
     H: HyperGraph<N, E, A>,
     K: GraphType,
     Idx: RawIndex,
@@ -69,10 +71,10 @@ where
         self
     }
     /// a convience method to perform a search
-    pub fn search(&mut self, start: VertexId<Idx>) -> crate::AlgoResult<Vec<VertexId<Idx>>>
+    pub fn search(&mut self, start: VertexId<Idx>) -> Result<Vec<VertexId<Idx>>>
     where
         Idx: NumIndex,
-        for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<Idx>>,
+        for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<Idx>>,
     {
         Search::search(self, start)
     }
@@ -91,21 +93,21 @@ where
 
 impl<'a, N, E, A, H, K, Idx> Search<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, A, H>
 where
-    A: GraphAttributes<Ix = Idx, Kind = K>,
+    A: GraphProps<Ix = Idx, Kind = K>,
     H: HyperGraph<N, E, A>,
     K: GraphType,
     Idx: NumIndex,
-    for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<Idx>>,
+    for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<Idx>>,
 {
     type Output = Vec<VertexId<Idx>>;
 
-    fn search(&mut self, start: VertexId<Idx>) -> crate::AlgoResult<Self::Output> {
+    fn search(&mut self, start: VertexId<Idx>) -> Result<Self::Output> {
         // Reset state
         self.reset();
 
         // Check if starting vertex exists
         if !self.graph.contains_node(&start) {
-            return Err(crate::AlgoError::NodeNotFound);
+            return Err(Error::NotFound(Box::new(start.value())));
         }
 
         // Add start vertex to queue and mark as visited
@@ -133,7 +135,7 @@ where
 
 impl<'a, N, E, A, H, K, Idx> Traversal<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, A, H>
 where
-    A: GraphAttributes<Ix = Idx, Kind = K>,
+    A: GraphProps<Ix = Idx, Kind = K>,
     H: HyperGraph<N, E, A>,
     K: GraphType,
     Idx: RawIndex + Eq + Hash,

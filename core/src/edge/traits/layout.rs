@@ -5,8 +5,8 @@
 use crate::idx::{EdgeId, RawIndex, VertexId};
 use crate::{Domain, GraphType};
 
-/// [`RawEdge`] establishes a common interface for _hyperedge_ representations.
-pub trait RawEdge {
+/// [`RawLayout`] establishes a common interface for _hyperedge_ representations.
+pub trait RawLayout {
     type Index: RawIndex;
     type Kind: GraphType;
     type Store: Domain<Self::Index>;
@@ -30,14 +30,14 @@ pub trait RawEdge {
         TypeId::of::<crate::Undirected>() == TypeId::of::<Self::Kind>()
     }
 }
-/// [`HyperEdge`] extends the behaviour of a [`RawEdge`] to include various constructors and
-/// other utilitarian methods.
-pub trait HyperEdge: RawEdge {
+/// [`EdgeLayoutExt`] extends the behaviour of a [`RawLayout`] to include various constructors
+/// and other utilitarian methods.
+pub trait EdgeLayoutExt: RawLayout {
     fn new(id: EdgeId<Self::Index>, vertices: Self::Store) -> Self;
 }
-/// A [`BinaryEdge`] represents a specific type of edge that essentially defines the standard
+/// A [`BinaryLayout`] represents a specific type of edge that essentially defines the standard
 /// edge layout of a normal graph, where each edge connects exactly two vertices.
-pub trait BinaryEdge: RawEdge {
+pub trait BinaryLayout: RawLayout {
     fn lhs(&self) -> &VertexId<Self::Index>;
     fn rhs(&self) -> &VertexId<Self::Index>;
 }
@@ -46,9 +46,9 @@ pub trait BinaryEdge: RawEdge {
  ************* Implementations *************
 */
 use crate::BinaryStore;
-use crate::edge::{Edge, Surface};
+use crate::edge::{Edge, EdgeLayout};
 
-impl<S, I, K> BinaryEdge for Edge<S, K, I>
+impl<S, I, K> BinaryLayout for EdgeLayout<S, K, I>
 where
     S: BinaryStore<I>,
     I: RawIndex,
@@ -63,9 +63,9 @@ where
     }
 }
 
-impl<E, S, I, K> BinaryEdge for Surface<E, S, K, I>
+impl<E, S, I, K> BinaryLayout for Edge<E, S, K, I>
 where
-    E: BinaryEdge,
+    E: BinaryLayout,
     S: BinaryStore<I>,
     I: RawIndex,
     K: GraphType,

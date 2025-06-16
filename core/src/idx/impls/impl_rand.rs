@@ -2,16 +2,13 @@
     appellation: impl_rand <module>
     authors: @FL03
 */
-use crate::idx::{GraphIndex, IndexBase, RawIndex};
+use crate::idx::{IndexBase, RawIndex};
 use rand::RngCore;
 use rand_distr::uniform::{SampleRange, SampleUniform};
 use rand_distr::{Distribution, StandardNormal, StandardUniform};
 
 /// generic implementations for the [`IndexBase<T, K>`] enabled by the `rand` feature
-impl<K> IndexBase<usize, K>
-where
-    K: GraphIndex,
-{
+impl<K> IndexBase<usize, K> {
     /// generate a random index from a value of type `T`
     pub fn rand() -> Self {
         let rid = rand::random::<u128>();
@@ -22,7 +19,6 @@ where
 /// generic implementations for the [`IndexBase<T, K>`] enabled by the `rand` feature
 impl<T, K> IndexBase<T, K>
 where
-    K: GraphIndex,
     T: RawIndex,
 {
     /// replaces the current value with a randomly generated value and returns a new instance
@@ -72,7 +68,6 @@ where
 
 impl<T, K> Distribution<IndexBase<T, K>> for StandardUniform
 where
-    K: GraphIndex,
     T: RawIndex,
     StandardUniform: Distribution<T>,
 {
@@ -89,7 +84,6 @@ where
 
 impl<T, K> Distribution<IndexBase<T, K>> for StandardNormal
 where
-    K: GraphIndex,
     T: RawIndex,
     StandardNormal: Distribution<T>,
 {

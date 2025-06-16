@@ -2,12 +2,12 @@
     appellation: surface <module>
     authors: @FL03
 */
-use super::RawEdge;
-use crate::Weight;
+use super::RawLayout;
 use crate::idx::EdgeId;
+use crate::weight::Weight;
 
-/// [`RawFacet`] extends the behaviour of a [`RawEdge`] to include a weight
-pub trait RawFacet<T>: RawEdge {
+/// [`RawSurface`] extends the behaviour of a [`RawEdge`] to include a weight
+pub trait RawSurface<T>: RawLayout {
     private!();
     /// Returns the index of the edge.
     fn weight(&self) -> &Weight<T>;
@@ -37,9 +37,9 @@ pub trait RawFacet<T>: RawEdge {
     }
 }
 
-/// [`HyperFacet`] extends the behaviour of a [`RawFacet`] to include various constructors and
+/// [`HyperSurface`] extends the behaviour of a [`RawSurface`] to include various constructors and
 /// other utility methods.
-pub trait HyperFacet<T>: RawFacet<T> {
+pub trait HyperSurface<T>: RawSurface<T> {
     /// creates a new facet with the given id and weight
     fn new(id: EdgeId<Self::Index>, store: Self::Store, weight: Weight<T>) -> Self;
 }

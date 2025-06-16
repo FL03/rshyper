@@ -6,8 +6,8 @@
 //! which iterates over the nodes in the hypergraph in an ordered, sequential manner.
 use super::{Vertices, VerticesMut};
 use core::hash::Hash;
-use rshyper_core::idx::{RawIndex, VertexId};
-use rshyper_core::node::Node;
+use rshyper::idx::{RawIndex, VertexId};
+use rshyper::node::Node;
 
 /// [`SeqVertexIter`] is an iterator over the nodes of a hypergraph, yielding elements
 /// according to the order in-which they were inserted.

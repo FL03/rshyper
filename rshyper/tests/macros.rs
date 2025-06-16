@@ -7,7 +7,7 @@ use rshyper::HyperMap;
 
 #[test]
 #[cfg(feature = "hyper_map")]
-fn test_hypergraph_on_eg() -> rshyper::HyperResult<()> {
+fn test_hypergraph_on_eg() -> rshyper::Result<()> {
     // initialize a new, undirected hypergraph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // use the `hypergraph!` macro to define nodes and edges
@@ -40,7 +40,7 @@ fn test_hypergraph_on_eg() -> rshyper::HyperResult<()> {
 
 #[test]
 #[cfg(feature = "hyper_map")]
-fn test_hypernode_on_eg() -> rshyper::HyperResult<()> {
+fn test_hypernode_on_eg() -> rshyper::Result<()> {
     // initialize a new, undirected hypergraph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // use the `hypernode!` macro to define nodes
@@ -65,7 +65,7 @@ fn test_hypernode_on_eg() -> rshyper::HyperResult<()> {
 
 #[test]
 #[cfg(feature = "hyper_map")]
-fn test_hyperedge_on_hg() -> rshyper::HyperResult<()> {
+fn test_hyperedge_on_hg() -> rshyper::Result<()> {
     // initialize a new, undirected hypergraph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // manually add some vertices

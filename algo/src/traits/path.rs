@@ -2,6 +2,7 @@
     appellation: path <module>
     authors: @FL03
 */
+use crate::error::Result;
 use rshyper_core::idx::VertexId;
 
 /// The [`PathFinder`] establishes an interface for path-finding operators on hypergraphs. Each
@@ -10,11 +11,7 @@ use rshyper_core::idx::VertexId;
 pub trait PathFinder<Idx> {
     type Path;
     /// returns a
-    fn find_path(
-        &mut self,
-        from: VertexId<Idx>,
-        to: VertexId<Idx>,
-    ) -> crate::AlgoResult<Self::Path>;
+    fn find_path(&mut self, from: VertexId<Idx>, to: VertexId<Idx>) -> Result<Self::Path>;
 
     fn reconstruct_path(&self, tgt: VertexId<Idx>) -> Self::Path;
 }

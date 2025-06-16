@@ -3,12 +3,11 @@
     authors: @FL03
 */
 use crate::AddStep;
-use crate::idx::{GraphIndex, IndexBase, RawIndex};
+use crate::idx::{IndexBase, RawIndex};
 
 impl<T, K> Default for IndexBase<T, K>
 where
-    K: GraphIndex,
-    T: RawIndex + Default,
+    T: Default,
 {
     fn default() -> Self {
         Self {
@@ -20,7 +19,6 @@ where
 
 impl<T, K> AsRef<T> for IndexBase<T, K>
 where
-    K: GraphIndex,
     T: RawIndex,
 {
     fn as_ref(&self) -> &T {
@@ -30,7 +28,6 @@ where
 
 impl<T, K> AsMut<T> for IndexBase<T, K>
 where
-    K: GraphIndex,
     T: RawIndex,
 {
     fn as_mut(&mut self) -> &mut T {
@@ -40,7 +37,6 @@ where
 
 impl<T, K> core::borrow::Borrow<T> for IndexBase<T, K>
 where
-    K: GraphIndex,
     T: RawIndex,
 {
     fn borrow(&self) -> &T {
@@ -49,7 +45,6 @@ where
 }
 impl<T, K> core::borrow::BorrowMut<T> for IndexBase<T, K>
 where
-    K: GraphIndex,
     T: RawIndex,
 {
     fn borrow_mut(&mut self) -> &mut T {
@@ -59,7 +54,6 @@ where
 
 impl<T, K> From<T> for IndexBase<T, K>
 where
-    K: GraphIndex,
     T: RawIndex,
 {
     fn from(index: T) -> Self {
@@ -69,7 +63,6 @@ where
 
 impl<T, K> Iterator for IndexBase<T, K>
 where
-    K: GraphIndex,
     T: RawIndex + AddStep<Output = T>,
 {
     type Item = IndexBase<T, K>;

@@ -2,11 +2,11 @@
     appellation: impl_edge <module>
     authors: @FL03
 */
-use crate::edge::Edge;
+use crate::edge::EdgeLayout;
 use crate::idx::{EdgeId, RawIndex, VertexId};
 use crate::{Directed, Domain, GraphType, Undirected};
 
-impl<S, Idx> Edge<S, Directed, Idx>
+impl<S, Idx> EdgeLayout<S, Directed, Idx>
 where
     Idx: RawIndex,
     S: Domain<Idx>,
@@ -17,7 +17,7 @@ where
     }
 }
 
-impl<S, Idx> Edge<S, Undirected, Idx>
+impl<S, Idx> EdgeLayout<S, Undirected, Idx>
 where
     Idx: RawIndex,
     S: Domain<Idx>,
@@ -28,7 +28,7 @@ where
     }
 }
 
-impl<S, K, Idx> Default for Edge<S, K, Idx>
+impl<S, K, Idx> Default for EdgeLayout<S, K, Idx>
 where
     Idx: RawIndex + Default,
     K: GraphType,
@@ -39,7 +39,7 @@ where
     }
 }
 
-impl<S, K, Idx> core::fmt::Debug for Edge<S, K, Idx>
+impl<S, K, Idx> core::fmt::Debug for EdgeLayout<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -53,7 +53,7 @@ where
     }
 }
 
-impl<S, K, Idx> core::fmt::Display for Edge<S, K, Idx>
+impl<S, K, Idx> core::fmt::Display for EdgeLayout<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -64,7 +64,7 @@ where
     }
 }
 
-impl<S, K, Idx> FromIterator<Idx> for Edge<S, K, Idx>
+impl<S, K, Idx> FromIterator<Idx> for EdgeLayout<S, K, Idx>
 where
     Idx: Default + RawIndex,
     K: GraphType,
@@ -79,7 +79,7 @@ where
     }
 }
 
-impl<S, K, Idx> FromIterator<VertexId<Idx>> for Edge<S, K, Idx>
+impl<S, K, Idx> FromIterator<VertexId<Idx>> for EdgeLayout<S, K, Idx>
 where
     Idx: Default + RawIndex,
     K: GraphType,
@@ -94,7 +94,7 @@ where
     }
 }
 
-impl<S, K, Idx> From<EdgeId<Idx>> for Edge<S, K, Idx>
+impl<S, K, Idx> From<EdgeId<Idx>> for EdgeLayout<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -105,18 +105,18 @@ where
     }
 }
 
-impl<S, K, Idx> From<Edge<S, K, Idx>> for EdgeId<Idx>
+impl<S, K, Idx> From<EdgeLayout<S, K, Idx>> for EdgeId<Idx>
 where
     Idx: RawIndex,
     K: GraphType,
     S: Domain<Idx>,
 {
-    fn from(from: Edge<S, K, Idx>) -> Self {
+    fn from(from: EdgeLayout<S, K, Idx>) -> Self {
         from.id
     }
 }
 
-impl<S, K, Idx> AsRef<S> for Edge<S, K, Idx>
+impl<S, K, Idx> AsRef<S> for EdgeLayout<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -127,7 +127,7 @@ where
     }
 }
 
-impl<S, K, Idx> AsMut<S> for Edge<S, K, Idx>
+impl<S, K, Idx> AsMut<S> for EdgeLayout<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -138,7 +138,7 @@ where
     }
 }
 
-impl<S, K, Idx> core::borrow::Borrow<EdgeId<Idx>> for Edge<S, K, Idx>
+impl<S, K, Idx> core::borrow::Borrow<EdgeId<Idx>> for EdgeLayout<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -149,7 +149,7 @@ where
     }
 }
 
-impl<S, K, Idx> core::borrow::BorrowMut<EdgeId<Idx>> for Edge<S, K, Idx>
+impl<S, K, Idx> core::borrow::BorrowMut<EdgeId<Idx>> for EdgeLayout<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -160,7 +160,7 @@ where
     }
 }
 
-impl<S, K, Idx> core::ops::Deref for Edge<S, K, Idx>
+impl<S, K, Idx> core::ops::Deref for EdgeLayout<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -173,7 +173,7 @@ where
     }
 }
 
-impl<S, K, Idx> core::ops::DerefMut for Edge<S, K, Idx>
+impl<S, K, Idx> core::ops::DerefMut for EdgeLayout<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,

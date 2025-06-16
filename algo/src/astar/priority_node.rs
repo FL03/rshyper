@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use core::cmp::Ordering;
-use rshyper_core::idx::{RawIndex, VertexId};
+use rshyper::idx::{RawIndex, VertexId};
 
 /// Priority queue node for A* algorithm
 #[derive(Copy, Clone, Debug, Eq, Hash, PartialEq)]

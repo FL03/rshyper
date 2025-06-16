@@ -2,8 +2,9 @@
     appellation: tracker <module>
     authors: @FL03
 */
-use super::{EdgeId, Frame, IndexError, RawIndex, VertexId};
+use super::{EdgeId, Frame, RawIndex, VertexId};
 use crate::AddStep;
+use crate::idx::error::{IndexError, IndexResult};
 use alloc::vec::Vec;
 
 /// the [`IndexTracker`] keeps a history of the created indices and the current cursor position.
@@ -209,7 +210,7 @@ where
     }
     /// steps the edge index forward before storing and returning the previous index
     #[inline]
-    pub fn next_edge(&mut self) -> Result<EdgeId<Ix>, IndexError>
+    pub fn next_edge(&mut self) -> IndexResult<EdgeId<Ix>>
     where
         Ix: AddStep<Output = Ix> + Clone + PartialEq,
     {
@@ -227,7 +228,7 @@ where
     }
     /// steps the node index forward before storing and returning the previous index
     #[inline]
-    pub fn next_vertex(&mut self) -> Result<VertexId<Ix>, IndexError>
+    pub fn next_vertex(&mut self) -> IndexResult<VertexId<Ix>>
     where
         Ix: AddStep<Output = Ix> + Clone + PartialEq,
     {

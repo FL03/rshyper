@@ -8,20 +8,20 @@
 pub use self::prelude::*;
 
 mod directional;
+mod iter;
 #[cfg(feature = "rayon")]
 mod parallel;
 mod sequential;
-mod surface;
 
-#[allow(unused_imports)]
 mod prelude {
     #[doc(inline)]
+    #[allow(unused_imports)]
     pub use super::directional::*;
+    #[doc(inline)]
+    pub use super::iter::*;
     #[doc(inline)]
     #[cfg(feature = "rayon")]
     pub use super::parallel::*;
     #[doc(inline)]
     pub use super::sequential::*;
-    #[doc(inline)]
-    pub use super::surface::*;
 }

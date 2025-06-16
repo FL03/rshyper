@@ -4,12 +4,12 @@
 */
 #![allow(unused_variables)]
 
-use rshyper_core::{HyperResult, IntoWeight, Weight};
+use rshyper_core::{IntoWeight, Result, Weight};
 use rshyper_hmap::HyperMap;
 use std::collections::HashSet;
 
 #[test]
-fn test_error() -> HyperResult<()> {
+fn test_error() -> Result<()> {
     // initialize a new, undirected hash-graph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // try adding an empty edge
@@ -21,7 +21,7 @@ fn test_error() -> HyperResult<()> {
 }
 
 #[test]
-fn test_hyper_map() -> HyperResult<()> {
+fn test_hyper_map() -> Result<()> {
     let mut graph = HyperMap::<usize, usize>::undirected();
     // Add nodes with weights
     let v0 = graph.add_node(10.into_weight())?;
@@ -59,7 +59,7 @@ fn test_hyper_map() -> HyperResult<()> {
 }
 
 #[test]
-fn test_merge_edges() -> HyperResult<()> {
+fn test_merge_edges() -> Result<()> {
     // initialize a new, undirected hash-graph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // add some nodes with weights
@@ -84,7 +84,7 @@ fn test_merge_edges() -> HyperResult<()> {
 }
 
 #[test]
-fn test_node_mut() -> HyperResult<()> {
+fn test_node_mut() -> Result<()> {
     // initialize a new, undirected hash-graph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // add a node using the default weight
@@ -100,7 +100,7 @@ fn test_node_mut() -> HyperResult<()> {
 }
 
 #[test]
-fn test_remove_edge() -> HyperResult<()> {
+fn test_remove_edge() -> Result<()> {
     // initialize a new, undirected hash-graph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // add some vertices
@@ -121,7 +121,7 @@ fn test_remove_edge() -> HyperResult<()> {
 }
 
 #[test]
-fn test_seq_iter() -> HyperResult<()> {
+fn test_seq_iter() -> Result<()> {
     // initialize a new undirected hash graph
     let mut graph = HyperMap::<usize, usize>::undirected();
     // add some nodes

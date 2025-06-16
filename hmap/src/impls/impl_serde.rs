@@ -4,15 +4,15 @@
 */
 use crate::HyperMap;
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::GraphAttributes;
+use rshyper::GraphProps;
 use serde::de::{Deserialize, DeserializeOwned, MapAccess, Visitor};
 use serde::ser::Serialize;
 
-const FIELDS: &[&str] = &["nodes", "surfaces", "position", "_attrs"];
+const FIELDS: &[&str] = &["attrs", "edges", "history", "nodes"];
 
 impl<'a, N, E, A, S> Deserialize<'a> for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes + DeserializeOwned,
+    A: GraphProps + DeserializeOwned,
     E: DeserializeOwned,
     N: DeserializeOwned,
     S: BuildHasher + Default,
@@ -35,7 +35,7 @@ where
 
 impl<N, E, A, S> Serialize for HyperMap<N, E, A, S>
 where
-    A: GraphAttributes + Serialize,
+    A: GraphProps + Serialize,
     E: Serialize,
     N: Serialize,
     S: BuildHasher + Default,
@@ -48,10 +48,10 @@ where
     {
         use serde::ser::SerializeStruct;
         let mut state = serializer.serialize_struct("HashGraph", 4)?;
+        state.serialize_field("attrs", &self.attrs())?;
+        state.serialize_field("edges", self.edges())?;
+        state.serialize_field("history", self.history())?;
         state.serialize_field("nodes", self.nodes())?;
-        state.serialize_field("surfaces", self.surfaces())?;
-        state.serialize_field("position", self.position())?;
-        state.serialize_field("_attrs", &self.attrs)?;
         state.end()
     }
 }
@@ -62,7 +62,7 @@ struct HashGraphVisitor<N, E, A, S> {
 
 impl<'de, N, E, A, S> Visitor<'de> for HashGraphVisitor<N, E, A, S>
 where
-    A: GraphAttributes + DeserializeOwned,
+    A: GraphProps + DeserializeOwned,
     E: DeserializeOwned,
     N: DeserializeOwned,
     S: BuildHasher + Default,
@@ -80,48 +80,49 @@ where
         M: MapAccess<'de>,
     {
         let mut nodes = None;
-        let mut surfaces = None;
+        let mut edges = None;
         let mut position = None;
         let mut attrs = None;
 
         while let Some(key) = map.next_key::<&str>()? {
             match key {
+                "attrs" => {
+                    if attrs.is_some() {
+                        return Err(serde::de::Error::duplicate_field("attrs"));
+                    }
+                    attrs = Some(map.next_value()?);
+                }
+                "edges" => {
+                    if edges.is_some() {
+                        return Err(serde::de::Error::duplicate_field("edges"));
+                    }
+                    edges = Some(map.next_value()?);
+                }
+                "history" => {
+                    if position.is_some() {
+                        return Err(serde::de::Error::duplicate_field("position"));
+                    }
+                    position = Some(map.next_value()?);
+                }
                 "nodes" => {
                     if nodes.is_some() {
                         return Err(serde::de::Error::duplicate_field("nodes"));
                     }
                     nodes = Some(map.next_value()?);
                 }
-                "surfaces" => {
-                    if surfaces.is_some() {
-                        return Err(serde::de::Error::duplicate_field("surfaces"));
-                    }
-                    surfaces = Some(map.next_value()?);
-                }
-                "position" => {
-                    if position.is_some() {
-                        return Err(serde::de::Error::duplicate_field("position"));
-                    }
-                    position = Some(map.next_value()?);
-                }
-                "_attrs" => {
-                    if attrs.is_some() {
-                        return Err(serde::de::Error::duplicate_field("_attrs"));
-                    }
-                    attrs = Some(map.next_value()?);
-                }
                 _ => return Err(serde::de::Error::unknown_field(key, FIELDS)),
             }
         }
 
+        let attrs = attrs.ok_or_else(|| serde::de::Error::missing_field("attrs"))?;
+        let edges = edges.ok_or_else(|| serde::de::Error::missing_field("edges"))?;
+        let history = position.ok_or_else(|| serde::de::Error::missing_field("history"))?;
         let nodes = nodes.ok_or_else(|| serde::de::Error::missing_field("nodes"))?;
-        let surfaces = surfaces.ok_or_else(|| serde::de::Error::missing_field("surfaces"))?;
-        let position = position.ok_or_else(|| serde::de::Error::missing_field("position"))?;
-        let attrs = attrs.ok_or_else(|| serde::de::Error::missing_field("_attrs"))?;
+
         Ok(HyperMap {
             nodes,
-            surfaces,
-            history: position,
+            edges,
+            history,
             attrs,
         })
     }

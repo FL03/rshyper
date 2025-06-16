@@ -2,23 +2,17 @@
     appellation: rshyper-hmap <library>
     authors: @FL03
 */
-//! # rshyper-hmap
-//!
-//! [![crates.io](https://img.shields.io/crates/v/rshyper?style=for-the-badge&logo=rust)](https://crates.io/crates/rshyper)
-//! [![docs.rs](https://img.shields.io/docsrs/rshyper?style=for-the-badge&logo=docs.rs)](https://docs.rs/rshyper)
-//! [![GitHub License](https://img.shields.io/github/license/FL03/rshyper?style=for-the-badge&logo=github)](https://github.com/FL03/rshyper/blob/main/LICENSE)
-//!
-//! ***
-//!
-//! Welcome to the `rshyper-hmap` crate! This package provides the [`HyperMap`] implementation,
-//! a map-based hypergraph structure designed for efficient storage and manipulation using the
-//! native [`HashMap`](std::collections::HashMap) type.
+//! This crate provides the [`HyperMap`] implementation for the [`rshyper`](https://docs.rs/rshyper)
+//! framework. The [`HyperMap`] is a map-based hypergraph structure designed for efficient
+//! storage and manipulation. To achieve the maximum flexibility the implementation is generic
+//! over 6 total types represented within 4 generic parameters:
 //!
 //! - `N`: the type of weight associated with a hypernode
 //! - `E`: the type of weight associated with a hyperedge
-//! - `A`: the attributes of the hypergraph
+//! - `A`: the attributes of the graph; an implementor of the [`GraphAttributes`](rshyper_core::GraphAttributes)
+//!   trait
 //!   - `A::Kind`: the _kind_ of hypergraph, either [`Directed`](rshyper_core::Directed) or [`Undirected`](rshyper_core::Undirected)
-//!   - `A::Ix`: the type of index used by components within the graph
+//!   - `A::Ix`: the type of indices used by the instance; bounded by the [`RawIndex`](rshyper_core::RawIndex) trait
 //! - `S`: the type of [`BuildHasher`](core::hash::BuildHasher) used for the underling stores
 //!
 //! ## Features
@@ -71,6 +65,10 @@ mod impls {
     pub mod impl_repr;
     #[cfg(feature = "serde")]
     pub mod impl_serde;
+
+    #[doc(hidden)]
+    #[allow(deprecated, unused)]
+    pub mod impl_deprecated;
 }
 
 pub mod iter {

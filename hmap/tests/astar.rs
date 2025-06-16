@@ -2,11 +2,11 @@
     appellation: astar_search <module>
     authors: @FL03
 */
-use rshyper_core::{HyperResult, VertexId};
+use rshyper_core::{Result, VertexId};
 use rshyper_hmap::HyperMap;
 
 #[test]
-fn test_astar_shortest_path() -> HyperResult<()> {
+fn test_astar_shortest_path() -> Result<()> {
     // Simple Euclidean distance heuristic (not used in this test)
     fn heuristic(_x: VertexId, _y: VertexId) -> f64 {
         0.0 // No heuristic, just a placeholder
@@ -46,7 +46,7 @@ fn test_astar_shortest_path() -> HyperResult<()> {
 }
 
 #[test]
-fn test_astar_with_heuristic() -> HyperResult<()> {
+fn test_astar_with_heuristic() -> Result<()> {
     let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a simple grid-like graph
@@ -132,7 +132,7 @@ fn test_astar_with_heuristic() -> HyperResult<()> {
 }
 
 #[test]
-fn test_astar_disconnected() -> HyperResult<()> {
+fn test_astar_disconnected() -> Result<()> {
     let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create two disconnected components
@@ -161,7 +161,7 @@ fn test_astar_disconnected() -> HyperResult<()> {
 }
 
 #[test]
-fn test_astar_complex_paths() -> HyperResult<()> {
+fn test_astar_complex_paths() -> Result<()> {
     let mut graph = HyperMap::<usize, usize>::undirected();
 
     // Create a graph with multiple paths of different lengths
