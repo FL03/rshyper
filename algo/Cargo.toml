@@ -44,13 +44,10 @@ rayon-core = { optional = true, workspace = true }
 thiserror = { workspace = true }
 # logging
 tracing = { optional = true, workspace = true }
-# macros
-paste = { workspace = true }
-smart-default = { workspace = true }
-strum = { features = ["derive"], workspace = true }
 # math
 num-traits = { workspace = true }
-ordered-float = { workspace = true }
+# macros & utilities
+strum = { features = ["derive"], workspace = true }
 # serialization
 serde = { features = ["derive"], optional = true, workspace = true }
 serde_derive = { optional = true, workspace = true }
@@ -67,14 +64,13 @@ full = [
     "tracing",
 ]
 
-# ************* [FF:Dependencies] *************
-
-
-# ************* [FF:Environments] *************
 nightly = [
     "rshyper-core/nightly",
 ]
 
+# ************* [FF:Features] *************
+
+# ************* [FF:Environments] *************
 std = [
     "alloc",
     "num-traits/std",
@@ -120,7 +116,6 @@ rayon = [
 serde = [
     "dep:serde",
     "dep:serde_derive",
-    "ordered-float/serde",
     "rshyper-core/serde",
     "scsys/serde",
 ]
