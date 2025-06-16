@@ -39,7 +39,7 @@ rshyper-core = { workspace = true }
 # custom
 scsys = { workspace = true }
 # concurrency & parallelism
-rayon = { optional = true, workspace = true }
+rayon-core = { optional = true, workspace = true }
 # error handling
 thiserror = { workspace = true }
 # logging
@@ -94,9 +94,10 @@ wasi = [
 
 wasm = [
     "alloc",
-    "rayon?/web_spin_lock",
+    "rayon-core?/web_spin_lock",
     "rshyper-core/wasm",
     "scsys/wasm",
+    "wasm-bindgen",
 ]
 
 # ************* [FF:Dependencies] *************
@@ -112,7 +113,7 @@ anyhow = [
 ]
 
 rayon = [
-    "dep:rayon",
+    "dep:rayon-core",
     "rshyper-core/rayon",
 ]
 
@@ -130,7 +131,10 @@ tracing = [
     "scsys/tracing",
 ]
 
+wasm-bindgen = [
+    "rshyper-core/wasm-bindgen",
+]
+
 # ************* [Tests] *************
 [[test]]
 name = "default"
-

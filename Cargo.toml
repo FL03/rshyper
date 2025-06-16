@@ -5,7 +5,7 @@ default-members = [
 members = [
     "rshyper",
     "algo",
-    "core", 
+    "core",
     "hmap",
 ]
 resolver = "3"
@@ -53,7 +53,6 @@ num = { default-features = false, version = "0.4" }
 num-traits = { default-features = false, version = "0.2" }
 ordered-float = { default-features = false, version = "5" }
 # randomization
-getrandom = { default-features = false, version = "0.3" }
 rand = { default-features = false, version = "0.9" }
 rand_distr = { default-features = false, version = "0.5" }
 # data & serialization
@@ -61,7 +60,7 @@ serde = { default-features = false, features = ["derive"], version = "1" }
 serde_derive = { version = "1" }
 serde_json = { version = "1" }
 # macros & utilities
-itertools = { default-features = false, features = ["macros"], version = "0.14" }
+# itertools = { default-features = false, features = ["macros"], version = "0.14.0" }
 lazy_static = { version = "1" }
 paste = { version = "1" }
 smart-default = { version = "0.7" }
