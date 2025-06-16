@@ -8,7 +8,7 @@ use rshyper_core::GraphProps;
 use serde::de::{Deserialize, DeserializeOwned, MapAccess, Visitor};
 use serde::ser::Serialize;
 
-const FIELDS: &[&str] = &["nodes", "surfaces", "position", "_attrs"];
+const FIELDS: &[&str] = &["nodes", "edges", "position", "_attrs"];
 
 impl<'a, N, E, A, S> Deserialize<'a> for HyperMap<N, E, A, S>
 where
@@ -48,10 +48,10 @@ where
     {
         use serde::ser::SerializeStruct;
         let mut state = serializer.serialize_struct("HashGraph", 4)?;
-        state.serialize_field("nodes", self.nodes())?;
-        state.serialize_field("surfaces", self.surfaces())?;
+        state.serialize_field("edges", self.surfaces())?;
         state.serialize_field("history", self.history())?;
-        state.serialize_field("_attrs", &self.attrs)?;
+        state.serialize_field("nodes", self.nodes())?;
+        state.serialize_field("attrs", &self.attrs())?;
         state.end()
     }
 }
@@ -80,7 +80,7 @@ where
         M: MapAccess<'de>,
     {
         let mut nodes = None;
-        let mut surfaces = None;
+        let mut edges = None;
         let mut position = None;
         let mut attrs = None;
 
@@ -92,11 +92,11 @@ where
                     }
                     nodes = Some(map.next_value()?);
                 }
-                "surfaces" => {
-                    if surfaces.is_some() {
-                        return Err(serde::de::Error::duplicate_field("surfaces"));
+                "edges" => {
+                    if edges.is_some() {
+                        return Err(serde::de::Error::duplicate_field("edges"));
                     }
-                    surfaces = Some(map.next_value()?);
+                    edges = Some(map.next_value()?);
                 }
                 "position" => {
                     if position.is_some() {
@@ -106,7 +106,7 @@ where
                 }
                 "_attrs" => {
                     if attrs.is_some() {
-                        return Err(serde::de::Error::duplicate_field("_attrs"));
+                        return Err(serde::de::Error::duplicate_field("attrs"));
                     }
                     attrs = Some(map.next_value()?);
                 }
@@ -115,12 +115,12 @@ where
         }
 
         let nodes = nodes.ok_or_else(|| serde::de::Error::missing_field("nodes"))?;
-        let surfaces = surfaces.ok_or_else(|| serde::de::Error::missing_field("surfaces"))?;
+        let edges = edges.ok_or_else(|| serde::de::Error::missing_field("edges"))?;
         let position = position.ok_or_else(|| serde::de::Error::missing_field("position"))?;
-        let attrs = attrs.ok_or_else(|| serde::de::Error::missing_field("_attrs"))?;
+        let attrs = attrs.ok_or_else(|| serde::de::Error::missing_field("attrs"))?;
         Ok(HyperMap {
             nodes,
-            surfaces,
+            edges: edges,
             history: position,
             attrs,
         })

@@ -50,8 +50,8 @@ where
     /// the `nodes` of a hypergraph are the vertices, each identified by a `VertexId` and
     /// associated with a weight of type `N`.
     pub(crate) nodes: NodeMap<N, A::Ix, S>,
-    /// `surfaces` represent the hyperedges of the hypergraph, each identified by an `EdgeId`
-    pub(crate) surfaces: SurfaceMap<E, A::Kind, A::Ix, S>,
+    /// `edges` represent the hyperedges of the hypergraph, each identified by an `EdgeId`
+    pub(crate) edges: SurfaceMap<E, A::Kind, A::Ix, S>,
 }
 
 impl<N, E, A, K, Idx, S> HyperMap<N, E, A, S>
@@ -71,7 +71,7 @@ where
         HyperMap {
             attrs: A::new(),
             history: IndexTracker::new(),
-            surfaces: SurfaceMap::with_hasher(hasher.clone()),
+            edges: SurfaceMap::with_hasher(hasher.clone()),
             nodes: NodeMap::with_hasher(hasher),
         }
     }
@@ -83,7 +83,7 @@ where
     {
         let hasher = S::default();
         HyperMap {
-            surfaces: SurfaceMap::with_capacity_and_hasher(edges, hasher.clone()),
+            edges: SurfaceMap::with_capacity_and_hasher(edges, hasher.clone()),
             nodes: NodeMap::with_capacity_and_hasher(nodes, hasher),
             history: IndexTracker::new(),
             attrs: A::new(),
@@ -128,11 +128,11 @@ where
     }
     /// returns an immutable reference to the surfaces of the hypergraph
     pub const fn surfaces(&self) -> &SurfaceMap<E, K, Idx, S> {
-        &self.surfaces
+        &self.edges
     }
     /// returns a mutable reference to the surfaces of the hypergraph
     pub const fn surfaces_mut(&mut self) -> &mut SurfaceMap<E, K, Idx, S> {
-        &mut self.surfaces
+        &mut self.edges
     }
     /// overrides the current nodes and returns a mutable reference to the hypergraph
     #[inline]
@@ -167,7 +167,7 @@ where
     where
         Idx: Default,
     {
-        self.surfaces = surfaces;
+        self.edges = surfaces;
         self
     }
     /// returns true if the hypergraph contains an edge with the given index;

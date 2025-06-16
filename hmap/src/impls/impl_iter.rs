@@ -16,49 +16,62 @@ where
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
 {
-    /// returns an iterator over the nodes of the hypergraph, yielding pairs of [`VertexId`](rshyper_core::VertexId)
-    /// and the corresponding [`Node`](rshyper_core::Node).
+    /// returns an iterator over the node entries within the hypergraph, yielding a 2-tuple
+    /// consisting of:
+    ///
+    /// - `0`: a reference to the [`VertexId`](rshyper_core::VertexId)
+    /// - `1`: a reference to the corresponding [`Node`](rshyper_core::Node).
     pub fn node_iter(&self) -> NodeIter<'_, N, Idx> {
         NodeIter {
             iter: self.nodes().iter(),
         }
     }
-    /// returns a mutable iterator over the nodes of the hypergraph, yielding pairs of
-    /// [`VertexId`](rshyper_core::VertexId) and a mutable reference to the corresponding
-    /// [`Node`](rshyper_core::Node).
+    /// returns a mutable iterator over the node entries within the hypergraph,yielding a
+    /// 2-tuple consisting of:
+    ///
+    /// - `0`: a reference to the [`VertexId`](rshyper_core::VertexId)
+    /// - `1mutable reference to the corresponding [`Node`](rshyper_core::Node).
     pub fn node_iter_mut(&mut self) -> NodeIterMut<'_, N, Idx> {
         NodeIterMut {
             iter: self.nodes_mut().iter_mut(),
         }
     }
-    /// returns an iterator over the surfaces of the hypergraph, yielding pairs of [`EdgeId`](rshyper_core::EdgeId)
-    /// and the corresponding [`Surface`](rshyper_core::Surface).
+    /// returns an iterator over the edge entries of the hypergraph, yielding a 2-tuple
+    /// consisting of:
+    ///
+    /// - `0`: a reference to the [`EdgeId`](rshyper_core::EdgeId)
+    /// - `1`: a reference to the corresponding [`Surface`](rshyper_core::Surface).
     pub fn surface_iter(&self) -> SurfaceIter<'_, E, K, Idx, S> {
         SurfaceIter {
             iter: self.surfaces().iter(),
         }
     }
-    /// returns a mutable iterator over the surfaces of the hypergraph, yielding pairs of
-    /// [`EdgeId`](rshyper_core::EdgeId) and a mutable reference to the corresponding
-    /// [`Surface`](rshyper_core::Surface).
+    /// returns a mutable iterator over the edge entries of the hypergraph, yielding a 2-tuple
+    /// consisting of:
+    ///
+    ///  - `0`: a reference to the [`EdgeId`](rshyper_core::EdgeId)
+    ///  - `1`: a mutable reference to the corresponding [`Surface`](rshyper_core::Surface).
     pub fn surface_iter_mut(&mut self) -> SurfaceIterMut<'_, E, K, Idx, S> {
         SurfaceIterMut {
             iter: self.surfaces_mut().iter_mut(),
         }
     }
-    /// returns an iterator over the keys of the surfaces, yielding the indices of the entries.
+    /// returns an immutable iterator over each of the associated identifiers of the edges
+    /// within the graph.
     pub fn edges(&self) -> Edges<'_, E, K, Idx, S> {
         Edges {
             iter: self.surfaces().keys(),
         }
     }
-    /// returns an iterator producing references to the surfaces of the graph
+    /// returns a mutable iterator over each of the _values_, or [`Surface`](rshyper_core::Surface),
+    /// associated with the edges of the graph.
     pub fn facets(&self) -> Facets<'_, E, K, Idx, S> {
         Facets {
             iter: self.surfaces().values(),
         }
     }
-    /// returns a mutable iterator producing mutable references to the surfaces of the graph
+    /// returns a mutable iterator over each of the _values_, or [`Surface`](rshyper_core::Surface),
+    /// associated with the edges of the graph, yielding mutable references to the surfaces.
     pub fn facets_mut(&mut self) -> FacetsMut<'_, E, K, Idx, S> {
         FacetsMut {
             iter: self.surfaces_mut().values_mut(),
