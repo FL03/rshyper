@@ -4,8 +4,8 @@
 */
 use crate::HyperMap;
 use core::hash::BuildHasher;
-use rshyper_algo::{AStarSearch, BreadthFirstTraversal, DepthFirstTraversal, Dijkstra, Heuristic};
 use rshyper::prelude::{GraphProps, NumIndex};
+use rshyper_algo::{AStarSearch, BreadthFirstTraversal, DepthFirstTraversal, Dijkstra, Heuristic};
 
 /// implementations for various algorithms and operators on the hypergraph
 impl<N, E, A, S> HyperMap<N, E, A, S>

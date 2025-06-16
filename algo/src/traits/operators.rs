@@ -2,7 +2,8 @@
     appellation: operators <module>
     authors: @FL03
 */
-use rshyper_core::{GraphProps, HyperGraph};
+use crate::error::Result;
+use rshyper::{GraphProps, HyperGraph};
 
 /// this trait is used to denote an algorithm that can be applied to a hypergraph
 pub trait GraphicAlgorithm<H> {
@@ -10,7 +11,7 @@ pub trait GraphicAlgorithm<H> {
     type Output;
 
     /// run the algorithm on the graph and return the output
-    fn process(self, graph: H) -> crate::Result<Self::Output>;
+    fn process(self, graph: H) -> Result<Self::Output>;
 }
 
 /// this trait is used to denote an algorithmic operator that can be applied to a hypergraph.

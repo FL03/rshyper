@@ -55,11 +55,11 @@ pub mod types {
 
 pub(crate) mod prelude {
     #[doc(inline)]
+    pub use super::Weight;
+    #[doc(inline)]
     pub use super::traits::prelude::*;
     #[doc(inline)]
     pub use super::types::prelude::*;
-    #[doc(inline)]
-    pub use super::Weight;
 }
 
 /// The [`Weight`] type is a wrapper around a generic type `T` that provides additional

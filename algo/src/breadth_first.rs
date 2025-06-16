@@ -6,9 +6,9 @@
 use crate::error::{Error, Result};
 use crate::{Search, Traversal};
 use core::hash::Hash;
-use rshyper_core::edge::RawEdge;
-use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphProps, GraphType, HyperGraph};
+use rshyper::edge::RawEdge;
+use rshyper::idx::{NumIndex, RawIndex, VertexId};
+use rshyper::{GraphProps, GraphType, HyperGraph};
 use std::collections::{HashSet, VecDeque};
 
 /// Breadth-First Traversal algorithm for hypergraphs

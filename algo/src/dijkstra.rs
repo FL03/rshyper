@@ -13,9 +13,9 @@ use crate::{PathFinder, Search, Traversal, VertexSet};
 use core::hash::Hash;
 use num_traits::bounds::UpperBounded;
 use num_traits::{FromPrimitive, Num};
-use rshyper_core::edge::RawEdge;
-use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphProps, HyperGraph, HyperGraphIter};
+use rshyper::edge::RawEdge;
+use rshyper::idx::{NumIndex, RawIndex, VertexId};
+use rshyper::{GraphProps, HyperGraph, HyperGraphIter};
 use std::collections::BinaryHeap;
 
 /// a type alias for a map of distances for vertices in the graph

@@ -7,8 +7,8 @@
 
 #[cfg(feature = "alloc")]
 use alloc::boxed::Box;
-use rshyper_core::error::Error as CoreError;
-use rshyper_core::idx::RawIndex;
+use rshyper::error::Error as CoreError;
+use rshyper::idx::RawIndex;
 /// a type alias for a [Result] with the crate-specific error type [`AlgoError`]
 pub type Result<T = ()> = core::result::Result<T, Error>;
 

@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use core::cmp::Ordering;
-use rshyper_core::idx::{RawIndex, VertexId};
+use rshyper::idx::{RawIndex, VertexId};
 
 /// A node in the priority queue for Dijkstra's algorithm
 #[derive(Copy, Clone, Debug, Default)]

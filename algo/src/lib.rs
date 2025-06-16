@@ -39,13 +39,13 @@ pub(crate) mod macros {
     pub mod seal;
 }
 
+#[doc(inline)]
+pub use self::traits::prelude::*;
 #[cfg(feature = "std")]
 pub use self::{
     astar::AStarSearch, breadth_first::BreadthFirstTraversal, depth_first::DepthFirstTraversal,
     dijkstra::Dijkstra,
 };
-#[doc(inline)]
-pub use self::{error::*, traits::prelude::*};
 
 #[cfg(feature = "std")]
 pub mod astar;

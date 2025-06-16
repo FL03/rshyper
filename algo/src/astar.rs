@@ -11,9 +11,9 @@ mod priority_node;
 use crate::error::{Error, Result};
 use crate::{Heuristic, PathFinder, Search, Traversal, VertexSet};
 use core::hash::Hash;
-use rshyper_core::edge::RawEdge;
-use rshyper_core::idx::{NumIndex, RawIndex, VertexId};
-use rshyper_core::{GraphProps, GraphType, HyperGraph, HyperGraphIter};
+use rshyper::edge::RawEdge;
+use rshyper::idx::{NumIndex, RawIndex, VertexId};
+use rshyper::{GraphProps, GraphType, HyperGraph, HyperGraphIter};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 
 /// An A* Search algorithm implementation for hypergraphs
