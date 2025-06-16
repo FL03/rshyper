@@ -8,6 +8,8 @@ use rshyper_core::idx::{EdgeId, RawIndex, VertexId, VertexSet};
 use rshyper_core::{AddStep, GraphAttributes, GraphType};
 use rshyper_core::{HyperError, HyperResult, Node, Surface, Weight};
 
+/// private implementations of the [`HyperMap`] providing methods, for convenience and 
+/// consistency.
 impl<N, E, A, K, Idx, S> HyperMap<N, E, A, S>
 where
     A: GraphAttributes<Ix = Idx, Kind = K>,
@@ -15,17 +17,10 @@ where
     Idx: RawIndex + Eq + Hash,
     S: BuildHasher,
 {
-    /// add a new hyperedge, using the given vertices and the logical [`Default`] for the
-    /// weight of type `T` and returning the corresponding edge index.
-    pub fn add_edge<I>(&mut self, vertices: I) -> HyperResult<EdgeId<Idx>>
-    where
-        I: IntoIterator<Item = VertexId<Idx>>,
-        Idx: AddStep<Output = Idx> + Clone,
-        E: Default,
-        S: Default,
-    {
-        self.add_surface(vertices, Default::default())
-    }
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, level = "trace", target = "hyper_map")
+    )]
     /// add a new hyperedge directly using an externally defined surface, returns an error if the
     /// surface is empty or if the associated edge id is not recorded in the history.
     pub(crate) fn add_hyperedge(
@@ -57,7 +52,11 @@ where
         self.surfaces_mut().insert(id.clone(), surface);
         // return the id
         Ok(id)
-    }
+    }    
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, level = "trace", target = "hyper_map")
+    )]
     /// directly insert a new hypernode
     pub(crate) fn add_hypernode(&mut self, data: Node<N, Idx>) -> HyperResult<VertexId<Idx>>
     where
@@ -82,11 +81,28 @@ where
         // return the id
         Ok(id)
     }
+}
+/// this implementation of the [`HyperMap`] works to provide fundamental manipulation methods 
+/// alongside additional functional accessors, validators, and more.
+impl<N, E, A, K, Idx, S> HyperMap<N, E, A, S>
+where
+    A: GraphAttributes<Ix = Idx, Kind = K>,
+    K: GraphType,
+    Idx: RawIndex + Eq + Hash,
+    S: BuildHasher,
+{
+    /// add a new hyperedge, using the given vertices and the logical [`Default`] for the
+    /// weight of type `T` and returning the corresponding edge index.
+    pub fn add_edge<I>(&mut self, vertices: I) -> HyperResult<EdgeId<Idx>>
+    where
+        I: IntoIterator<Item = VertexId<Idx>>,
+        Idx: AddStep<Output = Idx> + Clone,
+        E: Default,
+        S: Default,
+    {
+        self.add_surface(vertices, Default::default())
+    }    
     /// add a new node with the given weight and return its index
-    #[cfg_attr(
-        feature = "tracing",
-        tracing::instrument(skip_all, level = "trace", target = "hash_graph")
-    )]
     pub fn add_node(&mut self, Weight(weight): Weight<N>) -> HyperResult<VertexId<Idx>>
     where
         Idx: AddStep<Output = Idx> + Copy,
@@ -111,10 +127,6 @@ where
     }
     /// add a new hyperedge with the given vertices and weight, returning the corresponding
     /// edge index.
-    #[cfg_attr(
-        feature = "tracing",
-        tracing::instrument(skip_all, level = "trace", target = "hash_graph")
-    )]
     pub fn add_surface<I>(&mut self, vertices: I, weight: Weight<E>) -> HyperResult<EdgeId<Idx>>
     where
         I: IntoIterator<Item = VertexId<Idx>>,
@@ -134,16 +146,11 @@ where
             .filter_map(HyperResult::ok)
             .collect::<VertexSet<Idx, S>>();
         // fetch the next edge index
-        let edge_id = self.next_edge_id();
+        let id = self.next_edge_id();
         // create a new surface
-        let surface = Surface::new(edge_id.clone(), verts, weight);
+        let surface = Surface::new(id.clone(), verts, weight);
         // add the hyperedge to the graph
-        self.add_hyperedge(surface)?;
-        // log the addition of the new hyperedge
-        #[cfg(feature = "tracing")]
-        tracing::debug!("added a new hyperedge with id {edge_id}");
-        // return the edge id
-        Ok(edge_id)
+        self.add_hyperedge(surface)
     }
     /// add a new hypernode using the logical [`Default`] for the weight of type `N` and
     /// return its index.
@@ -189,7 +196,7 @@ where
     /// returns a set of vertices that are in the hyperedge with the given id
     #[cfg_attr(
         feature = "tracing",
-        tracing::instrument(skip_all, name = "neighbors", target = "hash_graph")
+        tracing::instrument(skip_all, name = "neighbors", target = "hyper_map")
     )]
     pub fn find_node_neighbors(&self, index: &VertexId<Idx>) -> HyperResult<VertexSet<Idx>>
     where
@@ -220,7 +227,7 @@ where
     /// returns a set of [`HyperNode`]s that are associated with the given edge id
     #[cfg_attr(
         feature = "tracing",
-        tracing::instrument(skip_all, level = "trace", target = "hash_graph")
+        tracing::instrument(skip_all, level = "trace", target = "hyper_map")
     )]
     pub fn get_edge_nodes<Q>(&self, index: &Q) -> HyperResult<Vec<&Node<N, Idx>>>
     where
@@ -343,7 +350,7 @@ where
     /// trait
     #[cfg_attr(
         feature = "tracing",
-        tracing::instrument(skip_all, target = "hash_graph", name = "merge_edges")
+        tracing::instrument(skip_all, target = "hyper_map", name = "merge_edges")
     )]
     pub fn merge_edges<Q>(&mut self, e1: &Q, e2: &Q) -> HyperResult<EdgeId<Idx>>
     where
@@ -362,7 +369,7 @@ where
     /// the provided function to merge their weights;
     #[cfg_attr(
         feature = "tracing",
-        tracing::instrument(skip_all, target = "hash_graph", name = "merge_edges")
+        tracing::instrument(skip_all, target = "hyper_map", name = "merge_edges")
     )]
     pub fn merge_edges_with<Q, F>(&mut self, e1: &Q, e2: &Q, f: F) -> HyperResult<EdgeId<Idx>>
     where
@@ -400,7 +407,7 @@ where
     #[inline]
     #[cfg_attr(
         feature = "tracing",
-        tracing::instrument(skip_all, name = "remove_node", target = "hash_graph")
+        tracing::instrument(skip_all, name = "remove_node", target = "hyper_map")
     )]
     pub fn remove_node<Q>(&mut self, index: &Q) -> HyperResult<Node<N, Idx>>
     where
@@ -431,7 +438,7 @@ where
     #[inline]
     #[cfg_attr(
         feature = "tracing",
-        tracing::instrument(skip_all, name = "remove_surface", target = "hash_graph")
+        tracing::instrument(skip_all, name = "remove_surface", target = "hyper_map")
     )]
     pub fn remove_surface<Q>(&mut self, index: &Q) -> HyperResult<HashSurface<E, K, Idx, S>>
     where

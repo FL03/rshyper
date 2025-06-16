@@ -43,7 +43,6 @@ scsys = { default-features = false, features = ["derive"], version = "0.3.0" }
 # benchmarking
 criterion = { version = "0.6" }
 # concurrency & parallelism
-crossbeam = { default-features = false, version = "0.8" }
 rayon = { default-features = false, version = "1" }
 rayon-core = { default-features = false, version = "1" }
 # error-handling

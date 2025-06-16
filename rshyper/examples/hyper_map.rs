@@ -16,7 +16,7 @@ fn main() -> rshyper::HyperResult<()> {
         .init();
     // use the macro to insert nodes into the graph
     hypergraph! {
-        let mut graph: UnHyperMap::<usize, usize> {
+        let mut graph: UnHyperMap::<usize, f64> {
             nodes: {
                 let v0;
                 let v1 = 2;
@@ -24,14 +24,14 @@ fn main() -> rshyper::HyperResult<()> {
                 let v3 = 4;
             };
             edges: {
-                let e0: [v0, v1, v2] = 10;
+                let e0: [v0, v1, v2] = 10.0;
                 let e1: [v1, v2, v3];
-                let e2: [v0, v1] = 20;
-                let e3: [v1, v2] = 25;
+                let e2: [v0, v1] = 20.0;
+                let e3: [v1, v2] = 25.0;
             };
         }
     }
-    tracing::info!("Initial graph state: {:?}", graph);
+    tracing::info!("Initial graph state: {graph}");
 
     let order_e1 = graph.get_edge_order(&e1)?;
     tracing::info!("Edge {e1} has order {order_e1}");
@@ -60,6 +60,6 @@ fn main() -> rshyper::HyperResult<()> {
     graph.remove_node(&v2)?;
     tracing::info!("removed vertex {v}...", v = v2);
 
-    tracing::info!("Final graph state: {:?}", graph);
+    tracing::info!("Final graph state: {graph}");
     Ok(())
 }
