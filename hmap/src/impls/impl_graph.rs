@@ -22,8 +22,14 @@ where
         feature = "tracing",
         tracing::instrument(skip_all, level = "trace", target = "hyper_map")
     )]
-    /// add a new hyperedge directly using an externally defined surface, returns an error if the
-    /// surface is empty or if the associated edge id is not recorded in the history.
+    /// this method is responsible for directly registering new surfaces with the system,
+    /// implementing additional checks to ensure the validity of the instance. More
+    /// specifically, it ensures that:
+    ///
+    /// - the surface must not be empty
+    /// - the associated id must be recorded in the ledger, but not present within the graph
+    ///
+    /// if **any** of these condition are not met, an error will be thrown.
     pub(crate) fn add_hyperedge(
         &mut self,
         surface: HashSurface<E, K, Idx, S>,
@@ -33,16 +39,20 @@ where
     {
         // ensure the surface is valid
         if surface.is_empty() {
+            #[cfg(feature = "tracing")]
+            tracing::error!(
+                "attempted to insert an empty hyperedge with id {id}",
+                id = surface.id()
+            );
             return Err(Error::EmptyHyperedge);
         }
         // verify the edge id is already recorded in the history
-        if !self.history().contains_edge(surface.id()) {
+        if !self.history().contains_edge(surface.id()) && !self.contains_edge(surface.id()) {
             #[cfg(feature = "tracing")]
             tracing::error!(
                 "the surface with id {} is not recorded in the history",
                 surface.id()
             );
-            // self.history_mut().add_edge(surface.id().clone());
             return Err(Error::EdgeNotFound);
         }
         // get the id of the surface
@@ -58,13 +68,20 @@ where
         feature = "tracing",
         tracing::instrument(skip_all, level = "trace", target = "hyper_map")
     )]
-    /// directly insert a new hypernode
+    /// this method is responsible for directly registering new nodes with the system,
+    /// implementing additional checks to ensure the validity of the instance. More
+    /// specifically, it ensures that:
+    ///
+    /// - the associated is is recorded in the ledger
+    /// - the node doesn't already exist in the graph
+    ///
+    /// if **any** of these condition are not met, an error will be thrown.
     pub(crate) fn add_hypernode(&mut self, data: Node<N, Idx>) -> Result<VertexId<Idx>>
     where
         Idx: Clone,
     {
         // verify the edge id is already recorded in the history
-        if !self.history().contains_node(data.id()) {
+        if !self.history().contains_node(data.id()) && !self.contains_node(data.id()) {
             #[cfg(feature = "tracing")]
             tracing::error!(
                 "the surface with id {} is not recorded in the history",
@@ -113,10 +130,10 @@ where
         // initialize a new node with the given weight & index
         let node = Node::new(ndx, weight);
         // insert the new node into the vertices map
-        self.add_hypernode(node)?;
-        Ok(ndx)
+        self.add_hypernode(node)
     }
-    /// add multiple nodes with the given weights and return their indices
+    /// given a set of weights, insert a new node into the graph for each and return its id as
+    /// an iterator of [`VertexId`]
     pub fn add_nodes<I>(&mut self, weights: I) -> impl Iterator<Item = VertexId<Idx>>
     where
         I: IntoIterator<Item = N>,
@@ -248,7 +265,7 @@ where
         self.get_surface(index).map(|edge| edge.len())
     }
     /// returns the set of vertices composing the given edge
-    pub fn get_edge_vertices<Q>(&self, index: &Q) -> Result<&VertexSet<Idx, S>>
+    pub fn get_edge_domain<Q>(&self, index: &Q) -> Result<&VertexSet<Idx, S>>
     where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -256,7 +273,7 @@ where
         self.get_surface(index).map(|edge| edge.domain())
     }
     /// returns a mutable reference to the set of vertices composing the given edge
-    pub fn get_edge_vertices_mut<Q>(&mut self, index: &Q) -> Result<&mut VertexSet<Idx, S>>
+    pub fn get_edge_domain_mut<Q>(&mut self, index: &Q) -> Result<&mut VertexSet<Idx, S>>
     where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -291,8 +308,11 @@ where
             .filter(|facet| facet.edge().domain().contains(index))
             .count()
     }
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, target = "hyper_map", level = "trace")
+    )]
     /// returns the weight of a particular vertex
-    #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
     pub fn get_node<Q>(&self, index: &Q) -> Result<&Node<N, Idx>>
     where
         Q: Eq + Hash + ?Sized,
@@ -300,6 +320,10 @@ where
     {
         self.nodes().get(index).ok_or(Error::NodeNotFound)
     }
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, target = "hyper_map", level = "trace")
+    )]
     /// returns a mutable reference to the weight of a vertex
     pub fn get_node_mut<Q>(&mut self, index: &Q) -> Result<&mut Node<N, Idx>>
     where
@@ -308,6 +332,10 @@ where
     {
         self.nodes_mut().get_mut(index).ok_or(Error::NodeNotFound)
     }
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, target = "hyper_map", level = "trace")
+    )]
     /// returns an immutable reference to the weight of a vertex
     pub fn get_node_weight<Q>(&self, index: &Q) -> Result<&Weight<N>>
     where
@@ -316,6 +344,10 @@ where
     {
         self.get_node(index).map(|node| node.weight())
     }
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, target = "hyper_map", level = "trace")
+    )]
     /// returns a mutable reference to the weight of a vertex
     pub fn get_node_weight_mut<Q>(&mut self, index: &Q) -> Result<&mut Weight<N>>
     where
@@ -324,16 +356,22 @@ where
     {
         self.get_node_mut(index).map(|node| node.weight_mut())
     }
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, target = "hyper_map", level = "trace")
+    )]
     /// returns an immutable reference to the [`HashFacet`] associated with the given index
     pub fn get_surface<Q>(&self, index: &Q) -> Result<&HashSurface<E, K, Idx, S>>
     where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.surfaces()
-            .get(index)
-            .ok_or_else(|| Error::EdgeNotFound)
+        self.surfaces().get(index).ok_or_else(Error::edge_not_found)
     }
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, target = "hyper_map", level = "trace")
+    )]
     /// returns a mutable reference to the [`HashFacet`] associated with the given index
     pub fn get_surface_mut<Q>(&mut self, index: &Q) -> Result<&mut HashSurface<E, K, Idx, S>>
     where
@@ -344,13 +382,13 @@ where
             .get_mut(index)
             .ok_or_else(|| Error::EdgeNotFound)
     }
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, target = "hyper_map", level = "trace")
+    )]
     /// merge two edges within the hypergraph into one by combining their vertices and using
     /// the [`Add`](core::ops::Add) trait to merge their weights;
     /// trait
-    #[cfg_attr(
-        feature = "tracing",
-        tracing::instrument(skip_all, target = "hyper_map", name = "merge_edges")
-    )]
     pub fn merge_edges<Q>(&mut self, e1: &Q, e2: &Q) -> Result<EdgeId<Idx>>
     where
         Q: Eq + Hash + core::fmt::Debug,
@@ -364,12 +402,12 @@ where
             w1 + w2
         })
     }
-    /// merge two edges within the hypergraph into one by combining their vertices and using
-    /// the provided function to merge their weights;
     #[cfg_attr(
         feature = "tracing",
-        tracing::instrument(skip_all, target = "hyper_map", name = "merge_edges")
+        tracing::instrument(skip_all, target = "hyper_map", level = "trace")
     )]
+    /// merge two edges within the hypergraph into one by combining their vertices and using
+    /// the provided function to merge their weights;
     pub fn merge_edges_with<Q, F>(&mut self, e1: &Q, e2: &Q, f: F) -> Result<EdgeId<Idx>>
     where
         Q: ?Sized + Eq + Hash + core::fmt::Debug,
@@ -402,12 +440,12 @@ where
         // return the new edge ID
         Ok(edge_id)
     }
-    /// removes the vertex with the given id and all of its associated hyperedges
     #[inline]
     #[cfg_attr(
         feature = "tracing",
-        tracing::instrument(skip_all, name = "remove_node", target = "hyper_map")
+        tracing::instrument(skip_all, target = "hyper_map", level = "trace")
     )]
+    /// removes the vertex with the given id and all of its associated hyperedges
     pub fn remove_node<Q>(&mut self, index: &Q) -> Result<Node<N, Idx>>
     where
         Q: Eq + core::fmt::Debug + Hash,
@@ -437,7 +475,7 @@ where
     #[inline]
     #[cfg_attr(
         feature = "tracing",
-        tracing::instrument(skip_all, name = "remove_surface", target = "hyper_map")
+        tracing::instrument(skip_all, target = "hyper_map", level = "trace")
     )]
     pub fn remove_surface<Q>(&mut self, index: &Q) -> Result<HashSurface<E, K, Idx, S>>
     where
@@ -446,6 +484,10 @@ where
     {
         self.surfaces_mut().remove(index).ok_or(Error::EdgeNotFound)
     }
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, target = "hyper_map", level = "trace")
+    )]
     /// retain nodes in the hypergraph based on a predicate;
     ///
     /// ## Saftey
@@ -461,6 +503,10 @@ where
         self.nodes_mut().retain(f);
         self
     }
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, target = "hyper_map", level = "trace")
+    )]
     /// retain surfaces in the hypergraph based on a predicate;
     pub fn retain_surfaces<F>(&mut self, f: F) -> &mut Self
     where
@@ -469,9 +515,12 @@ where
         self.surfaces_mut().retain(f);
         self
     }
-    /// update the weight of an edge with the given index
     #[inline]
-    #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, target = "hyper_map", level = "trace")
+    )]
+    /// update the weight of an edge with the given index
     pub fn set_edge_weight<Q>(&mut self, index: &Q, weight: Weight<E>) -> Result<&mut Self>
     where
         Q: Eq + Hash + ?Sized,
@@ -484,9 +533,12 @@ where
             .map_err(|_| Error::EdgeNotFound)?;
         Ok(self)
     }
-    /// update the weight of a given vertex
     #[inline]
-    #[cfg_attr(feature = "tracing", tracing::instrument(skip_all))]
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, target = "hyper_map", level = "trace")
+    )]
+    /// update the weight of a given vertex
     pub fn set_node_weight<Q>(&mut self, index: &Q, weight: Weight<N>) -> Result<&mut Self>
     where
         Q: Eq + Hash + ?Sized,
@@ -498,5 +550,36 @@ where
             })
             .map_err(|_| Error::NodeNotFound)?;
         Ok(self)
+    }
+}
+
+/*
+ ************* DEPRECATED *************
+*/
+
+#[doc(hidden)]
+#[allow(deprecated)]
+impl<N, E, A, S, K, Idx> HyperMap<N, E, A, S>
+where
+    A: GraphProps<Ix = Idx, Kind = K>,
+    K: GraphType,
+    Idx: RawIndex + Eq + Hash,
+    S: BuildHasher,
+{
+    #[deprecated(note = "use `get_edge_domain` instead", since = "0.1.5")]
+    pub fn get_edge_vertices<Q>(&self, index: &Q) -> Result<&VertexSet<Idx, S>>
+    where
+        Q: Eq + Hash + ?Sized,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.get_surface(index).map(|edge| edge.domain())
+    }
+    #[deprecated(note = "use `get_edge_domain_mut` instead", since = "0.1.5")]
+    pub fn get_edge_vertices_mut<Q>(&mut self, index: &Q) -> Result<&mut VertexSet<Idx, S>>
+    where
+        Q: Eq + Hash + ?Sized,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.get_surface_mut(index).map(|edge| edge.domain_mut())
     }
 }

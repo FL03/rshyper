@@ -5,14 +5,17 @@
 //! this module implements the [`Error`] type for the [`rshyper`](https://docs.rs/rshyper)
 //! crate.
 #[cfg(feature = "alloc")]
-use alloc::{boxed::Box, string::String};
-
+use alloc::{
+    boxed::Box,
+    string::{String, ToString},
+};
 /// A type alias for a [Result] with the crate-specific error type [`Error`]
 pub type Result<T = ()> = core::result::Result<T, Error>;
 
 /// The error type for this crate
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    #[cfg(feature = "alloc")]
     #[error("The edge with the given id does not exist")]
     EdgeNotFound,
     #[error("The node with the given id does not exist")]
@@ -43,6 +46,22 @@ pub enum Error {
     #[cfg(feature = "alloc")]
     #[error("{0}")]
     Unknown(String),
+}
+
+impl Error {
+    /// returns a new [`EdgeNotFound`](Error::EdgeNotFound) variant
+    pub fn edge_not_found() -> Self {
+        Error::EdgeNotFound
+    }
+    /// returns a new [`NodeNotFound`](Error::NodeNotFound) variant
+    pub fn node_not_found() -> Self {
+        Error::NodeNotFound
+    }
+    #[cfg(feature = "alloc")]
+    /// returns a new [`Unknown`](Error::Unknown) variant initialized with the given value
+    pub fn unknown<S: ToString>(s: S) -> Self {
+        Error::Unknown(s.to_string())
+    }
 }
 
 #[cfg(feature = "alloc")]

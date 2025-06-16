@@ -2,9 +2,12 @@
     Appellation: index <module>
     Contrib: @FL03
 */
-use super::{GraphIndex, IndexError, RawIndex};
+use crate::idx::RawIndex;
+use crate::idx::error::IndexResult;
 use crate::{AddStep, StepWith};
 
+#[cfg(feature = "alloc")]
+use alloc::boxed::Box;
 use num_traits::{One, Zero};
 
 /// A generic [`IndexBase`] implementation used to represent various [_kinds_](GraphIndex) of
@@ -18,7 +21,6 @@ pub struct IndexBase<Idx = super::Udx, K = super::VertexIndex> {
 
 impl<T, K> IndexBase<T, K>
 where
-    K: GraphIndex,
     T: RawIndex,
 {
     /// returns a new instance of [`IndexBase`] with the given value.
@@ -56,6 +58,19 @@ where
     /// returns a mutable pointer to the inner value
     pub fn as_mut_ptr(&mut self) -> *mut T {
         core::ptr::from_mut(&mut self.value)
+    }
+    #[cfg(feature = "alloc")]
+    /// converts the a reference to a boxed raw index trait object
+    pub fn as_raw_box(&self) -> Box<dyn RawIndex>
+    where
+        T: Clone,
+    {
+        Box::new(self.value.clone())
+    }
+    #[cfg(feature = "alloc")]
+    /// boxes up the raw index value for generic use
+    pub fn into_raw_box(self) -> Box<dyn RawIndex> {
+        Box::new(self.value)
     }
     /// returns an immutable reference to the inner value
     pub const fn get(&self) -> &T {
@@ -160,7 +175,7 @@ where
     ///     assert_eq!(e2.get(), &2);
     /// ```
     #[inline]
-    pub fn step(&mut self) -> Result<Self, IndexError>
+    pub fn step(&mut self) -> IndexResult<Self>
     where
         T: AddStep<Output = T>,
     {
@@ -172,7 +187,7 @@ where
     }
     /// replaces the current value with the next one computed using the provided function and
     /// returns the previous instance of the index.
-    pub fn step_with<F>(&mut self, f: F) -> Result<Self, IndexError>
+    pub fn step_with<F>(&mut self, f: F) -> IndexResult<Self>
     where
         F: FnOnce(&T) -> T,
     {
@@ -184,7 +199,7 @@ where
     /// similar to [`step_with`](IndexBase::step_with), however, rather than replacing the
     /// current value with the computed value, it returns a new instance of the index
     /// containing the computed value.
-    pub fn next_with<U, F>(self, f: F) -> Result<IndexBase<U, K>, IndexError>
+    pub fn next_with<U, F>(self, f: F) -> IndexResult<IndexBase<U, K>>
     where
         F: FnOnce(T) -> U,
         U: RawIndex,
@@ -202,7 +217,6 @@ where
 
 impl<T, K> StepWith<T> for IndexBase<T, K>
 where
-    K: GraphIndex,
     T: RawIndex,
 {
     type Output = IndexBase<T, K>;

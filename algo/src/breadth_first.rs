@@ -107,7 +107,7 @@ where
 
         // Check if starting vertex exists
         if !self.graph.contains_node(&start) {
-            return Err(Error::NodeNotFound);
+            return Err(Error::NotFound(Box::new(start.value())));
         }
 
         // Add start vertex to queue and mark as visited

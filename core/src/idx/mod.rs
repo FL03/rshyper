@@ -8,10 +8,11 @@
 //! specify the index type when working with hypergraphs.
 #[doc(inline)]
 #[cfg(feature = "alloc")]
-pub use self::tracker::IndexTracker;
+pub use self::{error::*, tracker::IndexTracker};
 #[doc(inline)]
-pub use self::{error::*, index::*, position::*, traits::prelude::*, types::prelude::*};
+pub use self::{index::*, position::*, traits::prelude::*, types::prelude::*};
 
+#[cfg(feature = "alloc")]
 /// this module defines the [`IndexError`] type, establishing the various errors encountered by
 /// indices in a hypergraph.
 pub mod error;

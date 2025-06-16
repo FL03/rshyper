@@ -8,6 +8,7 @@
 #[cfg(feature = "alloc")]
 use alloc::boxed::Box;
 use rshyper_core::error::Error as CoreError;
+use rshyper_core::idx::RawIndex;
 /// a type alias for a [Result] with the crate-specific error type [`AlgoError`]
 pub type Result<T = ()> = core::result::Result<T, Error>;
 
@@ -15,14 +16,16 @@ pub type Result<T = ()> = core::result::Result<T, Error>;
 /// hypergraphs
 #[derive(Debug, strum::EnumIs, thiserror::Error)]
 pub enum Error {
+    #[error("Not Found: {0}")]
+    NotFound(Box<dyn RawIndex>),
     #[error("No path found between the two points")]
     PathNotFound,
     #[error("The edge with the given id does not exist")]
     EdgeNotFound,
-    #[error("The node with the given id does not exist")]
+    #[error("There is no node associated with the given id found within the hypergraph")]
     NodeNotFound,
     #[error("No edges contain the given vertex")]
-    NoEdgesWithVertex,
+    NodeNotInDomain,
     #[error("Cannot create an empty hyperedge")]
     EmptyHyperedge,
     #[error(transparent)]

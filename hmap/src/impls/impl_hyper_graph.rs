@@ -36,11 +36,11 @@ where
     }
 
     fn get_edge_domain(&self, index: &EdgeId<A::Ix>) -> Option<&VertexSet<A::Ix, S>> {
-        self.get_edge_vertices(index).ok()
+        self.get_edge_domain(index).ok()
     }
 
     fn get_edge_domain_mut(&mut self, index: &EdgeId<A::Ix>) -> Option<&mut VertexSet<A::Ix, S>> {
-        self.get_edge_vertices_mut(index).ok()
+        self.get_edge_domain_mut(index).ok()
     }
 
     fn get_edge_weight(&self, index: &EdgeId<A::Ix>) -> Option<&Weight<E>> {
