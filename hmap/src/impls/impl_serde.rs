@@ -49,7 +49,7 @@ where
         use serde::ser::SerializeStruct;
         let mut state = serializer.serialize_struct("HashGraph", 4)?;
         state.serialize_field("attrs", &self.attrs())?;
-        state.serialize_field("edges", self.surfaces())?;
+        state.serialize_field("edges", self.edges())?;
         state.serialize_field("history", self.history())?;
         state.serialize_field("nodes", self.nodes())?;
         state.end()

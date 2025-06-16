@@ -127,11 +127,11 @@ where
         self.history_mut().cursor_mut()
     }
     /// returns an immutable reference to the surfaces of the hypergraph
-    pub const fn surfaces(&self) -> &SurfaceMap<E, K, Idx, S> {
+    pub const fn edges(&self) -> &SurfaceMap<E, K, Idx, S> {
         &self.edges
     }
     /// returns a mutable reference to the surfaces of the hypergraph
-    pub const fn surfaces_mut(&mut self) -> &mut SurfaceMap<E, K, Idx, S> {
+    pub const fn edges_mut(&mut self) -> &mut SurfaceMap<E, K, Idx, S> {
         &mut self.edges
     }
     /// overrides the current nodes and returns a mutable reference to the hypergraph
@@ -177,7 +177,7 @@ where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.surfaces().contains_key(index)
+        self.edges().contains_key(index)
     }
     /// check if a vertex with the given id exists
     pub fn contains_node<Q>(&self, index: &Q) -> bool
@@ -201,14 +201,14 @@ where
         EdgeId<Idx>: core::borrow::Borrow<Q>,
         VertexId<Idx>: core::borrow::Borrow<Q2>,
     {
-        if let Some(surface) = self.surfaces().get(index) {
+        if let Some(surface) = self.edges().get(index) {
             return surface.contains(vertex);
         }
         false
     }
     /// returns true if the hypergraph is empty, meaning it has no edges, facets, or nodes
     pub fn is_empty(&self) -> bool {
-        self.surfaces().is_empty() && self.nodes().is_empty()
+        self.edges().is_empty() && self.nodes().is_empty()
     }
     /// returns true if the hypergraph is directed;
     pub fn is_directed(&self) -> bool {
@@ -232,7 +232,7 @@ where
     where
         Idx: Eq + Hash,
     {
-        self.surfaces_mut().entry(index)
+        self.edges_mut().entry(index)
     }
     /// computes the next edge index before replacing and returning the previous value
     pub fn next_edge_id(&mut self) -> EdgeId<Idx>
@@ -257,7 +257,7 @@ where
     /// where `H=(X,E)`.
     /// returns the total number of edges within the hypergraph
     pub fn size(&self) -> usize {
-        self.surfaces().len()
+        self.edges().len()
     }
 }
 
@@ -272,7 +272,7 @@ where
         f.debug_struct("HyperMap")
             .field("history", self.history())
             .field("nodes", self.nodes())
-            .field("surfaces", self.surfaces())
+            .field("surfaces", self.edges())
             .finish()
     }
 }
@@ -289,7 +289,7 @@ where
             f,
             "{{ history: {h:?}, edges: {e:?}, nodes: {n:?} }}",
             n = self.nodes(),
-            e = self.surfaces(),
+            e = self.edges(),
             h = self.history()
         )
     }

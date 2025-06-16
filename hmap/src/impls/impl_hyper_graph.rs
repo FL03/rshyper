@@ -102,7 +102,7 @@ where
         Self: 'a;
 
     fn iter_nodes(&self) -> Self::Nodes<'_> {
-        self.node_iter()
+        self.iter_nodes()
     }
 
     fn vertices(&self) -> Self::Verts<'_> {
@@ -119,22 +119,22 @@ where
     A::Ix: NumIndex,
 {
     type Surfaces<'a>
-        = iter::SurfaceIter<'a, E, A::Kind, A::Ix, S>
+        = iter::EdgeIter<'a, E, A::Kind, A::Ix, S>
     where
         Self: 'a,
         Self::Edge<E>: 'a;
 
     type Edges<'a>
-        = iter::Edges<'a, E, A::Kind, A::Ix, S>
+        = iter::EdgeKeys<'a, E, A::Kind, A::Ix, S>
     where
         Self: 'a,
         Self::Edge<E>: 'a;
 
     fn iter_surfaces(&self) -> Self::Surfaces<'_> {
-        self.surface_iter()
+        self.iter_edges()
     }
 
     fn edges(&self) -> Self::Edges<'_> {
-        self.edges()
+        self.iter_edge_ids()
     }
 }

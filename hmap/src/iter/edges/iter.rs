@@ -9,22 +9,10 @@ use rshyper_core::idx::{EdgeId, RawIndex};
 use std::collections::hash_map;
 use std::hash::RandomState;
 
-/// an iterator over the keys of the surfaces within a hypergraph, yielding the
-/// [`EdgeId`]s of the entries.
-#[repr(transparent)]
-pub struct Edges<'a, E, K, Idx, S = RandomState>
-where
-    Idx: RawIndex + Eq + Hash,
-    K: GraphType,
-    S: BuildHasher,
-{
-    pub(crate) iter: hash_map::Keys<'a, EdgeId<Idx>, HashSurface<E, K, Idx, S>>,
-}
-
-/// [`SurfaceIter`] is an iterator over the edge entries within the `HyperMap`, yielding
+/// [`EdgeIter`] is an iterator over the edge entries within the `HyperMap`, yielding
 /// a 2-tuple consisting of references to the [`EdgeId`] and [`HashSurface`] of the entry.
 #[repr(transparent)]
-pub struct SurfaceIter<'a, E, K, Idx, S = RandomState>
+pub struct EdgeIter<'a, E, K, Idx, S = RandomState>
 where
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
@@ -32,11 +20,11 @@ where
 {
     pub(crate) iter: hash_map::Iter<'a, EdgeId<Idx>, HashSurface<E, K, Idx, S>>,
 }
-/// [`SurfaceIterMut`] is a mutable iterator over the edge entries within the `HyperMap`,
+/// [`EdgeIterMut`] is a mutable iterator over the edge entries within the `HyperMap`,
 /// yielding a 2-tuple consisting of references to the entry [`EdgeId`] and a mutable
 /// reference to the [`HashSurface`].
 #[repr(transparent)]
-pub struct SurfaceIterMut<'a, E, K, Idx, S = RandomState>
+pub struct EdgeIterMut<'a, E, K, Idx, S = RandomState>
 where
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
@@ -44,8 +32,18 @@ where
 {
     pub(crate) iter: hash_map::IterMut<'a, EdgeId<Idx>, HashSurface<E, K, Idx, S>>,
 }
-
-/// [`Facets`] is an iterator over the actual surfaces of a hypergraph, yielding
+/// an iterator over the keys of the surfaces within a hypergraph, yielding the
+/// [`EdgeId`]s of the entries.
+#[repr(transparent)]
+pub struct EdgeKeys<'a, E, K, Idx, S = RandomState>
+where
+    Idx: RawIndex + Eq + Hash,
+    K: GraphType,
+    S: BuildHasher,
+{
+    pub(crate) iter: hash_map::Keys<'a, EdgeId<Idx>, HashSurface<E, K, Idx, S>>,
+}
+/// [`Edges`] is an iterator over the actual surfaces of a hypergraph, yielding
 pub struct Facets<'a, E, K, Idx, S = RandomState>
 where
     E: 'a,
@@ -55,7 +53,7 @@ where
 {
     pub(crate) iter: hash_map::Values<'a, EdgeId<Idx>, HashSurface<E, K, Idx, S>>,
 }
-/// [`FacetsMut`] is a mutable iterator over the surfaces of a hypergraph, yielding
+/// [`EdgesMut`] is a mutable iterator over the surfaces of a hypergraph, yielding
 pub struct FacetsMut<'a, E, K, Idx, S = RandomState>
 where
     E: 'a,
@@ -69,7 +67,7 @@ where
 /*
  ************* Implementations *************
 */
-impl<'a, E, K, Idx, S> Iterator for Edges<'a, E, K, Idx, S>
+impl<'a, E, K, Idx, S> Iterator for EdgeKeys<'a, E, K, Idx, S>
 where
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
@@ -108,7 +106,7 @@ where
     }
 }
 
-impl<'a, E, K, Idx, S> Iterator for SurfaceIter<'a, E, K, Idx, S>
+impl<'a, E, K, Idx, S> Iterator for EdgeIter<'a, E, K, Idx, S>
 where
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
@@ -121,7 +119,7 @@ where
     }
 }
 
-impl<'a, E, K, Idx, S> Iterator for SurfaceIterMut<'a, E, K, Idx, S>
+impl<'a, E, K, Idx, S> Iterator for EdgeIterMut<'a, E, K, Idx, S>
 where
     K: GraphType,
     Idx: RawIndex + Eq + Hash,

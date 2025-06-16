@@ -60,7 +60,7 @@ where
         #[cfg(feature = "tracing")]
         tracing::debug!("inserting a new hyperedge ({id}) into the graph...");
         // insert the new hyperedge into the adjacency map
-        self.surfaces_mut().insert(id.clone(), surface);
+        self.edges_mut().insert(id.clone(), surface);
         // return the id
         Ok(id)
     }
@@ -184,7 +184,7 @@ where
         // log the addition of the new hyperedge
         #[cfg(feature = "tracing")]
         tracing::info!("clearing the hypergraph...");
-        self.surfaces_mut().clear();
+        self.edges_mut().clear();
         self.nodes_mut().clear();
         self
     }
@@ -199,7 +199,7 @@ where
         }
         //
         let edges = self
-            .surfaces()
+            .edges()
             .iter()
             .filter_map(|(&edge_id, facet)| {
                 if facet.contains(index) {
@@ -228,7 +228,7 @@ where
         // initialize an empty set to hold the neighbors
         let mut neighbors = VertexSet::new();
         // iterate through all the connections
-        self.surfaces().values().for_each(|surface| {
+        self.edges().values().for_each(|surface| {
             if surface.contains(index) {
                 neighbors.extend(
                     surface
@@ -303,7 +303,7 @@ where
         Q: Eq + Hash + ?Sized,
         VertexId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.surfaces()
+        self.edges()
             .values()
             .filter(|facet| facet.edge().domain().contains(index))
             .count()
@@ -366,7 +366,7 @@ where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.surfaces().get(index).ok_or_else(Error::edge_not_found)
+        self.edges().get(index).ok_or_else(Error::edge_not_found)
     }
     #[cfg_attr(
         feature = "tracing",
@@ -378,7 +378,7 @@ where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.surfaces_mut()
+        self.edges_mut()
             .get_mut(index)
             .ok_or_else(|| Error::EdgeNotFound)
     }
@@ -436,7 +436,7 @@ where
         // initialize a new facet using the merged vertices, new index, and source weight
         let surface = Edge::new(edge_id, vertices, Weight(weight));
         // insert the new hyperedge into the surfaces map
-        self.surfaces_mut().insert(edge_id, surface);
+        self.edges_mut().insert(edge_id, surface);
         // return the new edge ID
         Ok(edge_id)
     }
@@ -482,7 +482,7 @@ where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
     {
-        self.surfaces_mut().remove(index).ok_or(Error::EdgeNotFound)
+        self.edges_mut().remove(index).ok_or(Error::EdgeNotFound)
     }
     #[cfg_attr(
         feature = "tracing",
@@ -512,7 +512,7 @@ where
     where
         F: FnMut(&EdgeId<Idx>, &mut HashSurface<E, K, Idx, S>) -> bool,
     {
-        self.surfaces_mut().retain(f);
+        self.edges_mut().retain(f);
         self
     }
     #[inline]
