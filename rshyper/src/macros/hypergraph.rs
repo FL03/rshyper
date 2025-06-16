@@ -103,7 +103,7 @@ macro_rules! hypergraph {
 /// ```rust
 /// use rshyper::{HyperMap, IntoWeight};
 ///
-/// fn main() -> rshyper::HyperResult<()> {
+/// fn main() -> rshyper::Result<()> {
 ///     // initialize a new undirected hypergraph
 ///     let mut graph = HyperMap::<usize, usize>::undirected();
 ///     // add some vertices
