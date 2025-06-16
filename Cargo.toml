@@ -58,7 +58,7 @@ rand_distr = { default-features = false, version = "0.5" }
 # data & serialization
 serde = { default-features = false, features = ["derive"], version = "1" }
 serde_derive = { version = "1" }
-serde_json = { version = "1" }
+serde_json = { default-features = false, version = "1" }
 # macros & utilities
 # itertools = { default-features = false, features = ["macros"], version = "0.14.0" }
 lazy_static = { version = "1" }
