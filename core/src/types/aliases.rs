@@ -11,8 +11,6 @@ use crate::{Directed, Undirected};
 
 #[cfg(feature = "alloc")]
 pub use self::use_alloc::*;
-#[cfg(feature = "std")]
-pub use self::use_std::*;
 
 #[cfg(all(feature = "std", not(feature = "hashbrown")))]
 /// a type alias for a [`HashSet`](std::collections::HashSet) of [`VertexId`] that is generic over
