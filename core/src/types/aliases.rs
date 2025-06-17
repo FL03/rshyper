@@ -62,10 +62,10 @@ mod use_alloc {
     use alloc::collections::{BTreeSet, VecDeque};
     use alloc::vec::Vec;
 
-    #[cfg(feature = "nightly")]
-    /// a type alias for a [`Vec`] of [`VertexId`] that is generic over the index type `I`
-    pub type VertexVec<I, A> = Vec<VertexId<I>, A>;
-    #[cfg(not(feature = "nightly"))]
+    // #[cfg(feature = "nightly")]
+    // /// a type alias for a [`Vec`] of [`VertexId`] that is generic over the index type `I`
+    // pub type VertexVec<I, A> = Vec<VertexId<I>, A>;
+    // #[cfg(not(feature = "nightly"))]
     /// a type alias for a [`Vec`] of [`VertexId`] that is generic over the index type `I`
     pub type VertexVec<I> = Vec<VertexId<I>>;
     /// a type alias for a [`VertexId`] stored in a [`VecDeque`]
