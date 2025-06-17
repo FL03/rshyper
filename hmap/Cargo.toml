@@ -36,7 +36,7 @@ test = true
 [dependencies]
 # sdk
 rshyper-algo = { optional = true, workspace = true }
-rshyper-core = { workspace = true }
+rshyper-core = { features = ["hashbrown"], workspace = true }
 # custom
 scsys = { workspace = true }
 # concurrency & parallelism
