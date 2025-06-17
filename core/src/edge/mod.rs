@@ -5,9 +5,7 @@
 //! this module focuses on the [`Edge`] implementation, providing additional types, traits, and
 //! representations for edges in a hypergraph.
 #[doc(inline)]
-pub use self::{
-    hyper_edge::Edge, layout::EdgeLayout, traits::prelude::*, utils::prelude::*,
-};
+pub use self::{hyper_edge::Edge, layout::EdgeLayout, traits::prelude::*, utils::prelude::*};
 
 /// a [`hyper_surface`] speaks to a _weighted_ hyperedge, materialized here as a [`Surface`]
 pub mod hyper_edge;
@@ -16,8 +14,8 @@ pub mod hyper_edge;
 pub mod layout;
 
 mod impls {
-    pub mod impl_layout;
     pub mod impl_edge;
+    pub mod impl_layout;
 }
 
 pub mod traits {
@@ -47,9 +45,7 @@ pub mod types {
     #[allow(unused_imports)]
     pub use self::prelude::*;
 
-
-    pub(crate) mod prelude {
-    }
+    pub(crate) mod prelude {}
 }
 
 pub mod utils {

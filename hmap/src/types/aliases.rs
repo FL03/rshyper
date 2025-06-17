@@ -2,8 +2,6 @@
     appellation: aliases <module>
     authors: @FL03
 */
-
-// pub(crate) use rshyper::prelude::VertexSet;
 #[allow(deprecated, unused_imports)]
 pub use self::impl_deprecated::*;
 

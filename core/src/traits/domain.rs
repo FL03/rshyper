@@ -75,7 +75,7 @@ mod impl_hb {
     impl<I, S> RawDomain for HashSet<VertexId<I>, S>
     where
         I: RawIndex,
-        S: BuildHasher
+        S: BuildHasher,
     {
         type Item = VertexId<I>;
         type Store<_T> = HashSet<_T, S>;
