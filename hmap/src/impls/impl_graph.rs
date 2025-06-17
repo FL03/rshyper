@@ -30,10 +30,7 @@ where
     /// - the associated id must be recorded in the ledger, but not present within the graph
     ///
     /// if **any** of these condition are not met, an error will be thrown.
-    pub(crate) fn add_hyperedge(
-        &mut self,
-        surface: HashEdge<E, K, Idx, S>,
-    ) -> Result<EdgeId<Idx>>
+    pub(crate) fn add_hyperedge(&mut self, surface: HashEdge<E, K, Idx, S>) -> Result<EdgeId<Idx>>
     where
         Idx: Clone,
     {
