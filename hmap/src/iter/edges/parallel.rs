@@ -108,7 +108,7 @@ where
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
-        C: UnindexedConsumer<Self::Item>,
+        C: Consumer<&HashEdge<E, K, Idx, S>> + UnindexedConsumer<Self::Item>,
     {
         self.iter.into_par_iter().drive_unindexed(consumer)
     }
@@ -125,7 +125,7 @@ where
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
-        C: UnindexedConsumer<Self::Item>,
+        C: Consumer<&mut HashEdge<E, K, Idx, S>> + UnindexedConsumer<Self::Item>,
     {
         self.iter.into_par_iter().drive_unindexed(consumer)
     }

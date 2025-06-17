@@ -81,7 +81,7 @@ where
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
-        C: UnindexedConsumer<Self::Item>,
+        C: Consumer<&Node<N, Idx>> + UnindexedConsumer<Self::Item>,
     {
         self.iter.into_par_iter().drive_unindexed(consumer)
     }
@@ -96,7 +96,7 @@ where
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
-        C: UnindexedConsumer<Self::Item>,
+        C: Consumer<&mut Node<N, Idx>> + UnindexedConsumer<Self::Item>,
     {
         self.iter.into_par_iter().drive_unindexed(consumer)
     }
