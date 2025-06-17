@@ -20,7 +20,7 @@ where
     Idx: RawIndex + Eq + Hash + Send + Sync,
     S: BuildHasher + Send + Sync,
 {
-    pub(crate) iter: hash_map::ParValues<'a, E, K, Idx, S>,
+    pub(crate) iter: hash_map::ParValues<'a, EdgeId<Idx>, HashEdge<E, K, Idx, S>>,
 }
 /// [`ParFacetsMut`] is a mutable parallel iterator over the edges of a hypergraph,
 /// yielding pairs of [`EdgeId`] and a mutable reference to the corresponding [`Edge`](rshyper::Edge).
@@ -33,7 +33,7 @@ where
     Idx: RawIndex + Eq + Hash + Send + Sync,
     S: BuildHasher + Send + Sync,
 {
-    pub(crate) iter: hash_map::ParValuesMut<'a, E, K, Idx, S>,
+    pub(crate) iter: hash_map::ParValuesMut<'a, EdgeId<Idx>, HashEdge<E, K, Idx, S>>,
 }
 
 /*

@@ -18,7 +18,7 @@ where
     N: Send + Sync,
     Idx: RawIndex + Eq + Hash,
 {
-    pub(crate) iter: hash_map::ParValues<'a, N, Idx>,
+    pub(crate) iter: hash_map::ParValues<'a, VertexId<Idx>, Node<N, Idx>>,
 }
 
 /// [`NodeParIterMut`] is a mutable parallel iterator over the nodes of a hypergraph, yielding
@@ -29,7 +29,7 @@ where
     N: Send + Sync,
     Idx: RawIndex + Eq + Hash,
 {
-    pub(crate) iter: hash_map::ParValuesMut<'a, N, Idx>,
+    pub(crate) iter: hash_map::ParValuesMut<'a, VertexId<Idx>, Node<N, Idx>>,
 }
 
 /*
