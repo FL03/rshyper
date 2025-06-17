@@ -107,11 +107,11 @@ pub mod types {
         #[cfg(all(feature = "std", not(feature = "hashbrown")))]
         /// a type alias for a [`HashSet`](std::collections::HashSet) of [`VertexId`] that is generic over
         /// the index type `I`
-        pub type VertexSet<I, S> = std::collections::HashSet<VertexId<I>, S>;
+        pub type VertexSet<I, S = std::hash::RandomState> = std::collections::HashSet<VertexId<I>, S>;
         #[cfg(feature = "hashbrown")]
         /// a type alias for a [`HashSet`](hashbrown::HashSet) of [`VertexId`] that is generic over
         /// the index type `I`
-        pub type VertexSet<I, S> = hashbrown::HashSet<VertexId<I>, S>;
+        pub type VertexSet<I, S = hashbrown::DefaultHashBuilder> = hashbrown::HashSet<VertexId<I>, S>;
     }
 }
 
