@@ -7,6 +7,7 @@ use crate::types::HashEdge;
 use core::hash::{BuildHasher, Hash};
 use hashbrown::hash_map::rayon as hash_map;
 use rayon::iter::plumbing::{Consumer, UnindexedConsumer};
+use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
 use rshyper::GraphType;
 use rshyper::idx::{EdgeId, RawIndex};
 
@@ -38,8 +39,6 @@ where
 /*
  ************* Implementations *************
 */
-
-use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
 
 impl<'a, E, K, Idx, S> ParallelIterator for EdgeKeys<'a, E, K, Idx, S>
 where
@@ -106,7 +105,7 @@ where
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
-        C: Consumer<&HashEdge<E, K, Idx, S>> + UnindexedConsumer<Self::Item>,
+        C: Consumer<&'a HashEdge<E, K, Idx, S>> + UnindexedConsumer<Self::Item>,
     {
         self.iter.into_par_iter().drive_unindexed(consumer)
     }
@@ -123,7 +122,7 @@ where
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
-        C: Consumer<&mut HashEdge<E, K, Idx, S>> + UnindexedConsumer<Self::Item>,
+        C: Consumer<&'a mut HashEdge<E, K, Idx, S>> + UnindexedConsumer<Self::Item>,
     {
         self.iter.into_par_iter().drive_unindexed(consumer)
     }
