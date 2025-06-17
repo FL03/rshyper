@@ -4,7 +4,8 @@
 */
 use core::hash::Hash;
 use hashbrown::hash_map::rayon as hash_map;
-use rayon::iter::{plumbing::UnindexedConsumer, ParallelIterator};
+use rayon::iter::plumbing::UnindexedConsumer;
+use rayon::iter::ParallelIterator;
 use rshyper::idx::{RawIndex, VertexId};
 use rshyper::node::Node;
 

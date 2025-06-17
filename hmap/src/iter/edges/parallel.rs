@@ -5,7 +5,7 @@
 use crate::types::HashEdge;
 use core::hash::{BuildHasher, Hash};
 use hashbrown::hash_map::rayon as hash_map;
-use rayon::iter::plumbing::{Consumer, UnindexedConsumer};
+use rayon::iter::plumbing::UnindexedConsumer;
 use rayon::iter::ParallelIterator;
 use rshyper::GraphType;
 use rshyper::idx::{EdgeId, RawIndex};
