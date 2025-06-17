@@ -6,7 +6,7 @@
 
 use rshyper_core::{IntoWeight, Result, Weight};
 use rshyper_hmap::HyperMap;
-use std::collections::HashSet;
+use hashbrown::HashSet;
 
 #[test]
 fn test_error() -> Result<()> {
