@@ -7,17 +7,17 @@
 use crate::types::prelude::*;
 
 use core::hash::{BuildHasher, Hash};
+use hashbrown::DefaultHashBuilder;
 use rshyper_core::{
     AddStep, GraphType, Mode,
     attrs::{DiAttrs, GraphProps, UnAttrs},
-    idx::{EdgeId, Frame, IndexTracker, RawIndex, VertexId},
+    idx::{EdgeId, Frame, IndexTracker, RawIndex, Udx, VertexId},
 };
-use std::hash::RandomState;
 
-/// a type alias for a [directed](crate::Directed) [`HyperMap`]
-pub type DiHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, DiAttrs<Idx>, S>;
-/// a type alias for an [undirected](crate::Undirected) [`HyperMap`]
-pub type UnHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, UnAttrs<Idx>, S>;
+/// a type alias for a [directed](rshyper::Directed) [`HyperMap`]
+pub type DiHyperMap<N, E, Idx = Udx, S = DefaultHashBuilder> = HyperMap<N, E, DiAttrs<Idx>, S>;
+/// a type alias for an [undirected](rshyper::Undirected) [`HyperMap`]
+pub type UnHyperMap<N, E, Idx = Udx, S = DefaultHashBuilder> = HyperMap<N, E, UnAttrs<Idx>, S>;
 
 /// The [`HyperMap`] is a map-based implementation of a hypergraph that is generic over the
 /// types:
@@ -37,7 +37,7 @@ pub type UnHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, UnAttrs
 /// created.
 ///
 #[derive(Clone, Default)]
-pub struct HyperMap<N = (), E = (), A = UnAttrs<usize>, S = RandomState>
+pub struct HyperMap<N = (), E = (), A = UnAttrs<Udx>, S = DefaultHashBuilder>
 where
     S: BuildHasher,
     A: GraphProps,
@@ -65,26 +65,24 @@ where
     pub fn new() -> Self
     where
         Idx: Default,
-        S: Clone + Default,
+        S: Default,
     {
-        let hasher = S::default();
         HyperMap {
             attrs: A::new(),
             history: IndexTracker::new(),
-            edges: EdgeMap::with_hasher(hasher.clone()),
-            nodes: NodeMap::with_hasher(hasher),
+            edges: EdgeMap::with_hasher(Default::default()),
+            nodes: NodeMap::with_hasher(Default::default()),
         }
     }
     /// creates a new instance of the hypergraph with the given capacity for edges and nodes
     pub fn with_capacity(edges: usize, nodes: usize) -> Self
     where
         Idx: Default,
-        S: Clone + Default,
+        S: Default,
     {
-        let hasher = S::default();
         HyperMap {
-            edges: EdgeMap::with_capacity_and_hasher(edges, hasher.clone()),
-            nodes: NodeMap::with_capacity_and_hasher(nodes, hasher),
+            edges: EdgeMap::with_capacity_and_hasher(edges, Default::default()),
+            nodes: NodeMap::with_capacity_and_hasher(nodes, Default::default()),
             history: IndexTracker::new(),
             attrs: A::new(),
         }
