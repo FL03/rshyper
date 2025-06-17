@@ -93,7 +93,17 @@ jobs:
       matrix:
         features:  [ full, all, default ]
         target: [ x86_64-unknown-linux-gnu ]
-        toolchain: [ stable ]
+        toolchain: [ stable, nightly ]
+        include:
+            - features: default
+              target: x86_64-unknown-linux-gnu
+              toolchain: stable
+            - features: all
+              target: x86_64-unknown-linux-gnu
+              toolchain: nightly
+            - features: full
+              target: x86_64-unknown-linux-gnu
+              toolchain: stable
     steps:
       -
         name: Checkout
@@ -107,14 +117,14 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           override: true
       -
-        if: matrix.features != 'default' && matrix.features != 'all'
         name: Test (${{ matrix.features }})
+        if: matrix.features != 'default' && matrix.features != 'all'
         run: cargo test -r --locked --workspace --target ${{ matrix.target }} --features ${{ matrix.features }}
       -
-        if: matrix.features == 'default'
         name: Test (default)
+        if: matrix.features == 'default'
         run: cargo test -r --locked --workspace --target ${{ matrix.target }}
       -
-        if: matrix.features == 'all'
         name: Test (all-features)
+        if: matrix.features == 'all' && matrix.toolchain == 'nightly'
         run: cargo test -r --locked --workspace --target ${{ matrix.target }} --all-features

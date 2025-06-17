@@ -2,7 +2,7 @@
     appellation: impl_graph <module>
     authors: @FL03
 */
-use crate::{HashSurface, HyperMap};
+use crate::{HashEdge, HyperMap};
 use core::hash::{BuildHasher, Hash};
 use rshyper::error::{Error, Result};
 use rshyper::idx::{EdgeId, RawIndex, VertexId, VertexSet};
@@ -32,7 +32,7 @@ where
     /// if **any** of these condition are not met, an error will be thrown.
     pub(crate) fn add_hyperedge(
         &mut self,
-        surface: HashSurface<E, K, Idx, S>,
+        surface: HashEdge<E, K, Idx, S>,
     ) -> Result<EdgeId<Idx>>
     where
         Idx: Clone,
@@ -361,7 +361,7 @@ where
         tracing::instrument(skip_all, target = "hyper_map", level = "trace")
     )]
     /// returns an immutable reference to the [`HashFacet`] associated with the given index
-    pub fn get_surface<Q>(&self, index: &Q) -> Result<&HashSurface<E, K, Idx, S>>
+    pub fn get_surface<Q>(&self, index: &Q) -> Result<&HashEdge<E, K, Idx, S>>
     where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -373,7 +373,7 @@ where
         tracing::instrument(skip_all, target = "hyper_map", level = "trace")
     )]
     /// returns a mutable reference to the [`HashFacet`] associated with the given index
-    pub fn get_surface_mut<Q>(&mut self, index: &Q) -> Result<&mut HashSurface<E, K, Idx, S>>
+    pub fn get_surface_mut<Q>(&mut self, index: &Q) -> Result<&mut HashEdge<E, K, Idx, S>>
     where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -477,7 +477,7 @@ where
         feature = "tracing",
         tracing::instrument(skip_all, target = "hyper_map", level = "trace")
     )]
-    pub fn remove_surface<Q>(&mut self, index: &Q) -> Result<HashSurface<E, K, Idx, S>>
+    pub fn remove_surface<Q>(&mut self, index: &Q) -> Result<HashEdge<E, K, Idx, S>>
     where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -510,7 +510,7 @@ where
     /// retain surfaces in the hypergraph based on a predicate;
     pub fn retain_surfaces<F>(&mut self, f: F) -> &mut Self
     where
-        F: FnMut(&EdgeId<Idx>, &mut HashSurface<E, K, Idx, S>) -> bool,
+        F: FnMut(&EdgeId<Idx>, &mut HashEdge<E, K, Idx, S>) -> bool,
     {
         self.edges_mut().retain(f);
         self

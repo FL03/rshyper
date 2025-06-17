@@ -15,6 +15,9 @@
 //!   - `A::Ix`: the type of indices used by the instance; bounded by the [`RawIndex`](rshyper_core::RawIndex) trait
 //! - `S`: the type of [`BuildHasher`](core::hash::BuildHasher) used for the underling stores
 //!
+//! The underlying storage mechanics are based upon the [`hashbrown`](https://docs.rs/hashbrown) crate,
+//! a Rust implementation of [Google's SwissTable](https://abseil.io/blog/20180927-swisstables) algorithm.
+//!
 //! ## Features
 //!
 //! The crate is heavily feature-gated to maximize compatibility and minimize dependencies,

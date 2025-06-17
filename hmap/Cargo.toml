@@ -93,7 +93,8 @@ algo = ["dep:rshyper-algo"]
 # ************* [FF:Environments] *************
 # std is required, this is more symbolic then anything
 std = [
-    "hashbrown/std",
+    "alloc",
+    "hashbrown/default",
     "num-traits/std",
     "rand?/std",
     "rshyper-algo?/std",
@@ -169,6 +170,7 @@ rng = [
 serde = [
     "dep:serde",
     "dep:serde_derive",
+    "hashbrown/serde",
     "rand?/serde",
     "rshyper-algo?/serde",
     "rshyper-core/serde",

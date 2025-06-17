@@ -2,7 +2,7 @@
     appellation: impl_hyper_graph <module>
     authors: @FL03
 */
-use crate::{HashSurface, HyperMap, iter};
+use crate::{HashEdge, HyperMap, iter};
 use core::hash::{BuildHasher, Hash};
 use rshyper::error::Result;
 use rshyper::idx::{EdgeId, NumIndex, VertexId};
@@ -15,7 +15,7 @@ where
     S: BuildHasher,
 {
     type Node<_N> = Node<_N, A::Ix>;
-    type Edge<_E> = HashSurface<_E, A::Kind, A::Ix, S>;
+    type Edge<_E> = HashEdge<_E, A::Kind, A::Ix, S>;
 }
 
 impl<N, E, A, S> HyperGraph<N, E, A> for HyperMap<N, E, A, S>
@@ -59,14 +59,14 @@ where
         self.get_node_mut(index).ok()
     }
 
-    fn get_surface(&self, index: &EdgeId<A::Ix>) -> Option<&HashSurface<E, A::Kind, A::Ix, S>> {
+    fn get_surface(&self, index: &EdgeId<A::Ix>) -> Option<&HashEdge<E, A::Kind, A::Ix, S>> {
         self.get_surface(index).ok()
     }
 
     fn get_surface_mut(
         &mut self,
         index: &EdgeId<A::Ix>,
-    ) -> Option<&mut HashSurface<E, A::Kind, A::Ix, S>> {
+    ) -> Option<&mut HashEdge<E, A::Kind, A::Ix, S>> {
         self.get_surface_mut(index).ok()
     }
 

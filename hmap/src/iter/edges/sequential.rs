@@ -3,19 +3,18 @@
     authors: @FL03
 */
 //! this module implements sequential iterator over the edges of a [`HyperMap`]
-use crate::HashSurface;
+use crate::HashEdge;
 
 use super::{Facets, FacetsMut};
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::idx::{EdgeId, RawIndex};
-use rshyper_core::prelude::GraphType;
-use std::hash::RandomState;
+use rshyper::idx::{EdgeId, RawIndex};
+use rshyper::prelude::GraphType;
 
 /// [`SeqEdgeIter`] is an iterator producing references to the edges of a hypergraph w.r.t. the
 /// order in-which they were inserted.
-pub struct SeqFacetIter<'a, E, K, Idx, S = RandomState>
+pub struct SeqFacetIter<'a, E, K, Idx, S>
 where
-    S: BuildHasher,
+    S: BuildHasher + 'a,
     E: 'a,
     Idx: RawIndex,
     K: GraphType,
@@ -25,9 +24,9 @@ where
 }
 /// [`SeqFacetIterMut`] is a mutable iterator producing mutable references to the edges of a
 /// hypergraph in a manner that respects the order in-which they were inserted.
-pub struct SeqFacetIterMut<'a, E, K, Idx, S = RandomState>
+pub struct SeqFacetIterMut<'a, E, K, Idx, S>
 where
-    S: BuildHasher,
+    S: BuildHasher + 'a,
     E: 'a,
     Idx: RawIndex,
     K: GraphType,
@@ -41,12 +40,12 @@ where
 */
 impl<'a, E, K, Idx, S> Iterator for SeqFacetIter<'a, E, K, Idx, S>
 where
-    S: BuildHasher,
+    S: BuildHasher + 'a,
     E: 'a,
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
 {
-    type Item = &'a HashSurface<E, K, Idx, S>;
+    type Item = &'a HashEdge<E, K, Idx, S>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(next) = self.keys.next() {
@@ -61,12 +60,12 @@ where
 
 impl<'a, E, K, Idx, S> Iterator for SeqFacetIterMut<'a, E, K, Idx, S>
 where
-    S: BuildHasher,
+    S: BuildHasher + 'a,
     E: 'a,
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
 {
-    type Item = &'a mut HashSurface<E, K, Idx, S>;
+    type Item = &'a mut HashEdge<E, K, Idx, S>;
 
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(next) = self.keys.next() {

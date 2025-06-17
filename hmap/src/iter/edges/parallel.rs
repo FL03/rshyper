@@ -3,20 +3,19 @@
     authors: @FL03
 */
 use super::iter::{EdgeIter, EdgeIterMut, EdgeKeys};
-use crate::types::HashSurface;
+use crate::types::HashEdge;
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::GraphType;
-use rshyper_core::idx::{EdgeId, RawIndex};
-use std::hash::RandomState;
+use rshyper::GraphType;
+use rshyper::idx::{EdgeId, RawIndex};
 
 /// [`ParEdgeIter`] is a parallel iterator over the edges of a hypergraph, yielding pairs of
 /// [`EdgeId`] and the corresponding [`HashFacet`].
 #[cfg(feature = "rayon")]
 #[repr(transparent)]
-pub struct ParEdgeIter<'a, E, K, Idx, S = RandomState>
+pub struct ParEdgeIter<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
-    E: Send + Sync,
+    E: 'a + Send + Sync,
     Idx: RawIndex + Eq + Hash + Send + Sync,
     S: BuildHasher + Send + Sync,
 {
@@ -26,10 +25,10 @@ where
 /// yielding pairs of [`EdgeId`] and a mutable reference to the corresponding [`HashFacet`].
 #[cfg(feature = "rayon")]
 #[repr(transparent)]
-pub struct ParEdgeIterMut<'a, E, K, Idx, S = RandomState>
+pub struct ParEdgeIterMut<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
-    E: Send + Sync,
+    E: 'a + Send + Sync,
     Idx: RawIndex + Eq + Hash + Send + Sync,
     S: BuildHasher + Send + Sync,
 {
@@ -46,9 +45,9 @@ use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
 impl<'a, E, K, Idx, S> ParallelIterator for EdgeKeys<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
-    E: Send + Sync,
+    E: 'a + Send + Sync,
     Idx: RawIndex + Eq + Hash + Send + Sync,
-    S: BuildHasher + Send + Sync,
+    S: BuildHasher + Send + Sync + 'a,
 {
     type Item = &'a EdgeId<Idx>;
 
@@ -63,11 +62,11 @@ where
 impl<'a, E, K, Idx, S> ParallelIterator for EdgeIter<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
-    E: Send + Sync,
+    E: 'a + Send + Sync,
     Idx: RawIndex + Eq + Hash + Send + Sync,
-    S: BuildHasher + Send + Sync,
+    S: BuildHasher + Send + Sync + 'a,
 {
-    type Item = (&'a EdgeId<Idx>, &'a HashSurface<E, K, Idx, S>);
+    type Item = (&'a EdgeId<Idx>, &'a HashEdge<E, K, Idx, S>);
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
@@ -80,11 +79,11 @@ where
 impl<'a, E, K, Idx, S> ParallelIterator for EdgeIterMut<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
-    E: Send + Sync,
+    E: 'a + Send + Sync,
     Idx: RawIndex + Eq + Hash + Send + Sync,
-    S: BuildHasher + Send + Sync,
+    S: BuildHasher + Send + Sync + 'a,
 {
-    type Item = (&'a EdgeId<Idx>, &'a mut HashSurface<E, K, Idx, S>);
+    type Item = (&'a EdgeId<Idx>, &'a mut HashEdge<E, K, Idx, S>);
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
@@ -100,11 +99,11 @@ where
 impl<'a, E, K, Idx, S> ParallelIterator for ParEdgeIter<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
-    E: Send + Sync,
+    E: 'a + Send + Sync,
     Idx: RawIndex + Eq + Hash + Send + Sync,
-    S: BuildHasher + Send + Sync,
+    S: BuildHasher + Send + Sync + 'a,
 {
-    type Item = (&'a EdgeId<Idx>, &'a HashSurface<E, K, Idx, S>);
+    type Item = (&'a EdgeId<Idx>, &'a HashEdge<E, K, Idx, S>);
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
@@ -117,11 +116,11 @@ where
 impl<'a, E, K, Idx, S> ParallelIterator for ParEdgeIterMut<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
-    E: Send + Sync,
+    E: 'a + Send + Sync,
     Idx: RawIndex + Eq + Hash + Send + Sync,
-    S: BuildHasher + Send + Sync,
+    S: BuildHasher + Send + Sync + 'a,
 {
-    type Item = (&'a EdgeId<Idx>, &'a mut HashSurface<E, K, Idx, S>);
+    type Item = (&'a EdgeId<Idx>, &'a mut HashEdge<E, K, Idx, S>);
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where

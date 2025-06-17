@@ -3,9 +3,9 @@
     authors: @FL03
 */
 use core::hash::Hash;
+use hashbrown::hash_map;
 use rshyper::idx::{RawIndex, VertexId};
 use rshyper::node::Node;
-use std::collections::hash_map;
 
 #[doc(hidden)]
 /// returns an iterator that starts at the "first" vertex and follows the path until the end

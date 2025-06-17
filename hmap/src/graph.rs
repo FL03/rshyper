@@ -51,7 +51,7 @@ where
     /// associated with a weight of type `N`.
     pub(crate) nodes: NodeMap<N, A::Ix, S>,
     /// `edges` represent the hyperedges of the hypergraph, each identified by an `EdgeId`
-    pub(crate) edges: SurfaceMap<E, A::Kind, A::Ix, S>,
+    pub(crate) edges: EdgeMap<E, A::Kind, A::Ix, S>,
 }
 
 impl<N, E, A, K, Idx, S> HyperMap<N, E, A, S>
@@ -71,7 +71,7 @@ where
         HyperMap {
             attrs: A::new(),
             history: IndexTracker::new(),
-            edges: SurfaceMap::with_hasher(hasher.clone()),
+            edges: EdgeMap::with_hasher(hasher.clone()),
             nodes: NodeMap::with_hasher(hasher),
         }
     }
@@ -83,7 +83,7 @@ where
     {
         let hasher = S::default();
         HyperMap {
-            edges: SurfaceMap::with_capacity_and_hasher(edges, hasher.clone()),
+            edges: EdgeMap::with_capacity_and_hasher(edges, hasher.clone()),
             nodes: NodeMap::with_capacity_and_hasher(nodes, hasher),
             history: IndexTracker::new(),
             attrs: A::new(),
@@ -127,11 +127,11 @@ where
         self.history_mut().cursor_mut()
     }
     /// returns an immutable reference to the surfaces of the hypergraph
-    pub const fn edges(&self) -> &SurfaceMap<E, K, Idx, S> {
+    pub const fn edges(&self) -> &EdgeMap<E, K, Idx, S> {
         &self.edges
     }
     /// returns a mutable reference to the surfaces of the hypergraph
-    pub const fn edges_mut(&mut self) -> &mut SurfaceMap<E, K, Idx, S> {
+    pub const fn edges_mut(&mut self) -> &mut EdgeMap<E, K, Idx, S> {
         &mut self.edges
     }
     /// overrides the current nodes and returns a mutable reference to the hypergraph
@@ -163,7 +163,7 @@ where
     }
     #[inline]
     /// overrides the current surfaces and returns a mutable reference to the hypergraph
-    pub fn set_surfaces(&mut self, surfaces: SurfaceMap<E, K, Idx, S>) -> &mut Self
+    pub fn set_surfaces(&mut self, surfaces: EdgeMap<E, K, Idx, S>) -> &mut Self
     where
         Idx: Default,
     {
@@ -220,15 +220,15 @@ where
     }
     /// returns an [`Entry`](std::collections::hash_map::Entry) for the node with the given
     /// index, allowing for modifications or insertions to the mapping
-    pub fn node(&mut self, index: VertexId<Idx>) -> NodeEntry<'_, N, Idx>
+    pub fn node(&mut self, index: VertexId<Idx>) -> NodeEntry<'_, N, Idx, S>
     where
         Idx: Eq + Hash,
     {
         self.nodes_mut().entry(index)
     }
-    /// returns a [`SurfaceEntry`] for the surface with the given index, allowing for in-place
+    /// returns a [`EdgeEntry`] for the surface with the given index, allowing for in-place
     /// mutations to the value associated with the index
-    pub fn surface(&mut self, index: EdgeId<Idx>) -> SurfaceEntry<'_, E, K, Idx, S>
+    pub fn edge(&mut self, index: EdgeId<Idx>) -> EdgeEntry<'_, E, K, Idx, S>
     where
         Idx: Eq + Hash,
     {
