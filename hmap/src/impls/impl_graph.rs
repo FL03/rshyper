@@ -2,10 +2,10 @@
     appellation: impl_graph <module>
     authors: @FL03
 */
-use crate::{HashEdge, HyperMap};
+use crate::{HashEdge, HyperMap, VertexSet};
 use core::hash::{BuildHasher, Hash};
 use rshyper::error::{Error, Result};
-use rshyper::idx::{EdgeId, RawIndex, VertexId, VertexSet};
+use rshyper::idx::{EdgeId, RawIndex, VertexId};
 use rshyper::{AddStep, GraphProps, GraphType};
 use rshyper::{Edge, Node, Weight};
 
