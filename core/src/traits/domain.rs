@@ -67,16 +67,19 @@ where
 
 #[cfg(feature = "hashbrown")]
 mod impl_hb {
+
     use super::RawDomain;
     use crate::idx::{RawIndex, VertexId};
+    use core::hash::BuildHasher;
     use hashbrown::HashSet;
 
-    impl<I> RawDomain for HashSet<VertexId<I>>
+    impl<I, S> RawDomain for HashSet<VertexId<I>, S>
     where
         I: RawIndex,
+        S: BuildHasher
     {
         type Item = VertexId<I>;
-        type Store<_T> = HashSet<_T>;
+        type Store<_T> = HashSet<_T, S>;
 
         seal!();
 
