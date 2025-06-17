@@ -14,10 +14,6 @@ pub use self::use_alloc::*;
 #[cfg(feature = "std")]
 pub use self::use_std::*;
 
-#[cfg(feature = "alloc")]
-/// a type alias for a [`Vec`](alloc::vec::Vec) of [`VertexId`] that is generic over
-/// the index type `I`
-pub type VertexVec<I, A> = alloc::vec::Vec<VertexId<I>, A>;
 #[cfg(all(feature = "std", not(feature = "hashbrown")))]
 /// a type alias for a [`HashSet`](std::collections::HashSet) of [`VertexId`] that is generic over
 /// the index type `I`
@@ -63,8 +59,12 @@ mod use_alloc {
     use alloc::collections::{BTreeSet, VecDeque};
     use alloc::vec::Vec;
 
-    /// a type alias for a [`VertexId`] stored in a [`Vec`]
-    pub type VertexVec<Idx = usize> = Vec<VertexId<Idx>>;
+    #[cfg(feature = "nightly")]
+    /// a type alias for a [`Vec`] of [`VertexId`] that is generic over the index type `I`
+    pub type VertexVec<I, A> = alloc::vec::Vec<VertexId<I>, A>;
+    #[cfg(not(feature = "nightly"))]
+    /// a type alias for a [`Vec`] of [`VertexId`] that is generic over the index type `I`
+    pub type VertexVec<I> = alloc::vec::Vec<VertexId<I>>;
     /// a type alias for a [`VertexId`] stored in a [`VecDeque`]
     pub type VertexVecDeque<Idx = usize> = VecDeque<VertexId<Idx>>;
     /// a type alias for a [`VertexId`] stored in a [`BTreeSet`]
