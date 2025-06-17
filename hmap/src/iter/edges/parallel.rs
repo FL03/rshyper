@@ -9,11 +9,11 @@ use hashbrown::hash_map::rayon as hash_map;
 use rshyper::GraphType;
 use rshyper::idx::{EdgeId, RawIndex};
 
-/// [`ParEdgeIter`] is a parallel iterator over the edges of a hypergraph, yielding pairs of
-/// [`EdgeId`] and the corresponding [`HashFacet`].
+/// [`ParFacets`] is a parallel iterator over the edges of a hypergraph, yielding pairs of
+/// [`EdgeId`] and the corresponding [`Edge`](rshyper::Edge).
 #[cfg(feature = "rayon")]
 #[repr(transparent)]
-pub struct ParEdgeIter<'a, E, K, Idx, S>
+pub struct ParFacets<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
     E: 'a + Send + Sync,
@@ -22,11 +22,11 @@ where
 {
     pub(crate) iter: hash_map::ParValues<'a, E, K, Idx, S>,
 }
-/// [`ParEdgeIterMut`] is a mutable parallel iterator over the edges of a hypergraph,
-/// yielding pairs of [`EdgeId`] and a mutable reference to the corresponding [`HashFacet`].
+/// [`ParFacetsMut`] is a mutable parallel iterator over the edges of a hypergraph,
+/// yielding pairs of [`EdgeId`] and a mutable reference to the corresponding [`Edge`](rshyper::Edge).
 #[cfg(feature = "rayon")]
 #[repr(transparent)]
-pub struct ParEdgeIterMut<'a, E, K, Idx, S>
+pub struct ParFacetsMut<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
     E: 'a + Send + Sync,
@@ -97,7 +97,7 @@ where
     }
 }
 
-impl<'a, E, K, Idx, S> ParallelIterator for ParEdgeIter<'a, E, K, Idx, S>
+impl<'a, E, K, Idx, S> ParallelIterator for ParFacets<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
     E: 'a + Send + Sync,
@@ -114,7 +114,7 @@ where
     }
 }
 
-impl<'a, E, K, Idx, S> ParallelIterator for ParEdgeIterMut<'a, E, K, Idx, S>
+impl<'a, E, K, Idx, S> ParallelIterator for ParFacetsMut<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
     E: 'a + Send + Sync,
