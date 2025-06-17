@@ -91,19 +91,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        features:  [ full, all, default ]
+        features:  [ full, default ]
         target: [ x86_64-unknown-linux-gnu ]
-        toolchain: [ stable, nightly ]
-        include:
-            - features: default
-              target: x86_64-unknown-linux-gnu
-              toolchain: stable
-            - features: all
-              target: x86_64-unknown-linux-gnu
-              toolchain: nightly
-            - features: full
-              target: x86_64-unknown-linux-gnu
-              toolchain: stable
     steps:
       -
         name: Checkout
@@ -114,7 +103,33 @@ jobs:
         with:
           cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           target: ${{ matrix.target }}
-          toolchain: ${{ matrix.toolchain }}
+      -
+        name: Test (${{ matrix.features }})
+        if: matrix.features != 'default' && matrix.features != 'all'
+        run: cargo test -r --locked --workspace --target ${{ matrix.target }} --features ${{ matrix.features }}
+      -
+        name: Test (default)
+        if: matrix.features == 'default'
+        run: cargo test -r --locked --workspace --target ${{ matrix.target }}
+  test_nightly:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        features:  [ all ]
+        target: [ x86_64-unknown-linux-gnu ]
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          target: ${{ matrix.target }}
+          toolchain: nightly
           override: true
       -
         name: Test (${{ matrix.features }})
@@ -126,5 +141,5 @@ jobs:
         run: cargo test -r --locked --workspace --target ${{ matrix.target }}
       -
         name: Test (all-features)
-        if: matrix.features == 'all' && matrix.toolchain == 'nightly'
+        if: matrix.features == 'all'
         run: cargo test -r --locked --workspace --target ${{ matrix.target }} --all-features
