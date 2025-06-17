@@ -2,6 +2,8 @@
     appellation: aliases <module>
     authors: @FL03
 */
+
+pub(crate) use rshyper::prelude::VertexSet;
 #[allow(deprecated, unused_imports)]
 pub use self::impl_deprecated::*;
 
@@ -10,8 +12,8 @@ use hashbrown::hash_map::{Entry, HashMap};
 use rshyper::idx::{EdgeId, VertexId};
 use rshyper::{Edge, Node};
 
-/// a type alias for a [`HashSet`](hashbrown::HashSet) of [`VertexId`]
-pub type VertexSet<Idx = usize, S = DefaultHashBuilder> = hashbrown::HashSet<VertexId<Idx>, S>;
+// /// a type alias for a [`HashSet`](hashbrown::HashSet) of [`VertexId`]
+// pub(crate) type VertexSet<Idx = usize, S = DefaultHashBuilder> = hashbrown::HashSet<VertexId<Idx>, S>;
 
 /// a type alias for a [`Edge`] with [`VertexSet`] as its vertices
 pub type HashEdge<E, K, I, S> = Edge<E, VertexSet<I, S>, K, I>;
