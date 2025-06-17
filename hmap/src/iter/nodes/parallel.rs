@@ -4,31 +4,32 @@
 */
 use super::iter::*;
 use core::hash::Hash;
+use hashbrown::hash_map::rayon as hash_map;
 use rayon::iter::plumbing::UnindexedConsumer;
 use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
 use rshyper::idx::{RawIndex, VertexId};
 use rshyper::node::Node;
 
 /// [`NodeParIter`] is a parallel iterator over the nodes of a hypergraph, yielding pairs of
-/// [`VertexId`] and the corresponding [`HyperNode`].
+/// [`VertexId`] and the corresponding [`Node`].
 #[cfg(feature = "rayon")]
 pub struct NodeParIter<'a, N, Idx>
 where
     N: Send + Sync,
     Idx: RawIndex + Eq + Hash,
 {
-    pub(crate) iter: NodeIter<'a, N, Idx>,
+    pub(crate) iter: hash_map::ParValues<'a, N, Idx>,
 }
 
 /// [`NodeParIterMut`] is a mutable parallel iterator over the nodes of a hypergraph, yielding
-/// pairs of [`VertexId`] and a mutable reference to the corresponding [`HyperNode`].
+/// pairs of [`VertexId`] and a mutable reference to the corresponding [`Node`].
 #[cfg(feature = "rayon")]
 pub struct NodeParIterMut<'a, N, Idx>
 where
     N: Send + Sync,
     Idx: RawIndex + Eq + Hash,
 {
-    pub(crate) iter: NodeIterMut<'a, N, Idx>,
+    pub(crate) iter: hash_map::ParValuesMut<'a, N, Idx>,
 }
 
 /*

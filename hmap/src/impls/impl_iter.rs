@@ -115,32 +115,31 @@ where
     /// returns a parallel iterator over the nodes of the hypergraph, yielding pairs of
     /// [`VertexId`](rshyper::VertexId) and the corresponding [`Node`](rshyper::Node).
     #[cfg(feature = "rayon")]
-    pub fn node_par_iter(&self) -> NodeParIter<'_, N, Idx>
+    pub fn par_iter_nodes(&self) -> NodeParIter<'_, N, Idx>
     where
         N: Send + Sync,
         Idx: Send + Sync,
     {
         NodeParIter {
-            iter: self.iter_nodes(),
+            iter: self.nodes().par_values(),
         }
     }
     /// returns a mutable parallel iterator over the nodes of the hypergraph, yielding pairs of
-    /// [`VertexId`](rshyper::VertexId) and a mutable reference to the corresponding
-    /// [`Node`](rshyper::Node).
+    /// references to the [`Node`](rshyper::Node) in the hypergraph.
     #[cfg(feature = "rayon")]
-    pub fn node_par_iter_mut(&mut self) -> NodeParIterMut<'_, N, Idx>
+    pub fn par_iter_nodes_mut(&mut self) -> NodeParIterMut<'_, N, Idx>
     where
         N: Send + Sync,
         Idx: Send + Sync,
     {
         NodeParIterMut {
-            iter: self.iter_nodes_mut(),
+            iter: self.nodes_mut().par_values_mut(),
         }
     }
     /// returns a parallel iterator over the surfaces of the hypergraph, yielding pairs of
     /// [`EdgeId`](rshyper::EdgeId) and the corresponding [`Edge`](rshyper::Edge).
     #[cfg(feature = "rayon")]
-    pub fn surface_par_iter(&self) -> ParEdgeIter<'_, E, K, Idx, S>
+    pub fn par_iter_facets(&self) -> ParEdgeIter<'_, E, K, Idx, S>
     where
         E: Send + Sync,
         K: Send + Sync,
@@ -148,13 +147,13 @@ where
         S: Send + Sync,
     {
         ParEdgeIter {
-            iter: self.iter_edges(),
+            iter: self.edges().par_values(),
         }
     }
     /// returns a mutable parallel iterator over the surfaces of the hypergraph, yielding pairs of
     /// [`EdgeId`](rshyper::EdgeId) and a mutable reference to the corresponding [`Edge`](rshyper::Edge).
     #[cfg(feature = "rayon")]
-    pub fn surface_par_iter_mut(&mut self) -> ParEdgeIterMut<'_, E, K, Idx, S>
+    pub fn par_iter_facets_mut(&mut self) -> ParEdgeIterMut<'_, E, K, Idx, S>
     where
         E: Send + Sync,
         K: Send + Sync,
@@ -162,7 +161,7 @@ where
         S: Send + Sync,
     {
         ParEdgeIterMut {
-            iter: self.iter_edges_mut(),
+            iter: self.edges().par_values_mut(),
         }
     }
 }

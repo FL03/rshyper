@@ -5,6 +5,7 @@
 use super::iter::{EdgeIter, EdgeIterMut, EdgeKeys};
 use crate::types::HashEdge;
 use core::hash::{BuildHasher, Hash};
+use hashbrown::hash_map::rayon as hash_map;
 use rshyper::GraphType;
 use rshyper::idx::{EdgeId, RawIndex};
 
@@ -19,7 +20,7 @@ where
     Idx: RawIndex + Eq + Hash + Send + Sync,
     S: BuildHasher + Send + Sync,
 {
-    pub(crate) iter: EdgeIter<'a, E, K, Idx, S>,
+    pub(crate) iter: hash_map::ParValues<'a, E, K, Idx, S>,
 }
 /// [`ParEdgeIterMut`] is a mutable parallel iterator over the edges of a hypergraph,
 /// yielding pairs of [`EdgeId`] and a mutable reference to the corresponding [`HashFacet`].
@@ -32,7 +33,7 @@ where
     Idx: RawIndex + Eq + Hash + Send + Sync,
     S: BuildHasher + Send + Sync,
 {
-    pub(crate) iter: EdgeIterMut<'a, E, K, Idx, S>,
+    pub(crate) iter: hash_map::ParValuesMut<'a, E, K, Idx, S>,
 }
 
 /*
