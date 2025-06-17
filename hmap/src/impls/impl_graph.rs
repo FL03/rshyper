@@ -213,7 +213,7 @@ where
         feature = "tracing",
         tracing::instrument(skip_all, name = "neighbors", target = "hyper_map")
     )]
-    pub fn find_node_neighbors(&self, index: &VertexId<Idx>) -> Result<VertexSet<Idx>>
+    pub fn find_node_neighbors(&self, index: &VertexId<Idx>) -> Result<VertexSet<Idx, S>>
     where
         Idx: Copy,
     {
