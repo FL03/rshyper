@@ -224,7 +224,7 @@ where
             return Err(Error::NodeNotFound);
         }
         // initialize an empty set to hold the neighbors
-        let mut neighbors = VertexSet::<Idx, S>::new();
+        let mut neighbors = VertexSet::<Idx, S>::with_hasher(S::default());
         // iterate through all the connections
         self.edges().values().for_each(|surface| {
             if surface.contains(index) {
