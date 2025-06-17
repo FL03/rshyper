@@ -30,9 +30,9 @@ pub trait RawLayout {
         TypeId::of::<crate::Undirected>() == TypeId::of::<Self::Kind>()
     }
 }
-/// [`EdgeLayoutExt`] extends the behaviour of a [`RawLayout`] to include various constructors
+/// [`LayoutExt`] extends the behaviour of a [`RawLayout`] to include various constructors
 /// and other utilitarian methods.
-pub trait EdgeLayoutExt: RawLayout {
+pub trait LayoutExt: RawLayout {
     fn new(id: EdgeId<Self::Index>, vertices: Self::Store) -> Self;
 }
 /// A [`BinaryLayout`] represents a specific type of edge that essentially defines the standard

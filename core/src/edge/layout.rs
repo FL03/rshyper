@@ -2,7 +2,7 @@
     appellation: hyper_edge <module>
     authors: @FL03
 */
-use super::RawLayout;
+use crate::edge::{LayoutExt, RawLayout};
 use crate::idx::{EdgeId, RawIndex, VertexId};
 use crate::{Domain, GraphType};
 
@@ -205,7 +205,7 @@ where
     }
 }
 
-impl<S, K, Idx> EdgeLayoutExt for EdgeLayout<S, K, Idx>
+impl<S, K, Idx> LayoutExt for EdgeLayout<S, K, Idx>
 where
     S: Domain<Idx>,
     Idx: RawIndex,
