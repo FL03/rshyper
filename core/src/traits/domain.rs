@@ -65,6 +65,31 @@ where
 {
 }
 
+#[cfg(feature = "hashbrown")]
+mod impl_hb {
+    use super::RawDomain;
+    use crate::idx::{RawIndex, VertexId};
+    use hashbrown::HashSet;
+
+    impl<I> RawDomain for HashSet<VertexId<I>>
+    where
+        I: RawIndex,
+    {
+        type Item = VertexId<I>;
+        type Store<_T> = HashSet<_T>;
+
+        seal!();
+
+        fn len(&self) -> usize {
+            <Self::Store<Self::Item>>::len(self)
+        }
+
+        fn is_empty(&self) -> bool {
+            <Self::Store<Self::Item>>::is_empty(self)
+        }
+    }
+}
+
 impl<I> RawDomain for &[VertexId<I>]
 where
     I: RawIndex,

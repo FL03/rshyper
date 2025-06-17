@@ -1014,6 +1014,7 @@ name = "rshyper-core"
 version = "0.1.6"
 dependencies = [
  "anyhow",
+ "hashbrown",
  "lazy_static",
  "num-traits",
  "paste",
