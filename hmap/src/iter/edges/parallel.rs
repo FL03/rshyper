@@ -2,12 +2,10 @@
     appellation: surface <module>
     authors: @FL03
 */
-use super::iter::{EdgeIter, EdgeIterMut, EdgeKeys};
 use crate::types::HashEdge;
 use core::hash::{BuildHasher, Hash};
 use hashbrown::hash_map::rayon as hash_map;
-use rayon::iter::plumbing::{Consumer, UnindexedConsumer};
-use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
+use rayon::iter::{plumbing::UnindexedConsumer, ParallelIterator};
 use rshyper::GraphType;
 use rshyper::idx::{EdgeId, RawIndex};
 
@@ -40,60 +38,6 @@ where
  ************* Implementations *************
 */
 
-impl<'a, E, K, Idx, S> ParallelIterator for EdgeKeys<'a, E, K, Idx, S>
-where
-    K: GraphType + Send + Sync,
-    E: 'a + Send + Sync,
-    Idx: RawIndex + Eq + Hash + Send + Sync,
-    S: BuildHasher + Send + Sync + 'a,
-{
-    type Item = &'a EdgeId<Idx>;
-
-    fn drive_unindexed<C>(self, consumer: C) -> C::Result
-    where
-        C: UnindexedConsumer<Self::Item>,
-    {
-        self.iter.par_bridge().drive_unindexed(consumer)
-    }
-}
-
-impl<'a, E, K, Idx, S> ParallelIterator for EdgeIter<'a, E, K, Idx, S>
-where
-    K: GraphType + Send + Sync,
-    E: 'a + Send + Sync,
-    Idx: RawIndex + Eq + Hash + Send + Sync,
-    S: BuildHasher + Send + Sync + 'a,
-{
-    type Item = (&'a EdgeId<Idx>, &'a HashEdge<E, K, Idx, S>);
-
-    fn drive_unindexed<C>(self, consumer: C) -> C::Result
-    where
-        C: UnindexedConsumer<Self::Item>,
-    {
-        self.iter.par_bridge().drive_unindexed(consumer)
-    }
-}
-
-impl<'a, E, K, Idx, S> ParallelIterator for EdgeIterMut<'a, E, K, Idx, S>
-where
-    K: GraphType + Send + Sync,
-    E: 'a + Send + Sync,
-    Idx: RawIndex + Eq + Hash + Send + Sync,
-    S: BuildHasher + Send + Sync + 'a,
-{
-    type Item = (&'a EdgeId<Idx>, &'a mut HashEdge<E, K, Idx, S>);
-
-    fn drive_unindexed<C>(self, consumer: C) -> C::Result
-    where
-        C: UnindexedConsumer<Self::Item>,
-    {
-        self.iter
-            .par_bridge()
-            .into_par_iter()
-            .drive_unindexed(consumer)
-    }
-}
-
 impl<'a, E, K, Idx, S> ParallelIterator for ParFacets<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
@@ -105,9 +49,9 @@ where
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
-        C: Consumer<&'a HashEdge<E, K, Idx, S>> + UnindexedConsumer<Self::Item>,
+        C: UnindexedConsumer<Self::Item>,
     {
-        self.iter.into_par_iter().drive_unindexed(consumer)
+        self.iter.drive_unindexed(consumer)
     }
 }
 
@@ -122,8 +66,8 @@ where
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
-        C: Consumer<&'a mut HashEdge<E, K, Idx, S>> + UnindexedConsumer<Self::Item>,
+        C: UnindexedConsumer<Self::Item>,
     {
-        self.iter.into_par_iter().drive_unindexed(consumer)
+        self.iter.drive_unindexed(consumer)
     }
 }
