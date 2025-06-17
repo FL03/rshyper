@@ -32,6 +32,11 @@ pub type DiSurface<T, S, Idx = usize> = Edge<T, S, Directed, Idx>;
 /// a type alias for an [`Undirected`] hypersurface
 pub type UnSurface<T, S, Idx = usize> = Edge<T, S, Undirected, Idx>;
 
+/// a type alias for an [`Edge`] whose _vertices_ are stored in a [`VertexHashSet`]
+pub type HashEdge<K, I, S> = EdgeLayout<VertexHashSet<I, S>, K, I>;
+/// a type alias for an [`Surface`] whose _vertices_ are stored in a [`VertexHashSet`]
+pub type HashSurface<T, K, I, S> = Edge<T, VertexHashSet<I, S>, K, I>;
+
 /// a type alias for a [`Edge`] whose _vertices_ are stored in an array of fixed
 /// size with the size defined by the generic parameter `N`.
 pub type EdgeArray<const N: usize, K = Undirected, Idx = usize> =
@@ -61,10 +66,10 @@ mod use_alloc {
 
     #[cfg(feature = "nightly")]
     /// a type alias for a [`Vec`] of [`VertexId`] that is generic over the index type `I`
-    pub type VertexVec<I, A> = alloc::vec::Vec<VertexId<I>, A>;
+    pub type VertexVec<I, A> = Vec<VertexId<I>, A>;
     #[cfg(not(feature = "nightly"))]
     /// a type alias for a [`Vec`] of [`VertexId`] that is generic over the index type `I`
-    pub type VertexVec<I> = alloc::vec::Vec<VertexId<I>>;
+    pub type VertexVec<I> = Vec<VertexId<I>>;
     /// a type alias for a [`VertexId`] stored in a [`VecDeque`]
     pub type VertexVecDeque<Idx = usize> = VecDeque<VertexId<Idx>>;
     /// a type alias for a [`VertexId`] stored in a [`BTreeSet`]
@@ -81,20 +86,4 @@ mod use_alloc {
     pub type EdgeBTreeSet<K, Idx = usize> = EdgeLayout<VertexBSet<Idx>, K, Idx>;
     /// a type alias for an [`Surface`] whose _vertices_ are stored in a [`BTreeSet`]
     pub type SurfaceBTreeSet<T, K, Idx = usize> = Edge<T, VertexBSet<Idx>, K, Idx>;
-}
-
-#[cfg(feature = "std")]
-mod use_std {
-    use crate::edge::{Edge, EdgeLayout};
-    use crate::idx::VertexId;
-
-    use std::collections::HashSet;
-    use std::hash::RandomState;
-    /// a type alias for a [`VertexId`] stored in a [`HashSet`] that is generic over the
-    /// type of the index, `I`, and the hasher used, `S`.
-    pub type VertexHashSet<I = usize, S = RandomState> = HashSet<VertexId<I>, S>;
-    /// a type alias for an [`Edge`] whose _vertices_ are stored in a [`HashSet`]
-    pub type HashEdge<K, I = usize, S = RandomState> = EdgeLayout<VertexHashSet<I, S>, K, I>;
-    /// a type alias for an [`Surface`] whose _vertices_ are stored in a [`HashSet`]
-    pub type HashSurface<T, K, I = usize, S = RandomState> = Edge<T, VertexHashSet<I, S>, K, I>;
 }
