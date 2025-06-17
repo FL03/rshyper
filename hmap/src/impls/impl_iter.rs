@@ -161,7 +161,7 @@ where
         S: Send + Sync,
     {
         ParFacetsMut {
-            iter: self.edges().par_values_mut(),
+            iter: self.edges_mut().par_values_mut(),
         }
     }
 }

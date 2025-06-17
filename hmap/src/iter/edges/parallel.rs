@@ -110,7 +110,7 @@ where
     where
         C: UnindexedConsumer<Self::Item>,
     {
-        self.iter.par_bridge().drive_unindexed(consumer)
+        self.iter.into_par_iter().drive_unindexed(consumer)
     }
 }
 
@@ -128,7 +128,6 @@ where
         C: UnindexedConsumer<Self::Item>,
     {
         self.iter
-            .par_bridge()
             .into_par_iter()
             .drive_unindexed(consumer)
     }
