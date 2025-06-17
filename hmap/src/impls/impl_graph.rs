@@ -216,6 +216,7 @@ where
     pub fn find_node_neighbors(&self, index: &VertexId<Idx>) -> Result<VertexSet<Idx, S>>
     where
         Idx: Copy,
+        S: Default,
     {
         if !self.contains_node(index) {
             #[cfg(feature = "tracing")]
@@ -223,7 +224,7 @@ where
             return Err(Error::NodeNotFound);
         }
         // initialize an empty set to hold the neighbors
-        let mut neighbors = VertexSet::new();
+        let mut neighbors = VertexSet::<Idx, S>::new();
         // iterate through all the connections
         self.edges().values().for_each(|surface| {
             if surface.contains(index) {
