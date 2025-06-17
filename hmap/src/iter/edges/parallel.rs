@@ -127,8 +127,6 @@ where
     where
         C: UnindexedConsumer<Self::Item>,
     {
-        self.iter
-            .into_par_iter()
-            .drive_unindexed(consumer)
+        self.iter.into_par_iter().drive_unindexed(consumer)
     }
 }
