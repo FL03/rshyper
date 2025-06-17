@@ -12,16 +12,16 @@ use hashbrown::hash_map::{Entry, HashMap};
 use rshyper::idx::{EdgeId, VertexId};
 use rshyper::{Edge, Node};
 
-/// a type alias for a [`HashSet`](hashbrown::HashSet) of [`VertexId`]
-pub(crate) type VertexSet<Idx = usize, S = DefaultHashBuilder> = hashbrown::HashSet<VertexId<Idx>, S>;
-
 /// a type alias for a [`Edge`] with [`VertexSet`] as its vertices
 pub type HashEdge<E, K, I, S> = Edge<E, VertexSet<I, S>, K, I>;
+/// a type alias for a [`HashSet`](hashbrown::HashSet) of [`VertexId`]
+pub type VertexSet<Idx = usize, S = DefaultHashBuilder> = hashbrown::HashSet<VertexId<Idx>, S>;
 
 /// a type alias for a [`Entry`] that whose key is a [`VertexId`] and value is a [`Node`]
 pub type NodeEntry<'a, N, I, S> = Entry<'a, VertexId<I>, Node<N, I>, S>;
 /// a type alias for a [`Entry`] that whose key is an [`EdgeId`] and value is a [`HashSurface`]
 pub type EdgeEntry<'a, T, K, I, S> = Entry<'a, EdgeId<I>, HashEdge<T, K, I, S>, S>;
+
 /// a type alias for a [`HashMap`] that maps [`VertexId`] to a [`Node`]
 pub type NodeMap<N, I, S = DefaultHashBuilder> = HashMap<VertexId<I>, Node<N, I>, S>;
 /// a type alias for a [`HashMap`] that maps [`EdgeId`] to a [`HashFacet`]

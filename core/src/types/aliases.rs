@@ -2,9 +2,9 @@
     appellation: aliases <module>
     authors: @FL03
 */
-//! this module defines various type aliases, for convenience and clarity, for the
-//! [`Edge`] and [`Surface`] types
+//! this module provides various type aliases for the core components of a hypergraph, such as:
 //!
+//! - [`DiEdge`], [`UnEdge`], [`DiSurface`], [`UnSurface`], and others.
 use crate::edge::{Edge, EdgeLayout};
 use crate::idx::VertexId;
 use crate::{Directed, Undirected};
@@ -13,6 +13,19 @@ use crate::{Directed, Undirected};
 pub use self::use_alloc::*;
 #[cfg(feature = "std")]
 pub use self::use_std::*;
+
+#[cfg(feature = "alloc")]
+/// a type alias for a [`Vec`](alloc::vec::Vec) of [`VertexId`] that is generic over
+/// the index type `I`
+pub type VertexVec<I, A> = alloc::vec::Vec<VertexId<I>, A>;
+#[cfg(all(feature = "std", not(feature = "hashbrown")))]
+/// a type alias for a [`HashSet`](std::collections::HashSet) of [`VertexId`] that is generic over
+/// the index type `I`
+pub type VertexHashSet<I, S = std::hash::RandomState> = std::collections::HashSet<VertexId<I>, S>;
+#[cfg(feature = "hashbrown")]
+/// a type alias for a [`HashSet`](hashbrown::HashSet) of [`VertexId`] that is generic over
+/// the index type `I`
+pub type VertexHashSet<I, S = hashbrown::DefaultHashBuilder> = hashbrown::HashSet<VertexId<I>, S>;
 
 /// a type alias for a [`Directed`] hyperedge
 pub type DiEdge<S, Idx = usize> = EdgeLayout<S, Directed, Idx>;

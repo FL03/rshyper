@@ -6,7 +6,7 @@
 //! representations for edges in a hypergraph.
 #[doc(inline)]
 pub use self::{
-    hyper_edge::Edge, layout::EdgeLayout, traits::prelude::*, types::prelude::*, utils::prelude::*,
+    hyper_edge::Edge, layout::EdgeLayout, traits::prelude::*, utils::prelude::*,
 };
 
 /// a [`hyper_surface`] speaks to a _weighted_ hyperedge, materialized here as a [`Surface`]
@@ -16,8 +16,8 @@ pub mod hyper_edge;
 pub mod layout;
 
 mod impls {
+    pub mod impl_layout;
     pub mod impl_edge;
-    pub mod impl_surface;
 }
 
 pub mod traits {
@@ -29,7 +29,7 @@ pub mod traits {
     /// this module defines the [`RawLayout`] trait for establishing a common interface for
     /// representations of a hyperedge
     mod layout;
-    /// this module defines the [`RawEdge`] trait
+    /// this module defines the [`RawSurface`] trait
     mod surface;
 
     pub(crate) mod prelude {
@@ -44,13 +44,11 @@ pub mod types {
     //! this module contains various type aliases and additional types in support of the edges
     //! of a hypergraph.
     #[doc(inline)]
+    #[allow(unused_imports)]
     pub use self::prelude::*;
 
-    mod aliases;
 
     pub(crate) mod prelude {
-        #[doc(inline)]
-        pub use super::aliases::*;
     }
 }
 

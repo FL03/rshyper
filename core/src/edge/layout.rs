@@ -205,7 +205,7 @@ where
     }
 }
 
-impl<S, K, Idx> super::EdgeLayoutExt for EdgeLayout<S, K, Idx>
+impl<S, K, Idx> EdgeLayoutExt for EdgeLayout<S, K, Idx>
 where
     S: Domain<Idx>,
     Idx: RawIndex,

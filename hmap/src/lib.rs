@@ -111,8 +111,6 @@ pub mod prelude {
     pub use super::graph::*;
     #[doc(inline)]
     pub use super::iter::prelude::*;
-    #[doc(inline)]
-    pub use super::types::prelude::*;
 
     #[allow(deprecated)]
     #[deprecated(since = "0.1.3", note = "use `HyperMap` instead")]
