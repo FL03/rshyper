@@ -5,7 +5,8 @@
 use crate::types::HashEdge;
 use core::hash::{BuildHasher, Hash};
 use hashbrown::hash_map::rayon as hash_map;
-use rayon::iter::{plumbing::UnindexedConsumer, ParallelIterator};
+use rayon::iter::plumbing::{Consumer, UnindexedConsumer};
+use rayon::iter::ParallelIterator;
 use rshyper::GraphType;
 use rshyper::idx::{EdgeId, RawIndex};
 
@@ -45,7 +46,7 @@ where
     Idx: RawIndex + Eq + Hash + Send + Sync,
     S: BuildHasher + Send + Sync + 'a,
 {
-    type Item = (&'a EdgeId<Idx>, &'a HashEdge<E, K, Idx, S>);
+    type Item = &'a HashEdge<E, K, Idx, S>;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
@@ -62,7 +63,7 @@ where
     Idx: RawIndex + Eq + Hash + Send + Sync,
     S: BuildHasher + Send + Sync + 'a,
 {
-    type Item = (&'a EdgeId<Idx>, &'a mut HashEdge<E, K, Idx, S>);
+    type Item = &'a mut HashEdge<E, K, Idx, S>;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where

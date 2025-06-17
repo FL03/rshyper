@@ -38,7 +38,7 @@ where
     N: Send + Sync,
     Idx: RawIndex + Eq + Hash,
 {
-    type Item = (&'a VertexId<Idx>, &'a Node<N, Idx>);
+    type Item = &'a Node<N, Idx>;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
@@ -53,7 +53,7 @@ where
     N: Send + Sync,
     Idx: RawIndex + Eq + Hash,
 {
-    type Item = (&'a VertexId<Idx>, &'a mut Node<N, Idx>);
+    type Item = &'a mut Node<N, Idx>;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
