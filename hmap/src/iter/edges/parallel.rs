@@ -5,15 +5,15 @@
 use crate::types::HashEdge;
 use core::hash::{BuildHasher, Hash};
 use hashbrown::hash_map::rayon as hash_map;
-use rayon::iter::plumbing::UnindexedConsumer;
 use rayon::iter::ParallelIterator;
+use rayon::iter::plumbing::UnindexedConsumer;
 use rshyper::GraphType;
 use rshyper::idx::{EdgeId, RawIndex};
 
-/// [`ParFacets`] is a parallel iterator over the edges of a hypergraph, yielding pairs of
-/// [`EdgeId`] and the corresponding [`Edge`](rshyper::Edge).
+/// [`ParEdgeValues`] is a parallel iterator over the edges of a hypergraph, yielding
+/// references to the edges as [`HashEdge`]s.
 #[repr(transparent)]
-pub struct ParFacets<'a, E, K, Idx, S>
+pub struct ParEdgeValues<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
     E: 'a + Send + Sync,
@@ -22,10 +22,10 @@ where
 {
     pub(crate) iter: hash_map::ParValues<'a, EdgeId<Idx>, HashEdge<E, K, Idx, S>>,
 }
-/// [`ParFacetsMut`] is a mutable parallel iterator over the edges of a hypergraph,
-/// yielding pairs of [`EdgeId`] and a mutable reference to the corresponding [`Edge`](rshyper::Edge).
+/// [`ParEdgeValuesMut`] is a mutable parallel iterator over the edges of a hypergraph,
+/// yielding a mutable reference to the corresponding [`HashEdge`].
 #[repr(transparent)]
-pub struct ParFacetsMut<'a, E, K, Idx, S>
+pub struct ParEdgeValuesMut<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
     E: 'a + Send + Sync,
@@ -39,7 +39,7 @@ where
  ************* Implementations *************
 */
 
-impl<'a, E, K, Idx, S> ParallelIterator for ParFacets<'a, E, K, Idx, S>
+impl<'a, E, K, Idx, S> ParallelIterator for ParEdgeValues<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
     E: 'a + Send + Sync,
@@ -56,7 +56,7 @@ where
     }
 }
 
-impl<'a, E, K, Idx, S> ParallelIterator for ParFacetsMut<'a, E, K, Idx, S>
+impl<'a, E, K, Idx, S> ParallelIterator for ParEdgeValuesMut<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
     E: 'a + Send + Sync,

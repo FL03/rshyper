@@ -4,15 +4,15 @@
 */
 use core::hash::Hash;
 use hashbrown::hash_map::rayon as hash_map;
-use rayon::iter::plumbing::UnindexedConsumer;
 use rayon::iter::ParallelIterator;
+use rayon::iter::plumbing::UnindexedConsumer;
 use rshyper::idx::{RawIndex, VertexId};
 use rshyper::node::Node;
 
-/// [`NodeParIter`] is a parallel iterator over the nodes of a hypergraph, yielding pairs of
+/// [`ParNodeValues`] is a parallel iterator over the nodes of a hypergraph, yielding pairs of
 /// [`VertexId`] and the corresponding [`Node`].
 #[cfg(feature = "rayon")]
-pub struct NodeParIter<'a, N, Idx>
+pub struct ParNodeValues<'a, N, Idx>
 where
     N: Send + Sync,
     Idx: RawIndex + Eq + Hash,
@@ -20,10 +20,10 @@ where
     pub(crate) iter: hash_map::ParValues<'a, VertexId<Idx>, Node<N, Idx>>,
 }
 
-/// [`NodeParIterMut`] is a mutable parallel iterator over the nodes of a hypergraph, yielding
+/// [`ParNodeValuesMut`] is a mutable parallel iterator over the nodes of a hypergraph, yielding
 /// pairs of [`VertexId`] and a mutable reference to the corresponding [`Node`].
 #[cfg(feature = "rayon")]
-pub struct NodeParIterMut<'a, N, Idx>
+pub struct ParNodeValuesMut<'a, N, Idx>
 where
     N: Send + Sync,
     Idx: RawIndex + Eq + Hash,
@@ -34,7 +34,7 @@ where
 /*
  ************* Implementations *************
 */
-impl<'a, N, Idx> ParallelIterator for NodeParIter<'a, N, Idx>
+impl<'a, N, Idx> ParallelIterator for ParNodeValues<'a, N, Idx>
 where
     N: Send + Sync,
     Idx: RawIndex + Eq + Hash,
@@ -49,7 +49,7 @@ where
     }
 }
 
-impl<'a, N, Idx> ParallelIterator for NodeParIterMut<'a, N, Idx>
+impl<'a, N, Idx> ParallelIterator for ParNodeValuesMut<'a, N, Idx>
 where
     N: Send + Sync,
     Idx: RawIndex + Eq + Hash,

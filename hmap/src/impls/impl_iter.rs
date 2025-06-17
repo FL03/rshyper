@@ -115,52 +115,52 @@ where
     /// returns a parallel iterator over the nodes of the hypergraph, yielding pairs of
     /// [`VertexId`](rshyper::VertexId) and the corresponding [`Node`](rshyper::Node).
     #[cfg(feature = "rayon")]
-    pub fn par_iter_nodes(&self) -> NodeParIter<'_, N, Idx>
+    pub fn par_iter_nodes(&self) -> ParNodeValues<'_, N, Idx>
     where
         N: Send + Sync,
         Idx: Send + Sync,
     {
-        NodeParIter {
+        ParNodeValues {
             iter: self.nodes().par_values(),
         }
     }
     /// returns a mutable parallel iterator over the nodes of the hypergraph, yielding pairs of
     /// references to the [`Node`](rshyper::Node) in the hypergraph.
     #[cfg(feature = "rayon")]
-    pub fn par_iter_nodes_mut(&mut self) -> NodeParIterMut<'_, N, Idx>
+    pub fn par_iter_nodes_mut(&mut self) -> ParNodeValuesMut<'_, N, Idx>
     where
         N: Send + Sync,
         Idx: Send + Sync,
     {
-        NodeParIterMut {
+        ParNodeValuesMut {
             iter: self.nodes_mut().par_values_mut(),
         }
     }
     /// returns a parallel iterator over the surfaces of the hypergraph, yielding pairs of
     /// [`EdgeId`](rshyper::EdgeId) and the corresponding [`Edge`](rshyper::Edge).
     #[cfg(feature = "rayon")]
-    pub fn par_iter_facets(&self) -> ParFacets<'_, E, K, Idx, S>
+    pub fn par_iter_facets(&self) -> ParEdgeValues<'_, E, K, Idx, S>
     where
         E: Send + Sync,
         K: Send + Sync,
         Idx: Send + Sync,
         S: Send + Sync,
     {
-        ParFacets {
+        ParEdgeValues {
             iter: self.edges().par_values(),
         }
     }
     /// returns a mutable parallel iterator over the surfaces of the hypergraph, yielding pairs of
     /// [`EdgeId`](rshyper::EdgeId) and a mutable reference to the corresponding [`Edge`](rshyper::Edge).
     #[cfg(feature = "rayon")]
-    pub fn par_iter_facets_mut(&mut self) -> ParFacetsMut<'_, E, K, Idx, S>
+    pub fn par_iter_facets_mut(&mut self) -> ParEdgeValuesMut<'_, E, K, Idx, S>
     where
         E: Send + Sync,
         K: Send + Sync,
         Idx: Send + Sync,
         S: Send + Sync,
     {
-        ParFacetsMut {
+        ParEdgeValuesMut {
             iter: self.edges_mut().par_values_mut(),
         }
     }
