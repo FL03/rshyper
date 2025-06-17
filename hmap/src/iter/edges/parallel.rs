@@ -6,12 +6,12 @@ use super::iter::{EdgeIter, EdgeIterMut, EdgeKeys};
 use crate::types::HashEdge;
 use core::hash::{BuildHasher, Hash};
 use hashbrown::hash_map::rayon as hash_map;
+use rayon::iter::plumbing::{Consumer, UnindexedConsumer};
 use rshyper::GraphType;
 use rshyper::idx::{EdgeId, RawIndex};
 
 /// [`ParFacets`] is a parallel iterator over the edges of a hypergraph, yielding pairs of
 /// [`EdgeId`] and the corresponding [`Edge`](rshyper::Edge).
-#[cfg(feature = "rayon")]
 #[repr(transparent)]
 pub struct ParFacets<'a, E, K, Idx, S>
 where
@@ -24,7 +24,6 @@ where
 }
 /// [`ParFacetsMut`] is a mutable parallel iterator over the edges of a hypergraph,
 /// yielding pairs of [`EdgeId`] and a mutable reference to the corresponding [`Edge`](rshyper::Edge).
-#[cfg(feature = "rayon")]
 #[repr(transparent)]
 pub struct ParFacetsMut<'a, E, K, Idx, S>
 where
@@ -40,7 +39,6 @@ where
  ************* Implementations *************
 */
 
-use rayon::iter::plumbing::UnindexedConsumer;
 use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
 
 impl<'a, E, K, Idx, S> ParallelIterator for EdgeKeys<'a, E, K, Idx, S>
