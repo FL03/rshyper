@@ -25,7 +25,7 @@
     clippy::missing_safety_doc
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
-
+#![cfg_attr(feature = "nightly", feature(allocator_api))]
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
