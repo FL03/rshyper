@@ -2,11 +2,11 @@
     appellation: impl_hyper_graph <module>
     authors: @FL03
 */
-use crate::{HashEdge, HyperMap, iter};
+use crate::{HashEdge, HyperMap,  VertexSet, iter};
 use core::hash::{BuildHasher, Hash};
 use rshyper::error::Result;
 use rshyper::idx::{EdgeId, NumIndex, VertexId};
-use rshyper::prelude::{GraphProps, Node, VertexSet, Weight};
+use rshyper::prelude::{GraphProps, Node,Weight};
 use rshyper::traits::{HyperGraph, HyperGraphIterEdge, HyperGraphIterNode, RawHyperGraph};
 
 impl<N, E, A, S> RawHyperGraph<A> for HyperMap<N, E, A, S>

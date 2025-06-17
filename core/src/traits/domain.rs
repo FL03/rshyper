@@ -67,7 +67,6 @@ where
 
 #[cfg(feature = "hashbrown")]
 mod impl_hb {
-
     use super::RawDomain;
     use crate::idx::{RawIndex, VertexId};
     use core::hash::BuildHasher;
@@ -89,6 +88,125 @@ mod impl_hb {
 
         fn is_empty(&self) -> bool {
             <Self::Store<Self::Item>>::is_empty(self)
+        }
+    }
+}
+
+#[cfg(feature = "alloc")]
+mod impl_alloc {
+    use super::StoreIter;
+    use crate::idx::{RawIndex, VertexId};
+    use alloc::collections::{
+        btree_set::{self, BTreeSet},
+        vec_deque::{self, VecDeque},
+    };
+    use alloc::vec::Vec;
+
+    macro_rules! impl_domain {
+        (@impl $t:ident<$T:ident>) => {
+            impl<$T> $crate::RawDomain for $t<VertexId<$T>>
+            where
+                $T: $crate::idx::RawIndex,
+            {
+                type Item = VertexId<$T>;
+                type Store<_T> = $t<_T>;
+
+                seal!();
+
+                fn len(&self) -> usize {
+                    <Self::Store<Self::Item>>::len(self)
+                }
+
+                fn is_empty(&self) -> bool {
+                    <Self::Store<Self::Item>>::is_empty(self)
+                }
+            }
+        };
+        ($($t:ident<$T:ident>),* $(,)?) => {
+            $(
+                impl_domain!(@impl $t<$T>);
+            )*
+        };
+    }
+
+    impl_domain! {
+        BTreeSet<I>,
+        Vec<I>,
+        VecDeque<I>
+    }
+
+    impl<I> StoreIter<I> for BTreeSet<VertexId<I>>
+    where
+        I: RawIndex,
+    {
+        type Iter<'a, _T: 'a> = btree_set::Iter<'a, _T>;
+
+        fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
+            <Self::Store<Self::Item>>::iter(self)
+        }
+    }
+
+    impl<I> StoreIter<I> for Vec<VertexId<I>>
+    where
+        I: RawIndex,
+    {
+        type Iter<'a, _T: 'a> = core::slice::Iter<'a, _T>;
+
+        fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
+            self.as_slice().iter()
+        }
+    }
+
+    impl<I> StoreIter<I> for VecDeque<VertexId<I>>
+    where
+        I: RawIndex,
+    {
+        type Iter<'a, _T: 'a> = vec_deque::Iter<'a, _T>;
+
+        fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
+            <Self::Store<Self::Item>>::iter(self)
+        }
+    }
+}
+
+#[cfg(feature = "std")]
+mod impl_std {
+    use super::{RawDomain, StoreIter};
+    use crate::idx::{RawIndex, VertexId};
+    use core::hash::BuildHasher;
+    use std::collections::hash_set::{self, HashSet};
+
+    impl<I, S> RawDomain for HashSet<VertexId<I>, S>
+    where
+        I: RawIndex,
+        S: BuildHasher,
+    {
+        type Item = VertexId<I>;
+        type Store<_T> = HashSet<_T, S>;
+
+        seal!();
+
+        fn len(&self) -> usize {
+            <Self::Store<Self::Item>>::len(self)
+        }
+
+        fn is_empty(&self) -> bool {
+            <Self::Store<Self::Item>>::is_empty(self)
+        }
+    }
+
+    impl<I, S> StoreIter<I> for HashSet<VertexId<I>, S>
+    where
+        I: RawIndex,
+        S: BuildHasher,
+    {
+        type Iter<'a, _T: 'a>
+            = hash_set::Iter<'a, _T>
+        where
+            S: 'a;
+
+        fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
+            <Self::Store<Self::Item>>::iter(self)
         }
     }
 }
@@ -224,127 +342,5 @@ where
 
     fn tgt(&self) -> &VertexId<I> {
         &self.1
-    }
-}
-
-#[allow(unused_macros)]
-macro_rules! impl_domain {
-    (@impl $t:ident<$T:ident>) => {
-        impl<$T> $crate::RawDomain for $t<VertexId<$T>>
-        where
-            $T: $crate::idx::RawIndex,
-        {
-            type Item = VertexId<$T>;
-            type Store<_T> = $t<_T>;
-
-            seal!();
-
-            fn len(&self) -> usize {
-                <Self::Store<Self::Item>>::len(self)
-            }
-
-            fn is_empty(&self) -> bool {
-                <Self::Store<Self::Item>>::is_empty(self)
-            }
-        }
-
-
-    };
-    ($($t:ident<$T:ident>),* $(,)?) => {
-        $(
-            impl_domain!(@impl $t<$T>);
-        )*
-    };
-}
-
-#[cfg(feature = "alloc")]
-mod impl_alloc {
-    use super::StoreIter;
-    use crate::idx::{RawIndex, VertexId};
-    use alloc::collections::{
-        btree_set::{self, BTreeSet},
-        vec_deque::{self, VecDeque},
-    };
-    use alloc::vec::Vec;
-
-    impl_domain! {
-        BTreeSet<I>,
-        Vec<I>,
-        VecDeque<I>
-    }
-
-    impl<I> StoreIter<I> for BTreeSet<VertexId<I>>
-    where
-        I: RawIndex,
-    {
-        type Iter<'a, _T: 'a> = btree_set::Iter<'a, _T>;
-
-        fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
-            <Self::Store<Self::Item>>::iter(self)
-        }
-    }
-
-    impl<I> StoreIter<I> for Vec<VertexId<I>>
-    where
-        I: RawIndex,
-    {
-        type Iter<'a, _T: 'a> = core::slice::Iter<'a, _T>;
-
-        fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
-            self.as_slice().iter()
-        }
-    }
-
-    impl<I> StoreIter<I> for VecDeque<VertexId<I>>
-    where
-        I: RawIndex,
-    {
-        type Iter<'a, _T: 'a> = vec_deque::Iter<'a, _T>;
-
-        fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
-            <Self::Store<Self::Item>>::iter(self)
-        }
-    }
-}
-
-#[cfg(feature = "std")]
-mod impl_std {
-    use super::{RawDomain, StoreIter};
-    use crate::idx::{RawIndex, VertexId};
-    use core::hash::BuildHasher;
-    use std::collections::hash_set::{self, HashSet};
-
-    impl<I, S> RawDomain for HashSet<VertexId<I>, S>
-    where
-        I: RawIndex,
-        S: BuildHasher,
-    {
-        type Item = VertexId<I>;
-        type Store<_T> = HashSet<_T, S>;
-
-        seal!();
-
-        fn len(&self) -> usize {
-            <Self::Store<Self::Item>>::len(self)
-        }
-
-        fn is_empty(&self) -> bool {
-            <Self::Store<Self::Item>>::is_empty(self)
-        }
-    }
-
-    impl<I, S> StoreIter<I> for HashSet<VertexId<I>, S>
-    where
-        I: RawIndex,
-        S: BuildHasher,
-    {
-        type Iter<'a, _T: 'a>
-            = hash_set::Iter<'a, _T>
-        where
-            S: 'a;
-
-        fn iter(&self) -> Self::Iter<'_, VertexId<I>> {
-            <Self::Store<Self::Item>>::iter(self)
-        }
     }
 }
