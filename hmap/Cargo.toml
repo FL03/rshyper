@@ -43,7 +43,7 @@ scsys = { workspace = true }
 # concurrency & parallelism
 rayon = { optional = true, workspace = true }
 #  data structures
-hashbrown = { workspace = true }
+hashbrown = { optional = true, workspace = true }
 # error handling
 thiserror = { workspace = true }
 # logging
@@ -75,6 +75,7 @@ default = [
 full = [
     "default",
     "anyhow",
+    "hashbrown",
     "json",
     "rand",
     "serde",
@@ -136,6 +137,11 @@ anyhow = [
     "rshyper-algo?/anyhow",
     "rshyper-core/anyhow",
     "scsys/anyhow",
+]
+
+hashbrown = [
+    "dep:hashbrown",
+    "rshyper-core/hashbrown",
 ]
 
 json = [

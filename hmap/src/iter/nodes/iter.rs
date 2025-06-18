@@ -3,6 +3,9 @@
     authors: @FL03
 */
 use core::hash::Hash;
+#[cfg(all(feature = "std", not(feature = "hashbrown")))]
+use std::collections::hash_map;
+#[cfg(feature = "hashbrown")]
 use hashbrown::hash_map;
 use rshyper::prelude::{Node, RawIndex, VertexId};
 

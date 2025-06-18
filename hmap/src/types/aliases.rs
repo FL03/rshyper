@@ -5,6 +5,9 @@
 #[allow(deprecated, unused_imports)]
 pub use self::impl_deprecated::*;
 
+#[cfg(all(feature = "std", not(feature = "hashbrown")))]
+use std::collections::hash_map::{Entry, HashMap};
+#[cfg(feature = "hashbrown")]
 use hashbrown::hash_map::{Entry, HashMap};
 use rshyper::idx::{EdgeId, VertexId};
 use rshyper::{Edge, Node};

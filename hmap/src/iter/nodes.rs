@@ -9,7 +9,7 @@ pub use self::prelude::*;
 
 mod directional;
 mod iter;
-#[cfg(feature = "rayon")]
+#[cfg(all(feature = "hashbrown", feature = "rayon"))]
 mod parallel;
 mod sequential;
 
@@ -20,7 +20,7 @@ mod prelude {
     #[doc(inline)]
     pub use super::iter::*;
     #[doc(inline)]
-    #[cfg(feature = "rayon")]
+    #[cfg(all(feature = "hashbrown", feature = "rayon"))]
     pub use super::parallel::*;
     #[doc(inline)]
     pub use super::sequential::*;
