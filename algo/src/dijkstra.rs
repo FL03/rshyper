@@ -198,8 +198,7 @@ where
             }
 
             // For each neighbor via hyperedges
-            let edges = self.graph().find_edges_with_node(&u);
-            for edge_id in edges {
+            for edge_id in self.graph.find_edges_with_node(&u) {
                 // load the weight of the edge
                 let weight = self
                     .graph
@@ -209,7 +208,7 @@ where
                 // visit each node within the hyperedge
                 for v in self
                     .graph
-                    .get_domain(&edge_id)
+                    .get_edge_domain(&edge_id)
                     .expect("empty hyperedge")
                     .clone()
                 {

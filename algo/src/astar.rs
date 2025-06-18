@@ -254,12 +254,11 @@ where
             // Get all hyperedges containing the current vertex
             self.graph
                 .find_edges_with_node(&current)
-                .iter()
                 .for_each(|edge_id| {
                     // Get all vertices in this hyperedge
                     let vertices = self
                         .graph
-                        .get_domain(edge_id)
+                        .get_edge_domain(edge_id)
                         .expect("Failed to get edge vertices");
 
                     // Process each vertex in this hyperedge

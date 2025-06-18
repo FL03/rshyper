@@ -3,16 +3,17 @@
     authors: @FL03
 */
 use crate::HyperMap;
-use crate::types::{EdgeEntry, EdgeMap};
+use crate::types::{EdgeEntry, EdgeMap, VertexSet};
 use core::borrow::Borrow;
 use core::hash::{BuildHasher, Hash};
-use rshyper::prelude::{EdgeId, GraphProps, GraphType, RawIndex, VertexId};
+use rshyper::idx::{EdgeId, RawIndex, VertexId};
+use rshyper::prelude::{GraphProps, GraphType, Result};
 
 impl<N, E, A, S, Idx, K> HyperMap<N, E, A, S>
 where
     A: GraphProps<Kind = K, Ix = Idx>,
     S: BuildHasher,
-    Idx: RawIndex,
+    Idx: RawIndex + Eq + Hash,
     K: GraphType,
 {
     #[deprecated(note = "use `get_domain` instead", since = "0.1.5")]

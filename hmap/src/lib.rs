@@ -35,7 +35,12 @@
     html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
 )]
-#![allow(clippy::should_implement_trait, clippy::module_inception)]
+#![allow(
+    clippy::missing_safety_doc,
+    clippy::module_inception,
+    clippy::needless_doctest_main,
+    clippy::should_implement_trait
+)]
 // **** WARNING ****
 // the `std` feature is required by the crate, only declared for concistency w.r.t. the
 // available features and for ensuring that all the depencies actually implement the `std`
@@ -59,18 +64,19 @@ pub use self::{graph::*, types::prelude::*};
 pub mod graph;
 
 mod impls {
-    #[cfg(feature = "algo")]
-    pub mod impl_algo;
     pub mod impl_graph;
     pub mod impl_hyper_graph;
     pub mod impl_iter;
     pub mod impl_ops;
     pub mod impl_repr;
+
+    #[cfg(feature = "algo")]
+    pub mod impl_algo;
     #[cfg(feature = "serde")]
     pub mod impl_serde;
 
     #[doc(hidden)]
-    #[allow(deprecated, unused)]
+    #[allow(deprecated)]
     pub mod impl_deprecated;
 }
 

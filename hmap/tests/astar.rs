@@ -119,8 +119,8 @@ fn test_astar_with_heuristic() -> Result<()> {
         let next = path[i + 1];
 
         // Check if these vertices are connected by any hyperedge
-        let current_edges = graph.find_edges_with_node(&current)?;
-        let next_edges = graph.find_edges_with_node(&next)?;
+        let current_edges = graph.find_edges_with_node(&current).collect::<Vec<_>>();
+        let next_edges = graph.find_edges_with_node(&next).collect::<Vec<_>>();
 
         // There should be at least one common edge between current and next
         let has_connection = current_edges.iter().any(|&e1| next_edges.contains(&e1));
@@ -207,8 +207,8 @@ fn test_astar_complex_paths() -> Result<()> {
 
     // Verify this is actually a valid path in the graph
     for i in 0..path.len() - 1 {
-        let current_edges = graph.find_edges_with_node(&path[i])?;
-        let next_edges = graph.find_edges_with_node(&path[i + 1])?;
+        let current_edges = graph.find_edges_with_node(&path[i]).collect::<Vec<_>>();
+        let next_edges = graph.find_edges_with_node(&path[i + 1]).collect::<Vec<_>>();
 
         let has_connection = current_edges.iter().any(|&e1| next_edges.contains(&e1));
 
