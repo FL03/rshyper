@@ -2,45 +2,40 @@
     Appellation: hash_graph <module>
     Contrib: @FL03
 */
-/// the [`graph`] module is responsible for defining the [`HyperMap`] structure and provides
-/// its root implementation(s).
+//! # [`HyperMap`]
+//!
+//! The [`HyperMap`] is a map-based implementation of a hypergraph leveraging the [`hashbrown`](https://crates.io/crates/hashbrown)
+//! crate for efficient storage and retrieval of nodes and edges.
+//!
+//! ## Overview
+//!
+//! This implementation focuses on performance and flexibility, leveraging an internal history
+//! to maintain a sense of order and enable efficient index management. The history enables
+//! us to provide sequential iterators that produce elements w.r.t. the order in-which they
+//! were inserted.
 use crate::types::prelude::*;
 
+use core::borrow::Borrow;
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::{
-    AddStep, GraphType, Mode,
-    attrs::{DiAttrs, GraphProps, UnAttrs},
-    idx::{EdgeId, Frame, IndexTracker, RawIndex, VertexId},
-};
-use std::hash::RandomState;
+use rshyper::attrs::{DiAttrs, GraphProps, UnAttrs};
+use rshyper::idx::{EdgeId, Frame, IndexTracker, RawIndex, Udx, VertexId};
+use rshyper::{AddStep, GraphType, Mode};
 
-/// a type alias for a [directed](crate::Directed) [`HyperMap`]
-pub type DiHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, DiAttrs<Idx>, S>;
-/// a type alias for an [undirected](crate::Undirected) [`HyperMap`]
-pub type UnHyperMap<N, E, Idx = usize, S = RandomState> = HyperMap<N, E, UnAttrs<Idx>, S>;
+/// a type alias for a [directed](rshyper::Directed) [`HyperMap`]
+pub type DiHyperMap<N, E, Idx = Udx, S = DefaultHashBuilder> = HyperMap<N, E, DiAttrs<Idx>, S>;
+/// a type alias for an [undirected](rshyper::Undirected) [`HyperMap`]
+pub type UnHyperMap<N, E, Idx = Udx, S = DefaultHashBuilder> = HyperMap<N, E, UnAttrs<Idx>, S>;
 
-/// The [`HyperMap`] is a map-based implementation of a hypergraph that is generic over the
-/// types:
-///
-/// - `N`: the weight of the nodes (vertices)
-/// - `E`: the weight of the edges (surfaces)
-/// - `A`: the attributes of the hypergraph, which define its kind and index type
-///   - `A::Ix`: the index type used for vertices and edges, which must implement the
-///     [`RawIndex`] trait
-///   - `A::Kind`: the kind of the hypergraph, which must implement the [`GraphType`] trait
-/// - `S`: the hasher used for hashing the nodes and edges
-///
-/// The generic design enables the graph to be used in various contexts and conditions while
-/// retaining a familiar interface for users. This implementation focuses on performance and
-/// flexibility, leveraging an internal history to maintain a sense of order and enable
-/// sequential iterators over the components of the graph w.r.t. the order in which they were
-/// created.
-///
+/// The [`HyperMap`] is a map-based implementation of a hypergraph that provides a flexible and
+/// efficient way to store and manipulate hypergraphs. It is designed to be generic over the
+/// types of nodes `N`, edges `E`, attributes `A`, and the hasher `S` used for hashing the
+/// nodes and edges. This design allows for a wide range of applications, from simple
+/// hypergraphs to more complex structures with custom attributes and hashing strategies.
 #[derive(Clone, Default)]
-pub struct HyperMap<N = (), E = (), A = UnAttrs<usize>, S = RandomState>
+pub struct HyperMap<N = (), E = (), A = UnAttrs<Udx>, S = DefaultHashBuilder>
 where
-    S: BuildHasher,
     A: GraphProps,
+    S: BuildHasher,
 {
     /// the attributes of a graph define its _kind_ and the type of index used
     pub(crate) attrs: A,
@@ -51,44 +46,57 @@ where
     /// associated with a weight of type `N`.
     pub(crate) nodes: NodeMap<N, A::Ix, S>,
     /// `edges` represent the hyperedges of the hypergraph, each identified by an `EdgeId`
-    pub(crate) edges: SurfaceMap<E, A::Kind, A::Ix, S>,
+    pub(crate) edges: EdgeMap<E, A::Kind, A::Ix, S>,
 }
 
-impl<N, E, A, K, Idx, S> HyperMap<N, E, A, S>
+impl<N, E, A, K, Ix, S> HyperMap<N, E, A, S>
 where
+    A: GraphProps<Ix = Ix, Kind = K>,
     S: BuildHasher,
-    A: GraphProps<Ix = Idx, Kind = K>,
     K: GraphType,
-    Idx: RawIndex,
+    Ix: RawIndex,
 {
     /// initialize a new, empty hypergraph
     pub fn new() -> Self
     where
-        Idx: Default,
-        S: Clone + Default,
+        Ix: Default,
+        S: Default,
     {
-        let hasher = S::default();
         HyperMap {
             attrs: A::new(),
             history: IndexTracker::new(),
-            edges: SurfaceMap::with_hasher(hasher.clone()),
-            nodes: NodeMap::with_hasher(hasher),
+            edges: EdgeMap::default(),
+            nodes: NodeMap::default(),
+        }
+    }
+    #[doc(hidden)]
+    /// initialize a new instance of the [`HyperMap`] configured with the given [`BuildHasher`]
+    pub fn with_hasher(hash_builder: S) -> Self
+    where
+        Ix: Default,
+        S: Clone,
+    {
+        HyperMap {
+            attrs: A::new(),
+            history: IndexTracker::new(),
+            edges: EdgeMap::with_hasher(hash_builder.clone()),
+            nodes: NodeMap::with_hasher(hash_builder),
         }
     }
     /// creates a new instance of the hypergraph with the given capacity for edges and nodes
     pub fn with_capacity(edges: usize, nodes: usize) -> Self
     where
-        Idx: Default,
-        S: Clone + Default,
+        Ix: Default,
+        S: Default,
     {
-        let hasher = S::default();
         HyperMap {
-            edges: SurfaceMap::with_capacity_and_hasher(edges, hasher.clone()),
-            nodes: NodeMap::with_capacity_and_hasher(nodes, hasher),
+            edges: EdgeMap::with_capacity_and_hasher(edges, Default::default()),
+            nodes: NodeMap::with_capacity_and_hasher(nodes, Default::default()),
             history: IndexTracker::new(),
             attrs: A::new(),
         }
     }
+    #[doc(hidden)]
     /// returns a copy of the graph attributes; almost never used, however, it is useful for
     /// extracting certain truths about the hypergraph.
     pub(crate) const fn attrs(&self) -> A {
@@ -99,73 +107,73 @@ where
         self.attrs().mode()
     }
     /// returns am immutable reference to the nodes
-    pub const fn nodes(&self) -> &NodeMap<N, Idx, S> {
+    pub const fn nodes(&self) -> &NodeMap<N, Ix, S> {
         &self.nodes
     }
     /// returns a mutable reference to the nodes of the hypergraph
-    pub const fn nodes_mut(&mut self) -> &mut NodeMap<N, Idx, S> {
+    pub const fn nodes_mut(&mut self) -> &mut NodeMap<N, Ix, S> {
         &mut self.nodes
     }
     /// returns an immutable reference to the history of the hypergraph, which is used to track
     /// the indices of edges and vertices that have been created so far.
-    pub const fn history(&self) -> &IndexTracker<Idx> {
+    pub const fn history(&self) -> &IndexTracker<Ix> {
         &self.history
     }
     /// returns a mutable reference to the history of the hypergraph, which is used to track
     /// the indices of edges and vertices that have been created so far.
-    pub const fn history_mut(&mut self) -> &mut IndexTracker<Idx> {
+    pub const fn history_mut(&mut self) -> &mut IndexTracker<Ix> {
         &mut self.history
     }
     /// returns a copy of the position of the hypergraph; here, the [`position`](Position) is
     /// used to track the indices (edge & vertex) and define which ones are next to be used
     /// when inserting new hyperedges or vertices
-    pub const fn position(&self) -> &Frame<Idx> {
+    pub const fn position(&self) -> &Frame<Ix> {
         self.history().cursor()
     }
     /// returns a mutable reference to the current position of the hypergraph;
-    pub const fn position_mut(&mut self) -> &mut Frame<Idx> {
+    pub const fn position_mut(&mut self) -> &mut Frame<Ix> {
         self.history_mut().cursor_mut()
     }
     /// returns an immutable reference to the surfaces of the hypergraph
-    pub const fn edges(&self) -> &SurfaceMap<E, K, Idx, S> {
+    pub const fn edges(&self) -> &EdgeMap<E, K, Ix, S> {
         &self.edges
     }
     /// returns a mutable reference to the surfaces of the hypergraph
-    pub const fn edges_mut(&mut self) -> &mut SurfaceMap<E, K, Idx, S> {
+    pub const fn edges_mut(&mut self) -> &mut EdgeMap<E, K, Ix, S> {
         &mut self.edges
     }
     /// overrides the current nodes and returns a mutable reference to the hypergraph
     #[inline]
-    pub fn set_nodes(&mut self, nodes: NodeMap<N, Idx, S>) -> &mut Self
+    pub fn set_nodes(&mut self, nodes: NodeMap<N, Ix, S>) -> &mut Self
     where
-        Idx: Default,
+        Ix: Default,
     {
         self.nodes = nodes;
         self
     }
     /// overrides the current history and returns a mutable reference to the hypergraph
     #[inline]
-    pub fn set_history(&mut self, history: IndexTracker<Idx>) -> &mut Self
+    pub fn set_history(&mut self, history: IndexTracker<Ix>) -> &mut Self
     where
-        Idx: Default,
+        Ix: Default,
     {
         *self.history_mut() = history;
         self
     }
     /// overrides the current position and returns a mutable reference to the hypergraph
     #[inline]
-    pub fn set_position(&mut self, position: Frame<Idx>) -> &mut Self
+    pub fn set_position(&mut self, position: Frame<Ix>) -> &mut Self
     where
-        Idx: Default,
+        Ix: Default,
     {
         self.history_mut().set_cursor(position);
         self
     }
     #[inline]
     /// overrides the current surfaces and returns a mutable reference to the hypergraph
-    pub fn set_surfaces(&mut self, surfaces: SurfaceMap<E, K, Idx, S>) -> &mut Self
+    pub fn set_surfaces(&mut self, surfaces: EdgeMap<E, K, Ix, S>) -> &mut Self
     where
-        Idx: Default,
+        Ix: Default,
     {
         self.edges = surfaces;
         self
@@ -173,78 +181,74 @@ where
     /// returns true if the hypergraph contains an edge with the given index;
     pub fn contains_edge<Q>(&self, index: &Q) -> bool
     where
-        Idx: Eq + Hash,
-        Q: Eq + Hash + ?Sized,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
+        Ix: Eq + Hash,
+        Q: ?Sized + Eq + Hash,
+        EdgeId<Ix>: Borrow<Q>,
     {
         self.edges().contains_key(index)
     }
     /// check if a vertex with the given id exists
     pub fn contains_node<Q>(&self, index: &Q) -> bool
     where
-        Idx: Eq + Hash,
-        Q: Eq + Hash + ?Sized,
-        VertexId<Idx>: core::borrow::Borrow<Q>,
+        Ix: Eq + Hash,
+        Q: ?Sized + Eq + Hash,
+        VertexId<Ix>: Borrow<Q>,
     {
         self.nodes().contains_key(index)
     }
     /// returns true if the vertex is contained in the hyperedge with the given id
-    #[cfg_attr(
-        feature = "tracing",
-        tracing::instrument(skip_all, target = "hash_graph")
-    )]
     pub fn is_node_in_domain<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
     where
-        Idx: Eq + Hash,
-        Q: Eq + Hash + ?Sized,
+        Ix: Eq + Hash,
+        Q: ?Sized + Eq + Hash,
         Q2: Eq + Hash,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
-        VertexId<Idx>: core::borrow::Borrow<Q2>,
+        EdgeId<Ix>: Borrow<Q>,
+        VertexId<Ix>: Borrow<Q2>,
     {
         if let Some(surface) = self.edges().get(index) {
             return surface.contains(vertex);
         }
         false
     }
-    /// returns true if the hypergraph is empty, meaning it has no edges, facets, or nodes
+    /// returns true if the hypergraph is empty, meaning it has no edges nor any nodes.
     pub fn is_empty(&self) -> bool {
         self.edges().is_empty() && self.nodes().is_empty()
     }
-    /// returns true if the hypergraph is directed;
+    /// returns true if the hypergraph is directed
     pub fn is_directed(&self) -> bool {
         self.attrs().is_directed()
     }
-    /// returns true if the hypergraph is undirected;
+    /// returns true if the hypergraph is undirected
     pub fn is_undirected(&self) -> bool {
         self.attrs().is_undirected()
     }
-    /// returns an [`Entry`](std::collections::hash_map::Entry) for the node with the given
-    /// index, allowing for modifications or insertions to the mapping
-    pub fn node(&mut self, index: VertexId<Idx>) -> NodeEntry<'_, N, Idx>
+    /// returns an [`EdgeEntry`] for the edge associated with the given index, allowing for
+    /// in-place modifications or insertions to the mapping
+    pub fn edge(&mut self, index: EdgeId<Ix>) -> EdgeEntry<'_, E, K, Ix, S>
     where
-        Idx: Eq + Hash,
-    {
-        self.nodes_mut().entry(index)
-    }
-    /// returns a [`SurfaceEntry`] for the surface with the given index, allowing for in-place
-    /// mutations to the value associated with the index
-    pub fn surface(&mut self, index: EdgeId<Idx>) -> SurfaceEntry<'_, E, K, Idx, S>
-    where
-        Idx: Eq + Hash,
+        Ix: Eq + Hash,
     {
         self.edges_mut().entry(index)
     }
-    /// computes the next edge index before replacing and returning the previous value
-    pub fn next_edge_id(&mut self) -> EdgeId<Idx>
+    /// returns an [`Entry`](std::collections::hash_map::Entry) for the node with the given
+    /// index, allowing for modifications or insertions to the mapping
+    pub fn node(&mut self, index: VertexId<Ix>) -> NodeEntry<'_, N, Ix, S>
     where
-        Idx: AddStep<Output = Idx> + Clone + PartialEq,
+        Ix: Eq + Hash,
+    {
+        self.nodes_mut().entry(index)
+    }
+    /// computes the next edge index before replacing and returning the previous value
+    pub fn next_edge_id(&mut self) -> EdgeId<Ix>
+    where
+        Ix: AddStep<Output = Ix> + Clone + PartialEq,
     {
         self.history_mut().next_edge().unwrap()
     }
     /// computes the next node index before replacing and returning the previous value
-    pub fn next_vertex_id(&mut self) -> VertexId<Idx>
+    pub fn next_vertex_id(&mut self) -> VertexId<Ix>
     where
-        Idx: AddStep<Output = Idx> + Clone + PartialEq,
+        Ix: AddStep<Output = Ix> + Clone + PartialEq,
     {
         self.history_mut().next_vertex().unwrap()
     }

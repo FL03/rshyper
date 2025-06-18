@@ -39,6 +39,8 @@ test = true
 scsys = { workspace = true }
 # concurrency & parallelism
 rayon-core = { optional = true, workspace = true }
+# data structures
+hashbrown = { optional = true, workspace = true }
 # error handling
 anyhow = { optional = true, workspace = true }
 thiserror = { workspace = true }
@@ -83,6 +85,7 @@ nightly = []
 std = [
     "alloc",
     "anyhow?/std",
+    "hashbrown?/default",
     "num-traits/std",
     "rand?/std",
     "scsys/std",
@@ -105,6 +108,7 @@ wasm = [
 ]
 # ************* [FF:Dependencies] *************
 alloc = [
+    "hashbrown?/alloc",
     "scsys/alloc",
     "serde?/alloc",
     "serde_json?/alloc",
@@ -113,6 +117,8 @@ alloc = [
 anyhow = [
     "dep:anyhow",
 ]
+
+hashbrown = ["dep:hashbrown"]
 
 json = [
     "alloc",

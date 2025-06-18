@@ -3,8 +3,8 @@
     authors: @FL03
 */
 use core::hash::Hash;
+use hashbrown::hash_map;
 use rshyper::prelude::{Node, RawIndex, VertexId};
-use std::collections::hash_map;
 
 /// [`NodeIter`] is an iterator over the node entries within the `HyperMap`, yielding a 2-tuple
 /// consisting of references to both each component of the entry, namely:

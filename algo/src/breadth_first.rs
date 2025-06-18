@@ -4,63 +4,67 @@
 */
 //! this module implements the breadth-first search algorithm as an operator on the hypergraph.
 use crate::error::{Error, Result};
-use crate::{Search, Traversal};
-use core::hash::Hash;
-use rshyper::edge::RawLayout;
-use rshyper::idx::{NumIndex, RawIndex, VertexId};
-use rshyper::{GraphProps, GraphType, HyperGraph};
-use std::collections::{HashSet, VecDeque};
+use crate::traits::{Search, Traversal};
+use crate::types::VertexSet;
+use core::hash::{BuildHasher, Hash};
+use hashbrown::{DefaultHashBuilder, HashSet};
+use rshyper::idx::{NumIndex, VertexId};
+use rshyper::rel::RawLayout;
+use rshyper::{GraphProps, HyperGraph};
+use std::collections::VecDeque;
 
 /// Breadth-First Traversal algorithm for hypergraphs
-pub struct BreadthFirstTraversal<'a, N, E, A, H>
+pub struct BreadthFirstTraversal<'a, N, E, A, H, S = DefaultHashBuilder>
 where
     A: GraphProps,
     H: HyperGraph<N, E, A>,
 {
     pub(crate) graph: &'a H,
     pub(crate) queue: VecDeque<VertexId<A::Ix>>,
-    pub(crate) visited: HashSet<VertexId<A::Ix>>,
+    pub(crate) visited: VertexSet<A::Ix, S>,
     _marker: core::marker::PhantomData<(N, E)>,
 }
 
-impl<'a, N, E, A, H, K, Idx> BreadthFirstTraversal<'a, N, E, A, H>
+impl<'a, N, E, A, H, S> BreadthFirstTraversal<'a, N, E, A, H, S>
 where
-    A: GraphProps<Ix = Idx, Kind = K>,
+    A: GraphProps,
     H: HyperGraph<N, E, A>,
-    K: GraphType,
-    Idx: RawIndex,
+    S: BuildHasher,
 {
     /// create a new instance from a hypergraph
-    pub fn new(graph: &'a H) -> Self {
+    pub fn new(graph: &'a H) -> Self
+    where
+        S: Default,
+    {
         Self {
             graph,
-            queue: VecDeque::new(),
-            visited: HashSet::new(),
+            queue: Default::default(),
+            visited: Default::default(),
             _marker: core::marker::PhantomData::<(N, E)>,
         }
     }
     /// returns an immutable reference to the queue
-    pub const fn queue(&self) -> &VecDeque<VertexId<Idx>> {
+    pub const fn queue(&self) -> &VecDeque<VertexId<A::Ix>> {
         &self.queue
     }
     /// returns a mutable reference to the queue
-    pub(crate) const fn queue_mut(&mut self) -> &mut VecDeque<VertexId<Idx>> {
+    pub(crate) const fn queue_mut(&mut self) -> &mut VecDeque<VertexId<A::Ix>> {
         &mut self.queue
     }
     /// returns an immutable reference to the visited vertices
-    pub const fn visited(&self) -> &HashSet<VertexId<Idx>> {
+    pub const fn visited(&self) -> &VertexSet<A::Ix, S> {
         &self.visited
     }
     /// returns a mutable reference to the visited vertices
-    pub const fn visited_mut(&mut self) -> &mut HashSet<VertexId<Idx>> {
+    pub const fn visited_mut(&mut self) -> &mut VertexSet<A::Ix, S> {
         &mut self.visited
     }
     /// returns true if the vertex has been visited
     pub fn has_visited<Q>(&self, vertex: &Q) -> bool
     where
-        Idx: Eq + Hash,
+        A::Ix: Eq + Hash,
         Q: ?Sized + Eq + Hash,
-        VertexId<Idx>: core::borrow::Borrow<Q>,
+        VertexId<A::Ix>: core::borrow::Borrow<Q>,
     {
         self.visited().contains(vertex)
     }
@@ -71,18 +75,18 @@ where
         self
     }
     /// a convience method to perform a search
-    pub fn search(&mut self, start: VertexId<Idx>) -> Result<Vec<VertexId<Idx>>>
+    pub fn search(&mut self, start: VertexId<A::Ix>) -> Result<Vec<VertexId<A::Ix>>>
     where
-        Idx: NumIndex,
-        for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<Idx>>,
+        A::Ix: NumIndex,
+        for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
     {
         Search::search(self, start)
     }
     /// if the vertex hans't been visited yet, push it to the back of the queue and mark it as
     /// visited by inserting it into the visited set.
-    pub(crate) fn register(&mut self, vertex: VertexId<Idx>)
+    pub(crate) fn register(&mut self, vertex: VertexId<A::Ix>)
     where
-        Idx: Copy + Eq + Hash,
+        A::Ix: Copy + Eq + Hash,
     {
         if !self.has_visited(&vertex) {
             self.queue_mut().push_back(vertex);
@@ -91,17 +95,17 @@ where
     }
 }
 
-impl<'a, N, E, A, H, K, Idx> Search<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, A, H>
+impl<'a, N, E, A, H, S> Search<VertexId<A::Ix>> for BreadthFirstTraversal<'a, N, E, A, H, S>
 where
-    A: GraphProps<Ix = Idx, Kind = K>,
+    A: GraphProps,
     H: HyperGraph<N, E, A>,
-    K: GraphType,
-    Idx: NumIndex,
-    for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<Idx>>,
+    S: BuildHasher,
+    A::Ix: NumIndex,
+    for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
-    type Output = Vec<VertexId<Idx>>;
+    type Output = Vec<VertexId<A::Ix>>;
 
-    fn search(&mut self, start: VertexId<Idx>) -> Result<Self::Output> {
+    fn search(&mut self, start: VertexId<A::Ix>) -> Result<Self::Output> {
         // Reset state
         self.reset();
 
@@ -133,20 +137,20 @@ where
     }
 }
 
-impl<'a, N, E, A, H, K, Idx> Traversal<VertexId<Idx>> for BreadthFirstTraversal<'a, N, E, A, H>
+impl<'a, N, E, A, H, S> Traversal<VertexId<A::Ix>> for BreadthFirstTraversal<'a, N, E, A, H, S>
 where
-    A: GraphProps<Ix = Idx, Kind = K>,
+    A: GraphProps,
     H: HyperGraph<N, E, A>,
-    K: GraphType,
-    Idx: RawIndex + Eq + Hash,
+    S: BuildHasher,
+    A::Ix: Eq + Hash,
 {
-    type Store<I2> = HashSet<I2>;
+    type Store<I2> = HashSet<I2, S>;
 
-    fn has_visited(&self, vertex: &VertexId<Idx>) -> bool {
+    fn has_visited(&self, vertex: &VertexId<A::Ix>) -> bool {
         self.visited().contains(vertex)
     }
 
-    fn visited(&self) -> &Self::Store<VertexId<Idx>> {
+    fn visited(&self) -> &Self::Store<VertexId<A::Ix>> {
         self.visited()
     }
 }

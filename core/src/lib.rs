@@ -25,7 +25,7 @@
     clippy::missing_safety_doc
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
-
+#![cfg_attr(feature = "nightly", feature(allocator_api))]
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
@@ -42,6 +42,7 @@ pub use self::{
     error::{Error, Result},
     idx::prelude::*,
     node::Node,
+    rel::{Link, RawLayout},
     traits::prelude::*,
     types::prelude::*,
     weight::prelude::*,
@@ -52,7 +53,7 @@ pub mod edge;
 pub mod error;
 pub mod idx;
 pub mod node;
-/// this module implements the [`Weight`] type, which is used to represent weights in a hypergraph
+pub mod rel;
 pub mod weight;
 
 pub mod traits {
@@ -98,7 +99,6 @@ pub mod types {
     //! this module provides various types used throughout the library
     #[doc(inline)]
     pub use self::prelude::*;
-
     /// this module defines the two types of graph kinds: [`Directed`] and [`Undirected`]
     pub mod graph_kind;
 
@@ -115,6 +115,7 @@ pub mod prelude {
     pub use crate::edge::prelude::*;
     pub use crate::idx::prelude::*;
     pub use crate::node::prelude::*;
+    pub use crate::rel::prelude::*;
     pub use crate::traits::prelude::*;
     pub use crate::types::prelude::*;
     pub use crate::weight::prelude::*;

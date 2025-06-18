@@ -1,144 +1,139 @@
 /*
-    appellation: impl_edge <module>
+    appellation: impl_hyper_facet <module>
     authors: @FL03
 */
-use crate::edge::EdgeLayout;
-use crate::idx::{EdgeId, RawIndex, VertexId};
-use crate::{Directed, Domain, GraphType, Undirected};
+use crate::edge::Edge;
+use crate::idx::{EdgeId, RawIndex};
+use crate::rel::Link;
+use crate::{Directed, Domain, GraphType, Undirected, Weight};
 
-impl<S, Idx> EdgeLayout<S, Directed, Idx>
+impl<T, S, Idx> Edge<T, S, Directed, Idx>
 where
     Idx: RawIndex,
     S: Domain<Idx>,
 {
-    /// returns a new [`Directed`] hyperedge with the given id and nodes
-    pub fn directed(id: EdgeId<Idx>, nodes: S) -> Self {
-        Self::new(id, nodes)
+    /// returns a new [`Directed`] hypersurface with the given id and nodes
+    pub fn directed(id: EdgeId<Idx>, nodes: S, weight: T) -> Self {
+        Self::from_parts(id, nodes, Weight::new(weight))
     }
 }
 
-impl<S, Idx> EdgeLayout<S, Undirected, Idx>
+impl<T, S, I> Edge<T, S, Undirected, I>
 where
-    Idx: RawIndex,
-    S: Domain<Idx>,
+    I: RawIndex,
+    S: Domain<I>,
 {
-    /// creates a new [`Undirected`] hyperedge with the given id and nodes
-    pub fn undirected(id: EdgeId<Idx>, nodes: S) -> Self {
-        Self::new(id, nodes)
+    /// creates a new [`Undirected`] hypersurface with the given id and nodes
+    pub fn undirected(id: EdgeId<I>, nodes: S, weight: T) -> Self {
+        Self::from_parts(id, nodes, Weight::new(weight))
     }
 }
 
-impl<S, K, Idx> Default for EdgeLayout<S, K, Idx>
+impl<T, S, K, Idx> Default for Edge<T, S, K, Idx>
 where
-    Idx: RawIndex + Default,
+    Idx: Default + RawIndex,
     K: GraphType,
+    T: Default,
     S: Domain<Idx> + Default,
 {
     fn default() -> Self {
-        Self::new(Default::default(), Default::default())
+        Self {
+            link: Link::default(),
+            weight: Weight::default(),
+        }
     }
 }
 
-impl<S, K, Idx> core::fmt::Debug for EdgeLayout<S, K, Idx>
+impl<T, S, K, Idx> core::fmt::Debug for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
+    T: core::fmt::Debug,
     S: Domain<Idx> + core::fmt::Debug,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_struct("Edge")
-            .field("id", &self.id())
-            .field("domain", &self.domain())
+        f.debug_struct("Surface")
+            .field("edge", &self.link())
+            .field("weight", &self.weight())
             .finish()
     }
 }
 
-impl<S, K, Idx> core::fmt::Display for EdgeLayout<S, K, Idx>
+impl<T, S, K, Idx> core::fmt::Display for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
+    T: core::fmt::Display,
     S: Domain<Idx> + core::fmt::Debug,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "{{ id: {}, domain: {:?} }}", self.id(), self.domain())
+        write!(
+            f,
+            "{{ edge: {e}, weight: {w} }}",
+            e = self.link(),
+            w = self.weight(),
+        )
     }
 }
 
-impl<S, K, Idx> FromIterator<Idx> for EdgeLayout<S, K, Idx>
+impl<T, S, K, Idx> From<Link<S, K, Idx>> for Edge<T, S, K, Idx>
 where
-    Idx: Default + RawIndex,
+    Idx: RawIndex,
     K: GraphType,
-    S: Domain<Idx> + FromIterator<VertexId<Idx>>,
+    S: Domain<Idx>,
+    T: Default,
 {
-    fn from_iter<I>(iter: I) -> Self
-    where
-        I: IntoIterator<Item = Idx>,
-    {
-        let iter = iter.into_iter().map(|v| VertexId::from(v));
-        Self::from_iter(iter)
+    fn from(edge: Link<S, K, Idx>) -> Self {
+        Self::from_link(edge)
     }
 }
 
-impl<S, K, Idx> FromIterator<VertexId<Idx>> for EdgeLayout<S, K, Idx>
+impl<T, S, K, Idx> From<Edge<T, S, K, Idx>> for Link<S, K, Idx>
 where
-    Idx: Default + RawIndex,
+    Idx: RawIndex,
     K: GraphType,
-    S: Domain<Idx> + FromIterator<VertexId<Idx>>,
+    S: Domain<Idx>,
 {
-    fn from_iter<I>(iter: I) -> Self
-    where
-        I: IntoIterator<Item = VertexId<Idx>>,
-    {
-        let store = S::from_iter(iter);
-        Self::from_domain(store)
+    fn from(facet: Edge<T, S, K, Idx>) -> Self {
+        facet.link
     }
 }
 
-impl<S, K, Idx> From<EdgeId<Idx>> for EdgeLayout<S, K, Idx>
+impl<T, S, K, Idx> From<EdgeId<Idx>> for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
     S: Default + Domain<Idx>,
+    T: Default,
 {
-    fn from(from: EdgeId<Idx>) -> Self {
-        Self::from_id(from)
+    fn from(id: EdgeId<Idx>) -> Self {
+        Self::from_id(id)
     }
 }
 
-impl<S, K, Idx> From<EdgeLayout<S, K, Idx>> for EdgeId<Idx>
+impl<T, S, K, Idx> AsRef<Weight<T>> for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
     S: Domain<Idx>,
 {
-    fn from(from: EdgeLayout<S, K, Idx>) -> Self {
-        from.id
+    fn as_ref(&self) -> &Weight<T> {
+        &self.weight
     }
 }
 
-impl<S, K, Idx> AsRef<S> for EdgeLayout<S, K, Idx>
+impl<T, S, K, Idx> AsMut<Weight<T>> for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
     S: Domain<Idx>,
 {
-    fn as_ref(&self) -> &S {
-        self.domain()
+    fn as_mut(&mut self) -> &mut Weight<T> {
+        &mut self.weight
     }
 }
 
-impl<S, K, Idx> AsMut<S> for EdgeLayout<S, K, Idx>
-where
-    Idx: RawIndex,
-    K: GraphType,
-    S: Domain<Idx>,
-{
-    fn as_mut(&mut self) -> &mut S {
-        self.domain_mut()
-    }
-}
-
-impl<S, K, Idx> core::borrow::Borrow<EdgeId<Idx>> for EdgeLayout<S, K, Idx>
+impl<T, S, K, Idx> core::borrow::Borrow<EdgeId<Idx>> for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -149,7 +144,7 @@ where
     }
 }
 
-impl<S, K, Idx> core::borrow::BorrowMut<EdgeId<Idx>> for EdgeLayout<S, K, Idx>
+impl<T, S, K, Idx> core::borrow::BorrowMut<EdgeId<Idx>> for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -160,26 +155,26 @@ where
     }
 }
 
-impl<S, K, Idx> core::ops::Deref for EdgeLayout<S, K, Idx>
+impl<T, S, K, Idx> core::ops::Deref for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
     S: Domain<Idx>,
 {
-    type Target = EdgeId<Idx>;
+    type Target = Link<S, K, Idx>;
 
     fn deref(&self) -> &Self::Target {
-        self.id()
+        self.link()
     }
 }
 
-impl<S, K, Idx> core::ops::DerefMut for EdgeLayout<S, K, Idx>
+impl<T, S, K, Idx> core::ops::DerefMut for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
     S: Domain<Idx>,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        self.id_mut()
+        self.link_mut()
     }
 }

@@ -15,6 +15,9 @@
 //!   - `A::Ix`: the type of indices used by the instance; bounded by the [`RawIndex`](rshyper_core::RawIndex) trait
 //! - `S`: the type of [`BuildHasher`](core::hash::BuildHasher) used for the underling stores
 //!
+//! The underlying storage mechanics are based upon the [`hashbrown`](https://docs.rs/hashbrown) crate,
+//! a Rust implementation of [Google's SwissTable](https://abseil.io/blog/20180927-swisstables) algorithm.
+//!
 //! ## Features
 //!
 //! The crate is heavily feature-gated to maximize compatibility and minimize dependencies,
@@ -32,7 +35,14 @@
     html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
 )]
-#![allow(clippy::should_implement_trait, clippy::module_inception)]
+#![allow(
+    clippy::missing_safety_doc,
+    clippy::module_inception,
+    clippy::needless_doctest_main,
+    clippy::should_implement_trait
+)]
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "nightly", feature(allocator_api))]
 // **** WARNING ****
 // the `std` feature is required by the crate, only declared for concistency w.r.t. the
 // available features and for ensuring that all the depencies actually implement the `std`
@@ -56,23 +66,24 @@ pub use self::{graph::*, types::prelude::*};
 pub mod graph;
 
 mod impls {
-    #[cfg(feature = "algo")]
-    pub mod impl_algo;
     pub mod impl_graph;
     pub mod impl_hyper_graph;
     pub mod impl_iter;
     pub mod impl_ops;
     pub mod impl_repr;
+
+    #[cfg(feature = "algo")]
+    pub mod impl_algo;
     #[cfg(feature = "serde")]
     pub mod impl_serde;
 
     #[doc(hidden)]
-    #[allow(deprecated, unused)]
+    #[allow(deprecated)]
     pub mod impl_deprecated;
 }
 
 pub mod iter {
-    //! this module implements the iterators for the [`HyperMap`](super::HashGraph)
+    //! this module defines various iterators for the [`HyperMap`](super::HyperMap)
     #[doc(inline)]
     pub use self::prelude::*;
 
@@ -108,8 +119,6 @@ pub mod prelude {
     pub use super::graph::*;
     #[doc(inline)]
     pub use super::iter::prelude::*;
-    #[doc(inline)]
-    pub use super::types::prelude::*;
 
     #[allow(deprecated)]
     #[deprecated(since = "0.1.3", note = "use `HyperMap` instead")]

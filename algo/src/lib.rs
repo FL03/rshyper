@@ -8,10 +8,10 @@
 //!
 //! ## Features
 //!
-//! - [`astar`]: enables the A* search algorithm for hypergraphs
-//! - [`breadth_first`]: enables the breadth-first search algorithm for hypergraphs
-//! - [`depth_first`]: enables the depth-first search algorithm for hypergraphs
-//! - [`dijkstra`]: enables Dijkstra's algorithm for finding the shortest path in hypergraphs
+//! - [`astar`]: the A* search algorithm for hypergraphs
+//! - [`breadth_first`]: the breadth-first search algorithm for hypergraphs
+//! - [`depth_first`]: the depth-first search algorithm for hypergraphs
+//! - [`dijkstra`]: Dijkstra's algorithm for finding the shortest path in hypergraphs
 //!
 #![crate_type = "lib"]
 #![doc(
@@ -41,6 +41,8 @@ pub(crate) mod macros {
 
 #[doc(inline)]
 pub use self::traits::prelude::*;
+#[allow(unused_imports)]
+pub use self::types::prelude::*;
 #[cfg(feature = "std")]
 pub use self::{
     astar::AStarSearch, breadth_first::BreadthFirstTraversal, depth_first::DepthFirstTraversal,
@@ -93,6 +95,27 @@ pub mod traits {
     }
 }
 
+pub mod types {
+    //! this module define various types and type aliases for the algorithms and operators
+    #[doc(inline)]
+    #[allow(unused_imports)]
+    pub use self::prelude::*;
+
+    pub(crate) mod prelude {
+        #[doc(inline)]
+        #[allow(unused_imports)]
+        pub use super::aliases::*;
+    }
+
+    #[allow(unused_imports)]
+    mod aliases {
+        use hashbrown::{DefaultHashBuilder, HashSet};
+        use rshyper::idx::VertexId;
+        /// a type alias for a [`HashSet`] of [`VertexId`] that is generic over  the index type `I`
+        pub(crate) type VertexSet<I, S = DefaultHashBuilder> = HashSet<VertexId<I>, S>;
+    }
+}
+
 #[doc(hidden)]
 #[allow(missing_docs)]
 pub mod prelude {
@@ -104,7 +127,3 @@ pub mod prelude {
         dijkstra::Dijkstra,
     };
 }
-
-/// a type alias for a [`HashSet`](std::collections::HashSet) of [`VertexId`](rshyper::VertexId)'s
-#[cfg(feature = "std")]
-pub(crate) type VertexSet<Idx> = std::collections::HashSet<rshyper::VertexId<Idx>>;

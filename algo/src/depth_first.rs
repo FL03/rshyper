@@ -2,65 +2,68 @@
     Appellation: dft <module>
     Contrib: @FL03
 */
-//! this module provide the depth-first traversal algorithm for hypergraphs.
+//! this module implements a Depth-First Traversal algorithm for hypergraphs
 use crate::error::{Error, Result};
-use crate::{Search, Traversal};
-use core::hash::Hash;
-use rshyper::edge::RawLayout;
-use rshyper::idx::{NumIndex, RawIndex, VertexId};
-use rshyper::{GraphProps, GraphType, HyperGraph};
-use std::collections::HashSet;
+use crate::traits::{Search, Traversal};
+use crate::types::VertexSet;
+use core::hash::{BuildHasher, Hash};
+use hashbrown::{DefaultHashBuilder, HashSet};
+use rshyper::idx::{NumIndex, VertexId};
+use rshyper::rel::RawLayout;
+use rshyper::{GraphProps, HyperGraph};
 
 /// Depth-First Traversal algorithm for hypergraphs
-pub struct DepthFirstTraversal<'a, N, E, A, H>
+pub struct DepthFirstTraversal<'a, N, E, A, H, S = DefaultHashBuilder>
 where
     A: GraphProps,
     H: HyperGraph<N, E, A>,
 {
     pub(crate) graph: &'a H,
     pub(crate) stack: Vec<VertexId<A::Ix>>,
-    pub(crate) visited: HashSet<VertexId<A::Ix>>,
+    pub(crate) visited: VertexSet<A::Ix, S>,
     _marker: core::marker::PhantomData<(N, E)>,
 }
 
-impl<'a, N, E, H, A, K, Idx> DepthFirstTraversal<'a, N, E, A, H>
+impl<'a, N, E, H, A, S> DepthFirstTraversal<'a, N, E, A, H, S>
 where
-    A: GraphProps<Ix = Idx, Kind = K>,
+    A: GraphProps,
     H: HyperGraph<N, E, A>,
-    K: GraphType,
-    Idx: RawIndex,
+    S: BuildHasher,
 {
     /// Create a new DepthFirstTraversal instance
-    pub fn new(graph: &'a H) -> Self {
+    pub fn new(graph: &'a H) -> Self
+    where
+        S: Default,
+    {
         Self {
             graph,
             stack: Vec::new(),
-            visited: HashSet::new(),
+            visited: VertexSet::default(),
             _marker: core::marker::PhantomData::<(N, E)>,
         }
     }
     /// returns an immutable reference to the stack
-    pub const fn stack(&self) -> &Vec<VertexId<Idx>> {
+    pub const fn stack(&self) -> &Vec<VertexId<A::Ix>> {
         &self.stack
     }
     /// returns a mutable reference to the stack
-    pub const fn stack_mut(&mut self) -> &mut Vec<VertexId<Idx>> {
+    pub const fn stack_mut(&mut self) -> &mut Vec<VertexId<A::Ix>> {
         &mut self.stack
     }
     /// returns an immutable reference to the visited vertices
-    pub const fn visited(&self) -> &HashSet<VertexId<Idx>> {
+    pub const fn visited(&self) -> &VertexSet<A::Ix, S> {
         &self.visited
     }
     /// returns a mutable reference to the visited vertices
-    pub const fn visited_mut(&mut self) -> &mut HashSet<VertexId<Idx>> {
+    pub const fn visited_mut(&mut self) -> &mut VertexSet<A::Ix, S> {
         &mut self.visited
     }
     /// returns true if the vertex has been visited
     pub fn has_visited<Q>(&self, vertex: &Q) -> bool
     where
-        Idx: Eq + Hash,
+        A::Ix: Eq + Hash,
         Q: ?Sized + Eq + Hash,
-        VertexId<Idx>: core::borrow::Borrow<Q>,
+        VertexId<A::Ix>: core::borrow::Borrow<Q>,
     {
         self.visited().contains(vertex)
     }
@@ -77,18 +80,18 @@ where
     /// a convience method to perform a search
     pub fn search(
         &mut self,
-        start: VertexId<Idx>,
-    ) -> Result<<Self as Search<VertexId<Idx>>>::Output>
+        start: VertexId<A::Ix>,
+    ) -> Result<<Self as Search<VertexId<A::Ix>>>::Output>
     where
-        Self: Search<VertexId<Idx>>,
-        Idx: NumIndex,
+        Self: Search<VertexId<A::Ix>>,
+        A::Ix: NumIndex,
     {
         Search::search(self, start)
     }
     /// include the given index in both the stack and visited stores
-    pub(crate) fn register_vertex(&mut self, index: VertexId<Idx>) -> &mut Self
+    pub(crate) fn register_vertex(&mut self, index: VertexId<A::Ix>) -> &mut Self
     where
-        Idx: Copy + Eq + Hash,
+        A::Ix: Copy + Eq + Hash,
     {
         self.stack_mut().push(index);
         self.visited_mut().insert(index);
@@ -96,13 +99,14 @@ where
     }
 }
 
-impl<'a, N, E, A, H> Traversal<VertexId<A::Ix>> for DepthFirstTraversal<'a, N, E, A, H>
+impl<'a, N, E, A, H, S> Traversal<VertexId<A::Ix>> for DepthFirstTraversal<'a, N, E, A, H, S>
 where
     A: GraphProps,
     H: HyperGraph<N, E, A>,
+    S: BuildHasher,
     A::Ix: Eq + Hash,
 {
-    type Store<I2> = HashSet<I2>;
+    type Store<I2> = HashSet<I2, S>;
 
     fn has_visited(&self, vertex: &VertexId<A::Ix>) -> bool {
         self.visited().contains(vertex)
@@ -113,10 +117,11 @@ where
     }
 }
 
-impl<'a, N, E, A, H> Search<VertexId<A::Ix>> for DepthFirstTraversal<'a, N, E, A, H>
+impl<'a, N, E, A, H, S> Search<VertexId<A::Ix>> for DepthFirstTraversal<'a, N, E, A, H, S>
 where
     A: GraphProps,
     H: HyperGraph<N, E, A>,
+    S: BuildHasher,
     A::Ix: NumIndex,
     for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {

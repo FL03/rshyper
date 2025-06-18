@@ -22,17 +22,19 @@ pub trait HyperIndex: RawIndex
 where
     Self: Clone + Default + PartialEq + PartialOrd,
 {
+    private!();
 }
 /// The [`HashIndex`] trait extends the [`StdIndex`] trait to include additional operations and
 /// behaviours commonly expected from indices in a hypergraph.
 ///
-/// **note:** the trait is automatically implemented for all types that implement [`Idx`]
-///  alongside traits including: [Eq] and [Hash](core::hash::Hash)
-/// implementations.
-pub trait HashIndex: HyperIndex
+/// **note:** this trait is automatically implemented for all [`RawIndex`] implementors that
+/// also implements the [`Eq`] and [`Hash`](core::hash::Hash) traits and is sealed to prevent
+/// any external implementations.
+pub trait HashIndex: RawIndex
 where
     Self: Eq + core::hash::Hash,
 {
+    private!();
 }
 /// The [`NumIndex`] trait extends the [`RawIndex`] trait to include additional operations and
 /// behaviours expected from numerical indices in a hypergraph.
@@ -72,9 +74,20 @@ where
 /*
  ************* Implementations *************
 */
-impl<T> HyperIndex for T where T: 'static + RawIndex + Clone + Default + PartialEq + PartialOrd {}
 
-impl<T> HashIndex for T where T: HyperIndex + Eq + core::hash::Hash {}
+impl<T> HashIndex for T
+where
+    T: RawIndex + Eq + core::hash::Hash,
+{
+    seal!();
+}
+
+impl<T> HyperIndex for T
+where
+    T: 'static + RawIndex + Copy + Default + PartialEq + PartialOrd,
+{
+    seal!();
+}
 
 impl<T> NumIndex for T where
     T: HashIndex

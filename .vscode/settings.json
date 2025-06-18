@@ -1,0 +1,9 @@
+{
+  "rust-analyzer.check.features": [
+    "default",
+    "full",
+    "serde",
+    "rayon",
+    "tracing",
+  ],
+}

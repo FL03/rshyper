@@ -2,11 +2,11 @@
     appellation: impl_hyper_graph <module>
     authors: @FL03
 */
-use crate::{HashSurface, HyperMap, iter};
+use crate::{HashEdge, HyperMap, VertexSet, iter};
 use core::hash::{BuildHasher, Hash};
 use rshyper::error::Result;
 use rshyper::idx::{EdgeId, NumIndex, VertexId};
-use rshyper::prelude::{GraphProps, Node, VertexSet, Weight};
+use rshyper::prelude::{GraphProps, Node, Weight};
 use rshyper::traits::{HyperGraph, HyperGraphIterEdge, HyperGraphIterNode, RawHyperGraph};
 
 impl<N, E, A, S> RawHyperGraph<A> for HyperMap<N, E, A, S>
@@ -15,7 +15,7 @@ where
     S: BuildHasher,
 {
     type Node<_N> = Node<_N, A::Ix>;
-    type Edge<_E> = HashSurface<_E, A::Kind, A::Ix, S>;
+    type Edge<_E> = HashEdge<_E, A::Kind, A::Ix, S>;
 }
 
 impl<N, E, A, S> HyperGraph<N, E, A> for HyperMap<N, E, A, S>
@@ -35,39 +35,47 @@ where
         self.add_surface(iter, weight)
     }
 
-    fn get_edge_domain(&self, index: &EdgeId<A::Ix>) -> Option<&VertexSet<A::Ix, S>> {
-        self.get_edge_domain(index).ok()
+    fn get_edge_domain(&self, index: &EdgeId<A::Ix>) -> Result<&VertexSet<A::Ix, S>> {
+        self.get_domain(index)
     }
 
-    fn get_edge_domain_mut(&mut self, index: &EdgeId<A::Ix>) -> Option<&mut VertexSet<A::Ix, S>> {
-        self.get_edge_domain_mut(index).ok()
+    fn get_edge_domain_mut(&mut self, index: &EdgeId<A::Ix>) -> Result<&mut VertexSet<A::Ix, S>> {
+        self.get_domain_mut(index)
     }
 
-    fn get_edge_weight(&self, index: &EdgeId<A::Ix>) -> Option<&Weight<E>> {
-        self.get_edge_weight(index).ok()
+    fn get_edge(&self, index: &EdgeId<A::Ix>) -> Result<&HashEdge<E, A::Kind, A::Ix, S>> {
+        self.get_surface(index)
     }
 
-    fn get_edge_weight_mut(&mut self, index: &EdgeId<A::Ix>) -> Option<&mut Weight<E>> {
-        self.get_edge_weight_mut(index).ok()
-    }
-
-    fn get_node(&self, index: &VertexId<A::Ix>) -> Option<&Node<N, A::Ix>> {
-        self.get_node(index).ok()
-    }
-
-    fn get_node_mut(&mut self, index: &VertexId<A::Ix>) -> Option<&mut Node<N, A::Ix>> {
-        self.get_node_mut(index).ok()
-    }
-
-    fn get_surface(&self, index: &EdgeId<A::Ix>) -> Option<&HashSurface<E, A::Kind, A::Ix, S>> {
-        self.get_surface(index).ok()
-    }
-
-    fn get_surface_mut(
+    fn get_edge_mut(
         &mut self,
         index: &EdgeId<A::Ix>,
-    ) -> Option<&mut HashSurface<E, A::Kind, A::Ix, S>> {
-        self.get_surface_mut(index).ok()
+    ) -> Result<&mut HashEdge<E, A::Kind, A::Ix, S>> {
+        self.get_surface_mut(index)
+    }
+
+    fn get_edge_weight(&self, index: &EdgeId<A::Ix>) -> Result<&Weight<E>> {
+        self.get_edge_weight(index)
+    }
+
+    fn get_edge_weight_mut(&mut self, index: &EdgeId<A::Ix>) -> Result<&mut Weight<E>> {
+        self.get_edge_weight_mut(index)
+    }
+
+    fn get_node(&self, index: &VertexId<A::Ix>) -> Result<&Node<N, A::Ix>> {
+        self.get_node(index)
+    }
+
+    fn get_node_mut(&mut self, index: &VertexId<A::Ix>) -> Result<&mut Node<N, A::Ix>> {
+        self.get_node_mut(index)
+    }
+
+    fn get_node_weight(&self, index: &VertexId<<A as GraphProps>::Ix>) -> Result<&Weight<N>> {
+        self.get_node_weight(index)
+    }
+
+    fn get_node_weight_mut(&mut self, index: &VertexId<A::Ix>) -> Result<&mut Weight<N>> {
+        self.get_node_weight_mut(index)
     }
 
     fn contains_edge(&self, index: &EdgeId<A::Ix>) -> bool {
@@ -78,8 +86,11 @@ where
         self.contains_node(index)
     }
 
-    fn find_edges_with_node(&self, index: &VertexId<A::Ix>) -> Vec<EdgeId<A::Ix>> {
-        self.find_edges_with_node(index).unwrap_or_default()
+    fn find_edges_with_node(
+        &self,
+        index: &VertexId<A::Ix>,
+    ) -> impl Iterator<Item = &EdgeId<A::Ix>> {
+        self.find_edges_with_node(index)
     }
 }
 

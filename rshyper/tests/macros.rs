@@ -27,10 +27,10 @@ fn test_hypergraph_on_eg() -> rshyper::Result<()> {
         }
     }
     // verify the nodes
-    assert_eq!(graph.get_node(&v0)?.weight(), &<usize>::default());
-    assert_eq!(graph.get_node(&v1)?.weight(), &10);
-    assert_eq!(graph.get_node(&v2)?.weight(), &20);
-    assert_eq!(graph.get_node(&v3)?.weight(), &30);
+    assert_eq!(graph.get_node_weight(&v0)?, &<usize>::default());
+    assert_eq!(graph.get_node_weight(&v1)?, &10);
+    assert_eq!(graph.get_node_weight(&v2)?, &20);
+    assert_eq!(graph.get_node_weight(&v3)?, &30);
     // verify the edges
     assert_eq!(graph.get_edge_order(&e1)?, 3);
     assert_eq!(graph.get_edge_order(&e2)?, 3);
@@ -57,7 +57,7 @@ fn test_hypernode_on_eg() -> rshyper::Result<()> {
     assert_eq!(graph.order(), 4); // 4 vertices
     // verify the weights of each node
     for (id, exp) in [(v0, 0), (v1, 10), (v2, 20), (v3, 30)] {
-        assert_eq!(graph.get_node(&id)?.weight(), &exp);
+        assert_eq!(graph.get_node_weight(&id)?, &exp);
     }
     // finish
     Ok(())

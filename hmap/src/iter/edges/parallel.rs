@@ -2,134 +2,73 @@
     appellation: surface <module>
     authors: @FL03
 */
-use super::iter::{EdgeIter, EdgeIterMut, EdgeKeys};
-use crate::types::HashSurface;
+use crate::types::HashEdge;
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::GraphType;
-use rshyper_core::idx::{EdgeId, RawIndex};
-use std::hash::RandomState;
+use hashbrown::hash_map::rayon as hash_map;
+use rayon::iter::ParallelIterator;
+use rayon::iter::plumbing::UnindexedConsumer;
+use rshyper::GraphType;
+use rshyper::idx::{EdgeId, RawIndex};
 
-/// [`ParEdgeIter`] is a parallel iterator over the edges of a hypergraph, yielding pairs of
-/// [`EdgeId`] and the corresponding [`HashFacet`].
-#[cfg(feature = "rayon")]
+/// [`ParEdgeValues`] is a parallel iterator over the edges of a hypergraph, yielding
+/// references to the edges as [`HashEdge`]s.
 #[repr(transparent)]
-pub struct ParEdgeIter<'a, E, K, Idx, S = RandomState>
+pub struct ParEdgeValues<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
-    E: Send + Sync,
+    E: 'a + Send + Sync,
     Idx: RawIndex + Eq + Hash + Send + Sync,
     S: BuildHasher + Send + Sync,
 {
-    pub(crate) iter: EdgeIter<'a, E, K, Idx, S>,
+    pub(crate) iter: hash_map::ParValues<'a, EdgeId<Idx>, HashEdge<E, K, Idx, S>>,
 }
-/// [`ParEdgeIterMut`] is a mutable parallel iterator over the edges of a hypergraph,
-/// yielding pairs of [`EdgeId`] and a mutable reference to the corresponding [`HashFacet`].
-#[cfg(feature = "rayon")]
+/// [`ParEdgeValuesMut`] is a mutable parallel iterator over the edges of a hypergraph,
+/// yielding a mutable reference to the corresponding [`HashEdge`].
 #[repr(transparent)]
-pub struct ParEdgeIterMut<'a, E, K, Idx, S = RandomState>
+pub struct ParEdgeValuesMut<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
-    E: Send + Sync,
+    E: 'a + Send + Sync,
     Idx: RawIndex + Eq + Hash + Send + Sync,
     S: BuildHasher + Send + Sync,
 {
-    pub(crate) iter: EdgeIterMut<'a, E, K, Idx, S>,
+    pub(crate) iter: hash_map::ParValuesMut<'a, EdgeId<Idx>, HashEdge<E, K, Idx, S>>,
 }
 
 /*
  ************* Implementations *************
 */
 
-use rayon::iter::plumbing::UnindexedConsumer;
-use rayon::iter::{IntoParallelIterator, ParallelBridge, ParallelIterator};
-
-impl<'a, E, K, Idx, S> ParallelIterator for EdgeKeys<'a, E, K, Idx, S>
+impl<'a, E, K, Idx, S> ParallelIterator for ParEdgeValues<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
-    E: Send + Sync,
+    E: 'a + Send + Sync,
     Idx: RawIndex + Eq + Hash + Send + Sync,
-    S: BuildHasher + Send + Sync,
+    S: BuildHasher + Send + Sync + 'a,
 {
-    type Item = &'a EdgeId<Idx>;
+    type Item = &'a HashEdge<E, K, Idx, S>;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
         C: UnindexedConsumer<Self::Item>,
     {
-        self.iter.par_bridge().drive_unindexed(consumer)
+        self.iter.drive_unindexed(consumer)
     }
 }
 
-impl<'a, E, K, Idx, S> ParallelIterator for EdgeIter<'a, E, K, Idx, S>
+impl<'a, E, K, Idx, S> ParallelIterator for ParEdgeValuesMut<'a, E, K, Idx, S>
 where
     K: GraphType + Send + Sync,
-    E: Send + Sync,
+    E: 'a + Send + Sync,
     Idx: RawIndex + Eq + Hash + Send + Sync,
-    S: BuildHasher + Send + Sync,
+    S: BuildHasher + Send + Sync + 'a,
 {
-    type Item = (&'a EdgeId<Idx>, &'a HashSurface<E, K, Idx, S>);
+    type Item = &'a mut HashEdge<E, K, Idx, S>;
 
     fn drive_unindexed<C>(self, consumer: C) -> C::Result
     where
         C: UnindexedConsumer<Self::Item>,
     {
-        self.iter.par_bridge().drive_unindexed(consumer)
-    }
-}
-
-impl<'a, E, K, Idx, S> ParallelIterator for EdgeIterMut<'a, E, K, Idx, S>
-where
-    K: GraphType + Send + Sync,
-    E: Send + Sync,
-    Idx: RawIndex + Eq + Hash + Send + Sync,
-    S: BuildHasher + Send + Sync,
-{
-    type Item = (&'a EdgeId<Idx>, &'a mut HashSurface<E, K, Idx, S>);
-
-    fn drive_unindexed<C>(self, consumer: C) -> C::Result
-    where
-        C: UnindexedConsumer<Self::Item>,
-    {
-        self.iter
-            .par_bridge()
-            .into_par_iter()
-            .drive_unindexed(consumer)
-    }
-}
-
-impl<'a, E, K, Idx, S> ParallelIterator for ParEdgeIter<'a, E, K, Idx, S>
-where
-    K: GraphType + Send + Sync,
-    E: Send + Sync,
-    Idx: RawIndex + Eq + Hash + Send + Sync,
-    S: BuildHasher + Send + Sync,
-{
-    type Item = (&'a EdgeId<Idx>, &'a HashSurface<E, K, Idx, S>);
-
-    fn drive_unindexed<C>(self, consumer: C) -> C::Result
-    where
-        C: UnindexedConsumer<Self::Item>,
-    {
-        self.iter.par_bridge().drive_unindexed(consumer)
-    }
-}
-
-impl<'a, E, K, Idx, S> ParallelIterator for ParEdgeIterMut<'a, E, K, Idx, S>
-where
-    K: GraphType + Send + Sync,
-    E: Send + Sync,
-    Idx: RawIndex + Eq + Hash + Send + Sync,
-    S: BuildHasher + Send + Sync,
-{
-    type Item = (&'a EdgeId<Idx>, &'a mut HashSurface<E, K, Idx, S>);
-
-    fn drive_unindexed<C>(self, consumer: C) -> C::Result
-    where
-        C: UnindexedConsumer<Self::Item>,
-    {
-        self.iter
-            .par_bridge()
-            .into_par_iter()
-            .drive_unindexed(consumer)
+        self.iter.drive_unindexed(consumer)
     }
 }

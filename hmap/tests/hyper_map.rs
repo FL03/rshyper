@@ -4,9 +4,9 @@
 */
 #![allow(unused_variables)]
 
+use hashbrown::HashSet;
 use rshyper_core::{IntoWeight, Result, Weight};
 use rshyper_hmap::HyperMap;
-use std::collections::HashSet;
 
 #[test]
 fn test_error() -> Result<()> {

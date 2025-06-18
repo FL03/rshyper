@@ -35,11 +35,13 @@ doctest = true
 test = true
 
 [dependencies]
-rshyper-core = { workspace = true }
+rshyper-core = { features = ["hashbrown"], workspace = true }
 # custom
 scsys = { workspace = true }
 # concurrency & parallelism
 rayon-core = { optional = true, workspace = true }
+#  data structures
+hashbrown = { workspace = true }
 # error handling
 thiserror = { workspace = true }
 # logging
@@ -66,6 +68,7 @@ full = [
 ]
 
 nightly = [
+    "hashbrown/nightly",
     "rshyper-core/nightly",
 ]
 
@@ -74,6 +77,7 @@ nightly = [
 # ************* [FF:Environments] *************
 std = [
     "alloc",
+    "hashbrown/default",
     "num-traits/std",
     "ordered-float?/std",
     "rshyper-core/std",
@@ -100,6 +104,7 @@ wasm = [
 
 # ************* [FF:Dependencies] *************
 alloc = [
+    "hashbrown/alloc",
     "rshyper-core/alloc",
     "scsys/alloc",
     "serde?/alloc",
@@ -110,16 +115,23 @@ anyhow = [
     "scsys/anyhow",
 ]
 
+# hashbrown = [
+#     "dep:hashbrown",
+#     "rshyper-core/hashbrown",
+# ]
+
 ordered-float = ["dep:ordered-float"]
 
 rayon = [
     "dep:rayon-core",
+    "hashbrown/rayon",
     "rshyper-core/rayon",
 ]
 
 serde = [
     "dep:serde",
     "dep:serde_derive",
+    "hashbrown/serde",
     "ordered-float?/serde",
     "rshyper-core/serde",
     "scsys/serde",

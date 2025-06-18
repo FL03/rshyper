@@ -2,86 +2,56 @@
     appellation: aliases <module>
     authors: @FL03
 */
-//! this module defines various type aliases, for convenience and clarity, for the
-//! [`Edge`] and [`Surface`] types
-//!
-use crate::edge::{Edge, EdgeLayout};
-use crate::idx::VertexId;
-use crate::{Directed, Undirected};
+//! this module provides various type aliases hyperedges such as: [`DiEdge`], [`UnEdge`] and
+//! [`HashEdge`]
 
 #[cfg(feature = "alloc")]
 pub use self::use_alloc::*;
-#[cfg(feature = "std")]
-pub use self::use_std::*;
+
+use crate::edge::Edge;
+use crate::idx::{VertexArray, VertexSet, VertexSlice, VertexSliceMut, VertexSliceRef};
+use crate::{Directed, Undirected};
 
 /// a type alias for a [`Directed`] hyperedge
-pub type DiEdge<S, Idx = usize> = EdgeLayout<S, Directed, Idx>;
+pub type DiEdge<T, S, Idx = usize> = Edge<T, S, Directed, Idx>;
 /// a type alias for an [`Undirected`] hyperedge
-pub type UnEdge<S, Idx = usize> = EdgeLayout<S, Undirected, Idx>;
-/// a type alias for a [`Directed`] hypersurface
-pub type DiSurface<T, S, Idx = usize> = Edge<T, S, Directed, Idx>;
-/// a type alias for an [`Undirected`] hypersurface
-pub type UnSurface<T, S, Idx = usize> = Edge<T, S, Undirected, Idx>;
+pub type UnEdge<T, S, Idx = usize> = Edge<T, S, Undirected, Idx>;
+
+/// a type alias for an [`Edge`] whose _vertices_ are stored in a [`VertexSet`]
+pub type HashEdge<T, K, Ix, S> = Edge<T, VertexSet<Ix, S>, K, Ix>;
 
 /// a type alias for a [`Edge`] whose _vertices_ are stored in an array of fixed
 /// size with the size defined by the generic parameter `N`.
-pub type EdgeArray<const N: usize, K = Undirected, Idx = usize> =
-    EdgeLayout<[VertexId<Idx>; N], K, Idx>;
-/// a type alias for a [`Surface`] whose _vertices_ are stored in an array of fixed
-/// size with the size defined by the generic parameter `N`.
-pub type SurfaceArray<T, const N: usize, K, Idx = usize> = Edge<T, [VertexId<Idx>; N], K, Idx>;
+pub type EdgeArray<T, const N: usize, K, Ix = usize> = Edge<T, VertexArray<Ix, N>, K, Ix>;
 /// a type alias for a [`Edge`] whose _vertices_ are stored in a slice
-pub type EdgeSlice<K, Idx = usize> = EdgeLayout<[VertexId<Idx>], K, Idx>;
-/// a type alias for a [`Surface`] whose _vertices_ are stored in a slice
-pub type SurfaceSlice<T, K, Idx = usize> = Edge<T, [VertexId<Idx>], K, Idx>;
+pub type EdgeSlice<T, K, Ix = usize> = Edge<T, VertexSlice<Ix>, K, Ix>;
 /// a type alias for a [`Edge`] whose _vertices_ are stored in an owned slice
-pub type EdgeSliceRef<'a, K, Idx = usize> = EdgeLayout<&'a [VertexId<Idx>], K, Idx>;
-/// a type alias for a [`Surface`] whose _vertices_ are stored in an owned slice
-pub type SurfaceSliceRef<'a, T, K, Idx = usize> = Edge<T, &'a [VertexId<Idx>], K, Idx>;
+pub type EdgeSliceRef<'a, T, K, Ix = usize> = Edge<T, VertexSliceRef<'a, Ix>, K, Ix>;
 /// a type alias for a [`Edge`] whose _vertices_ are stored in a mutable slice
-pub type EdgeSliceMut<'a, K, Idx = usize> = EdgeLayout<&'a mut [VertexId<Idx>], K, Idx>;
-/// a type alias for a [`Surface`] whose _vertices_ are stored in a mutable slice
-pub type SurfaceSliceMut<'a, T, K, Idx = usize> = Edge<T, &'a mut [VertexId<Idx>], K, Idx>;
+pub type EdgeSliceMut<'a, T, K, Ix = usize> = Edge<T, VertexSliceMut<'a, Ix>, K, Ix>;
 
-#[cfg(feature = "alloc")]
+#[cfg(all(feature = "alloc", not(feature = "nightly")))]
 mod use_alloc {
-    use crate::edge::{Edge, EdgeLayout};
-    use crate::idx::VertexId;
-    use alloc::collections::{BTreeSet, VecDeque};
-    use alloc::vec::Vec;
+    use crate::edge::Edge;
+    use crate::idx::{VertexBSet, VertexDeque, VertexVec};
 
-    /// a type alias for a [`VertexId`] stored in a [`Vec`]
-    pub type VertexVec<Idx = usize> = Vec<VertexId<Idx>>;
-    /// a type alias for a [`VertexId`] stored in a [`VecDeque`]
-    pub type VertexVecDeque<Idx = usize> = VecDeque<VertexId<Idx>>;
-    /// a type alias for a [`VertexId`] stored in a [`BTreeSet`]
-    pub type VertexBSet<Idx> = BTreeSet<VertexId<Idx>>;
     /// a type alias for an [`Edge`] whose _vertices_ are stored in a [`Vec`]
-    pub type EdgeVec<K, Idx = usize> = EdgeLayout<VertexVec<Idx>, K, Idx>;
-    /// a type alias for an [`Surface`] whose _vertices_ are stored in a [`Vec`]
-    pub type SurfaceVec<T, K, Idx = usize> = Edge<T, VertexVec<Idx>, K, Idx>;
+    pub type EdgeVec<T, K, Ix> = Edge<T, VertexVec<Ix>, K, Ix>;
     /// a type alias for an [`Edge`] whose _vertices_ are stored in a [`VecDeque`]
-    pub type EdgeVecDeque<K, Idx = usize> = EdgeLayout<VertexVecDeque<Idx>, K, Idx>;
-    /// a type alias for an [`Surface`] whose _vertices_ are stored in a [`VecDeque`]
-    pub type SurfaceVecDeque<T, K, Idx = usize> = Edge<T, VertexVecDeque<Idx>, K, Idx>;
+    pub type EdgeDeque<T, K, Ix> = Edge<T, VertexDeque<Ix>, K, Ix>;
     /// a type alias for an [`Edge`] whose _vertices_ are stored in a [`BTreeSet`]
-    pub type EdgeBTreeSet<K, Idx = usize> = EdgeLayout<VertexBSet<Idx>, K, Idx>;
-    /// a type alias for an [`Surface`] whose _vertices_ are stored in a [`BTreeSet`]
-    pub type SurfaceBTreeSet<T, K, Idx = usize> = Edge<T, VertexBSet<Idx>, K, Idx>;
+    pub type EdgeBSet<T, K, Ix> = Edge<T, VertexBSet<Ix>, K, Ix>;
 }
 
-#[cfg(feature = "std")]
-mod use_std {
-    use crate::edge::{Edge, EdgeLayout};
-    use crate::idx::VertexId;
+#[cfg(all(feature = "alloc", feature = "nightly"))]
+mod use_alloc {
+    use crate::edge::Edge;
+    use crate::{VertexBSet, VertexDeque, VertexVec};
 
-    use std::collections::HashSet;
-    use std::hash::RandomState;
-    /// a type alias for a [`VertexId`] stored in a [`HashSet`] that is generic over the
-    /// type of the index, `I`, and the hasher used, `S`.
-    pub type VertexHashSet<I = usize, S = RandomState> = HashSet<VertexId<I>, S>;
-    /// a type alias for an [`Edge`] whose _vertices_ are stored in a [`HashSet`]
-    pub type HashEdge<K, I = usize, S = RandomState> = EdgeLayout<VertexHashSet<I, S>, K, I>;
-    /// a type alias for an [`Surface`] whose _vertices_ are stored in a [`HashSet`]
-    pub type HashSurface<T, K, I = usize, S = RandomState> = Edge<T, VertexHashSet<I, S>, K, I>;
+    /// a type alias for an [`Edge`] whose _vertices_ are stored in a [`Vec`]
+    pub type EdgeVec<T, K, Ix, A> = Edge<T, VertexVec<Ix, A>, K, Ix>;
+    /// a type alias for an [`Edge`] whose _vertices_ are stored in a [`VertexDeque`]
+    pub type EdgeDeque<T, K, Ix, A> = Edge<T, VertexDeque<Ix, A>, K, Ix>;
+    /// a type alias for an [`Edge`] whose _vertices_ are stored in a [`VertexBSet`]
+    pub type EdgeBSet<T, K, Ix, A> = Edge<T, VertexBSet<Ix, A>, K, Ix>;
 }

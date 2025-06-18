@@ -16,22 +16,22 @@ where
 {
     /// returns a new [`A*`](AStarSearch) search operator configured with the current
     /// graph and the provided heuristic function.
-    pub fn astar<F>(&self, heuristic: F) -> AStarSearch<'_, N, E, A, F, Self>
+    pub fn astar<F>(&self, heuristic: F) -> AStarSearch<'_, N, E, A, F, Self, S>
     where
         F: Heuristic<A::Ix, Output = f64>,
     {
         AStarSearch::new(self, heuristic)
     }
     /// returns the [`BreadthFirstTraversal`] operator configured with the current hypergraph.
-    pub fn bft(&self) -> BreadthFirstTraversal<'_, N, E, A, Self> {
+    pub fn bft(&self) -> BreadthFirstTraversal<'_, N, E, A, Self, S> {
         BreadthFirstTraversal::new(self)
     }
     /// returns the [`DepthFirstTraversal`] operator configured with the current hypergraph.
-    pub fn dft(&self) -> DepthFirstTraversal<'_, N, E, A, Self> {
+    pub fn dft(&self) -> DepthFirstTraversal<'_, N, E, A, Self, S> {
         DepthFirstTraversal::new(self)
     }
     ///  returns the [`Dijkstra`] operator on the current hypergraph.
-    pub fn dijkstra(&self) -> Dijkstra<'_, N, E, A, Self> {
+    pub fn dijkstra(&self) -> Dijkstra<'_, N, E, A, Self, S> {
         Dijkstra::new(self)
     }
 }

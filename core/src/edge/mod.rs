@@ -5,19 +5,13 @@
 //! this module focuses on the [`Edge`] implementation, providing additional types, traits, and
 //! representations for edges in a hypergraph.
 #[doc(inline)]
-pub use self::{
-    hyper_edge::Edge, layout::EdgeLayout, traits::prelude::*, types::prelude::*, utils::prelude::*,
-};
+pub use self::{hyper_edge::Edge, traits::prelude::*, types::prelude::*, utils::prelude::*};
 
-/// a [`hyper_surface`] speaks to a _weighted_ hyperedge, materialized here as a [`Surface`]
+/// the [`hyper_edge`] is responsible for defining the [`Edge`] struct
 pub mod hyper_edge;
-/// here, a [`hyper_edge`] essentially represents an _unweighted_ hyperedge, consisting of an
-/// identifier, a domain (i.e. a collection of vertices), and a graph type.
-pub mod layout;
 
 mod impls {
     pub mod impl_edge;
-    pub mod impl_surface;
 }
 
 pub mod traits {
@@ -26,15 +20,10 @@ pub mod traits {
     //!
     #[doc(inline)]
     pub use self::prelude::*;
-    /// this module defines the [`RawLayout`] trait for establishing a common interface for
-    /// representations of a hyperedge
-    mod layout;
-    /// this module defines the [`RawEdge`] trait
+    /// this module defines the [`RawSurface`] trait
     mod surface;
 
     pub(crate) mod prelude {
-        #[doc(inline)]
-        pub use super::layout::*;
         #[doc(inline)]
         pub use super::surface::*;
     }
@@ -77,9 +66,9 @@ pub(crate) mod prelude {
     #[doc(inline)]
     pub use super::hyper_edge::*;
     #[doc(inline)]
-    pub use super::layout::*;
-    #[doc(inline)]
     pub use super::traits::prelude::*;
+    #[doc(inline)]
+    pub use super::types::prelude::*;
     #[doc(inline)]
     pub use super::utils::prelude::*;
 }

@@ -1,6 +1,9 @@
 # Artifacts
-**/.artifacts/data/
-**/.docker/data/
+**/.artifacts/*
+**/.docker/data/*
+
+!**/.artifacts/assets
+!**/.artifacts/docs
 
 ## cache
 **/.cache/
@@ -14,11 +17,12 @@
 # Dev
 
 ### Idea
-
 **/.idea/
 
 ### vscode
-**/.vscode/
+**/.vscode/*
+
+!**/.vscode/settings.json
 
 # Misc
 **/*.csv
