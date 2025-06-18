@@ -15,6 +15,22 @@ where
     Idx: RawIndex,
     K: GraphType,
 {
+    #[deprecated(note = "use `get_domain` instead", since = "0.1.5")]
+    pub fn get_edge_vertices<Q>(&self, index: &Q) -> Result<&VertexSet<Idx, S>>
+    where
+        Q: Eq + Hash + ?Sized,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.get_domain(index)
+    }
+    #[deprecated(note = "use `get_domain_mut` instead", since = "0.1.5")]
+    pub fn get_edge_vertices_mut<Q>(&mut self, index: &Q) -> Result<&mut VertexSet<Idx, S>>
+    where
+        Q: Eq + Hash + ?Sized,
+        EdgeId<Idx>: core::borrow::Borrow<Q>,
+    {
+        self.get_domain_mut(index)
+    }
     #[deprecated(
         since = "0.1.5",
         note = "use `edge` instead; this method will be removed in the next major release."

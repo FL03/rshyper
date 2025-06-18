@@ -259,7 +259,7 @@ where
                     // Get all vertices in this hyperedge
                     let vertices = self
                         .graph
-                        .get_edge_domain(edge_id)
+                        .get_domain(edge_id)
                         .expect("Failed to get edge vertices");
 
                     // Process each vertex in this hyperedge

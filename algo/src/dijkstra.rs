@@ -209,7 +209,7 @@ where
                 // visit each node within the hyperedge
                 for v in self
                     .graph
-                    .get_edge_domain(&edge_id)
+                    .get_domain(&edge_id)
                     .expect("empty hyperedge")
                     .clone()
                 {

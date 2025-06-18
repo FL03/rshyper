@@ -9,94 +9,6 @@ use rshyper::idx::{EdgeId, RawIndex, VertexId};
 use rshyper::{AddStep, GraphProps, GraphType};
 use rshyper::{Edge, Node, Weight};
 
-/// private implementations of the [`HyperMap`] providing methods, for convenience and
-/// consistency.
-impl<N, E, A, K, Idx, S> HyperMap<N, E, A, S>
-where
-    A: GraphProps<Ix = Idx, Kind = K>,
-    K: GraphType,
-    Idx: RawIndex + Eq + Hash,
-    S: BuildHasher,
-{
-    #[cfg_attr(
-        feature = "tracing",
-        tracing::instrument(skip_all, level = "trace", target = "hyper_map")
-    )]
-    /// this method is responsible for directly registering new surfaces with the system,
-    /// implementing additional checks to ensure the validity of the instance. More
-    /// specifically, it ensures that:
-    ///
-    /// - the surface must not be empty
-    /// - the associated id must be recorded in the ledger, but not present within the graph
-    ///
-    /// if **any** of these condition are not met, an error will be thrown.
-    pub(crate) fn add_hyperedge(&mut self, surface: HashEdge<E, K, Idx, S>) -> Result<EdgeId<Idx>>
-    where
-        Idx: Clone,
-    {
-        // ensure the surface is valid
-        if surface.is_empty() {
-            #[cfg(feature = "tracing")]
-            tracing::error!(
-                "attempted to insert an empty hyperedge with id {id}",
-                id = surface.id()
-            );
-            return Err(Error::EmptyHyperedge);
-        }
-        // verify the edge id is already recorded in the history
-        if !self.history().contains_edge(surface.id()) && !self.contains_edge(surface.id()) {
-            #[cfg(feature = "tracing")]
-            tracing::error!(
-                "the surface with id {} is not recorded in the history",
-                surface.id()
-            );
-            return Err(Error::EdgeNotFound);
-        }
-        // get the id of the surface
-        let id = surface.id().clone();
-        #[cfg(feature = "tracing")]
-        tracing::debug!("inserting a new hyperedge ({id}) into the graph...");
-        // insert the new hyperedge into the adjacency map
-        self.edges_mut().insert(id.clone(), surface);
-        // return the id
-        Ok(id)
-    }
-    #[cfg_attr(
-        feature = "tracing",
-        tracing::instrument(skip_all, level = "trace", target = "hyper_map")
-    )]
-    /// this method is responsible for directly registering new nodes with the system,
-    /// implementing additional checks to ensure the validity of the instance. More
-    /// specifically, it ensures that:
-    ///
-    /// - the associated is is recorded in the ledger
-    /// - the node doesn't already exist in the graph
-    ///
-    /// if **any** of these condition are not met, an error will be thrown.
-    pub(crate) fn add_hypernode(&mut self, data: Node<N, Idx>) -> Result<VertexId<Idx>>
-    where
-        Idx: Clone,
-    {
-        // verify the edge id is already recorded in the history
-        if !self.history().contains_node(data.id()) && !self.contains_node(data.id()) {
-            #[cfg(feature = "tracing")]
-            tracing::error!(
-                "the surface with id {} is not recorded in the history",
-                data.id()
-            );
-            // self.history_mut().add_edge(surface.id().clone());
-            return Err(Error::NodeNotFound);
-        }
-        // get the id of the surface
-        let id = data.id().clone();
-        #[cfg(feature = "tracing")]
-        tracing::debug!("inserting a new hypernode ({id}) into the graph...");
-        // insert the new hyperedge into the adjacency map
-        self.nodes_mut().insert(id.clone(), data);
-        // return the id
-        Ok(id)
-    }
-}
 /// this implementation of the [`HyperMap`] works to provide fundamental manipulation methods
 /// alongside additional functional accessors, validators, and more.
 impl<N, E, A, K, Idx, S> HyperMap<N, E, A, S>
@@ -127,7 +39,7 @@ where
         // initialize a new node with the given weight & index
         let node = Node::new(ndx, weight);
         // insert the new node into the vertices map
-        self.add_hypernode(node)
+        unsafe { self.insert_node_unchecked(node) }
     }
     /// given a set of weights, insert a new node into the graph for each and return its id as
     /// an iterator of [`VertexId`]
@@ -165,7 +77,7 @@ where
         // create a new surface
         let surface = Edge::new(id.clone(), verts, weight);
         // add the hyperedge to the graph
-        self.add_hyperedge(surface)
+        unsafe { self.insert_edge_unchecked(surface) }
     }
     /// add a new hypernode using the logical [`Default`] for the weight of type `N` and
     /// return its index.
@@ -186,27 +98,21 @@ where
         self
     }
     /// returns a set of edge indices that contain the given vertex
-    pub fn find_edges_with_node(&self, index: &VertexId<Idx>) -> Result<Vec<EdgeId<Idx>>>
+    pub fn find_edges_with_node<Q>(&self, index: &Q) -> impl Iterator<Item = &EdgeId<Idx>>
     where
-        Idx: Copy,
+        Q: ?Sized + PartialEq,
+        VertexId<Idx>: core::borrow::Borrow<Q>,
     {
-        // handle the case where the vertex does not exist
-        if !self.contains_node(index) {
-            return Err(Error::NodeNotFound);
-        }
-        //
-        let edges = self
-            .edges()
+        // filter the edges to find those that contain the vertex
+        self.edges()
             .iter()
-            .filter_map(|(&edge_id, facet)| {
+            .filter_map(move |(edge_id, facet)| {
                 if facet.contains(index) {
                     Some(edge_id)
                 } else {
                     None
                 }
             })
-            .collect::<Vec<_>>();
-        Ok(edges)
     }
     /// returns a set of vertices that are in the hyperedge with the given id
     #[cfg_attr(
@@ -263,7 +169,7 @@ where
         self.get_surface(index).map(|edge| edge.len())
     }
     /// returns the set of vertices composing the given edge
-    pub fn get_edge_domain<Q>(&self, index: &Q) -> Result<&VertexSet<Idx, S>>
+    pub fn get_domain<Q>(&self, index: &Q) -> Result<&VertexSet<Idx, S>>
     where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -271,7 +177,7 @@ where
         self.get_surface(index).map(|edge| edge.domain())
     }
     /// returns a mutable reference to the set of vertices composing the given edge
-    pub fn get_edge_domain_mut<Q>(&mut self, index: &Q) -> Result<&mut VertexSet<Idx, S>>
+    pub fn get_domain_mut<Q>(&mut self, index: &Q) -> Result<&mut VertexSet<Idx, S>>
     where
         Q: Eq + Hash + ?Sized,
         EdgeId<Idx>: core::borrow::Borrow<Q>,
@@ -551,33 +457,167 @@ where
     }
 }
 
-/*
- ************* DEPRECATED *************
-*/
-
-#[doc(hidden)]
-#[allow(deprecated)]
-impl<N, E, A, S, K, Idx> HyperMap<N, E, A, S>
+/// private implementations of the [`HyperMap`] providing methods, for convenience and
+/// consistency.
+impl<N, E, A, K, Idx, S> HyperMap<N, E, A, S>
 where
     A: GraphProps<Ix = Idx, Kind = K>,
     K: GraphType,
     Idx: RawIndex + Eq + Hash,
     S: BuildHasher,
 {
-    #[deprecated(note = "use `get_edge_domain` instead", since = "0.1.5")]
-    pub fn get_edge_vertices<Q>(&self, index: &Q) -> Result<&VertexSet<Idx, S>>
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, level = "trace", target = "hyper_map")
+    )]
+    /// this method is responsible for directly registering new surfaces with the system,
+    /// implementing additional checks to ensure the validity of the instance. More
+    /// specifically, it ensures that:
+    ///
+    /// - the surface must not be empty
+    /// - the associated id must be recorded in the ledger, but not present within the graph
+    ///
+    /// if **any** of these condition are not met, an error will be thrown.
+    pub(crate) fn insert_edge(&mut self, edge: HashEdge<E, K, Idx, S>) -> Result<EdgeId<Idx>>
     where
-        Q: Eq + Hash + ?Sized,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
+        Idx: Clone,
     {
-        self.get_surface(index).map(|edge| edge.domain())
+        // check the graph to make sure the edge doesn't exist
+        if self.contains_edge(edge.id()) {
+            #[cfg(feature = "tracing")]
+            tracing::error!(
+                "the edge with id ({}) already exists in the graph; cannot insert it again",
+                edge.id()
+            );
+            return Err(Error::edge_already_exists(edge.id().clone()));
+        }
+        // verify the edge id is already recorded in the history
+        if !self.history().contains_edge(edge.id()) {
+            #[cfg(feature = "tracing")]
+            tracing::warn!(
+                "the id ({}) is not recorded in the history; insterting the edge id into the history",
+                edge.id()
+            );
+            self.history_mut().add_edge(edge.id().clone());
+        }
+        // get the id of the surface
+        let id = unsafe { self.insert_edge_unchecked(edge)? };
+        // return the id
+        Ok(id)
     }
-    #[deprecated(note = "use `get_edge_domain_mut` instead", since = "0.1.5")]
-    pub fn get_edge_vertices_mut<Q>(&mut self, index: &Q) -> Result<&mut VertexSet<Idx, S>>
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, level = "trace", target = "hyper_map")
+    )]
+    /// this method is responsible for directly registering new nodes with the system,
+    /// implementing additional checks to ensure the validity of the instance. More
+    /// specifically, it ensures that:
+    ///
+    /// - the associated is is recorded in the ledger
+    /// - the node doesn't already exist in the graph
+    ///
+    /// if **any** of these condition are not met, an error will be thrown.
+    pub(crate) fn insert_node(
+        &mut self,
+        data: Node<N, Idx>,
+    ) -> Result<VertexId<Idx>>
     where
-        Q: Eq + Hash + ?Sized,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
+        Idx: Clone,
     {
-        self.get_surface_mut(index).map(|edge| edge.domain_mut())
+        // verify the edge id is already recorded in the history
+        if !self.history().contains_node(data.id()) {
+            #[cfg(feature = "tracing")]
+            tracing::error!(
+                "the id ({}) is not recorded in the history; inserting the node id into the history",
+                data.id()
+            );
+            self.history_mut().add_node(data.id().clone());
+            return Err(Error::NodeNotFound);
+        }
+        // get the id of the surface
+        let id = data.id().clone();
+        #[cfg(feature = "tracing")]
+        tracing::debug!("inserting a new hypernode ({id}) into the graph...");
+        let res = unsafe { self.insert_node_unchecked(data) };
+        res
+            .inspect(|_| {
+                #[cfg(feature = "tracing")]
+                tracing::debug!("successfully inserted the hypernode ({id}) into the graph");
+            })
+            .map_err(|_| {
+                #[cfg(feature = "tracing")]
+                tracing::error!("failed to insert the hypernode ({id}) into the graph");
+                Error::NodeNotFound
+            })
+    }
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, level = "trace", target = "hyper_map")
+    )]
+    /// this method is responsible for directly registering new surfaces with the system,
+    /// implementing a single check to verify the composition of the edge _domain_.
+    ///
+    /// ## Saftey
+    ///
+    /// This method is considered unsafe because it allows for the direct insertion of an
+    /// externally initialized [`HashEdge`] instance meaning that it is up to the developer to
+    /// ensure that:
+    ///
+    /// - the associated id must be recorded in the ledger
+    /// - the id must not already exist in the graph
+    ///
+    /// if **any** of these condition are not met, errors will eventually propagate within the
+    /// graph.
+    pub(crate) unsafe fn insert_edge_unchecked(&mut self, edge: HashEdge<E, K, Idx, S>) -> Result<EdgeId<Idx>>
+    where
+        Idx: Clone,
+    {
+        if !edge.is_empty() {
+            #[cfg(feature = "tracing")]
+            tracing::error!(
+                "attempted to insert an empty hyperedge with id {id}",
+                id = edge.id()
+            );
+            return Err(Error::EmptyHyperedge);
+        }
+        // get the id of the surface
+        let id = edge.id().clone();
+        #[cfg(feature = "tracing")]
+        tracing::debug!("inserting a new hyperedge ({id}) into the graph...");
+        // insert the new hyperedge into the adjacency map
+        self.edges_mut().insert(id.clone(), edge);
+        // return the id
+        Ok(id)
+    }
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, level = "trace", target = "hyper_map")
+    )]
+    /// this method is responsible for directly registering new nodes with the system,
+    /// implementing additional checks to ensure the validity of the instance.
+    ///
+    /// ## Saftey
+    ///
+    /// This method is considered unsafe because it allows for the direct insertion of an
+    /// externally initialized [`Node`] instance meaning that it is up to the developer to
+    /// ensure that:
+    ///
+    /// - the associated is is recorded in the ledger
+    /// - the node doesn't already exist in the graph
+    ///
+    /// if **any** of these condition are not met, errors will eventually propagate within the
+    /// graph.
+    pub(crate) unsafe fn insert_node_unchecked(&mut self, data: Node<N, Idx>) -> Result<VertexId<Idx>>
+    where
+        Idx: Clone,
+    {
+        // get the id of the surface
+        let id = data.id().clone();
+        #[cfg(feature = "tracing")]
+        tracing::debug!("inserting a new hypernode ({id}) into the graph...");
+        // insert the new hyperedge into the adjacency map
+        self.nodes_mut().insert(id.clone(), data);
+        // return the id
+        Ok(id)
     }
 }

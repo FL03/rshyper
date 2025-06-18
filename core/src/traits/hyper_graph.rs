@@ -50,31 +50,36 @@ where
         self.add_node(Default::default())
     }
     /// returns the vertices of the edge with the given index
-    fn get_edge_domain(
-        &self,
-        index: &EdgeId<A::Ix>,
-    ) -> Option<&<Self::Edge<E> as RawLayout>::Store>;
+    fn get_domain(&self, index: &EdgeId<A::Ix>) -> Option<&<Self::Edge<E> as RawLayout>::Store>;
     /// returns a mutable reference to the vertices of the edge with the given index
-    fn get_edge_domain_mut(
+    fn get_domain_mut(
         &mut self,
         index: &EdgeId<A::Ix>,
     ) -> Option<&mut <Self::Edge<E> as RawLayout>::Store>;
     /// returns a reference to the weight of the edge with the given index
     fn get_edge_weight(&self, index: &EdgeId<A::Ix>) -> Option<&Weight<E>> {
-        self.get_surface(index).map(|edge| edge.weight())
+        self.get_edge(index).map(|edge| edge.weight())
     }
     /// returns a mutable reference to the weight of the edge with the given index
     fn get_edge_weight_mut(&mut self, index: &EdgeId<A::Ix>) -> Option<&mut Weight<E>> {
-        self.get_surface_mut(index).map(|edge| edge.weight_mut())
+        self.get_edge_mut(index).map(|edge| edge.weight_mut())
     }
     /// returns an immutable reference to the edge with the given index
-    fn get_surface(&self, index: &EdgeId<A::Ix>) -> Option<&Self::Edge<E>>;
+    fn get_edge(&self, index: &EdgeId<A::Ix>) -> Option<&Self::Edge<E>>;
     /// returns a mutable reference to the edge with the given index
-    fn get_surface_mut(&mut self, index: &EdgeId<A::Ix>) -> Option<&mut Self::Edge<E>>;
+    fn get_edge_mut(&mut self, index: &EdgeId<A::Ix>) -> Option<&mut Self::Edge<E>>;
     /// returns a reference to the node with the given index
     fn get_node(&self, index: &VertexId<A::Ix>) -> Option<&Self::Node<N>>;
     /// returns a mutable reference to the node with the given index
     fn get_node_mut(&mut self, index: &VertexId<A::Ix>) -> Option<&mut Self::Node<N>>;
+    /// returns the weight of the node with the given index
+    fn get_node_weight(&self, index: &VertexId<A::Ix>) -> Option<&Weight<N>> {
+        self.get_node(index).map(|node| node.weight())
+    }
+    /// returns a mutable reference to the weight of the node with the given index
+    fn get_node_weight_mut(&mut self, index: &VertexId<A::Ix>) -> Option<&mut Weight<N>> {
+        self.get_node_mut(index).map(|node| node.weight_mut())
+    }
     /// returns true if the graph contains the edge with the given index
     fn contains_edge(&self, index: &EdgeId<A::Ix>) -> bool;
     /// returns true if the graph contains the node with the given index

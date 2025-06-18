@@ -35,12 +35,12 @@ where
         self.add_surface(iter, weight)
     }
 
-    fn get_edge_domain(&self, index: &EdgeId<A::Ix>) -> Option<&VertexSet<A::Ix, S>> {
-        self.get_edge_domain(index).ok()
+    fn get_domain(&self, index: &EdgeId<A::Ix>) -> Option<&VertexSet<A::Ix, S>> {
+        self.get_domain(index).ok()
     }
 
-    fn get_edge_domain_mut(&mut self, index: &EdgeId<A::Ix>) -> Option<&mut VertexSet<A::Ix, S>> {
-        self.get_edge_domain_mut(index).ok()
+    fn get_domain_mut(&mut self, index: &EdgeId<A::Ix>) -> Option<&mut VertexSet<A::Ix, S>> {
+        self.get_domain_mut(index).ok()
     }
 
     fn get_edge_weight(&self, index: &EdgeId<A::Ix>) -> Option<&Weight<E>> {
@@ -59,11 +59,11 @@ where
         self.get_node_mut(index).ok()
     }
 
-    fn get_surface(&self, index: &EdgeId<A::Ix>) -> Option<&HashEdge<E, A::Kind, A::Ix, S>> {
+    fn get_edge(&self, index: &EdgeId<A::Ix>) -> Option<&HashEdge<E, A::Kind, A::Ix, S>> {
         self.get_surface(index).ok()
     }
 
-    fn get_surface_mut(
+    fn get_edge_mut(
         &mut self,
         index: &EdgeId<A::Ix>,
     ) -> Option<&mut HashEdge<E, A::Kind, A::Ix, S>> {
