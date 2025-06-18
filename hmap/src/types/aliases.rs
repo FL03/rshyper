@@ -9,21 +9,20 @@ use hashbrown::hash_map::{Entry, HashMap};
 use rshyper::idx::{EdgeId, VertexId};
 use rshyper::{Edge, Node};
 
-
 /// a type alias for a [`HashSet`](rshyper::VertexHashSet)
-pub type VertexSet<Idx = usize, S> = rshyper::VertexHashSet<Idx, S>;
+pub type VertexSet<Ix, S> = rshyper::VertexHashSet<Ix, S>;
 /// a type alias for a [`Edge`] with [`VertexSet`] as its vertices
-pub type HashEdge<E, K, I, S> = Edge<E, VertexSet<I, S>, K, I>;
+pub type HashEdge<E, K, Ix, S> = Edge<E, VertexSet<Ix, S>, K, Ix>;
 
 /// a type alias for a [`Entry`] that whose key is a [`VertexId`] and value is a [`Node`]
-pub type NodeEntry<'a, N, I, S> = Entry<'a, VertexId<I>, Node<N, I>, S>;
+pub type NodeEntry<'a, N, Ix, S> = Entry<'a, VertexId<Ix>, Node<N, Ix>, S>;
 /// a type alias for a [`Entry`] that whose key is an [`EdgeId`] and value is a [`HashSurface`]
-pub type EdgeEntry<'a, T, K, I, S> = Entry<'a, EdgeId<I>, HashEdge<T, K, I, S>, S>;
+pub type EdgeEntry<'a, T, K, Ix, S> = Entry<'a, EdgeId<Ix>, HashEdge<T, K, Ix, S>, S>;
 
 /// a type alias for a [`HashMap`] that maps [`VertexId`] to a [`Node`]
-pub type NodeMap<N, I, S> = HashMap<VertexId<I>, Node<N, I>, S>;
+pub type NodeMap<N, Ix, S> = HashMap<VertexId<Ix>, Node<N, Ix>, S>;
 /// a type alias for a [`HashMap`] that maps [`EdgeId`] to a [`HashFacet`]
-pub type EdgeMap<E, K, I, S> = HashMap<EdgeId<I>, HashEdge<E, K, I, S>, S>;
+pub type EdgeMap<E, K, Ix, S> = HashMap<EdgeId<Ix>, HashEdge<E, K, Ix, S>, S>;
 
 #[allow(deprecated)]
 #[doc(hidden)]
