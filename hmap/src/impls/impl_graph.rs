@@ -40,7 +40,7 @@ where
         // initialize a new node with the given weight & index
         let node = Node::new(ndx, weight);
         // insert the new node into the vertices map
-        unsafe { self.insert_node_unchecked(node) }
+        self.insert_node_unchecked(node)
     }
     /// given a set of weights, insert a new node into the graph for each and return its id as
     /// an iterator of [`VertexId`]
@@ -78,7 +78,7 @@ where
         // create a new surface
         let surface = Edge::new(id.clone(), verts, weight);
         // add the hyperedge to the graph
-        unsafe { self.insert_edge_unchecked(surface) }
+        self.insert_edge_unchecked(surface)
     }
     /// add a new hypernode using the logical [`Default`] for the weight of type `N` and
     /// return its index.
@@ -443,7 +443,7 @@ where
             self.history_mut().add_edge(edge.id().clone());
         }
         // get the id of the surface
-        let id = unsafe { self.insert_edge_unchecked(edge)? };
+        let id = self.insert_edge_unchecked(edge)?;
         // return the id
         Ok(id)
     }
@@ -476,7 +476,7 @@ where
         let id = data.id().clone();
         #[cfg(feature = "tracing")]
         tracing::debug!("inserting a new hypernode ({id}) into the graph...");
-        let res = unsafe { self.insert_node_unchecked(data) };
+        let res = self.insert_node_unchecked(data);
         res
             .inspect(|_| {
                 #[cfg(feature = "tracing")]
@@ -488,10 +488,6 @@ where
                 Error::NodeNotFound
             })
     }
-    #[cfg_attr(
-        feature = "tracing",
-        tracing::instrument(skip_all, level = "trace", target = "hyper_map")
-    )]
     /// this method is responsible for directly registering new surfaces with the system,
     /// implementing a single check to verify the composition of the edge _domain_.
     ///
@@ -506,7 +502,7 @@ where
     ///
     /// if **any** of these condition are not met, errors will eventually propagate within the
     /// graph.
-    pub(crate) unsafe fn insert_edge_unchecked(&mut self, edge: HashEdge<E, K, Idx, S>) -> Result<EdgeId<Idx>>
+    pub(crate) fn insert_edge_unchecked(&mut self, edge: HashEdge<E, K, Idx, S>) -> Result<EdgeId<Idx>>
     where
         Idx: Clone,
     {
@@ -527,10 +523,6 @@ where
         // return the id
         Ok(id)
     }
-    #[cfg_attr(
-        feature = "tracing",
-        tracing::instrument(skip_all, level = "trace", target = "hyper_map")
-    )]
     /// this method is responsible for directly registering new nodes with the system,
     /// implementing additional checks to ensure the validity of the instance.
     ///
@@ -545,7 +537,7 @@ where
     ///
     /// if **any** of these condition are not met, errors will eventually propagate within the
     /// graph.
-    pub(crate) unsafe fn insert_node_unchecked(&mut self, data: Node<N, Idx>) -> Result<VertexId<Idx>>
+    pub(crate) fn insert_node_unchecked(&mut self, data: Node<N, Idx>) -> Result<VertexId<Idx>>
     where
         Idx: Clone,
     {
