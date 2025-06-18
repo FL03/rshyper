@@ -76,7 +76,7 @@ where
         // fetch the next edge index
         let id = self.next_edge_id();
         // create a new surface
-        let surface = Edge::new(id.clone(), verts, weight);
+        let surface = Edge::from_parts(id.clone(), verts, weight);
         // add the hyperedge to the graph
         self.insert_edge_unchecked(surface)
     }
@@ -105,15 +105,13 @@ where
         VertexId<Idx>: Borrow<Q>,
     {
         // filter the edges to find those that contain the vertex
-        self.edges()
-            .iter()
-            .filter_map(move |(edge_id, facet)| {
-                if facet.contains(index) {
-                    Some(edge_id)
-                } else {
-                    None
-                }
-            })
+        self.edges().iter().filter_map(move |(edge_id, facet)| {
+            if facet.contains(index) {
+                Some(edge_id)
+            } else {
+                None
+            }
+        })
     }
     /// returns a set of vertices that are in the hyperedge with the given id
     #[cfg_attr(
@@ -137,7 +135,7 @@ where
             if surface.contains(index) {
                 neighbors.extend(
                     surface
-                        .edge()
+                        .link()
                         .domain()
                         .iter()
                         .copied()
@@ -210,7 +208,7 @@ where
     {
         self.edges()
             .values()
-            .filter(|facet| facet.edge().domain().contains(index))
+            .filter(|facet| facet.link().domain().contains(index))
             .count()
     }
     /// returns the weight of a particular vertex
@@ -307,7 +305,7 @@ where
         // generate a new edge index
         let edge_id = self.next_edge_id();
         // initialize a new facet using the merged vertices, new index, and source weight
-        let surface = Edge::new(edge_id, vertices, Weight(weight));
+        let surface = Edge::from_parts(edge_id, vertices, Weight(weight));
         // insert the new hyperedge into the surfaces map
         self.edges_mut().insert(edge_id, surface);
         // return the new edge ID
@@ -455,10 +453,7 @@ where
     /// - the node doesn't already exist in the graph
     ///
     /// if **any** of these condition are not met, an error will be thrown.
-    pub(crate) fn insert_node(
-        &mut self,
-        data: Node<N, Idx>,
-    ) -> Result<VertexId<Idx>>
+    pub(crate) fn insert_node(&mut self, data: Node<N, Idx>) -> Result<VertexId<Idx>>
     where
         Idx: Clone,
     {
@@ -483,9 +478,9 @@ where
         }
         // add the node
         self.insert_node_unchecked(data).inspect(|id| {
-                #[cfg(feature = "tracing")]
-                tracing::debug!("successfully inserted the hypernode ({id}) into the graph");
-            })
+            #[cfg(feature = "tracing")]
+            tracing::debug!("successfully inserted the hypernode ({id}) into the graph");
+        })
     }
     /// this method is responsible for directly registering new surfaces with the system,
     /// implementing a single check to verify the composition of the edge _domain_.
@@ -501,7 +496,10 @@ where
     ///
     /// if **any** of these condition are not met, errors will eventually propagate within the
     /// graph.
-    pub(crate) fn insert_edge_unchecked(&mut self, edge: HashEdge<E, K, Idx, S>) -> Result<EdgeId<Idx>>
+    pub(crate) fn insert_edge_unchecked(
+        &mut self,
+        edge: HashEdge<E, K, Idx, S>,
+    ) -> Result<EdgeId<Idx>>
     where
         Idx: Clone,
     {

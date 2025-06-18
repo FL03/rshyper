@@ -2,11 +2,11 @@
     appellation: hyper_edge <module>
     authors: @FL03
 */
-use crate::edge::{LayoutExt, RawLayout};
+use super::{Layout, RawLayout};
 use crate::idx::{EdgeId, RawIndex, VertexId};
 use crate::{Domain, GraphType};
 
-/// [`EdgeLayout`] is the base type for hyperedges in a graph. These edges are generic over the
+/// [`Link`] is the base type for hyperedges in a graph. These edges are generic over the
 /// edge store type `S`, the graph kind `K`, and the index type `Idx`. This allows for
 /// flexibility in how edges store their vertices and how they are identified within the graph.
 #[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -16,7 +16,7 @@ use crate::{Domain, GraphType};
     serde(rename_all = "snake_case")
 )]
 #[repr(C)]
-pub struct EdgeLayout<S, K, Idx = usize>
+pub struct Link<S, K, Idx = usize>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -27,7 +27,7 @@ where
     pub(crate) _kind: core::marker::PhantomData<K>,
 }
 
-impl<S, K, Idx> EdgeLayout<S, K, Idx>
+impl<S, K, Idx> Link<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -85,8 +85,8 @@ where
         Self { id, ..self }
     }
     /// consumes the current instance to create another with the given nodes.
-    pub fn with_domain<S2: Domain<Idx>>(self, nodes: S2) -> EdgeLayout<S2, K, Idx> {
-        EdgeLayout {
+    pub fn with_domain<S2: Domain<Idx>>(self, nodes: S2) -> Link<S2, K, Idx> {
+        Link {
             id: self.id,
             domain: nodes,
             _kind: self._kind,
@@ -132,7 +132,7 @@ where
 
 #[allow(deprecated)]
 #[doc(hidden)]
-impl<S, K, Idx> EdgeLayout<S, K, Idx>
+impl<S, K, Idx> Link<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -175,12 +175,12 @@ where
         note = "Use `Edge::with_domain` instead. This method will be removed in a future version",
         since = "0.1.2"
     )]
-    pub fn with_points<S2: Domain<Idx>>(self, nodes: S2) -> EdgeLayout<S2, K, Idx> {
+    pub fn with_points<S2: Domain<Idx>>(self, nodes: S2) -> Link<S2, K, Idx> {
         self.with_domain(nodes)
     }
 }
 
-impl<S, K, Idx> RawLayout for EdgeLayout<S, K, Idx>
+impl<S, K, Idx> RawLayout for Link<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -205,7 +205,7 @@ where
     }
 }
 
-impl<S, K, Idx> LayoutExt for EdgeLayout<S, K, Idx>
+impl<S, K, Idx> Layout for Link<S, K, Idx>
 where
     S: Domain<Idx>,
     Idx: RawIndex,

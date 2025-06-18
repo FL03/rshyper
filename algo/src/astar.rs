@@ -11,8 +11,8 @@ mod priority_node;
 use crate::error::{Error, Result};
 use crate::{Heuristic, PathFinder, Search, Traversal, VertexSet};
 use core::hash::Hash;
-use rshyper::edge::RawLayout;
 use rshyper::idx::{NumIndex, RawIndex, VertexId};
+use rshyper::rel::RawLayout;
 use rshyper::{GraphProps, GraphType, HyperGraph, HyperGraphIter};
 use std::collections::{BinaryHeap, HashMap, HashSet};
 

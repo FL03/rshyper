@@ -75,12 +75,17 @@ where
  ************* Implementations *************
 */
 
-
-impl<T> HashIndex for T where T: RawIndex + Eq + core::hash::Hash {
+impl<T> HashIndex for T
+where
+    T: RawIndex + Eq + core::hash::Hash,
+{
     seal!();
 }
 
-impl<T> HyperIndex for T where T: 'static + RawIndex + Copy + Default + PartialEq + PartialOrd {
+impl<T> HyperIndex for T
+where
+    T: 'static + RawIndex + Copy + Default + PartialEq + PartialOrd,
+{
     seal!();
 }
 

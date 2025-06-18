@@ -6,8 +6,8 @@
 use crate::error::{Error, Result};
 use crate::{Search, Traversal};
 use core::hash::Hash;
-use rshyper::edge::RawLayout;
 use rshyper::idx::{NumIndex, RawIndex, VertexId};
+use rshyper::rel::RawLayout;
 use rshyper::{GraphProps, GraphType, HyperGraph};
 use std::collections::{HashSet, VecDeque};
 

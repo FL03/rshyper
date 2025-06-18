@@ -42,6 +42,7 @@ pub use self::{
     error::{Error, Result},
     idx::prelude::*,
     node::Node,
+    rel::{Link, RawLayout},
     traits::prelude::*,
     types::prelude::*,
     weight::prelude::*,
@@ -52,7 +53,7 @@ pub mod edge;
 pub mod error;
 pub mod idx;
 pub mod node;
-/// this module implements the [`Weight`] type, which is used to represent weights in a hypergraph
+pub mod rel;
 pub mod weight;
 
 pub mod traits {
@@ -118,6 +119,7 @@ pub mod prelude {
     pub use crate::edge::prelude::*;
     pub use crate::idx::prelude::*;
     pub use crate::node::prelude::*;
+    pub use crate::rel::prelude::*;
     pub use crate::traits::prelude::*;
     pub use crate::types::prelude::*;
     pub use crate::weight::prelude::*;

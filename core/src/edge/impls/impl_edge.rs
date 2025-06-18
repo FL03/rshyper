@@ -2,8 +2,9 @@
     appellation: impl_hyper_facet <module>
     authors: @FL03
 */
-use crate::edge::{Edge, EdgeLayout};
+use crate::edge::Edge;
 use crate::idx::{EdgeId, RawIndex};
+use crate::rel::Link;
 use crate::{Directed, Domain, GraphType, Undirected, Weight};
 
 impl<T, S, Idx> Edge<T, S, Directed, Idx>
@@ -13,7 +14,7 @@ where
 {
     /// returns a new [`Directed`] hypersurface with the given id and nodes
     pub fn directed(id: EdgeId<Idx>, nodes: S, weight: T) -> Self {
-        Self::new(id, nodes, Weight::new(weight))
+        Self::from_parts(id, nodes, Weight::new(weight))
     }
 }
 
@@ -24,7 +25,7 @@ where
 {
     /// creates a new [`Undirected`] hypersurface with the given id and nodes
     pub fn undirected(id: EdgeId<I>, nodes: S, weight: T) -> Self {
-        Self::new(id, nodes, Weight::new(weight))
+        Self::from_parts(id, nodes, Weight::new(weight))
     }
 }
 
@@ -37,7 +38,7 @@ where
 {
     fn default() -> Self {
         Self {
-            edge: EdgeLayout::default(),
+            link: Link::default(),
             weight: Weight::default(),
         }
     }
@@ -52,7 +53,7 @@ where
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         f.debug_struct("Surface")
-            .field("edge", &self.edge())
+            .field("edge", &self.link())
             .field("weight", &self.weight())
             .finish()
     }
@@ -69,32 +70,32 @@ where
         write!(
             f,
             "{{ edge: {e}, weight: {w} }}",
-            e = self.edge(),
+            e = self.link(),
             w = self.weight(),
         )
     }
 }
 
-impl<T, S, K, Idx> From<EdgeLayout<S, K, Idx>> for Edge<T, S, K, Idx>
+impl<T, S, K, Idx> From<Link<S, K, Idx>> for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
     S: Domain<Idx>,
     T: Default,
 {
-    fn from(edge: EdgeLayout<S, K, Idx>) -> Self {
-        Self::from_edge(edge)
+    fn from(edge: Link<S, K, Idx>) -> Self {
+        Self::from_link(edge)
     }
 }
 
-impl<T, S, K, Idx> From<Edge<T, S, K, Idx>> for EdgeLayout<S, K, Idx>
+impl<T, S, K, Idx> From<Edge<T, S, K, Idx>> for Link<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
     S: Domain<Idx>,
 {
     fn from(facet: Edge<T, S, K, Idx>) -> Self {
-        facet.edge
+        facet.link
     }
 }
 
@@ -160,10 +161,10 @@ where
     K: GraphType,
     S: Domain<Idx>,
 {
-    type Target = EdgeLayout<S, K, Idx>;
+    type Target = Link<S, K, Idx>;
 
     fn deref(&self) -> &Self::Target {
-        self.edge()
+        self.link()
     }
 }
 
@@ -174,6 +175,6 @@ where
     S: Domain<Idx>,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        self.edge_mut()
+        self.link_mut()
     }
 }

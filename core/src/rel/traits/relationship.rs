@@ -30,9 +30,9 @@ pub trait RawLayout {
         TypeId::of::<crate::Undirected>() == TypeId::of::<Self::Kind>()
     }
 }
-/// [`LayoutExt`] extends the behaviour of a [`RawLayout`] to include various constructors
+/// [`Layout`] extends the behaviour of a [`RawLayout`] to include various constructors
 /// and other utilitarian methods.
-pub trait LayoutExt: RawLayout {
+pub trait Layout: RawLayout {
     fn new(id: EdgeId<Self::Index>, vertices: Self::Store) -> Self;
 }
 /// A [`BinaryLayout`] represents a specific type of edge that essentially defines the standard
@@ -46,9 +46,8 @@ pub trait BinaryLayout: RawLayout {
  ************* Implementations *************
 */
 use crate::BinaryStore;
-use crate::edge::{Edge, EdgeLayout};
 
-impl<S, I, K> BinaryLayout for EdgeLayout<S, K, I>
+impl<S, I, K> BinaryLayout for crate::rel::Link<S, K, I>
 where
     S: BinaryStore<I>,
     I: RawIndex,
@@ -63,7 +62,7 @@ where
     }
 }
 
-impl<E, S, I, K> BinaryLayout for Edge<E, S, K, I>
+impl<E, S, I, K> BinaryLayout for crate::edge::Edge<E, S, K, I>
 where
     E: BinaryLayout,
     S: BinaryStore<I>,
@@ -71,10 +70,10 @@ where
     K: GraphType,
 {
     fn lhs(&self) -> &VertexId<I> {
-        self.edge().lhs()
+        self.link().lhs()
     }
 
     fn rhs(&self) -> &VertexId<I> {
-        self.edge().rhs()
+        self.link().rhs()
     }
 }
