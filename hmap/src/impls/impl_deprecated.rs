@@ -3,32 +3,72 @@
     authors: @FL03
 */
 use crate::HyperMap;
-use crate::types::{EdgeEntry, EdgeMap, VertexSet};
+use crate::types::{EdgeEntry, EdgeMap};
 use core::borrow::Borrow;
 use core::hash::{BuildHasher, Hash};
-use rshyper::idx::{EdgeId, RawIndex, VertexId};
-use rshyper::prelude::{GraphProps, GraphType, Result};
+use rshyper::error::Result;
+use rshyper::idx::{EdgeId, HashIndex, VertexId};
+use rshyper::prelude::{AddStep, GraphProps, GraphType, HashEdge, VertexSet, Weight};
 
-impl<N, E, A, S, Idx, K> HyperMap<N, E, A, S>
+impl<N, E, A, S, Ix, K> HyperMap<N, E, A, S>
 where
-    A: GraphProps<Kind = K, Ix = Idx>,
+    A: GraphProps<Kind = K, Ix = Ix>,
     S: BuildHasher,
-    Idx: RawIndex + Eq + Hash,
+    Ix: HashIndex,
     K: GraphType,
 {
-    #[deprecated(note = "use `get_domain` instead", since = "0.1.5")]
-    pub fn get_edge_vertices<Q>(&self, index: &Q) -> Result<&VertexSet<Idx, S>>
+    #[deprecated(
+        note = "use `add_edge` instead; this method will be removed in the next major release",
+        since = "0.1.7"
+    )]
+    pub fn add_surface<I>(&mut self, vertices: I, weight: Weight<E>) -> Result<EdgeId<Ix>>
+    where
+        I: IntoIterator<Item = VertexId<Ix>>,
+        Ix: AddStep<Output = Ix> + Clone,
+        S: Default,
+    {
+        self.add_edge(vertices, weight)
+    }
+    #[deprecated(
+        note = "use `retain_edges` instead; this method will be removed in the next major release",
+        since = "0.1.7"
+    )]
+    pub fn retain_surfaces<F>(&mut self, f: F) -> &mut Self
+    where
+        F: FnMut(&EdgeId<Ix>, &mut HashEdge<E, K, Ix, S>) -> bool,
+    {
+        self.retain_edges(f)
+    }
+    #[deprecated(
+        note = "use `remove_edge` instead; this method will be removed in the next major release",
+        since = "0.1.7"
+    )]
+    pub fn remove_surface<Q>(&mut self, index: &Q) -> Result<HashEdge<E, K, Ix, S>>
+    where
+        Q: ?Sized + Eq + Hash,
+        EdgeId<Ix>: Borrow<Q>,
+    {
+        self.remove_edge(index)
+    }
+    #[deprecated(
+        note = "use `get_domain` instead; this method will be removed in the next major release",
+        since = "0.1.5"
+    )]
+    pub fn get_edge_vertices<Q>(&self, index: &Q) -> Result<&VertexSet<Ix, S>>
     where
         Q: Eq + Hash + ?Sized,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
+        EdgeId<Ix>: core::borrow::Borrow<Q>,
     {
         self.get_domain(index)
     }
-    #[deprecated(note = "use `get_domain_mut` instead", since = "0.1.5")]
-    pub fn get_edge_vertices_mut<Q>(&mut self, index: &Q) -> Result<&mut VertexSet<Idx, S>>
+    #[deprecated(
+        note = "use `get_domain_mut` instead; this method will be removed in the next major release",
+        since = "0.1.5"
+    )]
+    pub fn get_edge_vertices_mut<Q>(&mut self, index: &Q) -> Result<&mut VertexSet<Ix, S>>
     where
         Q: Eq + Hash + ?Sized,
-        EdgeId<Idx>: core::borrow::Borrow<Q>,
+        EdgeId<Ix>: core::borrow::Borrow<Q>,
     {
         self.get_domain_mut(index)
     }
@@ -36,9 +76,9 @@ where
         since = "0.1.5",
         note = "use `edge` instead; this method will be removed in the next major release."
     )]
-    pub fn surface(&mut self, index: EdgeId<Idx>) -> EdgeEntry<'_, E, K, Idx, S>
+    pub fn surface(&mut self, index: EdgeId<Ix>) -> EdgeEntry<'_, E, K, Ix, S>
     where
-        Idx: Eq + Hash,
+        Ix: Eq + Hash,
     {
         self.edge(index)
     }
@@ -46,14 +86,14 @@ where
         since = "0.1.5",
         note = "use `edges` instead; this method will be removed in the next major release."
     )]
-    pub const fn surfaces(&self) -> &EdgeMap<E, K, Idx, S> {
+    pub const fn surfaces(&self) -> &EdgeMap<E, K, Ix, S> {
         self.edges()
     }
     #[deprecated(
         since = "0.1.5",
         note = "use `edges_mut` instead; this method will be removed in the next major release."
     )]
-    pub const fn surfaces_mut(&mut self) -> &mut EdgeMap<E, K, Idx, S> {
+    pub const fn surfaces_mut(&mut self) -> &mut EdgeMap<E, K, Ix, S> {
         self.edges_mut()
     }
     #[deprecated(

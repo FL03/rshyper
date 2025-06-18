@@ -15,7 +15,7 @@ fn test_dijkstra_direct_edge() -> Result<()> {
     let v1 = graph.add_vertex()?;
     let v2 = graph.add_vertex()?;
     // add a direct edge from v0 to v2
-    graph.add_edge([v0, v1, v2])?;
+    graph.add_link([v0, v1, v2])?;
     // find the shortest path from v0 to v2
     let path = graph.dijkstra().find_path(v0, v2)?;
     // verify the results
@@ -36,13 +36,13 @@ fn test_dijkstra_shortest_path() -> Result<()> {
     let v4 = graph.add_vertex()?;
     let v5 = graph.add_vertex()?;
     // Add edges to the graph
-    graph.add_edge([v0, v1])?;
-    graph.add_edge([v1, v2])?;
-    graph.add_edge([v2, v5])?;
-    graph.add_edge([v5, v4])?;
-    graph.add_edge([v0, v4])?;
-    graph.add_edge([v4, v3])?;
-    graph.add_edge([v0, v5, v3])?;
+    graph.add_link([v0, v1])?;
+    graph.add_link([v1, v2])?;
+    graph.add_link([v2, v5])?;
+    graph.add_link([v5, v4])?;
+    graph.add_link([v0, v4])?;
+    graph.add_link([v4, v3])?;
+    graph.add_link([v0, v5, v3])?;
 
     // Use Dijkstra's algorithm to find the shortest path from v0 to v3
     let path = graph.dijkstra().find_path(v0, v3)?;
@@ -66,9 +66,9 @@ fn test_dijkstra_no_path() -> Result<()> {
     let v2 = graph.add_vertex()?;
     let v3 = graph.add_vertex()?;
     // Add edges to the graph
-    let e0 = graph.add_edge([v0, v1])?;
+    let e0 = graph.add_link([v0, v1])?;
     // v2 and v3 are not connected to v0 or v1
-    let e1 = graph.add_edge([v0, v2])?;
+    let e1 = graph.add_link([v0, v2])?;
     // v2 and v3 are disconnected from v0 and v1
     // find the shortest path between v0 and v3
     let path = graph.dijkstra().find_path(v0, v3);
@@ -89,7 +89,7 @@ fn test_dijkstra_same_start_end() -> Result<()> {
     let v0 = graph.add_vertex()?;
     let v1 = graph.add_vertex()?;
     // add an edge between v0 and v1
-    let _e0 = graph.add_edge([v0, v1])?;
+    let _e0 = graph.add_link([v0, v1])?;
     // compute a self-loop from v0 -> v0
     let path = graph.dijkstra().find_path(v0, v0)?;
     // verify the path has one item, which is the node itself
@@ -113,10 +113,10 @@ fn test_dijkstra_multiple_paths() -> Result<()> {
     let v3 = graph.add_vertex()?;
     let v4 = graph.add_vertex()?;
     // Add edges to the graph
-    let e0 = graph.add_edge([v0, v1, v3])?;
-    let e1 = graph.add_edge([v0, v2])?;
-    let e2 = graph.add_edge([v2, v4])?;
-    let e3 = graph.add_edge([v3, v4])?;
+    let e0 = graph.add_link([v0, v1, v3])?;
+    let e1 = graph.add_link([v0, v2])?;
+    let e2 = graph.add_link([v2, v4])?;
+    let e3 = graph.add_link([v3, v4])?;
     // find the shortest path from v0 to v4
     let path = graph.dijkstra().find_path(v0, v4)?;
 

@@ -3,91 +3,85 @@
     authors: @FL03
 */
 use crate::{HashEdge, HyperMap};
-use core::hash::{BuildHasher, Hash};
+use core::hash::BuildHasher;
+use core::ops::{Index, IndexMut};
 use rshyper::error::Result;
-use rshyper::idx::{EdgeId, NumIndex, RawIndex, VertexId};
+use rshyper::idx::{EdgeId, HashIndex, HyperIndex, VertexId};
 use rshyper::node::Node;
-use rshyper::{Combine, GraphProps, GraphType};
+use rshyper::{Combine, GraphProps};
 
-impl<N, E, A, S, K, Idx> Combine<EdgeId<Idx>, EdgeId<Idx>> for HyperMap<N, E, A, S>
+impl<N, E, A, S, Ix> Combine<EdgeId<Ix>, EdgeId<Ix>> for HyperMap<N, E, A, S>
 where
-    A: GraphProps<Ix = Idx, Kind = K>,
-    E: Clone + core::ops::Add<Output = E>,
-    K: GraphType,
-    Idx: NumIndex,
+    A: GraphProps<Ix = Ix>,
     S: BuildHasher + Default,
+    Ix: HyperIndex,
     for<'a> &'a E: core::ops::Add<Output = E>,
 {
-    type Output = EdgeId<Idx>;
+    type Output = EdgeId<Ix>;
 
-    fn combine(&mut self, src: EdgeId<Idx>, tgt: EdgeId<Idx>) -> Result<Self::Output> {
+    fn combine(&mut self, src: EdgeId<Ix>, tgt: EdgeId<Ix>) -> Result<Self::Output> {
         self.merge_edges(&src, &tgt)
     }
 }
 
-impl<'a, N, E, A, S, K, Idx> Combine<&'a EdgeId<Idx>, &'a EdgeId<Idx>> for HyperMap<N, E, A, S>
+impl<'a, N, E, A, S, Ix> Combine<&'a EdgeId<Ix>, &'a EdgeId<Ix>> for HyperMap<N, E, A, S>
 where
-    A: GraphProps<Ix = Idx, Kind = K>,
-    K: GraphType,
-    Idx: NumIndex,
+    A: GraphProps<Ix = Ix>,
     S: BuildHasher + Default,
+    Ix: HyperIndex,
     for<'b> &'b E: core::ops::Add<Output = E>,
 {
-    type Output = EdgeId<Idx>;
+    type Output = EdgeId<Ix>;
 
-    fn combine(&mut self, src: &'a EdgeId<Idx>, tgt: &'a EdgeId<Idx>) -> Result<Self::Output> {
+    fn combine(&mut self, src: &'a EdgeId<Ix>, tgt: &'a EdgeId<Ix>) -> Result<Self::Output> {
         self.merge_edges(src, tgt)
     }
 }
 
-impl<N, E, A, S, K, Idx> core::ops::Index<&EdgeId<Idx>> for HyperMap<N, E, A, S>
+impl<N, E, A, S, Ix> Index<&EdgeId<Ix>> for HyperMap<N, E, A, S>
 where
-    A: GraphProps<Ix = Idx, Kind = K>,
-    K: GraphType,
-    Idx: RawIndex + Eq + Hash,
+    A: GraphProps<Ix = Ix>,
     S: BuildHasher,
+    Ix: HashIndex,
 {
-    type Output = HashEdge<E, K, Idx, S>;
+    type Output = HashEdge<E, A::Kind, Ix, S>;
 
-    fn index(&self, index: &EdgeId<Idx>) -> &Self::Output {
+    fn index(&self, index: &EdgeId<Ix>) -> &Self::Output {
         self.get_surface(index).expect("Edge not found")
     }
 }
 
-impl<N, E, A, S, K, Idx> core::ops::IndexMut<&EdgeId<Idx>> for HyperMap<N, E, A, S>
+impl<N, E, A, S, Ix> IndexMut<&EdgeId<Ix>> for HyperMap<N, E, A, S>
 where
-    A: GraphProps<Ix = Idx, Kind = K>,
-    K: GraphType,
-    Idx: RawIndex + Eq + Hash,
+    A: GraphProps<Ix = Ix>,
     S: BuildHasher,
+    Ix: HashIndex,
 {
-    fn index_mut(&mut self, index: &EdgeId<Idx>) -> &mut Self::Output {
+    fn index_mut(&mut self, index: &EdgeId<Ix>) -> &mut Self::Output {
         self.get_surface_mut(index).expect("Edge not found")
     }
 }
 
-impl<N, E, A, S, K, Idx> core::ops::Index<&VertexId<Idx>> for HyperMap<N, E, A, S>
+impl<N, E, A, S, Ix> Index<&VertexId<Ix>> for HyperMap<N, E, A, S>
 where
-    A: GraphProps<Ix = Idx, Kind = K>,
-    K: GraphType,
-    Idx: RawIndex + Eq + Hash,
+    A: GraphProps<Ix = Ix>,
     S: BuildHasher,
+    Ix: HashIndex,
 {
-    type Output = Node<N, Idx>;
+    type Output = Node<N, Ix>;
 
-    fn index(&self, index: &VertexId<Idx>) -> &Self::Output {
+    fn index(&self, index: &VertexId<Ix>) -> &Self::Output {
         self.get_node(index).expect("Node not found")
     }
 }
 
-impl<N, E, A, S, K, Idx> core::ops::IndexMut<&VertexId<Idx>> for HyperMap<N, E, A, S>
+impl<N, E, A, S, Ix> IndexMut<&VertexId<Ix>> for HyperMap<N, E, A, S>
 where
-    A: GraphProps<Ix = Idx, Kind = K>,
-    K: GraphType,
-    Idx: RawIndex + Eq + Hash,
+    A: GraphProps<Ix = Ix>,
     S: BuildHasher,
+    Ix: HashIndex,
 {
-    fn index_mut(&mut self, index: &VertexId<Idx>) -> &mut Self::Output {
+    fn index_mut(&mut self, index: &VertexId<Ix>) -> &mut Self::Output {
         self.get_node_mut(index).expect("Node not found")
     }
 }

@@ -5,8 +5,8 @@
 use crate::HyperMap;
 use crate::iter::*;
 
-use core::hash::{BuildHasher, Hash};
-use rshyper::{GraphProps, GraphType, RawIndex};
+use core::hash::BuildHasher;
+use rshyper::{GraphProps, GraphType, HashIndex};
 
 /// implements various iterators for the [`HyperMap`]
 impl<N, E, A, S, K, Idx> HyperMap<N, E, A, S>
@@ -14,7 +14,7 @@ where
     S: BuildHasher,
     A: GraphProps<Kind = K, Ix = Idx>,
     K: GraphType,
-    Idx: RawIndex + Eq + Hash,
+    Idx: HashIndex,
 {
     /// returns an iterator over the node entries within the hypergraph, yielding a 2-tuple
     /// consisting of:

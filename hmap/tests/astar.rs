@@ -23,14 +23,14 @@ fn test_astar_shortest_path() -> Result<()> {
     let v5 = graph.add_vertex()?;
     // create two paths with varying lengths
     // Path 1: v0 -> v1 -> v3
-    graph.add_edge([v0, v1])?;
-    graph.add_edge([v1, v3])?;
+    graph.add_link([v0, v1])?;
+    graph.add_link([v1, v3])?;
     // Path 2: v0 -> v2 -> v4 -> v1 -> v5 -> v3
-    graph.add_edge([v0, v2])?;
-    graph.add_edge([v2, v4])?;
-    graph.add_edge([v4, v1])?;
-    graph.add_edge([v1, v5])?;
-    graph.add_edge([v5, v3])?;
+    graph.add_link([v0, v2])?;
+    graph.add_link([v2, v4])?;
+    graph.add_link([v4, v1])?;
+    graph.add_link([v1, v5])?;
+    graph.add_link([v5, v3])?;
 
     // use the a* search algorithm to find a set of paths
     let path = graph.astar(heuristic).find_path(v0, v3)?;
@@ -67,20 +67,20 @@ fn test_astar_with_heuristic() -> Result<()> {
     let v8 = graph.add_vertex()?;
 
     // Create horizontal connections
-    graph.add_edge([v0, v1])?;
-    graph.add_edge([v1, v2])?;
-    graph.add_edge([v3, v4])?;
-    graph.add_edge([v4, v5])?;
-    graph.add_edge([v6, v7])?;
-    graph.add_edge([v7, v8])?;
+    graph.add_link([v0, v1])?;
+    graph.add_link([v1, v2])?;
+    graph.add_link([v3, v4])?;
+    graph.add_link([v4, v5])?;
+    graph.add_link([v6, v7])?;
+    graph.add_link([v7, v8])?;
 
     // Create vertical connections
-    graph.add_edge([v0, v3])?;
-    graph.add_edge([v3, v6])?;
-    graph.add_edge([v1, v4])?;
-    graph.add_edge([v4, v7])?;
-    graph.add_edge([v2, v5])?;
-    graph.add_edge([v5, v8])?;
+    graph.add_link([v0, v3])?;
+    graph.add_link([v3, v6])?;
+    graph.add_link([v1, v4])?;
+    graph.add_link([v4, v7])?;
+    graph.add_link([v2, v5])?;
+    graph.add_link([v5, v8])?;
 
     // Define positions for each vertex in a 2D grid
     let positions: [(f64, f64); 9] = [
@@ -143,8 +143,8 @@ fn test_astar_disconnected() -> Result<()> {
     let v2 = graph.add_vertex()?;
     let v3 = graph.add_vertex()?;
 
-    graph.add_edge([v0, v1])?;
-    graph.add_edge([v2, v3])?;
+    graph.add_link([v0, v1])?;
+    graph.add_link([v2, v3])?;
 
     // Simple heuristic
     let heuristic = |_: VertexId, _: VertexId| -> f64 { 0.0 };
@@ -180,18 +180,18 @@ fn test_astar_complex_paths() -> Result<()> {
     let v6 = graph.add_vertex()?;
 
     // Path 1: v0 -> v1 -> v2 -> v3 (length 3)
-    graph.add_edge([v0, v1])?;
-    graph.add_edge([v1, v2])?;
-    graph.add_edge([v2, v3])?;
+    graph.add_link([v0, v1])?;
+    graph.add_link([v1, v2])?;
+    graph.add_link([v2, v3])?;
 
     // Path 2: v0 -> v4 -> v5 -> v3 (length 3)
-    graph.add_edge([v0, v4])?;
-    graph.add_edge([v4, v5])?;
-    graph.add_edge([v5, v3])?;
+    graph.add_link([v0, v4])?;
+    graph.add_link([v4, v5])?;
+    graph.add_link([v5, v3])?;
 
     // Path 3: v0 -> v6 -> v5 -> v3 (also length 3)
-    graph.add_edge([v0, v6])?;
-    graph.add_edge([v6, v5])?;
+    graph.add_link([v0, v6])?;
+    graph.add_link([v6, v5])?;
     // v5 -> v3 already defined
 
     // Simple heuristic

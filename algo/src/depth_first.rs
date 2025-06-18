@@ -3,12 +3,11 @@
     Contrib: @FL03
 */
 //! this module implements a Depth-First Traversal algorithm for hypergraphs
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::traits::{Search, Traversal};
-use crate::types::VertexSet;
 use core::hash::{BuildHasher, Hash};
 use hashbrown::{DefaultHashBuilder, HashSet};
-use rshyper::idx::{NumIndex, VertexId};
+use rshyper::idx::{HashIndex, HyperIndex, VertexId, VertexSet};
 use rshyper::rel::RawLayout;
 use rshyper::{GraphProps, HyperGraph};
 
@@ -84,7 +83,7 @@ where
     ) -> Result<<Self as Search<VertexId<A::Ix>>>::Output>
     where
         Self: Search<VertexId<A::Ix>>,
-        A::Ix: NumIndex,
+        A::Ix: HyperIndex,
     {
         Search::search(self, start)
     }
@@ -104,7 +103,7 @@ where
     A: GraphProps,
     H: HyperGraph<N, E, A>,
     S: BuildHasher,
-    A::Ix: Eq + Hash,
+    A::Ix: HashIndex,
 {
     type Store<I2> = HashSet<I2, S>;
 
@@ -122,7 +121,7 @@ where
     A: GraphProps,
     H: HyperGraph<N, E, A>,
     S: BuildHasher,
-    A::Ix: NumIndex,
+    A::Ix: HyperIndex,
     for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
     type Output = Vec<VertexId<A::Ix>>;
@@ -133,7 +132,7 @@ where
 
         // Check if starting vertex exists
         if !self.graph.contains_node(&start) {
-            return Err(Error::NodeNotFound);
+            return Err(rshyper::Error::NodeNotFound.into());
         }
 
         // Add start vertex to stack and mark as visited

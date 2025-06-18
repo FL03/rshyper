@@ -4,7 +4,7 @@
 */
 use crate::HyperMap;
 use core::hash::BuildHasher;
-use rshyper::prelude::{GraphProps, NumIndex};
+use rshyper::prelude::{GraphProps, HyperIndex};
 use rshyper_algo::{AStarSearch, BreadthFirstTraversal, DepthFirstTraversal, Dijkstra, Heuristic};
 
 /// implementations for various algorithms and operators on the hypergraph
@@ -12,7 +12,7 @@ impl<N, E, A, S> HyperMap<N, E, A, S>
 where
     S: BuildHasher + Default,
     A: GraphProps,
-    A::Ix: NumIndex,
+    A::Ix: HyperIndex,
 {
     /// returns a new [`A*`](AStarSearch) search operator configured with the current
     /// graph and the provided heuristic function.

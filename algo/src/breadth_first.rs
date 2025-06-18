@@ -5,13 +5,12 @@
 //! this module implements the breadth-first search algorithm as an operator on the hypergraph.
 use crate::error::{Error, Result};
 use crate::traits::{Search, Traversal};
-use crate::types::VertexSet;
+use alloc::collections::VecDeque;
 use core::hash::{BuildHasher, Hash};
 use hashbrown::{DefaultHashBuilder, HashSet};
-use rshyper::idx::{NumIndex, VertexId};
+use rshyper::idx::{HyperIndex, VertexId, VertexSet};
 use rshyper::rel::RawLayout;
 use rshyper::{GraphProps, HyperGraph};
-use std::collections::VecDeque;
 
 /// Breadth-First Traversal algorithm for hypergraphs
 pub struct BreadthFirstTraversal<'a, N, E, A, H, S = DefaultHashBuilder>
@@ -77,7 +76,7 @@ where
     /// a convience method to perform a search
     pub fn search(&mut self, start: VertexId<A::Ix>) -> Result<Vec<VertexId<A::Ix>>>
     where
-        A::Ix: NumIndex,
+        A::Ix: HyperIndex,
         for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
     {
         Search::search(self, start)
@@ -100,7 +99,7 @@ where
     A: GraphProps,
     H: HyperGraph<N, E, A>,
     S: BuildHasher,
-    A::Ix: NumIndex,
+    A::Ix: HyperIndex,
     for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
     type Output = Vec<VertexId<A::Ix>>;
@@ -142,7 +141,7 @@ where
     A: GraphProps,
     H: HyperGraph<N, E, A>,
     S: BuildHasher,
-    A::Ix: Eq + Hash,
+    A::Ix: HyperIndex,
 {
     type Store<I2> = HashSet<I2, S>;
 

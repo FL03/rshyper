@@ -13,17 +13,6 @@ pub trait RawIndex: 'static + Send + Sync + core::fmt::Debug + core::fmt::Displa
         alloc::format!("{self}")
     }
 }
-/// The [`HyperIndex`] trait extends the [`RawIndex`] trait to include additional operations
-/// and behaviours commonly expected from indices in a hypergraph.
-///
-/// **note:** the trait is automatically implemented for all types that implement [`RawIndex`]
-/// alongside traits including: [Clone], [Default], [PartialEq], and [PartialOrd]
-pub trait HyperIndex: RawIndex
-where
-    Self: Clone + Default + PartialEq + PartialOrd,
-{
-    private!();
-}
 /// The [`HashIndex`] trait extends the [`StdIndex`] trait to include additional operations and
 /// behaviours commonly expected from indices in a hypergraph.
 ///
@@ -41,10 +30,11 @@ where
 ///
 /// **note:** the trait is automatically implemented for all types that implement [`HashIndex`]
 /// alongside additional traits
-pub trait NumIndex: HashIndex
+pub trait NumIndex: RawIndex
 where
     Self: Copy
-        + Ord
+        + PartialEq
+        + PartialOrd
         + crate::AddStep<Output = Self>
         + core::ops::Add<Output = Self>
         + core::ops::Div<Output = Self>
@@ -70,6 +60,22 @@ where
         + num_traits::NumRef
         + num_traits::NumAssignRef,
 {
+    private!();
+}
+
+/// The [`HyperIndex`] trait extends the [`NumIndex`] to define contraints for the standard
+/// index type for the crate; implementors must also implement following traits:
+///
+/// - [`NumIndex`]
+/// - [`Default`]
+/// - [`Eq`]
+/// - [`Hash`](core::hash::Hash)
+/// - [`Ord`]
+pub trait HyperIndex: NumIndex
+where
+    Self: Default + Eq + Ord + core::hash::Hash,
+{
+    private!();
 }
 /*
  ************* Implementations *************
@@ -82,18 +88,13 @@ where
     seal!();
 }
 
-impl<T> HyperIndex for T
+impl<T> NumIndex for T
 where
-    T: 'static + RawIndex + Copy + Default + PartialEq + PartialOrd,
-{
-    seal!();
-}
-
-impl<T> NumIndex for T where
-    T: HashIndex
+    T: RawIndex
         + Copy
         + Default
-        + Ord
+        + PartialEq
+        + PartialOrd
         + crate::AddStep<Output = Self>
         + core::ops::Add<Output = Self>
         + core::ops::Div<Output = Self>
@@ -116,8 +117,16 @@ impl<T> NumIndex for T where
         + num_traits::Zero
         + num_traits::ToBytes
         + num_traits::NumRef
-        + num_traits::NumAssignRef
+        + num_traits::NumAssignRef,
 {
+    seal!();
+}
+
+impl<T> HyperIndex for T
+where
+    T: NumIndex + Default + Eq + Ord + core::hash::Hash,
+{
+    seal!();
 }
 
 #[cfg(feature = "alloc")]
