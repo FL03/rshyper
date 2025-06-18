@@ -83,7 +83,7 @@ full = [
 ]
 
 nightly = [
-    "hashbrown/nightly",
+    "hashbrown?/nightly",
     "rshyper-algo?/nightly",
     "rshyper-core/nightly",
 ]
@@ -96,7 +96,7 @@ algo = ["dep:rshyper-algo"]
 # std is required, this is more symbolic then anything
 std = [
     "alloc",
-    "hashbrown/default",
+    "hashbrown?/default",
     "num-traits/std",
     "rand?/std",
     "rshyper-algo?/std",
@@ -125,7 +125,7 @@ wasm = [
 
 # ************* [FF:Dependencies] *************
 alloc = [
-    "hashbrown/alloc",
+    "hashbrown?/alloc",
     "rshyper-algo?/alloc",
     "rshyper-core/alloc",
     "scsys/alloc",
@@ -177,7 +177,7 @@ rng = [
 serde = [
     "dep:serde",
     "dep:serde_derive",
-    "hashbrown/serde",
+    "hashbrown?/serde",
     "rand?/serde",
     "rshyper-algo?/serde",
     "rshyper-core/serde",

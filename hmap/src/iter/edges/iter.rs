@@ -4,12 +4,12 @@
 */
 use crate::types::HashEdge;
 use core::hash::{BuildHasher, Hash};
-#[cfg(all(feature = "std", not(feature = "hashbrown")))]
-use std::collections::hash_map;
 #[cfg(feature = "hashbrown")]
 use hashbrown::hash_map;
 use rshyper_core::GraphType;
 use rshyper_core::idx::{EdgeId, RawIndex};
+#[cfg(all(feature = "std", not(feature = "hashbrown")))]
+use std::collections::hash_map;
 
 /// [`EdgeIter`] is an iterator over the edge entries within the `HyperMap`, yielding
 /// a 2-tuple consisting of references to the [`EdgeId`] and [`HashSurface`] of the entry.

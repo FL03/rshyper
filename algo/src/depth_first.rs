@@ -6,9 +6,12 @@
 use crate::error::{Error, Result};
 use crate::{Search, Traversal};
 use core::hash::Hash;
+#[cfg(feature = "hashbrown")]
+use hashbrown::HashSet;
 use rshyper::RawLayout;
 use rshyper::idx::{NumIndex, RawIndex, VertexId};
 use rshyper::{GraphProps, GraphType, HyperGraph};
+#[cfg(all(feature = "std", not(feature = "hashbrown")))]
 use std::collections::HashSet;
 
 /// Depth-First Traversal algorithm for hypergraphs

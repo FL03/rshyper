@@ -997,6 +997,7 @@ dependencies = [
 name = "rshyper-algo"
 version = "0.1.6"
 dependencies = [
+ "hashbrown",
  "num-traits",
  "ordered-float",
  "rayon-core",

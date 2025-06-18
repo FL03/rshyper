@@ -9,12 +9,13 @@ pub use self::priority_node::PriorityNode;
 mod priority_node;
 
 use crate::error::{Error, Result};
+use crate::types::{HashMap, HashSet};
 use crate::{Heuristic, PathFinder, Search, Traversal, VertexSet};
 use core::hash::Hash;
 use rshyper::idx::{NumIndex, RawIndex, VertexId};
 use rshyper::rel::RawLayout;
 use rshyper::{GraphProps, GraphType, HyperGraph, HyperGraphIter};
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::BinaryHeap;
 
 /// An A* Search algorithm implementation for hypergraphs
 pub struct AStarSearch<'a, N, E, A, F, H>

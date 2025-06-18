@@ -41,6 +41,8 @@ pub(crate) mod macros {
 
 #[doc(inline)]
 pub use self::traits::prelude::*;
+#[allow(unused_imports)]
+pub use self::types::prelude::*;
 #[cfg(feature = "std")]
 pub use self::{
     astar::AStarSearch, breadth_first::BreadthFirstTraversal, depth_first::DepthFirstTraversal,
@@ -93,6 +95,40 @@ pub mod traits {
     }
 }
 
+pub mod types {
+    //! this module define various types and type aliases for the algorithms and operators
+    #[doc(inline)]
+    #[allow(unused_imports)]
+    pub use self::prelude::*;
+
+    pub(crate) mod prelude {
+        #[doc(inline)]
+        #[allow(unused_imports)]
+        pub use super::aliases::*;
+    }
+
+    #[allow(unused_imports)]
+    mod aliases {
+        #[cfg(feature = "hashbrown")]
+        use hashbrown::{
+            hash_map::{self, HashMap},
+            hash_set::{self, HashSet},
+        };
+        #[cfg(all(feature = "std", not(feature = "hashbrown")))]
+        pub(crate) use std::collections::{
+            hash_map::{self, HashMap},
+            hash_set::{self, HashSet},
+        };
+
+        #[cfg(all(feature = "std", not(feature = "hashbrown")))]
+        pub(crate) type DefaultHashBuilder = std::hash::RandomState;
+        #[cfg(feature = "hashbrown")]
+        pub(crate) type DefaultHashBuilder = hashbrown::DefaultHashBuilder;
+        /// a type alias for a [`HashSet`] of [`VertexId`] that is generic over  the index type `I`
+        pub(crate) type VertexSet<I, S = DefaultHashBuilder> = HashSet<rshyper::VertexId<I>, S>;
+    }
+}
+
 #[doc(hidden)]
 #[allow(missing_docs)]
 pub mod prelude {
@@ -104,7 +140,3 @@ pub mod prelude {
         dijkstra::Dijkstra,
     };
 }
-
-/// a type alias for a [`HashSet`](std::collections::HashSet) of [`VertexId`](rshyper::VertexId)'s
-#[cfg(feature = "std")]
-pub(crate) type VertexSet<Idx> = std::collections::HashSet<rshyper::VertexId<Idx>>;

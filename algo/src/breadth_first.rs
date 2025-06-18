@@ -6,10 +6,14 @@
 use crate::error::{Error, Result};
 use crate::{Search, Traversal};
 use core::hash::Hash;
+#[cfg(feature = "hashbrown")]
+use hashbrown::HashSet;
 use rshyper::idx::{NumIndex, RawIndex, VertexId};
 use rshyper::rel::RawLayout;
 use rshyper::{GraphProps, GraphType, HyperGraph};
-use std::collections::{HashSet, VecDeque};
+#[cfg(all(feature = "std", not(feature = "hashbrown")))]
+use std::collections::HashSet;
+use std::collections::VecDeque;
 
 /// Breadth-First Traversal algorithm for hypergraphs
 pub struct BreadthFirstTraversal<'a, N, E, A, H>

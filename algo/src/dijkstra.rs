@@ -9,8 +9,9 @@ pub use self::queue_node::QueueNode;
 mod queue_node;
 
 use crate::error::{Error, Result};
-use crate::{PathFinder, Search, Traversal, VertexSet};
-use core::hash::Hash;
+use crate::types::{HashMap, HashSet, VertexSet};
+use crate::{DefaultHashBuilder, PathFinder, Search, Traversal};
+use core::hash::{BuildHasher, Hash};
 use num_traits::bounds::UpperBounded;
 use num_traits::{FromPrimitive, Num};
 use rshyper::idx::{NumIndex, RawIndex, VertexId};
@@ -19,36 +20,40 @@ use rshyper::{GraphProps, HyperGraph, HyperGraphIter};
 use std::collections::BinaryHeap;
 
 /// a type alias for a map of distances for vertices in the graph
-pub(crate) type Distances<K, V = f64> = std::collections::HashMap<VertexId<K>, V>;
+pub(crate) type Distances<K, V = f64, S = DefaultHashBuilder> = HashMap<VertexId<K>, V, S>;
 /// a type alias for the history of previous vertices in the graph, maps vertices to vertices
-pub(crate) type PreviousHistory<K> = std::collections::HashMap<VertexId<K>, VertexId<K>>;
+pub(crate) type PreviousHistory<K, S = DefaultHashBuilder> = HashMap<VertexId<K>, VertexId<K>, S>;
 
 /// Dijkstra's shortest path algorithm for hypergraphs
-pub struct Dijkstra<'a, N, E, A, H>
+pub struct Dijkstra<'a, N, E, A, H, S = DefaultHashBuilder>
 where
     A: GraphProps,
     H: HyperGraph<N, E, A>,
 {
     pub(crate) graph: &'a H,
-    pub(crate) distances: Distances<A::Ix, E>,
-    pub(crate) previous: PreviousHistory<A::Ix>,
-    pub(crate) visited: VertexSet<A::Ix>,
+    pub(crate) distances: Distances<A::Ix, E, S>,
+    pub(crate) previous: PreviousHistory<A::Ix, S>,
+    pub(crate) visited: VertexSet<A::Ix, S>,
     _marker: core::marker::PhantomData<(N, E)>,
 }
 
-impl<'a, N, E, A, H> Dijkstra<'a, N, E, A, H>
+impl<'a, N, E, A, H, S> Dijkstra<'a, N, E, A, H, S>
 where
     A: GraphProps,
     H: HyperGraph<N, E, A>,
+    S: BuildHasher,
     A::Ix: RawIndex,
 {
     /// Create a new Dijkstra instance
-    pub fn new(graph: &'a H) -> Self {
+    pub fn new(graph: &'a H) -> Self
+    where
+        S: Default,
+    {
         Self {
             graph,
-            distances: Distances::new(),
-            previous: PreviousHistory::new(),
-            visited: VertexSet::new(),
+            distances: Distances::default(),
+            previous: PreviousHistory::default(),
+            visited: VertexSet::default(),
             _marker: core::marker::PhantomData::<(N, E)>,
         }
     }
@@ -57,41 +62,41 @@ where
         self.graph
     }
     /// returns a reference to the distances
-    pub const fn distances(&self) -> &Distances<A::Ix, E> {
+    pub const fn distances(&self) -> &Distances<A::Ix, E, S> {
         &self.distances
     }
     /// returns a mutable reference to the distances
-    pub const fn distances_mut(&mut self) -> &mut Distances<A::Ix, E> {
+    pub const fn distances_mut(&mut self) -> &mut Distances<A::Ix, E, S> {
         &mut self.distances
     }
     /// returns a reference to the previous history
-    pub const fn previous(&self) -> &PreviousHistory<A::Ix> {
+    pub const fn previous(&self) -> &PreviousHistory<A::Ix, S> {
         &self.previous
     }
     /// returns a mutable reference to the previous history
-    pub const fn previous_mut(&mut self) -> &mut PreviousHistory<A::Ix> {
+    pub const fn previous_mut(&mut self) -> &mut PreviousHistory<A::Ix, S> {
         &mut self.previous
     }
     /// returns a reference to the visited vertices
-    pub const fn visited(&self) -> &VertexSet<A::Ix> {
+    pub const fn visited(&self) -> &VertexSet<A::Ix, S> {
         &self.visited
     }
     /// returns a mutable reference to the visited vertices
-    pub const fn visited_mut(&mut self) -> &mut VertexSet<A::Ix> {
+    pub const fn visited_mut(&mut self) -> &mut VertexSet<A::Ix, S> {
         &mut self.visited
     }
     /// update the distances and returns a mutable reference to the instance
-    pub fn set_distances(&mut self, distances: Distances<A::Ix, E>) -> &mut Self {
+    pub fn set_distances(&mut self, distances: Distances<A::Ix, E, S>) -> &mut Self {
         *self.distances_mut() = distances;
         self
     }
     /// update the previous history and returns a mutable reference to the instance
-    pub fn set_previous(&mut self, previous: PreviousHistory<A::Ix>) -> &mut Self {
+    pub fn set_previous(&mut self, previous: PreviousHistory<A::Ix, S>) -> &mut Self {
         *self.previous_mut() = previous;
         self
     }
     /// update the visited vertices and returns a mutable reference to the instance
-    pub fn set_visited(&mut self, visited: VertexSet<A::Ix>) -> &mut Self {
+    pub fn set_visited(&mut self, visited: VertexSet<A::Ix, S>) -> &mut Self {
         *self.visited_mut() = visited;
         self
     }
@@ -243,13 +248,14 @@ where
     }
 }
 
-impl<'a, N, E, A, H> Traversal<VertexId<A::Ix>> for Dijkstra<'a, N, E, A, H>
+impl<'a, N, E, A, H, S> Traversal<VertexId<A::Ix>> for Dijkstra<'a, N, E, A, H, S>
 where
     A: GraphProps,
     H: HyperGraph<N, E, A>,
+    S: BuildHasher,
     A::Ix: Eq + Hash,
 {
-    type Store<I2> = std::collections::HashSet<I2>;
+    type Store<I2> = HashSet<I2, S>;
 
     fn has_visited(&self, vertex: &VertexId<A::Ix>) -> bool {
         self.visited().contains(vertex)

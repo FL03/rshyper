@@ -18,7 +18,7 @@ use crate::{Domain, GraphType};
 #[repr(C)]
 pub struct Link<S, K, Ix = usize>
 where
-Ix: RawIndex,
+    Ix: RawIndex,
     K: GraphType,
     S: Domain<Ix>,
 {
