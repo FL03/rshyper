@@ -8,10 +8,10 @@
 //!
 //! ## Features
 //!
-//! - [`astar`]: enables the A* search algorithm for hypergraphs
-//! - [`breadth_first`]: enables the breadth-first search algorithm for hypergraphs
-//! - [`depth_first`]: enables the depth-first search algorithm for hypergraphs
-//! - [`dijkstra`]: enables Dijkstra's algorithm for finding the shortest path in hypergraphs
+//! - [`astar`]: the A* search algorithm for hypergraphs
+//! - [`breadth_first`]: the breadth-first search algorithm for hypergraphs
+//! - [`depth_first`]: the depth-first search algorithm for hypergraphs
+//! - [`dijkstra`]: Dijkstra's algorithm for finding the shortest path in hypergraphs
 //!
 #![crate_type = "lib"]
 #![doc(

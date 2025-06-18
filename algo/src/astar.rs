@@ -9,55 +9,63 @@ pub use self::priority_node::PriorityNode;
 mod priority_node;
 
 use crate::error::{Error, Result};
-use crate::types::{HashMap, HashSet};
-use crate::{Heuristic, PathFinder, Search, Traversal, VertexSet};
-use core::hash::Hash;
+use crate::traits::{Heuristic, PathFinder, Search, Traversal};
+use crate::types::{DefaultHashBuilder, HashMap, HashSet, VertexSet};
+use core::hash::{BuildHasher, Hash};
 use rshyper::idx::{NumIndex, RawIndex, VertexId};
 use rshyper::rel::RawLayout;
 use rshyper::{GraphProps, GraphType, HyperGraph, HyperGraphIter};
 use std::collections::BinaryHeap;
 
+type SourceMap<Ix, S = DefaultHashBuilder> = HashMap<VertexId<Ix>, VertexId<Ix>, S>;
+
+type ScoreMap<K, V, S = DefaultHashBuilder> = HashMap<VertexId<K>, V, S>;
+
 /// An A* Search algorithm implementation for hypergraphs
-pub struct AStarSearch<'a, N, E, A, F, H>
+pub struct AStarSearch<'a, N, E, A, F, H, S = DefaultHashBuilder>
 where
     A: GraphProps,
     H: HyperGraph<N, E, A>,
     F: Heuristic<A::Ix>,
 {
     pub(crate) graph: &'a H,
-    pub(crate) open_set: VertexSet<A::Ix>,
-    pub(crate) closed_set: VertexSet<A::Ix>,
-    pub(crate) came_from: HashMap<VertexId<A::Ix>, VertexId<A::Ix>>,
-    pub(crate) g_score: HashMap<VertexId<A::Ix>, F::Output>,
-    pub(crate) f_score: HashMap<VertexId<A::Ix>, F::Output>,
+    pub(crate) open_set: VertexSet<A::Ix, S>,
+    pub(crate) closed_set: VertexSet<A::Ix, S>,
+    pub(crate) came_from: SourceMap<A::Ix, S>,
+    pub(crate) g_score: ScoreMap<A::Ix, F::Output, S>,
+    pub(crate) f_score: ScoreMap<A::Ix, F::Output, S>,
     pub(crate) heuristic: F,
     _marker: core::marker::PhantomData<(N, E)>,
 }
 
-impl<'a, N, E, A, F, H, K, Idx> AStarSearch<'a, N, E, A, F, H>
+impl<'a, N, E, A, F, H, S, K, Idx> AStarSearch<'a, N, E, A, F, H, S>
 where
     A: GraphProps<Ix = Idx, Kind = K>,
     H: HyperGraph<N, E, A>,
     F: Heuristic<Idx>,
+    S: BuildHasher,
     K: GraphType,
     Idx: RawIndex,
 {
     /// Create a new A* search instance with the given heuristic function
-    pub fn new(graph: &'a H, heuristic: F) -> Self {
+    pub fn new(graph: &'a H, heuristic: F) -> Self
+    where
+        S: Default,
+    {
         Self {
             heuristic,
             graph,
-            open_set: VertexSet::new(),
-            closed_set: VertexSet::new(),
-            came_from: HashMap::new(),
-            g_score: HashMap::new(),
-            f_score: HashMap::new(),
+            open_set: VertexSet::default(),
+            closed_set: VertexSet::default(),
+            came_from: SourceMap::default(),
+            g_score: ScoreMap::default(),
+            f_score: ScoreMap::default(),
             _marker: core::marker::PhantomData::<(N, E)>,
         }
     }
     /// consumes the current instance to create another from the given heuristic function;
     /// **note:** while the functions may be different, the output type of both must match.
-    pub fn with_heuristic<G>(self, heuristic: G) -> AStarSearch<'a, N, E, A, G, H>
+    pub fn with_heuristic<G>(self, heuristic: G) -> AStarSearch<'a, N, E, A, G, H, S>
     where
         G: Heuristic<Idx, Output = F::Output>,
     {
@@ -73,35 +81,35 @@ where
         }
     }
 
-    pub const fn came_from(&self) -> &HashMap<VertexId<Idx>, VertexId<Idx>> {
+    pub const fn came_from(&self) -> &SourceMap<A::Ix, S> {
         &self.came_from
     }
     /// returns a mutable reference to the map of vertices that have been processed
-    pub const fn came_from_mut(&mut self) -> &mut HashMap<VertexId<Idx>, VertexId<Idx>> {
+    pub const fn came_from_mut(&mut self) -> &mut SourceMap<A::Ix, S> {
         &mut self.came_from
     }
     /// returns an immutable reference to the closed set of vertices
-    pub const fn closed_set(&self) -> &VertexSet<Idx> {
+    pub const fn closed_set(&self) -> &VertexSet<A::Ix, S> {
         &self.closed_set
     }
     /// returns a mutable reference to the closed set of vertices
-    pub const fn closed_set_mut(&mut self) -> &mut VertexSet<Idx> {
+    pub const fn closed_set_mut(&mut self) -> &mut VertexSet<A::Ix, S> {
         &mut self.closed_set
     }
     /// returns an immutable reference to the f_score map
-    pub const fn f_score(&self) -> &HashMap<VertexId<Idx>, F::Output> {
+    pub const fn f_score(&self) -> &ScoreMap<A::Ix, F::Output, S> {
         &self.f_score
     }
     /// returns a mutable reference to the f_score map
-    pub const fn f_score_mut(&mut self) -> &mut HashMap<VertexId<Idx>, F::Output> {
+    pub const fn f_score_mut(&mut self) -> &mut ScoreMap<A::Ix, F::Output, S> {
         &mut self.f_score
     }
     /// returns an immutable reference to the g_score map
-    pub const fn g_score(&self) -> &HashMap<VertexId<Idx>, F::Output> {
+    pub const fn g_score(&self) -> &ScoreMap<A::Ix, F::Output, S> {
         &self.g_score
     }
     /// returns a mutable reference to the g_score map
-    pub const fn g_score_mut(&mut self) -> &mut HashMap<VertexId<Idx>, F::Output> {
+    pub const fn g_score_mut(&mut self) -> &mut ScoreMap<A::Ix, F::Output, S> {
         &mut self.g_score
     }
     /// returns an immutable reference to the heuristic function of the algorithm
@@ -109,11 +117,11 @@ where
         &self.heuristic
     }
     /// returns an immutable reference to the set of vertices that have been visited
-    pub const fn open_set(&self) -> &VertexSet<Idx> {
+    pub const fn open_set(&self) -> &VertexSet<A::Ix, S> {
         &self.open_set
     }
     /// returns amutable reference to the open set of vertices
-    pub const fn open_set_mut(&mut self) -> &mut VertexSet<Idx> {
+    pub const fn open_set_mut(&mut self) -> &mut VertexSet<A::Ix, S> {
         &mut self.open_set
     }
     /// returns true if the given vertex has a f_score
@@ -193,11 +201,12 @@ where
     }
 }
 
-impl<'a, N, E, F, A, H> PathFinder<A::Ix> for AStarSearch<'a, N, E, A, F, H>
+impl<'a, N, E, F, A, H, S> PathFinder<A::Ix> for AStarSearch<'a, N, E, A, F, H, S>
 where
     A: GraphProps,
     H: HyperGraph<N, E, A>,
     F: Heuristic<A::Ix, Output = f64>,
+    S: BuildHasher,
     A::Ix: NumIndex,
     for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
@@ -320,14 +329,15 @@ where
     }
 }
 
-impl<'a, N, E, F, A, H> Traversal<VertexId<A::Ix>> for AStarSearch<'a, N, E, A, F, H>
+impl<'a, N, E, F, A, H, S> Traversal<VertexId<A::Ix>> for AStarSearch<'a, N, E, A, F, H, S>
 where
     A: GraphProps,
     F: Heuristic<A::Ix, Output = f64>,
     H: HyperGraph<N, E, A>,
+    S: BuildHasher,
     A::Ix: Eq + Hash,
 {
-    type Store<U> = HashSet<U>;
+    type Store<U> = HashSet<U, S>;
 
     fn has_visited(&self, vertex: &VertexId<A::Ix>) -> bool {
         self.visited().contains(vertex)
@@ -338,11 +348,12 @@ where
     }
 }
 
-impl<'a, N, E, F, A, H> Search<VertexId<A::Ix>> for AStarSearch<'a, N, E, A, F, H>
+impl<'a, N, E, F, A, H, S> Search<VertexId<A::Ix>> for AStarSearch<'a, N, E, A, F, H, S>
 where
     A: GraphProps,
     F: Heuristic<A::Ix, Output = f64>,
     H: HyperGraphIter<N, E, A>,
+    S: BuildHasher,
     A::Ix: NumIndex,
     for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {

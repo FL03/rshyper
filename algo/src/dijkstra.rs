@@ -163,11 +163,12 @@ where
     }
 }
 
-impl<'a, N, E, A, H> PathFinder<A::Ix> for Dijkstra<'a, N, E, A, H>
+impl<'a, N, E, A, H, S> PathFinder<A::Ix> for Dijkstra<'a, N, E, A, H, S>
 where
     E: Copy + Default + PartialOrd + FromPrimitive + Num + UpperBounded,
     A: GraphProps,
     H: HyperGraph<N, E, A>,
+    S: BuildHasher,
     A::Ix: NumIndex,
     <H::Edge<E> as RawLayout>::Store: Clone + IntoIterator<Item = VertexId<A::Ix>>,
 {
