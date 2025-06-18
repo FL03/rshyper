@@ -19,6 +19,9 @@ pub enum Error {
     #[cfg(feature = "alloc")]
     #[error("The edge associated with the id {0} already exists")]
     EdgeAlreadyExists(Box<dyn RawIndex>),
+    #[cfg(feature = "alloc")]
+    #[error("The node associated with the id {0} already exists")]
+    NodeAlreadyExists(Box<dyn RawIndex>),
     #[error("The edge with the given id does not exist")]
     EdgeNotFound,
     #[error("The node with the given id does not exist")]
@@ -57,6 +60,12 @@ impl Error {
     #[cfg(feature = "alloc")]
     pub fn edge_already_exists<I: RawIndex>(id: I) -> Self {
         Error::EdgeAlreadyExists(Box::new(id))
+    }
+    /// returns a new [`NodeAlreadyExists`](Error::NodeAlreadyExists) variant initialized with
+    /// the given node id
+    #[cfg(feature = "alloc")]
+    pub fn node_already_exists<I: RawIndex>(id: I) -> Self {
+        Error::NodeAlreadyExists(Box::new(id))
     }
     /// returns a new [`EdgeNotFound`](Error::EdgeNotFound) variant
     pub fn edge_not_found() -> Self {

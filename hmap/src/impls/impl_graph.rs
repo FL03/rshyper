@@ -472,20 +472,19 @@ where
             self.history_mut().add_node(data.id().clone());
             return Err(Error::NodeNotFound);
         }
-        // get the id of the surface
-        let id = data.id().clone();
-        #[cfg(feature = "tracing")]
-        tracing::debug!("inserting a new hypernode ({id}) into the graph...");
-        let res = self.insert_node_unchecked(data);
-        res
-            .inspect(|_| {
+        // if the node already exists in the graph, return an error
+        if self.contains_node(data.id()) {
+            #[cfg(feature = "tracing")]
+            tracing::error!(
+                "the node with id ({}) already exists in the graph; cannot insert it again",
+                data.id()
+            );
+            return Err(Error::node_already_exists(data.id().get().clone()));
+        }
+        // add the node
+        self.insert_node_unchecked(data).inspect(|id| {
                 #[cfg(feature = "tracing")]
                 tracing::debug!("successfully inserted the hypernode ({id}) into the graph");
-            })
-            .map_err(|_| {
-                #[cfg(feature = "tracing")]
-                tracing::error!("failed to insert the hypernode ({id}) into the graph");
-                Error::NodeNotFound
             })
     }
     /// this method is responsible for directly registering new surfaces with the system,
