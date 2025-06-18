@@ -5,7 +5,7 @@
 //! this module focuses on the [`Edge`] implementation, providing additional types, traits, and
 //! representations for edges in a hypergraph.
 #[doc(inline)]
-pub use self::{hyper_edge::Edge, traits::prelude::*, utils::prelude::*};
+pub use self::{hyper_edge::Edge, traits::prelude::*, types::prelude::*, utils::prelude::*};
 
 /// the [`hyper_edge`] is responsible for defining the [`Edge`] struct
 pub mod hyper_edge;
@@ -33,10 +33,14 @@ pub mod types {
     //! this module contains various type aliases and additional types in support of the edges
     //! of a hypergraph.
     #[doc(inline)]
-    #[allow(unused_imports)]
     pub use self::prelude::*;
 
-    pub(crate) mod prelude {}
+    mod aliases;
+
+    pub(crate) mod prelude {
+        #[doc(inline)]
+        pub use super::aliases::*;
+    }
 }
 
 pub mod utils {
@@ -63,6 +67,8 @@ pub(crate) mod prelude {
     pub use super::hyper_edge::*;
     #[doc(inline)]
     pub use super::traits::prelude::*;
+    #[doc(inline)]
+    pub use super::types::prelude::*;
     #[doc(inline)]
     pub use super::utils::prelude::*;
 }

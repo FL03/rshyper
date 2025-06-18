@@ -87,8 +87,8 @@ pub mod iter {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    mod edges;
-    mod nodes;
+    pub mod edges;
+    pub mod nodes;
 
     pub(crate) mod prelude {
         #[doc(inline)]

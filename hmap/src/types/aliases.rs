@@ -5,20 +5,15 @@
 #[allow(deprecated, unused_imports)]
 pub use self::impl_deprecated::*;
 
-#[cfg(feature = "hashbrown")]
+use hashbrown::HashSet;
 use hashbrown::hash_map::{Entry, HashMap};
 use rshyper::idx::{EdgeId, VertexId};
 use rshyper::{Edge, Node};
-#[cfg(all(feature = "std", not(feature = "hashbrown")))]
-use std::collections::hash_map::{Entry, HashMap};
 
-#[cfg(all(feature = "std", not(feature = "hashbrown")))]
-pub type DefaultHashBuilder = std::hash::RandomState;
-#[cfg(feature = "hashbrown")]
-pub type DefaultHashBuilder = hashbrown::DefaultHashBuilder;
+pub(crate) use hashbrown::DefaultHashBuilder;
 
-/// a type alias for a [`HashSet`](rshyper::VertexHashSet)
-pub type VertexSet<Ix, S> = rshyper::VertexHashSet<Ix, S>;
+/// a type alias for a [`HashSet`]
+pub type VertexSet<Ix, S> = HashSet<VertexId<Ix>, S>;
 /// a type alias for a [`Edge`] with [`VertexSet`] as its vertices
 pub type HashEdge<E, K, Ix, S> = Edge<E, VertexSet<Ix, S>, K, Ix>;
 

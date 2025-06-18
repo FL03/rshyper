@@ -65,15 +65,15 @@ where
     }
     /// returns a mutable iterator over each of the _values_, or [`Edge`](rshyper::Edge),
     /// associated with the edges of the graph.
-    pub fn facets(&self) -> Facets<'_, E, K, Idx, S> {
-        Facets {
+    pub fn facets(&self) -> Edges<'_, E, K, Idx, S> {
+        Edges {
             iter: self.edges().values(),
         }
     }
     /// returns a mutable iterator over each of the _values_, or [`Edge`](rshyper::Edge),
     /// associated with the edges of the graph, yielding mutable references to the surfaces.
-    pub fn facets_mut(&mut self) -> FacetsMut<'_, E, K, Idx, S> {
-        FacetsMut {
+    pub fn facets_mut(&mut self) -> EdgesMut<'_, E, K, Idx, S> {
+        EdgesMut {
             iter: self.edges_mut().values_mut(),
         }
     }

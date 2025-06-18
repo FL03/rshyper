@@ -83,6 +83,7 @@ pub mod types {
     #[doc(inline)]
     pub use self::prelude::*;
 
+    mod aliases;
     pub mod kinds;
 
     pub(crate) mod prelude {
@@ -90,16 +91,6 @@ pub mod types {
         pub use super::aliases::*;
         #[doc(inline)]
         pub use super::kinds::*;
-    }
-
-    mod aliases {
-        use crate::idx::{EdgeIndex, IndexBase, VertexIndex};
-        /// a type alias for a [`usize`] used to define the default index type throughout the crate.
-        pub type Udx = usize;
-        /// a type alias for an [`Index`] whose _kind_ is [`EdgeIndex`]
-        pub type EdgeId<T = Udx> = IndexBase<T, EdgeIndex>;
-        /// a type alias for an [`Index`] whose _kind_ is [`VertexIndex`]
-        pub type VertexId<T = Udx> = IndexBase<T, VertexIndex>;
     }
 }
 
@@ -109,7 +100,7 @@ pub(crate) mod prelude {
     #[doc(inline)]
     pub use super::position::*;
     #[doc(inline)]
-    pub use super::traits::{NumIndex, RawIndex};
+    pub use super::traits::prelude::*;
     #[doc(inline)]
     pub use super::types::prelude::*;
 }

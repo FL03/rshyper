@@ -99,14 +99,10 @@ pub mod types {
     //! this module provides various types used throughout the library
     #[doc(inline)]
     pub use self::prelude::*;
-
-    mod aliases;
     /// this module defines the two types of graph kinds: [`Directed`] and [`Undirected`]
     pub mod graph_kind;
 
     pub(crate) mod prelude {
-        #[doc(inline)]
-        pub use super::aliases::*;
         #[doc(inline)]
         pub use super::graph_kind::*;
     }

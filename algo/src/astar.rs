@@ -10,8 +10,9 @@ mod priority_node;
 
 use crate::error::{Error, Result};
 use crate::traits::{Heuristic, PathFinder, Search, Traversal};
-use crate::types::{DefaultHashBuilder, HashMap, HashSet, VertexSet};
+use crate::types::VertexSet;
 use core::hash::{BuildHasher, Hash};
+use hashbrown::{DefaultHashBuilder, HashMap, HashSet};
 use rshyper::idx::{NumIndex, RawIndex, VertexId};
 use rshyper::rel::RawLayout;
 use rshyper::{GraphProps, GraphType, HyperGraph, HyperGraphIter};

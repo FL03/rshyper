@@ -8,10 +8,12 @@ pub use self::queue_node::QueueNode;
 
 mod queue_node;
 
+use crate::VertexSet;
 use crate::error::{Error, Result};
-use crate::types::{HashMap, HashSet, VertexSet};
-use crate::{DefaultHashBuilder, PathFinder, Search, Traversal};
+use crate::traits::{PathFinder, Search, Traversal};
+
 use core::hash::{BuildHasher, Hash};
+use hashbrown::{DefaultHashBuilder, HashMap, HashSet};
 use num_traits::bounds::UpperBounded;
 use num_traits::{FromPrimitive, Num};
 use rshyper::idx::{NumIndex, RawIndex, VertexId};

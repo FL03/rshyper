@@ -17,11 +17,9 @@ use crate::types::prelude::*;
 
 use core::borrow::Borrow;
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::{
-    AddStep, GraphType, Mode,
-    attrs::{DiAttrs, GraphProps, UnAttrs},
-    idx::{EdgeId, Frame, IndexTracker, RawIndex, Udx, VertexId},
-};
+use rshyper::attrs::{DiAttrs, GraphProps, UnAttrs};
+use rshyper::idx::{EdgeId, Frame, IndexTracker, RawIndex, Udx, VertexId};
+use rshyper::{AddStep, GraphType, Mode};
 
 /// a type alias for a [directed](rshyper::Directed) [`HyperMap`]
 pub type DiHyperMap<N, E, Idx = Udx, S = DefaultHashBuilder> = HyperMap<N, E, DiAttrs<Idx>, S>;

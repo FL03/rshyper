@@ -109,23 +109,10 @@ pub mod types {
 
     #[allow(unused_imports)]
     mod aliases {
-        #[cfg(feature = "hashbrown")]
-        use hashbrown::{
-            hash_map::{self, HashMap},
-            hash_set::{self, HashSet},
-        };
-        #[cfg(all(feature = "std", not(feature = "hashbrown")))]
-        pub(crate) use std::collections::{
-            hash_map::{self, HashMap},
-            hash_set::{self, HashSet},
-        };
-
-        #[cfg(all(feature = "std", not(feature = "hashbrown")))]
-        pub(crate) type DefaultHashBuilder = std::hash::RandomState;
-        #[cfg(feature = "hashbrown")]
-        pub(crate) type DefaultHashBuilder = hashbrown::DefaultHashBuilder;
+        use hashbrown::{DefaultHashBuilder, HashSet};
+        use rshyper::idx::VertexId;
         /// a type alias for a [`HashSet`] of [`VertexId`] that is generic over  the index type `I`
-        pub(crate) type VertexSet<I, S = DefaultHashBuilder> = HashSet<rshyper::VertexId<I>, S>;
+        pub(crate) type VertexSet<I, S = DefaultHashBuilder> = HashSet<VertexId<I>, S>;
     }
 }
 

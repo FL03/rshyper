@@ -5,7 +5,7 @@
 //! this module implements sequential iterator over the edges of a [`HyperMap`]
 use crate::HashEdge;
 
-use super::{Facets, FacetsMut};
+use super::{Edges, EdgesMut};
 use core::hash::{BuildHasher, Hash};
 use rshyper::idx::{EdgeId, RawIndex};
 use rshyper::prelude::GraphType;
@@ -20,7 +20,7 @@ where
     K: GraphType,
 {
     pub(crate) keys: core::slice::Iter<'a, EdgeId<Idx>>,
-    pub(crate) values: Facets<'a, E, K, Idx, S>,
+    pub(crate) values: Edges<'a, E, K, Idx, S>,
 }
 /// [`SeqFacetIterMut`] is a mutable iterator producing mutable references to the edges of a
 /// hypergraph in a manner that respects the order in-which they were inserted.
@@ -32,7 +32,7 @@ where
     K: GraphType,
 {
     pub(crate) keys: core::slice::Iter<'a, EdgeId<Idx>>,
-    pub(crate) values: FacetsMut<'a, E, K, Idx, S>,
+    pub(crate) values: EdgesMut<'a, E, K, Idx, S>,
 }
 
 /*

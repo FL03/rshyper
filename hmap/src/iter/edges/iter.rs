@@ -4,12 +4,9 @@
 */
 use crate::types::HashEdge;
 use core::hash::{BuildHasher, Hash};
-#[cfg(feature = "hashbrown")]
 use hashbrown::hash_map;
 use rshyper_core::GraphType;
 use rshyper_core::idx::{EdgeId, RawIndex};
-#[cfg(all(feature = "std", not(feature = "hashbrown")))]
-use std::collections::hash_map;
 
 /// [`EdgeIter`] is an iterator over the edge entries within the `HyperMap`, yielding
 /// a 2-tuple consisting of references to the [`EdgeId`] and [`HashSurface`] of the entry.
@@ -46,7 +43,7 @@ where
     pub(crate) iter: hash_map::Keys<'a, EdgeId<Idx>, HashEdge<E, K, Idx, S>>,
 }
 /// [`Edges`] is an iterator over the actual surfaces of a hypergraph, yielding
-pub struct Facets<'a, E, K, Idx, S>
+pub struct Edges<'a, E, K, Idx, S>
 where
     E: 'a,
     Idx: RawIndex,
@@ -56,7 +53,7 @@ where
     pub(crate) iter: hash_map::Values<'a, EdgeId<Idx>, HashEdge<E, K, Idx, S>>,
 }
 /// [`EdgesMut`] is a mutable iterator over the surfaces of a hypergraph, yielding
-pub struct FacetsMut<'a, E, K, Idx, S>
+pub struct EdgesMut<'a, E, K, Idx, S>
 where
     E: 'a,
     Idx: RawIndex,
@@ -83,7 +80,7 @@ where
     }
 }
 
-impl<'a, E, K, Idx, S> Iterator for Facets<'a, E, K, Idx, S>
+impl<'a, E, K, Idx, S> Iterator for Edges<'a, E, K, Idx, S>
 where
     E: 'a,
     K: GraphType,
@@ -97,7 +94,7 @@ where
     }
 }
 
-impl<'a, E, K, Idx, S> Iterator for FacetsMut<'a, E, K, Idx, S>
+impl<'a, E, K, Idx, S> Iterator for EdgesMut<'a, E, K, Idx, S>
 where
     E: 'a,
     K: GraphType,

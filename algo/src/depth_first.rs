@@ -5,8 +5,9 @@
 //! this module implements a Depth-First Traversal algorithm for hypergraphs
 use crate::error::{Error, Result};
 use crate::traits::{Search, Traversal};
-use crate::types::{DefaultHashBuilder, HashSet, VertexSet};
+use crate::types::VertexSet;
 use core::hash::{BuildHasher, Hash};
+use hashbrown::{DefaultHashBuilder, HashSet};
 use rshyper::idx::{NumIndex, VertexId};
 use rshyper::rel::RawLayout;
 use rshyper::{GraphProps, HyperGraph};

@@ -5,8 +5,9 @@
 //! this module implements the breadth-first search algorithm as an operator on the hypergraph.
 use crate::error::{Error, Result};
 use crate::traits::{Search, Traversal};
-use crate::types::{DefaultHashBuilder, HashSet, VertexSet};
+use crate::types::VertexSet;
 use core::hash::{BuildHasher, Hash};
+use hashbrown::{DefaultHashBuilder, HashSet};
 use rshyper::idx::{NumIndex, VertexId};
 use rshyper::rel::RawLayout;
 use rshyper::{GraphProps, HyperGraph};
