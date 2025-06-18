@@ -26,8 +26,6 @@ pub type EdgeId<T = Udx> = IndexBase<T, EdgeIndex>;
 /// a type alias for an [`Index`] whose _kind_ is [`VertexIndex`]
 pub type VertexId<T = Udx> = IndexBase<T, VertexIndex>;
 
-/// a type alias for a [`HashSet`] of [`VertexId`] that is generic over the index type `I`
-pub type VertexSet<I, S = DefaultHashBuilder> = HashSet<VertexId<I>, S>;
 /// a type alias for a fixed sized array of [`IndexBase`]
 pub type IndexArray<T, const N: usize, K = VertexIndex> = [IndexBase<T, K>; N];
 /// a type alias for a slice of [`IndexBase`]
@@ -36,6 +34,20 @@ pub type IndexSlice<T, K = VertexIndex> = [IndexBase<T, K>];
 pub type IndexSliceMut<'a, T, K = VertexIndex> = &'a mut [IndexBase<T, K>];
 /// a type alias for a reference to a slice of [`IndexBase`]
 pub type IndexSliceRef<'a, T, K = VertexIndex> = &'a [IndexBase<T, K>];
+/// a type alias for a [`HashSet`] of [`IndexBase`] that is generic over the index type `I`,
+/// the kind `K`, and the hash builder `S`
+pub type IndexSet<I, K = VertexIndex, S = DefaultHashBuilder> = HashSet<IndexBase<I, K>, S>;
+
+/// a type alias for a fixed sized array of [`VertexId`]
+pub type VertexArray<T, const N: usize> = IndexArray<T, N, VertexIndex>;
+/// a type alias for a slice of [`VertexId`]
+pub type VertexSlice<T> = IndexSlice<T, VertexIndex>;
+/// a type alias for a mutable slice of [`VertexId`]
+pub type VertexSliceMut<'a, T> = IndexSliceMut<'a, T, VertexIndex>;
+/// a type alias for a reference to a slice of [`VertexId`]
+pub type VertexSliceRef<'a, T> = IndexSliceRef<'a, T, VertexIndex>;
+/// a type alias for a [`HashSet`] of [`VertexId`] that is generic over the index type `I`
+pub type VertexSet<I, S = DefaultHashBuilder> = IndexSet<I, VertexIndex, S>;
 
 #[cfg(all(feature = "alloc", not(feature = "nightly")))]
 mod use_alloc {
