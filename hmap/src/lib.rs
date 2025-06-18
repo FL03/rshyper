@@ -41,6 +41,8 @@
     clippy::needless_doctest_main,
     clippy::should_implement_trait
 )]
+#![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "nightly", feature(allocator_api))]
 // **** WARNING ****
 // the `std` feature is required by the crate, only declared for concistency w.r.t. the
 // available features and for ensuring that all the depencies actually implement the `std`
@@ -81,12 +83,12 @@ mod impls {
 }
 
 pub mod iter {
-    //! this module implements the iterators for the [`HyperMap`](super::HashGraph)
+    //! this module defines various iterators for the [`HyperMap`](super::HyperMap)
     #[doc(inline)]
     pub use self::prelude::*;
 
-    pub mod edges;
-    pub mod nodes;
+    mod edges;
+    mod nodes;
 
     pub(crate) mod prelude {
         #[doc(inline)]

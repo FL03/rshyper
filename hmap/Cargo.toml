@@ -1,4 +1,5 @@
 [package]
+build = "build.rs"
 description = "This crate implements the hypermap implementation (a map-based hypergraph) for the rshyper framework"
 name = "rshyper-hmap"
 
