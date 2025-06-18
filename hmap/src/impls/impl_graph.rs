@@ -457,6 +457,15 @@ where
     where
         Idx: Clone,
     {
+        // if the node already exists in the graph, return an error
+        if self.contains_node(data.id()) {
+            #[cfg(feature = "tracing")]
+            tracing::error!(
+                "the node with id ({}) already exists in the graph; cannot insert it again",
+                data.id()
+            );
+            return Err(Error::node_already_exists(data.id().get().clone()));
+        }
         // verify the edge id is already recorded in the history
         if !self.history().contains_node(data.id()) {
             #[cfg(feature = "tracing")]
@@ -466,15 +475,6 @@ where
             );
             self.history_mut().add_node(data.id().clone());
             return Err(Error::NodeNotFound);
-        }
-        // if the node already exists in the graph, return an error
-        if self.contains_node(data.id()) {
-            #[cfg(feature = "tracing")]
-            tracing::error!(
-                "the node with id ({}) already exists in the graph; cannot insert it again",
-                data.id()
-            );
-            return Err(Error::node_already_exists(data.id().get().clone()));
         }
         // add the node
         self.insert_node_unchecked(data).inspect(|id| {
@@ -503,10 +503,10 @@ where
     where
         Idx: Clone,
     {
-        if !edge.is_empty() {
+        if edge.is_empty() {
             #[cfg(feature = "tracing")]
             tracing::error!(
-                "attempted to insert an empty hyperedge with id {id}",
+                "attempted to insert an empty hyperedge ({id})",
                 id = edge.id()
             );
             return Err(Error::EmptyHyperedge);
