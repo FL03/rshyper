@@ -17,7 +17,6 @@ use crate::types::prelude::*;
 
 use core::borrow::Borrow;
 use core::hash::{BuildHasher, Hash};
-use hashbrown::DefaultHashBuilder;
 use rshyper_core::{
     AddStep, GraphType, Mode,
     attrs::{DiAttrs, GraphProps, UnAttrs},

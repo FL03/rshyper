@@ -12,6 +12,11 @@ use hashbrown::hash_map::{Entry, HashMap};
 use rshyper::idx::{EdgeId, VertexId};
 use rshyper::{Edge, Node};
 
+#[cfg(all(feature = "std", not(feature = "hashbrown")))]
+pub type DefaultHashBuilder = std::hash::RandomState;
+#[cfg(feature = "hashbrown")]
+pub type DefaultHashBuilder = hashbrown::DefaultHashBuilder;
+
 /// a type alias for a [`HashSet`](rshyper::VertexHashSet)
 pub type VertexSet<Ix, S> = rshyper::VertexHashSet<Ix, S>;
 /// a type alias for a [`Edge`] with [`VertexSet`] as its vertices
