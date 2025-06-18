@@ -441,9 +441,13 @@ where
             self.history_mut().add_edge(edge.id().clone());
         }
         // get the id of the surface
-        let id = self.insert_edge_unchecked(edge)?;
-        // return the id
-        Ok(id)
+        self.insert_edge_unchecked(edge).inspect(|_id| {
+            #[cfg(feature = "tracing")]
+            tracing::debug!(
+                "successfully inserted the hyperedge ({}) into the graph",
+                _id
+            );
+        })
     }
     /// this method is responsible for directly registering new nodes with the system,
     /// implementing additional checks to ensure the validity of the instance. More
@@ -479,7 +483,10 @@ where
         // add the node
         self.insert_node_unchecked(data).inspect(|_id| {
             #[cfg(feature = "tracing")]
-            tracing::debug!("successfully inserted the hypernode ({}) into the graph", _id);
+            tracing::debug!(
+                "successfully inserted the hypernode ({}) into the graph",
+                _id
+            );
         })
     }
     /// this method is responsible for directly registering new surfaces with the system,
