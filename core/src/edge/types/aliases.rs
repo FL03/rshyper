@@ -32,12 +32,12 @@ pub type EdgeSliceMut<'a, T, K, Idx = usize> = Edge<T, &'a mut [VertexId<Idx>], 
 #[cfg(all(feature = "alloc", not(feature = "nightly")))]
 mod use_alloc {
     use crate::edge::Edge;
-    use crate::{VertexBSet, VertexVec, VertexVecDeque};
+    use crate::{VertexBSet, VertexDeque, VertexVec};
 
     /// a type alias for an [`Edge`] whose _vertices_ are stored in a [`Vec`]
     pub type EdgeVec<T, K, Idx = usize> = Edge<T, VertexVec<Idx>, K, Idx>;
     /// a type alias for an [`Edge`] whose _vertices_ are stored in a [`VecDeque`]
-    pub type EdgeDeque<T, K, Idx = usize> = Edge<T, VertexVecDeque<Idx>, K, Idx>;
+    pub type EdgeDeque<T, K, Idx = usize> = Edge<T, VertexDeque<Idx>, K, Idx>;
     /// a type alias for an [`Edge`] whose _vertices_ are stored in a [`BTreeSet`]
     pub type EdgeBSet<T, K, Idx = usize> = Edge<T, VertexBSet<Idx>, K, Idx>;
 }
@@ -45,12 +45,12 @@ mod use_alloc {
 #[cfg(all(feature = "alloc", feature = "nightly"))]
 mod use_alloc {
     use crate::edge::Edge;
-    use crate::{VertexBSet, VertexVec, VertexVecDeque};
+    use crate::{VertexBSet, VertexDeque, VertexVec};
 
     /// a type alias for an [`Edge`] whose _vertices_ are stored in a [`Vec`]
-    pub type EdgeVec<T, K, Idx, A> = Edge<T, VertexVec<Idx, S>, K, Idx>;
+    pub type EdgeVec<T, K, Idx, A> = Edge<T, VertexVec<Idx, A>, K, Idx>;
     /// a type alias for an [`Edge`] whose _vertices_ are stored in a [`VertexVecDeque`]
-    pub type EdgeDeque<T, K, Idx = usize> = Edge<T, VertexVecDeque<Idx, S>, K, Idx>;
+    pub type EdgeDeque<T, K, Idx = usize> = Edge<T, VertexDeque<Idx, A>, K, Idx>;
     /// a type alias for an [`Edge`] whose _vertices_ are stored in a [`VertexBSet`]
-    pub type EdgeBSet<T, K, Idx = usize> = Edge<T, VertexBSet<Idx, S>, K, Idx>;
+    pub type EdgeBSet<T, K, Idx = usize> = Edge<T, VertexBSet<Idx, A>, K, Idx>;
 }

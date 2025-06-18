@@ -47,7 +47,7 @@ mod use_alloc {
     /// a type alias for a [`Vec`] of [`VertexId`] that is generic over the index type `Ix`
     pub type VertexVec<Ix> = Vec<VertexId<Ix>>;
     /// a type alias for a [`VertexId`] stored in a [`VecDeque`]
-    pub type VertexVecDeque<Ix> = VecDeque<VertexId<Ix>>;
+    pub type VertexDeque<Ix> = VecDeque<VertexId<Ix>>;
     /// a type alias for a [`VertexId`] stored in a [`BTreeSet`]
     pub type VertexBSet<Ix> = BTreeSet<VertexId<Ix>>;
 }
@@ -63,7 +63,7 @@ mod use_alloc {
     /// the allocator `A`
     pub type VertexVec<I, A> = Vec<VertexId<I>, A>;
     /// a type alias for a [`VertexId`] stored in a [`VecDeque`]
-    pub type VertexVecDeque<Ix, A> = VecDeque<VertexId<Ix>, A>;
+    pub type VertexDeque<Ix, A> = VecDeque<VertexId<Ix>, A>;
     /// a type alias for a [`VertexId`] stored in a [`BTreeSet`]
     pub type VertexBSet<Ix, A> = BTreeSet<VertexId<Ix>, A>;
 }
