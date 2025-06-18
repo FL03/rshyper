@@ -477,9 +477,9 @@ where
             return Err(Error::NodeNotFound);
         }
         // add the node
-        self.insert_node_unchecked(data).inspect(|id| {
+        self.insert_node_unchecked(data).inspect(|_id| {
             #[cfg(feature = "tracing")]
-            tracing::debug!("successfully inserted the hypernode ({id}) into the graph");
+            tracing::debug!("successfully inserted the hypernode ({}) into the graph", _id);
         })
     }
     /// this method is responsible for directly registering new surfaces with the system,
