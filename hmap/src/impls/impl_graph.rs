@@ -447,10 +447,6 @@ where
         // return the id
         Ok(id)
     }
-    #[cfg_attr(
-        feature = "tracing",
-        tracing::instrument(skip_all, level = "trace", target = "hyper_map")
-    )]
     /// this method is responsible for directly registering new nodes with the system,
     /// implementing additional checks to ensure the validity of the instance. More
     /// specifically, it ensures that:
