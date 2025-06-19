@@ -2,46 +2,73 @@
     Appellation: hyper_map <bench>
     Contrib: @FL03
 */
+extern crate rshyper_core as rshyper;
+extern crate rshyper_hmap as hyper_map;
+
 use self::ext::*;
-use rshyper_core::prelude::{VertexId, generate_random_edge};
-use rshyper_hmap::HyperMap;
+use hyper_map::HyperMap;
+use rshyper::prelude::{VertexId, Weight, generate_random_edge};
 
 use core::hint::black_box;
 use criterion::{BatchSize, Criterion};
 
-/// benchmark various edge operations on the [`HashGraph`] implementation.
-fn bench_hypermap_edges(c: &mut Criterion) {
-    let mut group = c.benchmark_group("HashGraph::edges");
+/// benchmark various iterators provided by the [`HyperMap`] implementation.
+fn bench_hypermap(c: &mut Criterion) {
+    let mut group = c.benchmark_group("HyperMap::iter");
     // set the sample size for the group
     group.sample_size(SAMPLES);
     // set the duration for the measurement
     group.measurement_time(std::time::Duration::from_secs(DURATION));
-    // benchmark the `add_edge` function
-    group.bench_function("add_edge", |b| {
+    // benchmark the iterator for edges
+    group.bench_with_input("iter_edges", &N, |b, &n| {
         b.iter_batched(
             setup,
-            |mut graph| {
-                // generates a random edge (as parts) using vertices from 0 to 10
-                let (verts, weight) = generate_random_edge::<Wt>(N);
-                // add the edge to the graph
-                graph
-                    .add_edge(black_box(verts), black_box(weight))
-                    .expect("failed to add edge");
+            |graph| {
+                // iterate over the edges of the graph, taking `n` edges
+                graph.iter_edges().take(black_box(n)).for_each(|v| {
+                    // black box the entry to prevent optimizations
+                    black_box(v);
+                });
             },
             BatchSize::SmallInput,
         )
     });
-    // benchmark the `remove_edge` function
-    group.bench_function("remove_edge", |b| {
+    // benchmark the sequential iterator for edges
+    group.bench_with_input("seq_iter_edges", &N, |b, &n| {
         b.iter_batched(
             setup,
-            |mut graph| {
-                // Use the next value from the iterator as the weight
-                for id in 0..5 {
-                    graph
-                        .remove_node(black_box(&id))
-                        .expect("failed to remove node");
-                }
+            |graph| {
+                // iterate sequentially over the edges of the graph, taking `n` edges
+                graph.seq_iter_edges().take(black_box(n)).for_each(|v| {
+                    // black box the entry to prevent optimizations
+                    black_box(v);
+                });
+            },
+            BatchSize::SmallInput,
+        )
+    });
+    // benchmark the iterator for nodes
+    group.bench_with_input("iter_nodes", &N, |b, &n| {
+        b.iter_batched(
+            setup,
+            |graph| {
+                // iterate over the edges of the graph, taking `n` nodes
+                graph.iter_nodes().take(black_box(n)).for_each(|v| {
+                    black_box(v);
+                })
+            },
+            BatchSize::SmallInput,
+        )
+    });
+    // benchmark the sequential iterator for edges
+    group.bench_with_input("seq_iter_nodes", &N, |b, &n| {
+        b.iter_batched(
+            setup,
+            |graph| {
+                // iterate over the edges of the graph, taking `n` nodes
+                graph.seq_iter_nodes().take(black_box(n)).for_each(|v| {
+                    black_box(v);
+                })
             },
             BatchSize::SmallInput,
         )
@@ -50,9 +77,73 @@ fn bench_hypermap_edges(c: &mut Criterion) {
     group.finish();
 }
 
-/// benchmark for the [`HashGraph`] implementation.
+/// benchmark various edge operations on the [`HyperMap`] implementation.
+fn bench_hypermap_edges(c: &mut Criterion) {
+    let mut group = c.benchmark_group("HyperMap::edges");
+    // set the sample size for the group
+    group.sample_size(SAMPLES);
+    // set the duration for the measurement
+    group.measurement_time(std::time::Duration::from_secs(DURATION));
+    // benchmark the `add_edge` function
+    group.bench_with_input("add_edge", &generate_random_edge::<Wt>(N), |b, input| {
+        b.iter_batched(
+            setup,
+            |mut graph| {
+                let (verts, weight) = input.clone();
+                // get the edge with the given id
+                graph
+                    .add_edge(verts, black_box(weight))
+                    .expect("failed to add edge");
+            },
+            BatchSize::SmallInput,
+        )
+    });
+    // benchmark the `get_edge` function
+    group.bench_with_input("get_edge", &rand::random_range(0..N), |b, idx| {
+        b.iter_batched(
+            setup,
+            |graph| {
+                // get the edge with the given id
+                let _ = graph.get_edge(black_box(idx)).expect("failed to get edge");
+            },
+            BatchSize::SmallInput,
+        )
+    });
+    // benchmark the `remove_edge` function
+    group.bench_with_input("remove_edge", &rand::random_range(0..N), |b, idx| {
+        b.iter_batched(
+            setup,
+            |graph| {
+                // get the edge with the given id
+                let _ = graph.get_edge(black_box(idx)).expect("failed to get edge");
+            },
+            BatchSize::SmallInput,
+        )
+    });
+    // benchmark the `find_edges_with_node` function
+    group.bench_with_input(
+        "find_edges_with_node",
+        &VertexId::<usize>::random_between(0..N),
+        |b, idx| {
+            b.iter_batched(
+                setup,
+                |graph| {
+                    // find the edges that contain the given vertex id
+                    let iter = graph.find_edges_with_node(black_box(idx));
+                    // consume the iterator to force the computation
+                    black_box(iter).count()
+                },
+                BatchSize::SmallInput,
+            )
+        },
+    );
+    // finish the group
+    group.finish();
+}
+
+/// benchmark for the [`HyperMap`] implementation.
 fn bench_hypermap_nodes(c: &mut Criterion) {
-    let mut group = c.benchmark_group("HashGraph::nodes");
+    let mut group = c.benchmark_group("HyperMap::nodes");
     // set the sample size for the group
     group.sample_size(SAMPLES);
     // set the duration for the measurement
@@ -93,104 +184,39 @@ fn bench_hypermap_nodes(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
-    // benchmark the `remove_node` function
-    group.bench_function("remove_node", |b| {
+    // benchmark the `add_node` function
+    group.bench_function("add_vertex", |b| {
         b.iter_batched(
             setup,
             |mut graph| {
-                graph.history().nodes().clone().iter().for_each(|id| {
-                    graph
-                        .remove_node(black_box(id))
-                        .expect("failed to remove node");
-                })
+                // add a vertex to the graph
+                let _ = graph.add_vertex();
             },
             BatchSize::SmallInput,
         )
     });
-    // finish the group
-    group.finish();
-}
-
-/// benchmarks for search algorithms in the [`HashGraph`] implementation.
-fn bench_hypermap_search(c: &mut Criterion) {
-    let mut group = c.benchmark_group("HashGraph::search");
-    // set the sample size for the group
-    group.sample_size(SAMPLES);
-    // set the duration for the measurement
-    group.measurement_time(std::time::Duration::from_secs(DURATION));
-    // benchmark the breadth-first traversal search
-    group.bench_function("bft", |b| {
+    // benchmark the `remove_node` function
+    group.bench_with_input("add_node", &rand::random::<Wt>(), |b, &w| {
         b.iter_batched(
             setup,
-            |graph| {
-                let idx = VertexId::random_between(0..N).map(|i| i % N);
-                // get the degree of each nodelet id = n.into();
-                // search the graph for some target vertex
-                graph.bft().search(black_box(idx)).unwrap();
-            },
-            BatchSize::SmallInput,
-        )
-    });
-    // benchmark the depth-first traversal search
-    group.bench_function("dft", |b| {
-        b.iter_batched(
-            setup,
-            |graph| {
-                let idx = VertexId::random_between(0..N);
-                // get the degree of each nodelet id = n.into();
-                // search the graph for some target vertex
-                graph.dft().search(black_box(idx)).unwrap();
-            },
-            BatchSize::SmallInput,
-        )
-    });
-    // finish the group
-    group.finish();
-}
-
-/// benchmarks for search algorithms in the [`HashGraph`] implementation.
-fn _bench_hypermap_path_finders(c: &mut Criterion) {
-    // a dummy hueristic function that returns a constant value
-    pub fn hue<T>(_a: VertexId, _b: VertexId) -> T
-    where
-        T: num_traits::One,
-    {
-        // a dummy heuristic function that returns a constant value
-        T::one()
-    }
-    let mut group = c.benchmark_group("HashGraph::pathfinder");
-    // set the sample size for the group
-    group.sample_size(SAMPLES);
-    // set the duration for the measurement
-    group.measurement_time(std::time::Duration::from_secs(DURATION));
-
-    // benchmark the breadth-first traversal search
-    group.bench_function("A*", |b| {
-        b.iter_batched(
-            setup,
-            |graph| {
-                let idx = VertexId::random_between(0..N).map(|i| i % N);
-                // get the degree of each nodelet id = n.into();
-                // search the graph for some target vertex
-                graph.astar(hue::<f64>).search(black_box(idx)).unwrap();
-            },
-            BatchSize::SmallInput,
-        )
-    });
-    // benchmark the dijkstra path-finding algorithm
-    group.bench_function("dijkstra", |b| {
-        b.iter_batched(
-            setup,
-            |graph| {
-                // generate a random source vertex
-                let src = VertexId::random_between(0..N).map(|i| i % N);
-                // generate a random target vertex
-                let tgt = VertexId::random_between(0..N).map(|i| i % N);
-                // use the dijkstra algorithm to find a path between two vertices
+            |mut graph| {
+                // add the node with the weight
                 graph
-                    .dijkstra()
-                    .find_path(black_box(src), black_box(tgt))
-                    .unwrap();
+                    .add_node(black_box(Weight(w)))
+                    .expect("failed to add node");
+            },
+            BatchSize::SmallInput,
+        )
+    });
+    // benchmark the `remove_node` function
+    group.bench_with_input("remove_node", &rand::random_range(0..N), |b, idx| {
+        b.iter_batched(
+            setup,
+            |mut graph| {
+                // remove the node with the given id
+                graph
+                    .remove_node(black_box(idx))
+                    .expect("failed to remove node");
             },
             BatchSize::SmallInput,
         )
@@ -201,8 +227,8 @@ fn _bench_hypermap_path_finders(c: &mut Criterion) {
 
 criterion::criterion_group! {
     name = benches;
-    config = Criterion::default().sample_size(SAMPLES).measurement_time(std::time::Duration::from_secs(DURATION)).with_plots();
-    targets = bench_hypermap_edges, bench_hypermap_nodes, bench_hypermap_search
+    config = Criterion::default().sample_size(SAMPLES).measurement_time(std::time::Duration::from_secs(DURATION)).with_plots().with_output_color(true);
+    targets = bench_hypermap, bench_hypermap_edges, bench_hypermap_nodes
 }
 
 criterion::criterion_main! {
@@ -212,7 +238,7 @@ criterion::criterion_main! {
 #[allow(unused_variables)]
 #[cfg(feature = "rand")]
 mod ext {
-    use rshyper_core::prelude::{IntoWeight, generate_random_edge};
+    use rshyper::prelude::{Weight, generate_random_edge};
     use rshyper_hmap::HyperMap;
 
     /// the duration, in seconds, for which the benchmarks should run
@@ -221,10 +247,10 @@ mod ext {
     pub const SAMPLES: usize = 50;
     /// the number of initialized nodes setup by the [`setup`] method
     pub const N: usize = 100;
-    /// a type alias for the type of weight used to benchmark the [`HashGraph`]
+    /// a type alias for the type of weight used to benchmark the [`HyperMap`]
     pub type Wt = i128;
 
-    /// initialize a new [`HashGraph`] with a predefined structure
+    /// initialize a new [`HyperMap`] with a predefined structure
     pub fn setup() -> HyperMap<Wt, Wt> {
         // initialize a new undirected hash graph
         let mut graph = HyperMap::<Wt, Wt>::undirected();
@@ -236,16 +262,16 @@ mod ext {
         let v5 = graph.add_vertex().expect("failed to add vertex");
         // add a few edges to the graph
         let e0 = graph
-            .add_edge([v0, v1, v2, v3, v5], 1.into_weight())
+            .add_edge([v0, v1, v2, v3, v5], Weight(1))
             .expect("failed to add surface");
         let e1 = graph
-            .add_edge([v1, v2, v3, v4], 2.into_weight())
+            .add_edge([v1, v2, v3, v4], Weight(2))
             .expect("failed to add surface");
         let e2 = graph
-            .add_edge([v2, v3, v4, v5], 3.into_weight())
+            .add_edge([v2, v3, v4, v5], Weight(3))
             .expect("failed to add surface");
         let e3 = graph
-            .add_edge([v0, v1], 4.into_weight())
+            .add_edge([v0, v1], Weight(4))
             .expect("failed to add surface");
         // add 100 nodes to the graph
         let _ = graph.add_nodes(5..(N as Wt)).collect::<Vec<_>>();

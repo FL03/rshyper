@@ -50,14 +50,14 @@ pub mod utils {
     pub use self::prelude::*;
 
     mod base;
-    #[cfg(feature = "rand")]
+    #[cfg(all(feature = "alloc", feature = "rand"))]
     mod rand;
 
     pub(crate) mod prelude {
         #[doc(inline)]
         pub use super::base::*;
         #[doc(inline)]
-        #[cfg(feature = "rand")]
+        #[cfg(all(feature = "alloc", feature = "rand"))]
         pub use super::rand::*;
     }
 }

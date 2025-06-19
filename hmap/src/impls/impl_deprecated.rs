@@ -6,9 +6,7 @@ use crate::HyperMap;
 use crate::types::{EdgeEntry, EdgeMap};
 use core::borrow::Borrow;
 use core::hash::{BuildHasher, Hash};
-use rshyper::error::Result;
-use rshyper::idx::{EdgeId, HashIndex, VertexId};
-use rshyper::prelude::{AddStep, GraphProps, GraphType, HashEdge, Node, VertexSet, Weight};
+use rshyper::prelude::*;
 
 #[doc(hidden)]
 impl<N, E, A, S, Ix, K> HyperMap<N, E, A, S>
