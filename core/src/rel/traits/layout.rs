@@ -45,11 +45,11 @@ pub trait BinaryLayout: RawLayout {
 /*
  ************* Implementations *************
 */
-use crate::BinaryStore;
+use crate::BinaryDomain;
 
 impl<S, I, K> BinaryLayout for crate::rel::Link<S, K, I>
 where
-    S: BinaryStore<I>,
+    S: BinaryDomain<I>,
     I: RawIndex,
     K: GraphType,
 {
@@ -65,7 +65,7 @@ where
 impl<E, S, I, K> BinaryLayout for crate::edge::Edge<E, S, K, I>
 where
     E: BinaryLayout,
-    S: BinaryStore<I>,
+    S: BinaryDomain<I>,
     I: RawIndex,
     K: GraphType,
 {

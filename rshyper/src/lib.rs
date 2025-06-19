@@ -24,12 +24,13 @@
 //!
 //! - **edge:** a hyperedge is a generalization of an edge in a graph, allowing it to connect
 //!   any number of vertices.
-//! - **link:** a _link_ essentially defines an unweighted edge
+//! - **link:** here, a link defines the _layout_ of an edge providing a way to connect
+//!   vertices together.
 //! - **node** a node is a complete _vertex_ in that it is considered to be weighted.
 //! - **point:** here, a point is a synonym for a vertex, and is used to define the position of
 //!   a vertex within the hypergraph.
-//! - **surface:** a surface is a synonym for a facet, speaking to an edge and its associated
-//!   weight.
+//! - **surface:** a surface is a synonym for an edge, often used here to describe iterators
+//!   directly yielding (mutable) references to the "Edge Values" of the hypergraph.
 //! - **vertex:** a vertex is an _unweighted_ node defining a point within the hypergraph.
 //!
 //! ### Hypergraphs

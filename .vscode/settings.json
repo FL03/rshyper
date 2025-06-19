@@ -6,4 +6,7 @@
     "rayon",
     "tracing",
   ],
+  "github-actions.workflows.pinned.workflows": [
+    ".github/workflows/rust.yml"
+  ],
 }
