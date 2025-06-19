@@ -11,7 +11,7 @@ use rshyper::prelude::VertexId;
 use core::hint::black_box;
 use criterion::{BatchSize, Criterion};
 
-/// benchmarks for search algorithms in the [`HyperMap`] implementation.
+/// benchmarks for search algorithms in the `HyperMap` implementation.
 fn bench_hypermap_search(c: &mut Criterion) {
     let mut group = c.benchmark_group("HyperMap::search");
     // set the sample size for the group
@@ -19,11 +19,10 @@ fn bench_hypermap_search(c: &mut Criterion) {
     // set the duration for the measurement
     group.measurement_time(std::time::Duration::from_secs(DURATION));
     // benchmark the breadth-first traversal search
-    group.bench_function("bft", |b| {
+    group.bench_with_input("bft", &VertexId::random_between(0..N), |b, &idx| {
         b.iter_batched(
             setup,
             |graph| {
-                let idx = VertexId::random_between(0..N).map(|i| i % N);
                 // get the degree of each nodelet id = n.into();
                 // search the graph for some target vertex
                 graph.bft().search(black_box(idx)).unwrap();
@@ -32,12 +31,10 @@ fn bench_hypermap_search(c: &mut Criterion) {
         )
     });
     // benchmark the depth-first traversal search
-    group.bench_function("dft", |b| {
+    group.bench_with_input("dft", &VertexId::random_between(0..N), |b, &idx| {
         b.iter_batched(
             setup,
             |graph| {
-                let idx = VertexId::random_between(0..N);
-                // get the degree of each nodelet id = n.into();
                 // search the graph for some target vertex
                 graph.dft().search(black_box(idx)).unwrap();
             },
@@ -65,36 +62,41 @@ fn _bench_hypermap_path_finders(c: &mut Criterion) {
     group.measurement_time(std::time::Duration::from_secs(DURATION));
 
     // benchmark the a* search
-    group.bench_function("A*", |b| {
-        b.iter_batched(
-            setup,
-            |graph| {
-                let idx = VertexId::random_between(0..N);
-                // get the degree of each nodelet id = n.into();
-                // search the graph for some target vertex
-                graph.astar(hue::<f64>).search(black_box(idx)).unwrap();
-            },
-            BatchSize::SmallInput,
-        )
-    });
+    group.bench_with_input(
+        "a8",
+        &(VertexId::zero(), VertexId::random_between(0..N)),
+        |b, &(src, tgt)| {
+            b.iter_batched(
+                setup,
+                |graph| {
+                    // use the a8 algorithm to find a path between two vertices
+                    graph
+                        .astar(hue)
+                        .find_path(black_box(src), black_box(tgt))
+                        .expect("failed to find path");
+                },
+                BatchSize::SmallInput,
+            )
+        },
+    );
     // benchmark the dijkstra path-finding algorithm
-    group.bench_function("dijkstra", |b| {
-        b.iter_batched(
-            setup,
-            |graph| {
-                // generate a random source vertex
-                let src = VertexId::random_between(0..N);
-                // generate a random target vertex
-                let tgt = VertexId::random_between(0..N);
-                // use the dijkstra algorithm to find a path between two vertices
-                graph
-                    .dijkstra()
-                    .find_path(black_box(src), black_box(tgt))
-                    .unwrap();
-            },
-            BatchSize::SmallInput,
-        )
-    });
+    group.bench_with_input(
+        "dijkstra",
+        &(VertexId::zero(), VertexId::random_between(0..N)),
+        |b, &(src, tgt)| {
+            b.iter_batched(
+                setup,
+                |graph| {
+                    // use the dijkstra algorithm to find a path between two vertices
+                    graph
+                        .dijkstra()
+                        .find_path(black_box(src), black_box(tgt))
+                        .expect("failed to find path");
+                },
+                BatchSize::SmallInput,
+            )
+        },
+    );
     // finish the group
     group.finish();
 }
