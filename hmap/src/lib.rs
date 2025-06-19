@@ -28,8 +28,8 @@
 //! available within the crate versus the standard [`HashMap`](std::collections::HashMap)
 //! implementation. That being said, it is important to note that for any applications where
 //! security it a concerin it is highly recommended to use the [`RandomState`](std::hash::RandomState)
-//! as the default hasher in lieu of the [`DefaultHashBuilder`] from [`foldhash`](https://crates.io/crates/foldhash
-//! as it faily to prevent against attacks such as `Hash-DoS`. See the [`hashbrown`](https://crates.io/crates/hashbrown)
+//! as the default hasher in lieu of the [`DefaultHashBuilder`] from [`foldhash`](https://crates.io/crates/foldhash)
+//! as it fails to prevent against attacks such as `Hash-DoS`. See the [`hashbrown`](https://crates.io/crates/hashbrown)
 //! for more information on the security implications of using a custom hasher.
 //!
 //! ## Features
@@ -131,7 +131,7 @@ pub mod iter {
     }
 }
 
-pub mod types {
+pub(crate) mod types {
     //! this module defines various types and type aliases in support of the [`HyperMap`](super::HyperMap)
     //! implementation
     #[doc(inline)]

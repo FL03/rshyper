@@ -64,15 +64,15 @@ where
         }
     }
     /// returns an iterator over each of the [`Edge`](rshyper::Edge) values within the graph.
-    pub fn facets(&self) -> Edges<'_, E, K, Idx, S> {
-        Edges {
+    pub fn facets(&self) -> EdgeValues<'_, E, K, Idx, S> {
+        EdgeValues {
             iter: self.edges().values(),
         }
     }
     /// returns a mutable iterator over each of the [`Edge`](rshyper::Edge) values within the
     /// graph.
-    pub fn facets_mut(&mut self) -> EdgesMut<'_, E, K, Idx, S> {
-        EdgesMut {
+    pub fn facets_mut(&mut self) -> EdgeValuesMut<'_, E, K, Idx, S> {
+        EdgeValuesMut {
             iter: self.edges_mut().values_mut(),
         }
     }
@@ -96,18 +96,45 @@ where
             iter: self.nodes_mut().values_mut(),
         }
     }
+    /// returns a sequential iterator over the edge entries of the hypergraph
+    pub fn seq_iter_edges(&self) -> SeqEdgeIter<'_, E, K, Idx, S> {
+        SeqEdgeIter {
+            keys: self.history().edges().iter(),
+            iter: self.iter_edges(),
+        }
+    }
+    /// returns a sequential iterator over the indices of the edges within the hypergraph
+    pub fn seq_iter_edge_keys(&self) -> SeqEdgeKeys<'_, Idx> {
+        SeqEdgeKeys {
+            keys: self.history().edges().iter(),
+        }
+    }
     /// returns a sequential iterator over the edges of the hypergraph
-    pub fn seq_iter_facets(&self) -> SeqFacetIter<'_, E, K, Idx, S> {
-        SeqFacetIter {
+    pub fn seq_iter_facets(&self) -> SeqEdgeValues<'_, E, K, Idx, S> {
+        SeqEdgeValues {
             values: self.facets(),
             keys: self.history().edges().iter(),
         }
     }
+    /// returns a sequential iterator over the nodes of the hypergraph producing references to
+    /// the nodes in the order they were inserted.
+    pub fn seq_iter_nodes(&self) -> SeqNodeIter<'_, N, Idx> {
+        SeqNodeIter {
+            keys: self.history().nodes().iter(),
+            iter: self.iter_nodes(),
+        }
+    }
     /// returns a sequential iterator over the nodes of the hypergraph producing items of type
     /// [`Node`](rshyper::Node) in the order they were inserted.
-    pub fn seq_iter_points(&self) -> SeqVertexIter<'_, N, Idx> {
-        SeqVertexIter {
+    pub fn seq_iter_points(&self) -> SeqNodeValues<'_, N, Idx> {
+        SeqNodeValues {
             values: self.points(),
+            keys: self.history().nodes().iter(),
+        }
+    }
+    /// returns a sequential iterator over _keys_, or vertices, of the hypergraph
+    pub fn seq_iter_vertices(&self) -> SeqNodeKeys<'_, Idx> {
+        SeqNodeKeys {
             keys: self.history().nodes().iter(),
         }
     }
