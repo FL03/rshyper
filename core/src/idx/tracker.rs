@@ -126,6 +126,17 @@ where
         self.nodes_mut().push(index);
         self
     }
+    /// clears the recorded edges and nodes before resetting the cursor to the initial position
+    pub fn clear(&mut self) -> &mut Self where Ix: Default {
+        // clear the nodes and edges
+        self.edges_mut().clear();
+        self.nodes_mut().clear();
+        // reset the cursor to the initial position
+        self.cursor_mut().reset();
+        // return a mutable reference
+        self
+    }
+
     /// returns true if the element is in the edge history
     #[inline]
     pub fn contains_edge(&self, index: &EdgeId<Ix>) -> bool
@@ -234,7 +245,7 @@ where
     {
         // step the current node cursor forward before replacing and returning
         // the previous index
-        let prev = self.cursor_mut().next_point()?;
+        let prev = self.cursor_mut().next_node()?;
         // check if the previous node index is already in the history
         if self.nodes().contains(&prev) {
             return Err(IndexError::DuplicateIndex);
@@ -243,6 +254,14 @@ where
         self.add_node(prev.clone());
         // return the previous node index
         Ok(prev)
+    }
+    /// returns the total number of edges within the history
+    pub fn size(&self) -> usize {
+        self.edges().len()
+    }
+    /// returns the total number of nodes within the history
+    pub fn order(&self) -> usize  {
+        self.nodes().len()
     }
 }
 

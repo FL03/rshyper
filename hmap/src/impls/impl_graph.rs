@@ -19,8 +19,7 @@ where
     K: GraphType,
     Ix: HashIndex,
 {
-    /// add a new hyperedge, using the given vertices and the logical [`Default`] for the
-    /// weight of type `T` and returning the corresponding edge index.
+    /// add a new _unweighted_ hyperedge into the graph composed from the given vertices.
     pub fn add_link<I>(&mut self, vertices: I) -> Result<EdgeId<Ix>>
     where
         I: IntoIterator<Item = VertexId<Ix>>,
@@ -90,15 +89,24 @@ where
         self.add_node(Default::default())
     }
     /// reset the hypergraph by clearing all nodes, edges, and facets
-    pub fn clear(&mut self) -> &mut Self {
-        // log the addition of the new hyperedge
+    pub fn clear(&mut self) -> &mut Self
+    where
+        Ix: Default,
+    {
         #[cfg(feature = "tracing")]
-        tracing::info!("clearing the hypergraph...");
+        tracing::trace!("clearing the hypergraph...");
+        // clear the edges
         self.edges_mut().clear();
+        // clear the nodes
         self.nodes_mut().clear();
+        // clear the history
+        self.history_mut().clear();
+        #[cfg(feature = "tracing")]
+        tracing::info!("cleared the hypergraph successfully...");
         self
     }
-    /// returns a set of edge indices that contain the given vertex
+    /// returns an interator over all the edges within the graph that contains the node
+    /// associated with the given index.
     pub fn find_edges_with_node<Q>(&self, index: &Q) -> impl Iterator<Item = &EdgeId<Ix>>
     where
         Q: ?Sized + PartialEq,
@@ -113,14 +121,15 @@ where
             }
         })
     }
-    /// returns a set of vertices that are in the hyperedge with the given id
     #[cfg_attr(
         feature = "tracing",
         tracing::instrument(skip_all, name = "neighbors", target = "hyper_map")
     )]
+    /// returns a set of vertices that neighbor the node associated with the given index; this
+    /// method will return an error if the vertex does not exist in the hypergraph.
     pub fn find_node_neighbors(&self, index: &VertexId<Ix>) -> Result<VertexSet<Ix, S>>
     where
-        Ix: Copy,
+        Ix: Clone,
         S: Default,
     {
         if !self.contains_node(index) {
@@ -129,35 +138,14 @@ where
             return Err(Error::NodeNotFound);
         }
         // initialize an empty set to hold the neighbors
-        let mut neighbors = VertexSet::<Ix, S>::with_hasher(S::default());
+        let mut neighbors = VertexSet::<Ix, S>::default();
         // iterate through all the connections
-        self.edges().values().for_each(|surface| {
-            if surface.contains(index) {
-                neighbors.extend(
-                    surface
-                        .link()
-                        .domain()
-                        .iter()
-                        .copied()
-                        .filter(|v| v != index),
-                );
+        self.facets().for_each(|edge| {
+            if edge.contains(index) {
+                neighbors.extend(edge.domain().iter().cloned().filter(|v| v != index));
             }
         });
         Ok(neighbors)
-    }
-    /// returns a set of [`Node`]s that are associated with the given edge id
-    pub fn get_edge_nodes<Q>(&self, index: &Q) -> Result<Vec<&Node<N, Ix>>>
-    where
-        Q: ?Sized + Eq + Hash,
-        EdgeId<Ix>: Borrow<Q>,
-    {
-        let surface = self.get_surface(index)?;
-        let nodes = surface
-            .domain()
-            .iter()
-            .map(|v| self.get_node(v).expect("vertex not found"))
-            .collect::<Vec<_>>();
-        Ok(nodes)
     }
     /// returns the set of vertices composing the given edge
     pub fn get_domain<Q>(&self, index: &Q) -> Result<&VertexSet<Ix, S>>
@@ -165,7 +153,7 @@ where
         Q: ?Sized + Eq + Hash,
         EdgeId<Ix>: Borrow<Q>,
     {
-        self.get_surface(index).map(|edge| edge.domain())
+        self.get_edge(index).map(|edge| edge.domain())
     }
     /// returns a mutable reference to the set of vertices composing the given edge
     pub fn get_domain_mut<Q>(&mut self, index: &Q) -> Result<&mut VertexSet<Ix, S>>
@@ -173,7 +161,25 @@ where
         Q: ?Sized + Eq + Hash,
         EdgeId<Ix>: Borrow<Q>,
     {
-        self.get_surface_mut(index).map(|edge| edge.domain_mut())
+        self.get_edge_mut(index).map(|edge| edge.domain_mut())
+    }
+    /// returns an immutable reference to the [`HashFacet`] associated with the given index
+    pub fn get_edge<Q>(&self, index: &Q) -> Result<&HashEdge<E, K, Ix, S>>
+    where
+        Q: ?Sized + Eq + Hash,
+        EdgeId<Ix>: Borrow<Q>,
+    {
+        self.edges().get(index).ok_or_else(Error::edge_not_found)
+    }
+    /// returns a mutable reference to the [`HashFacet`] associated with the given index
+    pub fn get_edge_mut<Q>(&mut self, index: &Q) -> Result<&mut HashEdge<E, K, Ix, S>>
+    where
+        Q: ?Sized + Eq + Hash,
+        EdgeId<Ix>: Borrow<Q>,
+    {
+        self.edges_mut()
+            .get_mut(index)
+            .ok_or_else(|| Error::EdgeNotFound)
     }
     /// returns the number of vertices within the given edge
     pub fn get_edge_order<Q>(&self, index: &Q) -> Result<usize>
@@ -181,7 +187,7 @@ where
         Q: ?Sized + Eq + Hash,
         EdgeId<Ix>: Borrow<Q>,
     {
-        self.get_surface(index).map(|edge| edge.len())
+        self.get_edge(index).map(|edge| edge.len())
     }
     /// returns an immutable reference to the weight of a hyperedge
     pub fn get_edge_weight<Q>(&self, index: &Q) -> Result<&Weight<E>>
@@ -189,7 +195,7 @@ where
         Q: ?Sized + Eq + Hash,
         EdgeId<Ix>: Borrow<Q>,
     {
-        self.get_surface(index).map(|edge| edge.weight())
+        self.get_edge(index).map(|edge| edge.weight())
     }
     /// returns a mutable reference to the weight of a hyperedge
     pub fn get_edge_weight_mut<Q>(&mut self, index: &Q) -> Result<&mut Weight<E>>
@@ -197,7 +203,7 @@ where
         Q: ?Sized + Eq + Hash,
         EdgeId<Ix>: Borrow<Q>,
     {
-        self.get_surface_mut(index).map(|edge| edge.weight_mut())
+        self.get_edge_mut(index).map(|edge| edge.weight_mut())
     }
     /// returns the degree of a given vertex where the degree is the number of hyperedges that
     /// contain the vertex
@@ -243,23 +249,19 @@ where
     {
         self.get_node_mut(index).map(|node| node.weight_mut())
     }
-    /// returns an immutable reference to the [`HashFacet`] associated with the given index
-    pub fn get_surface<Q>(&self, index: &Q) -> Result<&HashEdge<E, K, Ix, S>>
+    /// returns a set of [`Node`]s that are associated with the given edge id
+    pub fn load_edge_nodes<Q>(&self, index: &Q) -> Result<Vec<&Node<N, Ix>>>
     where
         Q: ?Sized + Eq + Hash,
         EdgeId<Ix>: Borrow<Q>,
     {
-        self.edges().get(index).ok_or_else(Error::edge_not_found)
-    }
-    /// returns a mutable reference to the [`HashFacet`] associated with the given index
-    pub fn get_surface_mut<Q>(&mut self, index: &Q) -> Result<&mut HashEdge<E, K, Ix, S>>
-    where
-        Q: ?Sized + Eq + Hash,
-        EdgeId<Ix>: Borrow<Q>,
-    {
-        self.edges_mut()
-            .get_mut(index)
-            .ok_or_else(|| Error::EdgeNotFound)
+        let surface = self.get_edge(index)?;
+        let nodes = surface
+            .domain()
+            .iter()
+            .map(|v| self.get_node(v).expect("vertex not found"))
+            .collect::<Vec<_>>();
+        Ok(nodes)
     }
     /// merge two edges within the hypergraph into one by combining their vertices and using
     /// the [`Add`](core::ops::Add) trait to merge their weights;

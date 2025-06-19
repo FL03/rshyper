@@ -56,7 +56,8 @@ where
     K: GraphType,
     Ix: RawIndex,
 {
-    /// initialize a new, empty hypergraph
+    /// returns a new, empty instance of the [`HyperMap`] using the default [`BuildHasher`] an
+    /// for the indices.
     pub fn new() -> Self
     where
         Ix: Default,
@@ -67,6 +68,38 @@ where
             history: IndexTracker::new(),
             edges: EdgeMap::default(),
             nodes: NodeMap::default(),
+        }
+    }
+    /// creates a new instance of the hypergraph with the given capacity for edges and nodes
+    pub fn with_capacity(edges: usize, nodes: usize) -> Self
+    where
+        Ix: Default,
+        S: Default,
+    {
+        HyperMap {
+            edges: EdgeMap::with_capacity_and_hasher(edges, Default::default()),
+            nodes: NodeMap::with_capacity_and_hasher(nodes, Default::default()),
+            history: IndexTracker::new(),
+            attrs: A::new(),
+        }
+    }
+    #[doc(hidden)]
+    /// initializes a new instance of the [`HyperMap`] with the given hasher and capacity for
+    /// nodes and edges.
+    pub fn with_capacity_and_hasher(
+        edges: usize,
+        nodes: usize,
+        hash_builder: S,
+    ) -> Self
+    where
+        Ix: Default,
+        S: Clone,
+    {
+        HyperMap {
+            edges: EdgeMap::with_capacity_and_hasher(edges, hash_builder.clone()),
+            nodes: NodeMap::with_capacity_and_hasher(nodes, hash_builder),
+            history: IndexTracker::new(),
+            attrs: A::new(),
         }
     }
     #[doc(hidden)]
@@ -81,19 +114,6 @@ where
             history: IndexTracker::new(),
             edges: EdgeMap::with_hasher(hash_builder.clone()),
             nodes: NodeMap::with_hasher(hash_builder),
-        }
-    }
-    /// creates a new instance of the hypergraph with the given capacity for edges and nodes
-    pub fn with_capacity(edges: usize, nodes: usize) -> Self
-    where
-        Ix: Default,
-        S: Default,
-    {
-        HyperMap {
-            edges: EdgeMap::with_capacity_and_hasher(edges, Default::default()),
-            nodes: NodeMap::with_capacity_and_hasher(nodes, Default::default()),
-            history: IndexTracker::new(),
-            attrs: A::new(),
         }
     }
     #[doc(hidden)]

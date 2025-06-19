@@ -47,7 +47,7 @@ where
     type Output = HashEdge<E, A::Kind, Ix, S>;
 
     fn index(&self, index: &EdgeId<Ix>) -> &Self::Output {
-        self.get_surface(index).expect("Edge not found")
+        self.get_edge(index).expect("Edge not found")
     }
 }
 
@@ -58,7 +58,7 @@ where
     Ix: HashIndex,
 {
     fn index_mut(&mut self, index: &EdgeId<Ix>) -> &mut Self::Output {
-        self.get_surface_mut(index).expect("Edge not found")
+        self.get_edge_mut(index).expect("Edge not found")
     }
 }
 

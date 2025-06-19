@@ -45,9 +45,9 @@ fn test_position() -> rshyper::Result<()> {
     assert_eq!(e1, &1);
     assert_eq!(e2, &2);
     // create some vertex indices
-    let v0 = index.next_point()?;
-    let v1 = index.next_point()?;
-    let v2 = index.next_point()?;
+    let v0 = index.next_node()?;
+    let v1 = index.next_node()?;
+    let v2 = index.next_node()?;
     // check the vertex indices
     assert_eq!(e0.get(), v0.get());
     assert_eq!(e1.get(), v1.get());

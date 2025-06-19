@@ -115,6 +115,11 @@ where
         self.link_mut().set_domain(nodes);
         self
     }
+    /// updates the link and returns a mutable reference to the instance
+    pub fn set_link(&mut self, link: Link<S, K, Idx>) -> &mut Self {
+        self.link = link;
+        self
+    }
     /// updates the weight and returns a mutable reference to the instance
     pub fn set_weight(&mut self, weight: Weight<T>) -> &mut Self {
         self.weight = weight;
@@ -174,14 +179,14 @@ where
         since = "0.1.2"
     )]
     pub const fn nodes(&self) -> &S {
-        self.link().domain()
+        self.domain()
     }
     #[deprecated(
         note = "Use `domain_mut` instead. This method will be removed in the next major version.",
         since = "0.1.2"
     )]
     pub const fn nodes_mut(&mut self) -> &mut S {
-        self.link_mut().domain_mut()
+        self.domain_mut()
     }
 }
 

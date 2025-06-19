@@ -8,8 +8,9 @@ use core::borrow::Borrow;
 use core::hash::{BuildHasher, Hash};
 use rshyper::error::Result;
 use rshyper::idx::{EdgeId, HashIndex, VertexId};
-use rshyper::prelude::{AddStep, GraphProps, GraphType, HashEdge, VertexSet, Weight};
+use rshyper::prelude::{AddStep, GraphProps, GraphType, Node, HashEdge, VertexSet, Weight};
 
+#[doc(hidden)]
 impl<N, E, A, S, Ix, K> HyperMap<N, E, A, S>
 where
     A: GraphProps<Kind = K, Ix = Ix>,
@@ -17,6 +18,40 @@ where
     Ix: HashIndex,
     K: GraphType,
 {
+    #[deprecated(
+        note = "use `load_edge_nodes` instead; this method will be removed in the next major release",
+        since = "0.1.7"
+    )]
+    pub fn get_edge_nodes<Q>(&self, index: &Q) -> Result<Vec<&Node<N, Ix>>>
+    where
+        Q: ?Sized + Eq + Hash,
+        EdgeId<Ix>: Borrow<Q>,
+    {
+        self.load_edge_nodes(index)
+    }
+    #[deprecated(
+        note = "use `get_edge` instead; this method will be removed in the next major release",
+        since = "0.1.7"
+    )]
+    pub fn get_surface<Q>(&self, index: &Q) -> Result<&HashEdge<E, K, Ix, S>>
+    where
+        Q: ?Sized + Eq + Hash,
+        EdgeId<Ix>: Borrow<Q>,
+    {
+        self.get_edge(index)
+    }
+    #[deprecated(
+        note = "use `get_edge_mut` instead; this method will be removed in the next major release",
+        since = "0.1.7"
+    )]
+    pub fn get_surface_mut<Q>(&mut self, index: &Q) -> Result<&mut HashEdge<E, K, Ix, S>>
+    where
+        Q: ?Sized + Eq + Hash,
+        EdgeId<Ix>: Borrow<Q>,
+    {
+        self.get_edge_mut(index)
+    }
+    #[doc(hidden)]
     #[deprecated(
         note = "use `add_edge` instead; this method will be removed in the next major release",
         since = "0.1.7"
@@ -29,6 +64,7 @@ where
     {
         self.add_edge(vertices, weight)
     }
+    #[doc(hidden)]
     #[deprecated(
         note = "use `retain_edges` instead; this method will be removed in the next major release",
         since = "0.1.7"
@@ -39,6 +75,7 @@ where
     {
         self.retain_edges(f)
     }
+    #[doc(hidden)]
     #[deprecated(
         note = "use `remove_edge` instead; this method will be removed in the next major release",
         since = "0.1.7"
@@ -50,6 +87,7 @@ where
     {
         self.remove_edge(index)
     }
+    #[doc(hidden)]
     #[deprecated(
         note = "use `get_domain` instead; this method will be removed in the next major release",
         since = "0.1.5"
@@ -61,6 +99,7 @@ where
     {
         self.get_domain(index)
     }
+    #[doc(hidden)]
     #[deprecated(
         note = "use `get_domain_mut` instead; this method will be removed in the next major release",
         since = "0.1.5"
@@ -72,6 +111,7 @@ where
     {
         self.get_domain_mut(index)
     }
+    #[doc(hidden)]
     #[deprecated(
         since = "0.1.5",
         note = "use `edge` instead; this method will be removed in the next major release."
@@ -82,6 +122,7 @@ where
     {
         self.edge(index)
     }
+    #[doc(hidden)]
     #[deprecated(
         since = "0.1.5",
         note = "use `edges` instead; this method will be removed in the next major release."
@@ -89,6 +130,7 @@ where
     pub const fn surfaces(&self) -> &EdgeMap<E, K, Ix, S> {
         self.edges()
     }
+    #[doc(hidden)]
     #[deprecated(
         since = "0.1.5",
         note = "use `edges_mut` instead; this method will be removed in the next major release."
@@ -96,6 +138,7 @@ where
     pub const fn surfaces_mut(&mut self) -> &mut EdgeMap<E, K, Ix, S> {
         self.edges_mut()
     }
+    #[doc(hidden)]
     #[deprecated(
         since = "0.1.3",
         note = "use `is_node_in_domain` instead; this method will be removed in the next major release."
@@ -113,6 +156,7 @@ where
         }
         false
     }
+    #[doc(hidden)]
     #[deprecated(
         since = "0.1.2",
         note = "use `contains_edge` instead; this method will be removed in the next major release."
@@ -125,6 +169,7 @@ where
     {
         self.edges().contains_key(index)
     }
+    #[doc(hidden)]
     #[deprecated(
         note = "use `size` instead; this method will be removed in the next major release.",
         since = "0.1.2"
@@ -132,6 +177,7 @@ where
     pub fn total_edges(&self) -> usize {
         self.edges().len()
     }
+    #[doc(hidden)]
     #[deprecated(
         note = "use `order` instead; this method will be removed in the next major release.",
         since = "0.1.2"
@@ -139,6 +185,7 @@ where
     pub fn total_nodes(&self) -> usize {
         self.nodes().len()
     }
+    #[doc(hidden)]
     #[deprecated(
         note = "use `order` instead; this method will be removed in the next major release.",
         since = "0.1.0"

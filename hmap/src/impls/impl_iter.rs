@@ -58,47 +58,46 @@ where
     }
     /// returns an immutable iterator over each of the associated identifiers of the edges
     /// within the graph.
-    pub fn iter_edge_ids(&self) -> EdgeKeys<'_, E, K, Idx, S> {
+    pub fn iter_edge_keys(&self) -> EdgeKeys<'_, E, K, Idx, S> {
         EdgeKeys {
             iter: self.edges().keys(),
         }
     }
-    /// returns a mutable iterator over each of the _values_, or [`Edge`](rshyper::Edge),
-    /// associated with the edges of the graph.
+    /// returns an iterator over each of the [`Edge`](rshyper::Edge) values within the graph.
     pub fn facets(&self) -> Edges<'_, E, K, Idx, S> {
         Edges {
             iter: self.edges().values(),
         }
     }
-    /// returns a mutable iterator over each of the _values_, or [`Edge`](rshyper::Edge),
-    /// associated with the edges of the graph, yielding mutable references to the surfaces.
+    /// returns a mutable iterator over each of the [`Edge`](rshyper::Edge) values within the
+    /// graph.
     pub fn facets_mut(&mut self) -> EdgesMut<'_, E, K, Idx, S> {
         EdgesMut {
             iter: self.edges_mut().values_mut(),
         }
     }
     /// returns an iterator over the keys of the nodes, yielding the indices of the entries.
-    pub fn points(&self) -> Points<'_, N, Idx> {
-        Points {
+    pub fn vertices(&self) -> NodeKeys<'_, N, Idx> {
+        NodeKeys {
             iter: self.nodes().keys(),
         }
     }
     /// returns an iterator over all the nodes of the hypergraph, producing [`Node`](rshyper::Node)
     /// until exhausted.
-    pub fn vertices(&self) -> Vertices<'_, N, Idx> {
-        Vertices {
+    pub fn points(&self) -> NodeValues<'_, N, Idx> {
+        NodeValues {
             iter: self.nodes().values(),
         }
     }
     /// returns a mutable iterator over all the nodes of the hypergraph, producing mutable
     /// references to [`Node`](rshyper::Node) until exhausted.
-    pub fn vertices_mut(&mut self) -> VerticesMut<'_, N, Idx> {
-        VerticesMut {
+    pub fn points_mut(&mut self) -> NodeValuesMut<'_, N, Idx> {
+        NodeValuesMut {
             iter: self.nodes_mut().values_mut(),
         }
     }
     /// returns a sequential iterator over the edges of the hypergraph
-    pub fn iter_seq_facets(&self) -> SeqFacetIter<'_, E, K, Idx, S> {
+    pub fn seq_iter_facets(&self) -> SeqFacetIter<'_, E, K, Idx, S> {
         SeqFacetIter {
             values: self.facets(),
             keys: self.history().edges().iter(),
@@ -106,39 +105,25 @@ where
     }
     /// returns a sequential iterator over the nodes of the hypergraph producing items of type
     /// [`Node`](rshyper::Node) in the order they were inserted.
-    pub fn iter_seq_vertices(&self) -> SeqVertexIter<'_, N, Idx> {
+    pub fn seq_iter_points(&self) -> SeqVertexIter<'_, N, Idx> {
         SeqVertexIter {
-            values: self.vertices(),
+            values: self.points(),
             keys: self.history().nodes().iter(),
         }
     }
-    /// returns a parallel iterator over the nodes of the hypergraph, yielding pairs of
-    /// [`VertexId`](rshyper::VertexId) and the corresponding [`Node`](rshyper::Node).
-    #[cfg(feature = "rayon")]
-    pub fn par_iter_nodes(&self) -> ParNodeValues<'_, N, Idx>
-    where
-        N: Send + Sync,
-        Idx: Send + Sync,
-    {
-        ParNodeValues {
-            iter: self.nodes().par_values(),
-        }
-    }
-    /// returns a mutable parallel iterator over the nodes of the hypergraph, yielding pairs of
-    /// references to the [`Node`](rshyper::Node) in the hypergraph.
-    #[cfg(feature = "rayon")]
-    pub fn par_iter_nodes_mut(&mut self) -> ParNodeValuesMut<'_, N, Idx>
-    where
-        N: Send + Sync,
-        Idx: Send + Sync,
-    {
-        ParNodeValuesMut {
-            iter: self.nodes_mut().par_values_mut(),
-        }
-    }
+}
+
+#[cfg(feature = "rayon")]
+impl<N, E, A, S, K, Idx> HyperMap<N, E, A, S>
+where
+    S: BuildHasher,
+    A: GraphProps<Kind = K, Ix = Idx>,
+    K: GraphType,
+    Idx: HashIndex,
+{
+
     /// returns a parallel iterator over the surfaces of the hypergraph, yielding pairs of
     /// [`EdgeId`](rshyper::EdgeId) and the corresponding [`Edge`](rshyper::Edge).
-    #[cfg(feature = "rayon")]
     pub fn par_iter_facets(&self) -> ParEdgeValues<'_, E, K, Idx, S>
     where
         E: Send + Sync,
@@ -152,7 +137,6 @@ where
     }
     /// returns a mutable parallel iterator over the surfaces of the hypergraph, yielding pairs of
     /// [`EdgeId`](rshyper::EdgeId) and a mutable reference to the corresponding [`Edge`](rshyper::Edge).
-    #[cfg(feature = "rayon")]
     pub fn par_iter_facets_mut(&mut self) -> ParEdgeValuesMut<'_, E, K, Idx, S>
     where
         E: Send + Sync,
@@ -162,6 +146,29 @@ where
     {
         ParEdgeValuesMut {
             iter: self.edges_mut().par_values_mut(),
+        }
+    }
+
+    /// returns a parallel iterator over the nodes of the hypergraph, yielding pairs of
+    /// [`VertexId`](rshyper::VertexId) and the corresponding [`Node`](rshyper::Node).
+    pub fn par_iter_points(&self) -> ParNodeValues<'_, N, Idx>
+    where
+        N: Send + Sync,
+        Idx: Send + Sync,
+    {
+        ParNodeValues {
+            iter: self.nodes().par_values(),
+        }
+    }
+    /// returns a mutable parallel iterator over the nodes of the hypergraph, yielding pairs of
+    /// references to the [`Node`](rshyper::Node) in the hypergraph.
+    pub fn par_iter_points_mut(&mut self) -> ParNodeValuesMut<'_, N, Idx>
+    where
+        N: Send + Sync,
+        Idx: Send + Sync,
+    {
+        ParNodeValuesMut {
+            iter: self.nodes_mut().par_values_mut(),
         }
     }
 }

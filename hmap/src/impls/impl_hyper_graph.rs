@@ -45,14 +45,14 @@ where
     }
 
     fn get_edge(&self, index: &EdgeId<A::Ix>) -> Result<&HashEdge<E, A::Kind, A::Ix, S>> {
-        self.get_surface(index)
+        self.get_edge(index)
     }
 
     fn get_edge_mut(
         &mut self,
         index: &EdgeId<A::Ix>,
     ) -> Result<&mut HashEdge<E, A::Kind, A::Ix, S>> {
-        self.get_surface_mut(index)
+        self.get_edge_mut(index)
     }
 
     fn get_edge_weight(&self, index: &EdgeId<A::Ix>) -> Result<&Weight<E>> {
@@ -109,7 +109,7 @@ where
         Self: 'a,
         Self::Node<N>: 'a;
     type Verts<'a>
-        = iter::Points<'a, N, A::Ix>
+        = iter::NodeKeys<'a, N, A::Ix>
     where
         Self: 'a;
 
@@ -118,7 +118,7 @@ where
     }
 
     fn vertices(&self) -> Self::Verts<'_> {
-        self.points()
+        self.vertices()
     }
 }
 
@@ -147,6 +147,6 @@ where
     }
 
     fn edges(&self) -> Self::Edges<'_> {
-        self.iter_edge_ids()
+        self.iter_edge_keys()
     }
 }
