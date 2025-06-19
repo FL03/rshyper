@@ -127,7 +127,10 @@ where
         self
     }
     /// clears the recorded edges and nodes before resetting the cursor to the initial position
-    pub fn clear(&mut self) -> &mut Self where Ix: Default {
+    pub fn clear(&mut self) -> &mut Self
+    where
+        Ix: Default,
+    {
         // clear the nodes and edges
         self.edges_mut().clear();
         self.nodes_mut().clear();
@@ -260,7 +263,7 @@ where
         self.edges().len()
     }
     /// returns the total number of nodes within the history
-    pub fn order(&self) -> usize  {
+    pub fn order(&self) -> usize {
         self.nodes().len()
     }
 }

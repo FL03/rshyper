@@ -121,7 +121,6 @@ where
     K: GraphType,
     Idx: HashIndex,
 {
-
     /// returns a parallel iterator over the surfaces of the hypergraph, yielding pairs of
     /// [`EdgeId`](rshyper::EdgeId) and the corresponding [`Edge`](rshyper::Edge).
     pub fn par_iter_facets(&self) -> ParEdgeValues<'_, E, K, Idx, S>

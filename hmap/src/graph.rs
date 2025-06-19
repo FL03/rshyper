@@ -86,11 +86,7 @@ where
     #[doc(hidden)]
     /// initializes a new instance of the [`HyperMap`] with the given hasher and capacity for
     /// nodes and edges.
-    pub fn with_capacity_and_hasher(
-        edges: usize,
-        nodes: usize,
-        hash_builder: S,
-    ) -> Self
+    pub fn with_capacity_and_hasher(edges: usize, nodes: usize, hash_builder: S) -> Self
     where
         Ix: Default,
         S: Clone,

@@ -8,7 +8,7 @@ use core::borrow::Borrow;
 use core::hash::{BuildHasher, Hash};
 use rshyper::error::Result;
 use rshyper::idx::{EdgeId, HashIndex, VertexId};
-use rshyper::prelude::{AddStep, GraphProps, GraphType, Node, HashEdge, VertexSet, Weight};
+use rshyper::prelude::{AddStep, GraphProps, GraphType, HashEdge, Node, VertexSet, Weight};
 
 #[doc(hidden)]
 impl<N, E, A, S, Ix, K> HyperMap<N, E, A, S>
