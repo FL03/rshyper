@@ -15,9 +15,13 @@ pub type DiHyperMap<N, E, Idx = Udx, S = DefaultHashBuilder> = HyperMap<N, E, Di
 /// a type alias for an [undirected](rshyper::Undirected) [`HyperMap`]
 pub type UnHyperMap<N, E, Idx = Udx, S = DefaultHashBuilder> = HyperMap<N, E, UnAttrs<Idx>, S>;
 
-/// The [`HyperMap`] is a map-based implementation of a hypergraph. The generic design enables
-/// a wide range of applications, enabling users to define everything from the types of edge
-/// and nod weights to the kind of graph, type of indices and even the hasher used.
+/// The [`HyperMap`] is a map-based implementation of a hypergraph that provides a flexible and
+/// efficient way to store and manipulate hypergraphs. It is designed to be generic over the
+/// types of nodes N, edges E, attributes A, and the hasher S used for hashing the nodes and
+/// edges. This design allows for a wide range of applications, from simple hypergraphs to more
+/// complex structures with custom attributes and hashing strategies.
+///
+/// ## Overview
 ///
 /// This implementation focuses on establishing a solid foundation for a hypergraph, relying on
 /// various traits to help shape its behavior and properties. Additionally, the internal
