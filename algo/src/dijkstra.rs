@@ -8,18 +8,17 @@ pub use self::queue_node::QueueNode;
 
 mod queue_node;
 
-use crate::VertexSet;
 use crate::error::{Error, Result};
 use crate::traits::{PathFinder, Search, Traversal};
 
+use alloc::collections::BinaryHeap;
 use core::hash::{BuildHasher, Hash};
 use hashbrown::{DefaultHashBuilder, HashMap, HashSet};
 use num_traits::bounds::UpperBounded;
 use num_traits::{FromPrimitive, Num};
-use rshyper::idx::{NumIndex, RawIndex, VertexId};
+use rshyper::idx::{HyperIndex, RawIndex, VertexId, VertexSet};
 use rshyper::rel::RawLayout;
 use rshyper::{GraphProps, HyperGraph, HyperGraphIter};
-use std::collections::BinaryHeap;
 
 /// a type alias for a map of distances for vertices in the graph
 pub(crate) type Distances<K, V = f64, S = DefaultHashBuilder> = HashMap<VertexId<K>, V, S>;
@@ -171,7 +170,7 @@ where
     A: GraphProps,
     H: HyperGraph<N, E, A>,
     S: BuildHasher,
-    A::Ix: NumIndex,
+    A::Ix: HyperIndex,
     <H::Edge<E> as RawLayout>::Store: Clone + IntoIterator<Item = VertexId<A::Ix>>,
 {
     type Path = Vec<VertexId<A::Ix>>;
@@ -180,10 +179,10 @@ where
         self.reset();
 
         if !self.graph.contains_node(&src) {
-            return Err(Error::NodeNotFound);
+            return Err(rshyper::Error::NodeNotFound.into());
         }
         if !self.graph.contains_node(&dest) {
-            return Err(Error::NodeNotFound);
+            return Err(rshyper::Error::NodeNotFound.into());
         }
 
         let mut heap: BinaryHeap<QueueNode<A::Ix, E>> = BinaryHeap::new();
@@ -274,7 +273,7 @@ where
     E: Copy + Default + PartialOrd + FromPrimitive + Num + UpperBounded,
     A: GraphProps,
     H: HyperGraphIter<N, E, A>,
-    A::Ix: NumIndex,
+    A::Ix: HyperIndex,
     <H::Edge<E> as RawLayout>::Store: Clone + IntoIterator<Item = VertexId<A::Ix>>,
 {
     type Output = Vec<VertexId<A::Ix>>;

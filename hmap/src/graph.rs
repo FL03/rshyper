@@ -1,24 +1,13 @@
 /*
-    Appellation: hash_graph <module>
+    Appellation: hyper_map <module>
     Contrib: @FL03
 */
-//! # [`HyperMap`]
-//!
-//! The [`HyperMap`] is a map-based implementation of a hypergraph leveraging the [`hashbrown`](https://crates.io/crates/hashbrown)
-//! crate for efficient storage and retrieval of nodes and edges.
-//!
-//! ## Overview
-//!
-//! This implementation focuses on performance and flexibility, leveraging an internal history
-//! to maintain a sense of order and enable efficient index management. The history enables
-//! us to provide sequential iterators that produce elements w.r.t. the order in-which they
-//! were inserted.
 use crate::types::prelude::*;
 
 use core::borrow::Borrow;
 use core::hash::{BuildHasher, Hash};
 use rshyper::attrs::{DiAttrs, GraphProps, UnAttrs};
-use rshyper::idx::{EdgeId, Frame, IndexTracker, RawIndex, Udx, VertexId};
+use rshyper::idx::{EdgeId, IndexFrame, IndexTracker, RawIndex, Udx, VertexId};
 use rshyper::{AddStep, GraphType, Mode};
 
 /// a type alias for a [directed](rshyper::Directed) [`HyperMap`]
@@ -28,25 +17,32 @@ pub type UnHyperMap<N, E, Idx = Udx, S = DefaultHashBuilder> = HyperMap<N, E, Un
 
 /// The [`HyperMap`] is a map-based implementation of a hypergraph that provides a flexible and
 /// efficient way to store and manipulate hypergraphs. It is designed to be generic over the
-/// types of nodes `N`, edges `E`, attributes `A`, and the hasher `S` used for hashing the
-/// nodes and edges. This design allows for a wide range of applications, from simple
-/// hypergraphs to more complex structures with custom attributes and hashing strategies.
+/// types of nodes N, edges E, attributes A, and the hasher S used for hashing the nodes and
+/// edges. This design allows for a wide range of applications, from simple hypergraphs to more
+/// complex structures with custom attributes and hashing strategies.
+///
+/// ## Overview
+///
+/// This implementation focuses on establishing a solid foundation for a hypergraph, relying on
+/// various traits to help shape its behavior and properties. Additionally, the internal
+/// history imbues the instance with a native sense of order enabling the design of sequential
+/// iteraotrs that respect the order in which the respective component was created in.
 #[derive(Clone, Default)]
 pub struct HyperMap<N = (), E = (), A = UnAttrs<Udx>, S = DefaultHashBuilder>
 where
     A: GraphProps,
     S: BuildHasher,
 {
+    /// `edges` represent the hyperedges of the hypergraph, each identified by an `EdgeId`
+    pub(crate) edges: EdgeMap<E, A::Kind, A::Ix, S>,
+    /// the `nodes` of a hypergraph are the vertices, each identified by a `VertexId` and
+    /// associated with a weight of type `N`.
+    pub(crate) nodes: NodeMap<N, A::Ix, S>,
     /// the attributes of a graph define its _kind_ and the type of index used
     pub(crate) attrs: A,
     /// tracks the current position of the hypergraph, which is used to determine the next
     /// available indices for edges and vertices.
     pub(crate) history: IndexTracker<A::Ix>,
-    /// the `nodes` of a hypergraph are the vertices, each identified by a `VertexId` and
-    /// associated with a weight of type `N`.
-    pub(crate) nodes: NodeMap<N, A::Ix, S>,
-    /// `edges` represent the hyperedges of the hypergraph, each identified by an `EdgeId`
-    pub(crate) edges: EdgeMap<E, A::Kind, A::Ix, S>,
 }
 
 impl<N, E, A, K, Ix, S> HyperMap<N, E, A, S>
@@ -56,17 +52,46 @@ where
     K: GraphType,
     Ix: RawIndex,
 {
-    /// initialize a new, empty hypergraph
+    /// returns a new, empty instance of the [`HyperMap`] using the default [`BuildHasher`] an
+    /// for the indices.
     pub fn new() -> Self
     where
         Ix: Default,
         S: Default,
     {
-        HyperMap {
-            attrs: A::new(),
-            history: IndexTracker::new(),
+        Self {
             edges: EdgeMap::default(),
             nodes: NodeMap::default(),
+            attrs: A::new(),
+            history: IndexTracker::new(),
+        }
+    }
+    /// creates a new instance of the hypergraph with the given capacity for edges and nodes
+    pub fn with_capacity(edges: usize, nodes: usize) -> Self
+    where
+        Ix: Default,
+        S: Default,
+    {
+        Self {
+            edges: EdgeMap::with_capacity_and_hasher(edges, Default::default()),
+            nodes: NodeMap::with_capacity_and_hasher(nodes, Default::default()),
+            history: IndexTracker::new(),
+            attrs: A::new(),
+        }
+    }
+    #[doc(hidden)]
+    /// initializes a new instance of the [`HyperMap`] with the given hasher and capacity for
+    /// nodes and edges.
+    pub fn with_capacity_and_hasher(edges: usize, nodes: usize, hash_builder: S) -> Self
+    where
+        Ix: Default,
+        S: Clone,
+    {
+        HyperMap {
+            edges: EdgeMap::with_capacity_and_hasher(edges, hash_builder.clone()),
+            nodes: NodeMap::with_capacity_and_hasher(nodes, hash_builder),
+            history: IndexTracker::new(),
+            attrs: A::new(),
         }
     }
     #[doc(hidden)]
@@ -81,19 +106,6 @@ where
             history: IndexTracker::new(),
             edges: EdgeMap::with_hasher(hash_builder.clone()),
             nodes: NodeMap::with_hasher(hash_builder),
-        }
-    }
-    /// creates a new instance of the hypergraph with the given capacity for edges and nodes
-    pub fn with_capacity(edges: usize, nodes: usize) -> Self
-    where
-        Ix: Default,
-        S: Default,
-    {
-        HyperMap {
-            edges: EdgeMap::with_capacity_and_hasher(edges, Default::default()),
-            nodes: NodeMap::with_capacity_and_hasher(nodes, Default::default()),
-            history: IndexTracker::new(),
-            attrs: A::new(),
         }
     }
     #[doc(hidden)]
@@ -127,11 +139,11 @@ where
     /// returns a copy of the position of the hypergraph; here, the [`position`](Position) is
     /// used to track the indices (edge & vertex) and define which ones are next to be used
     /// when inserting new hyperedges or vertices
-    pub const fn position(&self) -> &Frame<Ix> {
+    pub const fn position(&self) -> &IndexFrame<Ix> {
         self.history().cursor()
     }
     /// returns a mutable reference to the current position of the hypergraph;
-    pub const fn position_mut(&mut self) -> &mut Frame<Ix> {
+    pub const fn position_mut(&mut self) -> &mut IndexFrame<Ix> {
         self.history_mut().cursor_mut()
     }
     /// returns an immutable reference to the surfaces of the hypergraph
@@ -162,7 +174,7 @@ where
     }
     /// overrides the current position and returns a mutable reference to the hypergraph
     #[inline]
-    pub fn set_position(&mut self, position: Frame<Ix>) -> &mut Self
+    pub fn set_position(&mut self, position: IndexFrame<Ix>) -> &mut Self
     where
         Ix: Default,
     {

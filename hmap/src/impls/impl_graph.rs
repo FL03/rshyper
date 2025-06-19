@@ -6,59 +6,35 @@ use crate::{HashEdge, HyperMap, VertexSet};
 use core::borrow::Borrow;
 use core::hash::{BuildHasher, Hash};
 use rshyper::error::{Error, Result};
-use rshyper::idx::{EdgeId, RawIndex, VertexId};
+use rshyper::idx::{EdgeId, HashIndex, VertexId};
 use rshyper::{AddStep, GraphProps, GraphType};
 use rshyper::{Edge, Node, Weight};
 
 /// this implementation of the [`HyperMap`] works to provide fundamental manipulation methods
 /// alongside additional functional accessors, validators, and more.
-impl<N, E, A, K, Idx, S> HyperMap<N, E, A, S>
+impl<N, E, A, S, K, Ix> HyperMap<N, E, A, S>
 where
-    A: GraphProps<Ix = Idx, Kind = K>,
-    K: GraphType,
-    Idx: RawIndex + Eq + Hash,
+    A: GraphProps<Kind = K, Ix = Ix>,
     S: BuildHasher,
+    K: GraphType,
+    Ix: HashIndex,
 {
-    /// add a new hyperedge, using the given vertices and the logical [`Default`] for the
-    /// weight of type `T` and returning the corresponding edge index.
-    pub fn add_edge<I>(&mut self, vertices: I) -> Result<EdgeId<Idx>>
+    /// add a new _unweighted_ hyperedge into the graph composed from the given vertices.
+    pub fn add_link<I>(&mut self, vertices: I) -> Result<EdgeId<Ix>>
     where
-        I: IntoIterator<Item = VertexId<Idx>>,
-        Idx: AddStep<Output = Idx> + Clone,
+        I: IntoIterator<Item = VertexId<Ix>>,
+        Ix: AddStep<Output = Ix> + Clone,
         E: Default,
         S: Default,
     {
-        self.add_surface(vertices, Default::default())
-    }
-    /// add a new node with the given weight and return its index
-    pub fn add_node(&mut self, Weight(weight): Weight<N>) -> Result<VertexId<Idx>>
-    where
-        Idx: AddStep<Output = Idx> + Copy,
-    {
-        // generate a new index to identify the new node
-        let ndx = self.next_vertex_id();
-        // initialize a new node with the given weight & index
-        let node = Node::new(ndx, weight);
-        // insert the new node into the vertices map
-        self.insert_node_unchecked(node)
-    }
-    /// given a set of weights, insert a new node into the graph for each and return its id as
-    /// an iterator of [`VertexId`]
-    pub fn add_nodes<I>(&mut self, weights: I) -> impl Iterator<Item = VertexId<Idx>>
-    where
-        I: IntoIterator<Item = N>,
-        Idx: AddStep<Output = Idx> + Copy,
-    {
-        weights
-            .into_iter()
-            .filter_map(|weight| self.add_node(Weight(weight)).ok())
+        self.add_edge(vertices, Default::default())
     }
     /// add a new hyperedge with the given vertices and weight, returning the corresponding
     /// edge index.
-    pub fn add_surface<I>(&mut self, vertices: I, weight: Weight<E>) -> Result<EdgeId<Idx>>
+    pub fn add_edge<I>(&mut self, vertices: I, weight: Weight<E>) -> Result<EdgeId<Ix>>
     where
-        I: IntoIterator<Item = VertexId<Idx>>,
-        Idx: AddStep<Output = Idx> + Clone,
+        I: IntoIterator<Item = VertexId<Ix>>,
+        Ix: AddStep<Output = Ix> + Clone,
         S: Default,
     {
         // collect the vertices into a HashSet to ensure uniqueness
@@ -72,7 +48,7 @@ where
                 Ok(v)
             })
             .filter_map(Result::ok)
-            .collect::<VertexSet<Idx, S>>();
+            .collect::<VertexSet<Ix, S>>();
         // fetch the next edge index
         let id = self.next_edge_id();
         // create a new surface
@@ -80,29 +56,61 @@ where
         // add the hyperedge to the graph
         self.insert_edge_unchecked(surface)
     }
+    /// add a new node with the given weight and return its index
+    pub fn add_node(&mut self, Weight(weight): Weight<N>) -> Result<VertexId<Ix>>
+    where
+        Ix: AddStep<Output = Ix> + Copy,
+    {
+        // generate a new index to identify the new node
+        let ndx = self.next_vertex_id();
+        // initialize a new node with the given weight & index
+        let node = Node::new(ndx, weight);
+        // insert the new node into the vertices map
+        self.insert_node_unchecked(node)
+    }
+    /// given a set of weights, insert a new node into the graph for each and return its id as
+    /// an iterator of [`VertexId`]
+    pub fn add_nodes<I>(&mut self, weights: I) -> impl Iterator<Item = VertexId<Ix>>
+    where
+        I: IntoIterator<Item = N>,
+        Ix: AddStep<Output = Ix> + Copy,
+    {
+        weights
+            .into_iter()
+            .filter_map(|weight| self.add_node(Weight(weight)).ok())
+    }
     /// add a new hypernode using the logical [`Default`] for the weight of type `N` and
     /// return its index.
-    pub fn add_vertex(&mut self) -> Result<VertexId<Idx>>
+    pub fn add_vertex(&mut self) -> Result<VertexId<Ix>>
     where
         N: Default,
-        Idx: AddStep<Output = Idx> + Copy,
+        Ix: AddStep<Output = Ix> + Copy,
     {
         self.add_node(Default::default())
     }
     /// reset the hypergraph by clearing all nodes, edges, and facets
-    pub fn clear(&mut self) -> &mut Self {
-        // log the addition of the new hyperedge
+    pub fn clear(&mut self) -> &mut Self
+    where
+        Ix: Default,
+    {
         #[cfg(feature = "tracing")]
-        tracing::info!("clearing the hypergraph...");
+        tracing::trace!("clearing the hypergraph...");
+        // clear the edges
         self.edges_mut().clear();
+        // clear the nodes
         self.nodes_mut().clear();
+        // clear the history
+        self.history_mut().clear();
+        #[cfg(feature = "tracing")]
+        tracing::info!("cleared the hypergraph successfully...");
         self
     }
-    /// returns a set of edge indices that contain the given vertex
-    pub fn find_edges_with_node<Q>(&self, index: &Q) -> impl Iterator<Item = &EdgeId<Idx>>
+    /// returns an interator over all the edges within the graph that contains the node
+    /// associated with the given index.
+    pub fn find_edges_with_node<Q>(&self, index: &Q) -> impl Iterator<Item = &EdgeId<Ix>>
     where
         Q: ?Sized + PartialEq,
-        VertexId<Idx>: Borrow<Q>,
+        VertexId<Ix>: Borrow<Q>,
     {
         // filter the edges to find those that contain the vertex
         self.edges().iter().filter_map(move |(edge_id, facet)| {
@@ -113,14 +121,15 @@ where
             }
         })
     }
-    /// returns a set of vertices that are in the hyperedge with the given id
     #[cfg_attr(
         feature = "tracing",
         tracing::instrument(skip_all, name = "neighbors", target = "hyper_map")
     )]
-    pub fn find_node_neighbors(&self, index: &VertexId<Idx>) -> Result<VertexSet<Idx, S>>
+    /// returns a set of vertices that neighbor the node associated with the given index; this
+    /// method will return an error if the vertex does not exist in the hypergraph.
+    pub fn find_node_neighbors(&self, index: &VertexId<Ix>) -> Result<VertexSet<Ix, S>>
     where
-        Idx: Copy,
+        Ix: Clone,
         S: Default,
     {
         if !self.contains_node(index) {
@@ -129,82 +138,79 @@ where
             return Err(Error::NodeNotFound);
         }
         // initialize an empty set to hold the neighbors
-        let mut neighbors = VertexSet::<Idx, S>::with_hasher(S::default());
+        let mut neighbors = VertexSet::<Ix, S>::default();
         // iterate through all the connections
-        self.edges().values().for_each(|surface| {
-            if surface.contains(index) {
-                neighbors.extend(
-                    surface
-                        .link()
-                        .domain()
-                        .iter()
-                        .copied()
-                        .filter(|v| v != index),
-                );
+        self.facets().for_each(|edge| {
+            if edge.contains(index) {
+                neighbors.extend(edge.domain().iter().cloned().filter(|v| v != index));
             }
         });
         Ok(neighbors)
     }
-    /// returns a set of [`Node`]s that are associated with the given edge id
-    pub fn get_edge_nodes<Q>(&self, index: &Q) -> Result<Vec<&Node<N, Idx>>>
-    where
-        Q: Eq + Hash + ?Sized,
-        EdgeId<Idx>: Borrow<Q>,
-    {
-        let surface = self.get_surface(index)?;
-        let nodes = surface
-            .domain()
-            .iter()
-            .map(|v| self.get_node(v).expect("vertex not found"))
-            .collect::<Vec<_>>();
-        Ok(nodes)
-    }
     /// returns the set of vertices composing the given edge
-    pub fn get_domain<Q>(&self, index: &Q) -> Result<&VertexSet<Idx, S>>
+    pub fn get_domain<Q>(&self, index: &Q) -> Result<&VertexSet<Ix, S>>
     where
         Q: ?Sized + Eq + Hash,
-        EdgeId<Idx>: Borrow<Q>,
+        EdgeId<Ix>: Borrow<Q>,
     {
-        self.get_surface(index).map(|edge| edge.domain())
+        self.get_edge(index).map(|edge| edge.domain())
     }
     /// returns a mutable reference to the set of vertices composing the given edge
-    pub fn get_domain_mut<Q>(&mut self, index: &Q) -> Result<&mut VertexSet<Idx, S>>
+    pub fn get_domain_mut<Q>(&mut self, index: &Q) -> Result<&mut VertexSet<Ix, S>>
     where
-        Q: Eq + Hash + ?Sized,
-        EdgeId<Idx>: Borrow<Q>,
+        Q: ?Sized + Eq + Hash,
+        EdgeId<Ix>: Borrow<Q>,
     {
-        self.get_surface_mut(index).map(|edge| edge.domain_mut())
+        self.get_edge_mut(index).map(|edge| edge.domain_mut())
+    }
+    /// returns an immutable reference to the [`HashFacet`] associated with the given index
+    pub fn get_edge<Q>(&self, index: &Q) -> Result<&HashEdge<E, K, Ix, S>>
+    where
+        Q: ?Sized + Eq + Hash,
+        EdgeId<Ix>: Borrow<Q>,
+    {
+        self.edges().get(index).ok_or_else(Error::edge_not_found)
+    }
+    /// returns a mutable reference to the [`HashFacet`] associated with the given index
+    pub fn get_edge_mut<Q>(&mut self, index: &Q) -> Result<&mut HashEdge<E, K, Ix, S>>
+    where
+        Q: ?Sized + Eq + Hash,
+        EdgeId<Ix>: Borrow<Q>,
+    {
+        self.edges_mut()
+            .get_mut(index)
+            .ok_or_else(|| Error::EdgeNotFound)
     }
     /// returns the number of vertices within the given edge
     pub fn get_edge_order<Q>(&self, index: &Q) -> Result<usize>
     where
         Q: ?Sized + Eq + Hash,
-        EdgeId<Idx>: Borrow<Q>,
+        EdgeId<Ix>: Borrow<Q>,
     {
-        self.get_surface(index).map(|edge| edge.len())
+        self.get_edge(index).map(|edge| edge.len())
     }
     /// returns an immutable reference to the weight of a hyperedge
     pub fn get_edge_weight<Q>(&self, index: &Q) -> Result<&Weight<E>>
     where
-        Q: Eq + Hash + ?Sized,
-        EdgeId<Idx>: Borrow<Q>,
+        Q: ?Sized + Eq + Hash,
+        EdgeId<Ix>: Borrow<Q>,
     {
-        self.get_surface(index).map(|edge| edge.weight())
+        self.get_edge(index).map(|edge| edge.weight())
     }
     /// returns a mutable reference to the weight of a hyperedge
     pub fn get_edge_weight_mut<Q>(&mut self, index: &Q) -> Result<&mut Weight<E>>
     where
-        Q: Eq + Hash + ?Sized,
-        EdgeId<Idx>: Borrow<Q>,
+        Q: ?Sized + Eq + Hash,
+        EdgeId<Ix>: Borrow<Q>,
     {
-        self.get_surface_mut(index).map(|edge| edge.weight_mut())
+        self.get_edge_mut(index).map(|edge| edge.weight_mut())
     }
     /// returns the degree of a given vertex where the degree is the number of hyperedges that
     /// contain the vertex
     pub fn get_node_degree<Q>(&self, index: &Q) -> usize
     where
-        Q: Eq + Hash + ?Sized,
-        VertexId<Idx>: Borrow<Q>,
+        Q: ?Sized + Eq + Hash,
+        VertexId<Ix>: Borrow<Q>,
     {
         self.edges()
             .values()
@@ -212,63 +218,59 @@ where
             .count()
     }
     /// returns the weight of a particular vertex
-    pub fn get_node<Q>(&self, index: &Q) -> Result<&Node<N, Idx>>
+    pub fn get_node<Q>(&self, index: &Q) -> Result<&Node<N, Ix>>
     where
-        Q: Eq + Hash + ?Sized,
-        VertexId<Idx>: Borrow<Q>,
+        Q: ?Sized + Eq + Hash,
+        VertexId<Ix>: Borrow<Q>,
     {
         self.nodes().get(index).ok_or(Error::NodeNotFound)
     }
     /// returns a mutable reference to the weight of a vertex
-    pub fn get_node_mut<Q>(&mut self, index: &Q) -> Result<&mut Node<N, Idx>>
+    pub fn get_node_mut<Q>(&mut self, index: &Q) -> Result<&mut Node<N, Ix>>
     where
-        Q: Eq + Hash + ?Sized,
-        VertexId<Idx>: Borrow<Q>,
+        Q: ?Sized + Eq + Hash,
+        VertexId<Ix>: Borrow<Q>,
     {
         self.nodes_mut().get_mut(index).ok_or(Error::NodeNotFound)
     }
     /// returns an immutable reference to the weight of a vertex
     pub fn get_node_weight<Q>(&self, index: &Q) -> Result<&Weight<N>>
     where
-        Q: Eq + Hash + ?Sized,
-        VertexId<Idx>: Borrow<Q>,
+        Q: ?Sized + Eq + Hash,
+        VertexId<Ix>: Borrow<Q>,
     {
         self.get_node(index).map(|node| node.weight())
     }
     /// returns a mutable reference to the weight of a vertex
     pub fn get_node_weight_mut<Q>(&mut self, index: &Q) -> Result<&mut Weight<N>>
     where
-        Q: Eq + Hash + ?Sized,
-        VertexId<Idx>: Borrow<Q>,
+        Q: ?Sized + Eq + Hash,
+        VertexId<Ix>: Borrow<Q>,
     {
         self.get_node_mut(index).map(|node| node.weight_mut())
     }
-    /// returns an immutable reference to the [`HashFacet`] associated with the given index
-    pub fn get_surface<Q>(&self, index: &Q) -> Result<&HashEdge<E, K, Idx, S>>
+    /// returns a set of [`Node`]s that are associated with the given edge id
+    pub fn load_edge_nodes<Q>(&self, index: &Q) -> Result<Vec<&Node<N, Ix>>>
     where
-        Q: Eq + Hash + ?Sized,
-        EdgeId<Idx>: Borrow<Q>,
+        Q: ?Sized + Eq + Hash,
+        EdgeId<Ix>: Borrow<Q>,
     {
-        self.edges().get(index).ok_or_else(Error::edge_not_found)
-    }
-    /// returns a mutable reference to the [`HashFacet`] associated with the given index
-    pub fn get_surface_mut<Q>(&mut self, index: &Q) -> Result<&mut HashEdge<E, K, Idx, S>>
-    where
-        Q: Eq + Hash + ?Sized,
-        EdgeId<Idx>: Borrow<Q>,
-    {
-        self.edges_mut()
-            .get_mut(index)
-            .ok_or_else(|| Error::EdgeNotFound)
+        let surface = self.get_edge(index)?;
+        let nodes = surface
+            .domain()
+            .iter()
+            .map(|v| self.get_node(v).expect("vertex not found"))
+            .collect::<Vec<_>>();
+        Ok(nodes)
     }
     /// merge two edges within the hypergraph into one by combining their vertices and using
     /// the [`Add`](core::ops::Add) trait to merge their weights;
     /// trait
-    pub fn merge_edges<Q>(&mut self, e1: &Q, e2: &Q) -> Result<EdgeId<Idx>>
+    pub fn merge_edges<Q>(&mut self, e1: &Q, e2: &Q) -> Result<EdgeId<Ix>>
     where
-        Q: Eq + Hash + core::fmt::Debug,
-        EdgeId<Idx>: Borrow<Q>,
-        Idx: AddStep<Output = Idx> + Copy,
+        Q: ?Sized + Eq + Hash,
+        EdgeId<Ix>: Borrow<Q>,
+        Ix: AddStep<Output = Ix> + Copy,
         S: Default,
         for<'a> &'a E: core::ops::Add<Output = E>,
     {
@@ -279,27 +281,23 @@ where
     }
     /// merge two edges within the hypergraph into one by combining their vertices and using
     /// the provided function to merge their weights;
-    pub fn merge_edges_with<Q, F>(&mut self, e1: &Q, e2: &Q, f: F) -> Result<EdgeId<Idx>>
+    pub fn merge_edges_with<Q, F>(&mut self, e1: &Q, e2: &Q, f: F) -> Result<EdgeId<Ix>>
     where
-        Q: ?Sized + Eq + Hash + core::fmt::Debug,
-        EdgeId<Idx>: Borrow<Q>,
-        Idx: AddStep<Output = Idx> + Copy,
+        Q: ?Sized + Eq + Hash,
+        EdgeId<Ix>: Borrow<Q>,
+        Ix: AddStep<Output = Ix> + Copy,
         F: FnOnce(&E, &E) -> E,
         S: Default,
     {
-        // remove the edges from the surfaces map
-        let s1 = self.remove_surface(e1)?;
-        #[cfg(feature = "tracing")]
-        tracing::debug!("removed edge {e1:?} with vertices {ep:?}", ep = s1.domain());
-        let s2 = self.remove_surface(e2)?;
-        #[cfg(feature = "tracing")]
-        tracing::debug!("removed edge {e2:?} with vertices {ep:?}", ep = s2.domain());
+        // try and remove the two edges from the hypergraph
+        let s1 = self.remove_edge(e1)?;
+        let s2 = self.remove_edge(e2)?;
         // merge the vertices of the two edges by unionizing their domains
         let vertices = s1
             .domain()
             .union(s2.domain())
             .copied()
-            .collect::<VertexSet<Idx, S>>();
+            .collect::<VertexSet<Ix, S>>();
         // merge the two weights using the provided function
         let weight = f(*s1.weight().view(), *s2.weight().view());
         // generate a new edge index
@@ -312,11 +310,41 @@ where
         Ok(edge_id)
     }
     #[inline]
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, level = "trace", target = "hyper_map")
+    )]
+    /// remove the hyperedge with the given index from the hypergraph
+    pub fn remove_edge<Q>(&mut self, index: &Q) -> Result<HashEdge<E, K, Ix, S>>
+    where
+        Q: ?Sized + Eq + Hash,
+        EdgeId<Ix>: Borrow<Q>,
+    {
+        self.edges_mut()
+            .remove(index)
+            .ok_or(Error::EdgeNotFound)
+            .inspect(|edge| {
+                #[cfg(feature = "tracing")]
+                tracing::trace!(
+                    "successfully removed the hyperedge from the hypergraph with id: {}",
+                    edge.id()
+                );
+                // remove the edge id from the history
+                self.history_mut().remove_edge(edge.id());
+                #[cfg(feature = "tracing")]
+                tracing::trace!("removed the edge id ({}) from the history", edge.id());
+            })
+    }
+    #[inline]
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, level = "trace", target = "hyper_map")
+    )]
     /// removes the vertex with the given id and all of its associated hyperedges
-    pub fn remove_node<Q>(&mut self, index: &Q) -> Result<Node<N, Idx>>
+    pub fn remove_node<Q>(&mut self, index: &Q) -> Result<Node<N, Ix>>
     where
         Q: Eq + core::fmt::Debug + Hash,
-        VertexId<Idx>: Borrow<Q>,
+        VertexId<Ix>: Borrow<Q>,
     {
         #[cfg(feature = "tracing")]
         tracing::debug!("removing the vertex {index:?} from the hypergraph...");
@@ -325,28 +353,24 @@ where
             .remove(index)
             .ok_or(Error::NodeNotFound)
             .inspect(|node| {
+                // remove the node from the history
                 self.history_mut().remove_node(node.id());
                 #[cfg(feature = "tracing")]
                 tracing::trace!(
                     "successfully removed the node; removing edges that contained the vertex..."
                 );
                 // Remove all hyperedges containing this vertex
-                self.retain_surfaces(|_, facet| !facet.contains(index));
+                self.retain_edges(|_, facet| !facet.contains(index));
                 #[cfg(feature = "tracing")]
                 tracing::trace!(
                     "successfully removed the edges containing the removed vertex {index:?}..."
                 );
             })
     }
-    /// remove the hyperedge with the given index from the hypergraph
-    #[inline]
-    pub fn remove_surface<Q>(&mut self, index: &Q) -> Result<HashEdge<E, K, Idx, S>>
-    where
-        Q: Eq + Hash + ?Sized,
-        EdgeId<Idx>: Borrow<Q>,
-    {
-        self.edges_mut().remove(index).ok_or(Error::EdgeNotFound)
-    }
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, level = "trace", target = "hyper_map")
+    )]
     /// retain nodes in the hypergraph based on a predicate;
     ///
     /// ## Saftey
@@ -357,15 +381,19 @@ where
     /// the predicate does not leave the graph in an invalid state.
     pub unsafe fn retain_nodes<F>(&mut self, f: F) -> &mut Self
     where
-        F: FnMut(&VertexId<Idx>, &mut Node<N, Idx>) -> bool,
+        F: FnMut(&VertexId<Ix>, &mut Node<N, Ix>) -> bool,
     {
         self.nodes_mut().retain(f);
         self
     }
+    #[cfg_attr(
+        feature = "tracing",
+        tracing::instrument(skip_all, level = "trace", target = "hyper_map")
+    )]
     /// retain surfaces in the hypergraph based on a predicate;
-    pub fn retain_surfaces<F>(&mut self, f: F) -> &mut Self
+    pub fn retain_edges<F>(&mut self, f: F) -> &mut Self
     where
-        F: FnMut(&EdgeId<Idx>, &mut HashEdge<E, K, Idx, S>) -> bool,
+        F: FnMut(&EdgeId<Ix>, &mut HashEdge<E, K, Ix, S>) -> bool,
     {
         self.edges_mut().retain(f);
         self
@@ -374,8 +402,8 @@ where
     /// update the weight of an edge with the given index
     pub fn set_edge_weight<Q>(&mut self, index: &Q, weight: Weight<E>) -> Result<&mut Self>
     where
-        Q: Eq + Hash + ?Sized,
-        EdgeId<Idx>: Borrow<Q>,
+        Q: ?Sized + Eq + Hash,
+        EdgeId<Ix>: Borrow<Q>,
     {
         self.get_edge_weight_mut(index)
             .map(|w| {
@@ -388,8 +416,8 @@ where
     /// update the weight of a given vertex
     pub fn set_node_weight<Q>(&mut self, index: &Q, weight: Weight<N>) -> Result<&mut Self>
     where
-        Q: Eq + Hash + ?Sized,
-        VertexId<Idx>: Borrow<Q>,
+        Q: ?Sized + Eq + Hash,
+        VertexId<Ix>: Borrow<Q>,
     {
         self.get_node_weight_mut(index)
             .map(|w| {
@@ -407,7 +435,7 @@ impl<N, E, A, K, Idx, S> HyperMap<N, E, A, S>
 where
     A: GraphProps<Ix = Idx, Kind = K>,
     K: GraphType,
-    Idx: RawIndex + Eq + Hash,
+    Idx: HashIndex,
     S: BuildHasher,
 {
     /// this method is responsible for directly registering new surfaces with the system,

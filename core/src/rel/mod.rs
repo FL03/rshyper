@@ -14,6 +14,9 @@ pub mod link;
 
 mod impls {
     pub mod impl_link;
+    #[doc(hidden)]
+    pub mod impl_link_deprecated;
+    pub mod impl_link_ext;
 }
 
 pub mod traits {
@@ -24,11 +27,11 @@ pub mod traits {
     pub use self::prelude::*;
     /// this module defines the [`RawLayout`] trait for establishing a common interface for
     /// representations of a hyperedge
-    mod relationship;
+    mod layout;
 
     pub(crate) mod prelude {
         #[doc(inline)]
-        pub use super::relationship::*;
+        pub use super::layout::*;
     }
 }
 

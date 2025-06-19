@@ -4,7 +4,7 @@
 */
 use crate::idx::{EdgeId, IndexResult, RawIndex, Udx, VertexId};
 
-/// The [`Frame`] stores the current edge and vertex indices in a hypergraph, allowing
+/// The [`IndexFrame`] stores the current edge and vertex indices in a hypergraph, allowing
 /// for efficient traversal and manipulation of the hypergraph structure. Here, when we say
 /// current we mean the next indices used to create a new edge or vertex, respectively. It is
 /// designed to be used in conjunction with hypergraph operations that require knowledge of the
@@ -19,23 +19,23 @@ use crate::idx::{EdgeId, IndexResult, RawIndex, Udx, VertexId};
     derive(serde::Deserialize, serde::Serialize),
     serde(rename_all = "lowercase")
 )]
-pub struct Frame<T = Udx>
+pub struct IndexFrame<T = Udx>
 where
     T: RawIndex,
 {
     /// represent the edge index that is "on-deck", or the next id used to create a new edge
     pub(crate) edge: EdgeId<T>,
     /// represent the node index that is "on-deck", or the next id used to create a new vertex
-    pub(crate) point: VertexId<T>,
+    pub(crate) node: VertexId<T>,
 }
 
-impl<T> Frame<T>
+impl<T> IndexFrame<T>
 where
     T: RawIndex,
 {
     /// returns a new instance with the given edge and vertex indices.
-    pub const fn new(edge: EdgeId<T>, point: VertexId<T>) -> Self {
-        Self { edge, point }
+    pub const fn new(edge: EdgeId<T>, node: VertexId<T>) -> Self {
+        Self { edge, node }
     }
     #[allow(clippy::should_implement_trait)]
     /// initializes a new instance using the lgoical defaults for both the edge and vertex
@@ -71,7 +71,7 @@ where
         Self::new(edge, VertexId::default())
     }
     /// creates a new position from a vertex index, initializing the edge index to its default value
-    pub fn from_point(point: VertexId<T>) -> Self
+    pub fn from_node(point: VertexId<T>) -> Self
     where
         T: Default,
     {
@@ -86,12 +86,12 @@ where
         &mut self.edge
     }
     /// returns an immutable reference to the current vertex index
-    pub const fn point(&self) -> &VertexId<T> {
-        &self.point
+    pub const fn node(&self) -> &VertexId<T> {
+        &self.node
     }
     /// returns a mutable reference to the current vertex index
-    pub const fn point_mut(&mut self) -> &mut VertexId<T> {
-        &mut self.point
+    pub const fn node_mut(&mut self) -> &mut VertexId<T> {
+        &mut self.node
     }
     /// update the edge index and returns a mutable reference to the current instance
     #[inline]
@@ -101,8 +101,8 @@ where
     }
     /// update the vertex index and returns a mutable reference to the current instance
     #[inline]
-    pub fn set_point(&mut self, vertex: VertexId<T>) -> &mut Self {
-        *self.point_mut() = vertex;
+    pub fn set_node(&mut self, vertex: VertexId<T>) -> &mut Self {
+        *self.node_mut() = vertex;
         self
     }
     /// consumes the current instance to create another with the given edge index
@@ -112,9 +112,9 @@ where
     }
     /// consumes the current instance to create another with the given vertex index
     #[inline]
-    pub fn with_point(self, vertex: VertexId<T>) -> Self {
+    pub fn with_node(self, vertex: VertexId<T>) -> Self {
         Self {
-            point: vertex,
+            node: vertex,
             ..self
         }
     }
@@ -126,50 +126,97 @@ where
     {
         self.edge_mut().step()
     }
+    /// resets the [`Frame`] back to its initial position assuming the logical defaults for both the edge and node indices.
+    pub fn reset(&mut self) -> &mut Self
+    where
+        T: Default,
+    {
+        *self.edge_mut() = EdgeId::default();
+        *self.node_mut() = VertexId::default();
+        self
+    }
     /// increments the current vertex index by one and returns the previous value; see
     /// [`step`](VertexId::step) for more details.
-    pub fn next_point(&mut self) -> IndexResult<VertexId<T>>
+    pub fn next_node(&mut self) -> IndexResult<VertexId<T>>
     where
         T: crate::AddStep<Output = T>,
     {
-        self.point_mut().step()
+        self.node_mut().step()
     }
 }
 
 #[allow(deprecated)]
 #[doc(hidden)]
-impl<T> Frame<T>
+impl<T> IndexFrame<T>
 where
     T: RawIndex,
 {
+    #[deprecated(
+        since = "0.1.7",
+        note = "use `node` instead; this method will be removed in the next major release."
+    )]
+    pub const fn point(&self) -> &VertexId<T> {
+        self.node()
+    }
+    #[deprecated(
+        since = "0.1.7",
+        note = "use `node_mut` instead; this method will be removed in the next major release."
+    )]
+    pub const fn point_mut(&mut self) -> &mut VertexId<T> {
+        self.node_mut()
+    }
+    #[deprecated(
+        since = "0.1.7",
+        note = "use `set_node` instead; this method will be removed in the next major release."
+    )]
+    pub fn set_point(&mut self, vertex: VertexId<T>) -> &mut Self {
+        self.set_node(vertex)
+    }
+    #[deprecated(
+        since = "0.1.7",
+        note = "use `with_node` instead; this method will be removed in the next major release."
+    )]
+    pub fn with_point(self, vertex: VertexId<T>) -> Self {
+        self.with_node(vertex)
+    }
+    #[deprecated(
+        since = "0.1.7",
+        note = "use `next_node` instead; this method will be removed in the next major release."
+    )]
+    pub fn next_point(&mut self) -> IndexResult<VertexId<T>>
+    where
+        T: crate::AddStep<Output = T>,
+    {
+        self.next_node()
+    }
     #[deprecated(since = "0.1.2", note = "use `from_point` instead")]
     pub fn from_vertex(vertex: VertexId<T>) -> Self
     where
         T: Default,
     {
-        Self::from_point(vertex)
+        Self::from_node(vertex)
     }
     #[deprecated(since = "0.1.2", note = "use `set_point` instead")]
     pub fn set_vertex(&mut self, vertex: VertexId<T>) -> &mut Self {
-        self.set_point(vertex)
+        self.set_node(vertex)
     }
     #[deprecated(since = "0.1.2", note = "use `with_point` instead")]
     pub fn with_vertex(self, vertex: VertexId<T>) -> Self {
-        self.with_point(vertex)
+        self.with_node(vertex)
     }
     #[deprecated(since = "0.1.2", note = "use `point` instead")]
     pub const fn vertex(&self) -> &VertexId<T> {
-        self.point()
+        self.node()
     }
     #[deprecated(since = "0.1.2", note = "use `point_mut` instead")]
     pub const fn vertex_mut(&mut self) -> &mut VertexId<T> {
-        self.point_mut()
+        self.node_mut()
     }
     #[deprecated(since = "0.1.2", note = "use `next_point` instead")]
     pub fn next_vertex(&mut self) -> IndexResult<VertexId<T>>
     where
         T: crate::AddStep<Output = T>,
     {
-        self.next_point()
+        self.next_node()
     }
 }

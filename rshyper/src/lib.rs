@@ -24,13 +24,13 @@
 //!
 //! - **edge:** a hyperedge is a generalization of an edge in a graph, allowing it to connect
 //!   any number of vertices.
-//! - **facet:** a facet, or surface, defines a weighted hyperedge composed of one or more
-//!   vertices.
+//! - **link:** here, a link defines the _layout_ of an edge providing a way to connect
+//!   vertices together.
 //! - **node** a node is a complete _vertex_ in that it is considered to be weighted.
 //! - **point:** here, a point is a synonym for a vertex, and is used to define the position of
 //!   a vertex within the hypergraph.
-//! - **surface:** a surface is a synonym for a facet, speaking to an edge and its associated
-//!   weight.
+//! - **surface:** a surface is a synonym for an edge, often used here to describe iterators
+//!   directly yielding (mutable) references to the "Edge Values" of the hypergraph.
 //! - **vertex:** a vertex is an _unweighted_ node defining a point within the hypergraph.
 //!
 //! ### Hypergraphs
@@ -64,19 +64,19 @@
 //! ### _Example 1: Basic Usage_
 //!
 //! ```rust
-//! use rshyper::{HyperMap, IntoWeight};
+//! use rshyper::{HyperMap, Weight};
 //!
 //! let mut graph = HyperMap::<usize, usize>::undirected();
 //! // add some unweighted vertices
 //! let v0 = graph.add_vertex().expect("failed to add vertex");
 //! let v1 = graph.add_vertex().expect("failed to add vertex");
 //! // add a weighted node
-//! let v2 = graph.add_node(10.into_weight()).expect("failed to add node");
+//! let v2 = graph.add_node(Weight(10)).expect("failed to add node");
 //! // create some edges using those nodes
-//! let e0 = graph.add_edge([v0, v1]).expect("failed to add edge");
-//! let e1 = graph.add_edge([v1, v2]).expect("failed to add edge");
+//! let e0 = graph.add_link([v0, v1]).expect("failed to add edge");
+//! let e1 = graph.add_link([v1, v2]).expect("failed to add edge");
 //! // create a surface (weighted edge) using the nodes
-//! let e3 = graph.add_surface([v0, v2], 5.into_weight()).expect("failed to add surface");
+//! let e3 = graph.add_edge([v0, v2], Weight(5)).expect("failed to add surface");
 //! ```
 //!
 #![crate_name = "rshyper"]

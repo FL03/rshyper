@@ -25,7 +25,7 @@ fn bench_hypermap_edges(c: &mut Criterion) {
                 let (verts, weight) = generate_random_edge::<Wt>(N);
                 // add the edge to the graph
                 graph
-                    .add_surface(black_box(verts), black_box(weight))
+                    .add_edge(black_box(verts), black_box(weight))
                     .expect("failed to add edge");
             },
             BatchSize::SmallInput,
@@ -236,16 +236,16 @@ mod ext {
         let v5 = graph.add_vertex().expect("failed to add vertex");
         // add a few edges to the graph
         let e0 = graph
-            .add_surface([v0, v1, v2, v3, v5], 1.into_weight())
+            .add_edge([v0, v1, v2, v3, v5], 1.into_weight())
             .expect("failed to add surface");
         let e1 = graph
-            .add_surface([v1, v2, v3, v4], 2.into_weight())
+            .add_edge([v1, v2, v3, v4], 2.into_weight())
             .expect("failed to add surface");
         let e2 = graph
-            .add_surface([v2, v3, v4, v5], 3.into_weight())
+            .add_edge([v2, v3, v4, v5], 3.into_weight())
             .expect("failed to add surface");
         let e3 = graph
-            .add_surface([v0, v1], 4.into_weight())
+            .add_edge([v0, v1], 4.into_weight())
             .expect("failed to add surface");
         // add 100 nodes to the graph
         let _ = graph.add_nodes(5..(N as Wt)).collect::<Vec<_>>();
@@ -255,7 +255,7 @@ mod ext {
             let (verts, weight) = generate_random_edge::<Wt>(N);
             // add a self-loop to each vertex
             graph
-                .add_surface(verts, weight)
+                .add_edge(verts, weight)
                 .expect("failed to add surface");
         }
 

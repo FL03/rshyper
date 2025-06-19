@@ -139,10 +139,10 @@ macro_rules! hyperedge {
         $crate::hyperedge!(@new let $src.$edge = [$($var),*] $(=> $w)?);
     };
     (@new let $src:ident.$edge:ident = [$($var:ident),*]) => {
-        let $edge = $src.add_edge([$($var),*]).expect("Failed to insert edge");
+        let $edge = $src.add_link([$($var),*]).expect("Failed to insert edge");
     };
     (@new let $src:ident.$edge:ident = [$($var:ident),*] => $w:expr) => {
-        let $edge = $src.add_surface([$($var),*], $crate::Weight($w)).expect("Failed to insert edge");
+        let $edge = $src.add_edge([$($var),*], $crate::Weight($w)).expect("Failed to insert edge");
     };
 }
 /// the [`hypernode`] macro streamlines the process of inserting nodes into a hypergraph.

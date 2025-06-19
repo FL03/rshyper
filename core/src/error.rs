@@ -27,7 +27,7 @@ pub enum Error {
     #[error("The node with the given id does not exist")]
     NodeNotFound,
     #[error("No edges contain the given vertex")]
-    NoEdgesWithVertex,
+    NoEdgesWithDomain,
     #[error("Cannot create an empty hyperedge")]
     EmptyHyperedge,
     #[error(transparent)]

@@ -1,5 +1,5 @@
 /*
-    appellation: node <nodes>
+    appellation: iter <nodes>
     authors: @FL03
 */
 use core::hash::Hash;
@@ -10,7 +10,7 @@ use rshyper::prelude::{Node, RawIndex, VertexId};
 /// consisting of references to both each component of the entry, namely:
 ///
 /// - `0`: &'a [`VertexId`]
-/// - `1`: $'a [`Node`]
+/// - `1`: &'a [`Node`]
 pub struct NodeIter<'a, N, Idx>
 where
     Idx: RawIndex + Eq + Hash,
@@ -28,28 +28,28 @@ where
 {
     pub(crate) iter: hash_map::IterMut<'a, VertexId<Idx>, Node<N, Idx>>,
 }
-/// The [`Vertices`] iterator directly yields the _nodes_ of a hypergraph, which are strctural
-/// representations of hypernodes that have knowledge of their own id.
-pub struct Vertices<'a, N, Idx>
+/// The [`NodeKeys`] iterator yields references to the keys, or "vertices", of the hypergraph.
+pub struct NodeKeys<'a, N, Idx>
+where
+    Idx: RawIndex + Eq + Hash,
+{
+    pub(crate) iter: hash_map::Keys<'a, VertexId<Idx>, Node<N, Idx>>,
+}
+/// [`NodeValues`] is an iterator over the actual hypernodes of the graph, yielding references
+/// to each [`Node`].
+pub struct NodeValues<'a, N, Idx>
 where
     Idx: RawIndex + Eq + Hash,
 {
     pub(crate) iter: hash_map::Values<'a, VertexId<Idx>, Node<N, Idx>>,
 }
-/// The [`VerticesMut`] iterator yields mutable references to each of the nodes within the
-/// `HyperMap`
-pub struct VerticesMut<'a, N, Idx>
+/// [`NodeValuesMut`] is a mutable iterator over the actual hypernodes of the graph, yielding
+/// mutable references to each [`Node`].
+pub struct NodeValuesMut<'a, N, Idx>
 where
     Idx: RawIndex + Eq + Hash,
 {
     pub(crate) iter: hash_map::ValuesMut<'a, VertexId<Idx>, Node<N, Idx>>,
-}
-/// The [`Points`] iterator yields the keys, or indices, associated with each node in the graph
-pub struct Points<'a, N, Idx>
-where
-    Idx: RawIndex + Eq + Hash,
-{
-    pub(crate) iter: hash_map::Keys<'a, VertexId<Idx>, Node<N, Idx>>,
 }
 
 /*
@@ -78,7 +78,7 @@ where
     }
 }
 
-impl<'a, N, Idx> Iterator for Vertices<'a, N, Idx>
+impl<'a, N, Idx> Iterator for NodeValues<'a, N, Idx>
 where
     Idx: RawIndex + Eq + Hash,
 {
@@ -89,7 +89,7 @@ where
     }
 }
 
-impl<'a, N, Idx> Iterator for VerticesMut<'a, N, Idx>
+impl<'a, N, Idx> Iterator for NodeValuesMut<'a, N, Idx>
 where
     Idx: RawIndex + Eq + Hash,
 {
@@ -100,7 +100,7 @@ where
     }
 }
 
-impl<'a, N, Idx> Iterator for Points<'a, N, Idx>
+impl<'a, N, Idx> Iterator for NodeKeys<'a, N, Idx>
 where
     Idx: RawIndex + Eq + Hash,
 {

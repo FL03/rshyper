@@ -2,7 +2,7 @@
     appellation: tracker <module>
     authors: @FL03
 */
-use super::{EdgeId, Frame, RawIndex, VertexId};
+use super::{EdgeId, IndexFrame, RawIndex, VertexId};
 use crate::AddStep;
 use crate::idx::error::{IndexError, IndexResult};
 use alloc::vec::Vec;
@@ -19,7 +19,7 @@ pub struct IndexTracker<Ix = usize>
 where
     Ix: RawIndex,
 {
-    pub(crate) cursor: Frame<Ix>,
+    pub(crate) cursor: IndexFrame<Ix>,
     pub(crate) edges: Vec<EdgeId<Ix>>,
     pub(crate) nodes: Vec<VertexId<Ix>>,
 }
@@ -33,10 +33,10 @@ where
     where
         Ix: Default,
     {
-        Self::from_cursor(Frame::default())
+        Self::from_cursor(IndexFrame::default())
     }
     /// creates a new instance with an empty history and the given cursor.
-    pub fn from_cursor(cursor: Frame<Ix>) -> Self {
+    pub fn from_cursor(cursor: IndexFrame<Ix>) -> Self {
         Self {
             cursor,
             edges: Vec::new(),
@@ -48,21 +48,21 @@ where
     where
         Ix: num_traits::One,
     {
-        Self::from_cursor(Frame::one())
+        Self::from_cursor(IndexFrame::one())
     }
     /// create a new history with the cursor initialized to `0`
     pub fn zero() -> Self
     where
         Ix: num_traits::Zero,
     {
-        Self::from_cursor(Frame::zero())
+        Self::from_cursor(IndexFrame::zero())
     }
     /// returns a reference to the current cursor.
-    pub const fn cursor(&self) -> &Frame<Ix> {
+    pub const fn cursor(&self) -> &IndexFrame<Ix> {
         &self.cursor
     }
     /// returns a mutable reference to the current cursor.
-    pub const fn cursor_mut(&mut self) -> &mut Frame<Ix> {
+    pub const fn cursor_mut(&mut self) -> &mut IndexFrame<Ix> {
         &mut self.cursor
     }
     /// returns an immutable reference to the edge history
@@ -83,7 +83,7 @@ where
     }
     /// set the current position and return a mutable reference to the tracker
     #[inline]
-    pub fn set_cursor(&mut self, cursor: Frame<Ix>) -> &mut Self {
+    pub fn set_cursor(&mut self, cursor: IndexFrame<Ix>) -> &mut Self {
         *self.cursor_mut() = cursor;
         self
     }
@@ -101,7 +101,7 @@ where
     }
     /// consumes the current instance to create another with the given position
     #[inline]
-    pub fn with_cursor(self, cursor: Frame<Ix>) -> Self {
+    pub fn with_cursor(self, cursor: IndexFrame<Ix>) -> Self {
         Self { cursor, ..self }
     }
     /// consumes the current instance to create another with the given edge history
@@ -126,6 +126,20 @@ where
         self.nodes_mut().push(index);
         self
     }
+    /// clears the recorded edges and nodes before resetting the cursor to the initial position
+    pub fn clear(&mut self) -> &mut Self
+    where
+        Ix: Default,
+    {
+        // clear the nodes and edges
+        self.edges_mut().clear();
+        self.nodes_mut().clear();
+        // reset the cursor to the initial position
+        self.cursor_mut().reset();
+        // return a mutable reference
+        self
+    }
+
     /// returns true if the element is in the edge history
     #[inline]
     pub fn contains_edge(&self, index: &EdgeId<Ix>) -> bool
@@ -234,7 +248,7 @@ where
     {
         // step the current node cursor forward before replacing and returning
         // the previous index
-        let prev = self.cursor_mut().next_point()?;
+        let prev = self.cursor_mut().next_node()?;
         // check if the previous node index is already in the history
         if self.nodes().contains(&prev) {
             return Err(IndexError::DuplicateIndex);
@@ -243,6 +257,14 @@ where
         self.add_node(prev.clone());
         // return the previous node index
         Ok(prev)
+    }
+    /// returns the total number of edges within the history
+    pub fn size(&self) -> usize {
+        self.edges().len()
+    }
+    /// returns the total number of nodes within the history
+    pub fn order(&self) -> usize {
+        self.nodes().len()
     }
 }
 

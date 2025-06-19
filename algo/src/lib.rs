@@ -27,6 +27,7 @@
     clippy::should_implement_trait
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(feature = "nightly", feature(allocator_api))]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -41,8 +42,6 @@ pub(crate) mod macros {
 
 #[doc(inline)]
 pub use self::traits::prelude::*;
-#[allow(unused_imports)]
-pub use self::types::prelude::*;
 #[cfg(feature = "std")]
 pub use self::{
     astar::AStarSearch, breadth_first::BreadthFirstTraversal, depth_first::DepthFirstTraversal,
@@ -95,35 +94,18 @@ pub mod traits {
     }
 }
 
-pub mod types {
-    //! this module define various types and type aliases for the algorithms and operators
-    #[doc(inline)]
-    #[allow(unused_imports)]
-    pub use self::prelude::*;
-
-    pub(crate) mod prelude {
-        #[doc(inline)]
-        #[allow(unused_imports)]
-        pub use super::aliases::*;
-    }
-
-    #[allow(unused_imports)]
-    mod aliases {
-        use hashbrown::{DefaultHashBuilder, HashSet};
-        use rshyper::idx::VertexId;
-        /// a type alias for a [`HashSet`] of [`VertexId`] that is generic over  the index type `I`
-        pub(crate) type VertexSet<I, S = DefaultHashBuilder> = HashSet<VertexId<I>, S>;
-    }
-}
-
 #[doc(hidden)]
 #[allow(missing_docs)]
 pub mod prelude {
     #[doc(inline)]
-    pub use super::traits::prelude::*;
-    #[cfg(feature = "std")]
-    pub use super::{
-        astar::AStarSearch, breadth_first::BreadthFirstTraversal, depth_first::DepthFirstTraversal,
-        dijkstra::Dijkstra,
-    };
+    pub use crate::traits::prelude::*;
+
+    #[cfg(feature = "alloc")]
+    pub use crate::astar::AStarSearch;
+    #[cfg(feature = "alloc")]
+    pub use crate::breadth_first::BreadthFirstTraversal;
+    #[cfg(feature = "alloc")]
+    pub use crate::depth_first::DepthFirstTraversal;
+    #[cfg(feature = "alloc")]
+    pub use crate::dijkstra::Dijkstra;
 }

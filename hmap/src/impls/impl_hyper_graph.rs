@@ -5,8 +5,8 @@
 use crate::{HashEdge, HyperMap, VertexSet, iter};
 use core::hash::{BuildHasher, Hash};
 use rshyper::error::Result;
-use rshyper::idx::{EdgeId, NumIndex, VertexId};
-use rshyper::prelude::{GraphProps, Node, Weight};
+use rshyper::idx::{EdgeId, HyperIndex, VertexId};
+use rshyper::prelude::{GraphProps, GraphType, Node, Weight};
 use rshyper::traits::{HyperGraph, HyperGraphIterEdge, HyperGraphIterNode, RawHyperGraph};
 
 impl<N, E, A, S> RawHyperGraph<A> for HyperMap<N, E, A, S>
@@ -18,11 +18,12 @@ where
     type Edge<_E> = HashEdge<_E, A::Kind, A::Ix, S>;
 }
 
-impl<N, E, A, S> HyperGraph<N, E, A> for HyperMap<N, E, A, S>
+impl<N, E, A, S, K, Ix> HyperGraph<N, E, A> for HyperMap<N, E, A, S>
 where
-    A: GraphProps,
+    A: GraphProps<Kind = K, Ix = Ix>,
     S: BuildHasher + Default,
-    A::Ix: NumIndex,
+    K: GraphType,
+    Ix: HyperIndex,
 {
     fn add_node(&mut self, weight: Weight<N>) -> Result<VertexId<A::Ix>> {
         self.add_node(weight)
@@ -32,7 +33,7 @@ where
     where
         I: IntoIterator<Item = VertexId<A::Ix>>,
     {
-        self.add_surface(iter, weight)
+        self.add_edge(iter, weight)
     }
 
     fn get_edge_domain(&self, index: &EdgeId<A::Ix>) -> Result<&VertexSet<A::Ix, S>> {
@@ -44,14 +45,14 @@ where
     }
 
     fn get_edge(&self, index: &EdgeId<A::Ix>) -> Result<&HashEdge<E, A::Kind, A::Ix, S>> {
-        self.get_surface(index)
+        self.get_edge(index)
     }
 
     fn get_edge_mut(
         &mut self,
         index: &EdgeId<A::Ix>,
     ) -> Result<&mut HashEdge<E, A::Kind, A::Ix, S>> {
-        self.get_surface_mut(index)
+        self.get_edge_mut(index)
     }
 
     fn get_edge_weight(&self, index: &EdgeId<A::Ix>) -> Result<&Weight<E>> {
@@ -100,7 +101,7 @@ where
     S: BuildHasher + Default,
     E: Eq + Hash,
     N: Eq + Hash,
-    A::Ix: NumIndex,
+    A::Ix: HyperIndex,
 {
     type Nodes<'a>
         = iter::NodeIter<'a, N, A::Ix>
@@ -108,7 +109,7 @@ where
         Self: 'a,
         Self::Node<N>: 'a;
     type Verts<'a>
-        = iter::Points<'a, N, A::Ix>
+        = iter::NodeKeys<'a, N, A::Ix>
     where
         Self: 'a;
 
@@ -117,7 +118,7 @@ where
     }
 
     fn vertices(&self) -> Self::Verts<'_> {
-        self.points()
+        self.vertices()
     }
 }
 
@@ -127,7 +128,7 @@ where
     S: BuildHasher + Default,
     E: Eq + Hash,
     N: Eq + Hash,
-    A::Ix: NumIndex,
+    A::Ix: HyperIndex,
 {
     type Surfaces<'a>
         = iter::EdgeIter<'a, E, A::Kind, A::Ix, S>
@@ -146,6 +147,6 @@ where
     }
 
     fn edges(&self) -> Self::Edges<'_> {
-        self.iter_edge_ids()
+        self.iter_edge_keys()
     }
 }

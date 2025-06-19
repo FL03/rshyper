@@ -4,7 +4,7 @@
 */
 //! this module implements sequential iterator for the [`HyperMap`](crate::HyperMap)
 //! which iterates over the nodes in the hypergraph in an ordered, sequential manner.
-use super::{Vertices, VerticesMut};
+use super::{NodeValues, NodeValuesMut};
 use core::hash::Hash;
 use rshyper::idx::{RawIndex, VertexId};
 use rshyper::node::Node;
@@ -17,7 +17,7 @@ where
     Idx: RawIndex + Eq + Hash,
 {
     pub(crate) keys: core::slice::Iter<'a, VertexId<Idx>>,
-    pub(crate) values: Vertices<'a, N, Idx>,
+    pub(crate) values: NodeValues<'a, N, Idx>,
 }
 
 /// [`SeqVertexIterMut`] is a mutable iterator producing mutable references to the nodes of the
@@ -28,7 +28,7 @@ where
     Idx: RawIndex + Eq + Hash,
 {
     pub(crate) keys: core::slice::Iter<'a, VertexId<Idx>>,
-    pub(crate) values: VerticesMut<'a, N, Idx>,
+    pub(crate) values: NodeValuesMut<'a, N, Idx>,
 }
 
 /*

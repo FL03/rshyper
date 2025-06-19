@@ -10,13 +10,12 @@ mod priority_node;
 
 use crate::error::{Error, Result};
 use crate::traits::{Heuristic, PathFinder, Search, Traversal};
-use crate::types::VertexSet;
+use alloc::collections::BinaryHeap;
 use core::hash::{BuildHasher, Hash};
 use hashbrown::{DefaultHashBuilder, HashMap, HashSet};
-use rshyper::idx::{NumIndex, RawIndex, VertexId};
+use rshyper::idx::{HyperIndex, RawIndex, VertexId, VertexSet};
 use rshyper::rel::RawLayout;
 use rshyper::{GraphProps, GraphType, HyperGraph, HyperGraphIter};
-use std::collections::BinaryHeap;
 
 type SourceMap<Ix, S = DefaultHashBuilder> = HashMap<VertexId<Ix>, VertexId<Ix>, S>;
 
@@ -208,7 +207,7 @@ where
     H: HyperGraph<N, E, A>,
     F: Heuristic<A::Ix, Output = f64>,
     S: BuildHasher,
-    A::Ix: NumIndex,
+    A::Ix: HyperIndex,
     for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
     type Path = Vec<VertexId<A::Ix>>;
@@ -216,10 +215,10 @@ where
     fn find_path(&mut self, start: VertexId<A::Ix>, goal: VertexId<A::Ix>) -> Result<Self::Path> {
         // Check if both vertices exist
         if !self.graph.contains_node(&start) {
-            return Err(Error::NodeNotFound);
+            return Err(rshyper::Error::NodeNotFound.into());
         }
         if !self.graph.contains_node(&goal) {
-            return Err(Error::NodeNotFound);
+            return Err(rshyper::Error::NodeNotFound.into());
         }
 
         // reset state
@@ -355,7 +354,7 @@ where
     F: Heuristic<A::Ix, Output = f64>,
     H: HyperGraphIter<N, E, A>,
     S: BuildHasher,
-    A::Ix: NumIndex,
+    A::Ix: HyperIndex,
     for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
     type Output = Vec<VertexId<A::Ix>>;
@@ -367,7 +366,7 @@ where
         self.reset();
 
         if !self.graph.contains_node(&start) {
-            return Err(Error::NodeNotFound);
+            return Err(rshyper::Error::NodeNotFound.into());
         }
 
         // Using the vertex with the largest ID as a pseudo-goal
