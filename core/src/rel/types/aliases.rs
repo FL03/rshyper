@@ -7,6 +7,7 @@
 #[cfg(feature = "alloc")]
 pub use self::use_alloc::*;
 
+use crate::idx::{VertexArray, VertexSlice, VertexSliceRef, VertexSliceMut};
 use crate::rel::Link;
 use crate::{Directed, Undirected, VertexId};
 
@@ -28,13 +29,13 @@ pub type HashLink<K, I, S> = Link<VertexSet<I, S>, K, I>;
 
 /// a type alias for a [`Link`] whose _vertices_ are stored in an array of fixed
 /// size with the size defined by the generic parameter `N`.
-pub type LinkArray<const N: usize, K, Ix> = Link<[VertexId<Ix>; N], K, Ix>;
+pub type LinkArray<K, Ix, const N: usize> = Link<VertexArray<Ix, N>, K, Ix>;
 /// a type alias for a [`Link`] whose _vertices_ are stored in a slice
-pub type LinkSlice<K, Ix> = Link<[VertexId<Ix>], K, Ix>;
-/// a type alias for a [`Link`] whose _vertices_ are stored in an owned slice
-pub type LinkSliceRef<'a, K, Ix> = Link<&'a [VertexId<Ix>], K, Ix>;
-/// a type alias for a [`Link`] whose _vertices_ are stored in a mutable slice
-pub type LinkSliceMut<'a, K, Ix> = Link<&'a mut [VertexId<Ix>], K, Ix>;
+pub type LinkSlice<K, Ix> = Link<VertexSlice<Ix>, K, Ix>;
+/// a type alias for a [`Link`] with a reference domain representation of [`VertexSliceRef`]
+pub type LinkSliceRef<'a, K, Ix> = Link<VertexSliceRef<'a, Ix>, K, Ix>;
+/// a type alias for a [`Link`] with a mutable domain representation of [`VertexSliceMut`]
+pub type LinkSliceMut<'a, K, Ix> = Link<VertexSliceMut<'a, Ix>, K, Ix>;
 
 #[cfg(all(feature = "alloc", not(feature = "nightly")))]
 mod use_alloc {
@@ -52,6 +53,7 @@ mod use_alloc {
 #[cfg(all(feature = "alloc", feature = "nightly"))]
 mod use_alloc {
     use crate::idx::{VertexBSet, VertexDeque, VertexVec};
+    use crate::rel::Link;
 
     /// a type alias for an [`Link`] whose _vertices_ are stored in a [`Vec`]
     pub type LinkVec<K, Ix, A> = Link<VertexVec<Ix, A>, K, Ix>;
