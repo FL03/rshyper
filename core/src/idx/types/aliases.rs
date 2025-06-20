@@ -25,7 +25,6 @@ pub type Udx = usize;
 pub type EdgeId<T = Udx> = IndexBase<T, EdgeIndex>;
 /// a type alias for an [`Index`] whose _kind_ is [`VertexIndex`]
 pub type VertexId<T = Udx> = IndexBase<T, VertexIndex>;
-
 /// a type alias for a fixed sized array of [`IndexBase`]
 pub type IndexArray<T, const N: usize, K = VertexIndex> = [IndexBase<T, K>; N];
 /// a type alias for a slice of [`IndexBase`]

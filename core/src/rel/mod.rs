@@ -10,16 +10,16 @@ pub use self::{link::Link, traits::*, types::*};
 
 /// here, a [`link`] essentially represents an _unweighted_ hyperedge, consisting of an
 /// identifier, a domain (i.e. a collection of vertices), and a graph type.
-pub(self) mod link;
+mod link;
 
 mod impls {
-    pub(self) mod impl_link;
+    mod impl_link;
     #[doc(hidden)]
-    pub(self) mod impl_link_deprecated;
-    pub(self) mod impl_link_ext;
+    mod impl_link_deprecated;
+    mod impl_link_ext;
 }
 
-pub(self) mod traits {
+mod traits {
     //! this module contains the traits that define the interface for edges and facets in a
     //! hypergraph
     //!
@@ -27,7 +27,7 @@ pub(self) mod traits {
     pub use self::prelude::*;
     /// this module defines the [`RawLayout`] trait for establishing a common interface for
     /// representations of a hyperedge
-    pub(self) mod layout;
+    mod layout;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -35,11 +35,11 @@ pub(self) mod traits {
     }
 }
 
-pub(self) mod types {
+mod types {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    pub(self) mod aliases;
+    mod aliases;
 
     pub(crate) mod prelude {
         #[doc(inline)]

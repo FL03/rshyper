@@ -14,7 +14,7 @@ mod impls {
     pub mod impl_edge;
 }
 
-pub(self) mod traits {
+mod traits {
     //! this module contains the traits that define the interface for edges and facets in a
     //! hypergraph
     //!
@@ -22,7 +22,7 @@ pub(self) mod traits {
     #[allow(unused_imports)]
     pub use self::prelude::*;
     /// this module defines the [`RawSurface`] trait
-    pub(self) mod surface;
+    mod surface;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -30,14 +30,14 @@ pub(self) mod traits {
     }
 }
 
-pub(self) mod types {
+mod types {
     //! this module contains various type aliases and additional types in support of the edges
     //! of a hypergraph.
     #[doc(inline)]
     #[allow(unused_imports)]
     pub use self::prelude::*;
 
-    pub(self) mod aliases;
+    mod aliases;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -45,13 +45,13 @@ pub(self) mod types {
     }
 }
 
-pub(self) mod utils {
+mod utils {
     //! this module implements various utility functions for working with edges in a hypergraph
     #[doc(inline)]
     #[allow(unused_imports)]
     pub use self::prelude::*;
 
-    pub(self) mod base;
+    mod base;
     #[cfg(all(feature = "alloc", feature = "rand"))]
     pub(self) mod rand;
 

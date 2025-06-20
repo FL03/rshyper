@@ -7,11 +7,11 @@
 #[doc(inline)]
 pub use self::prelude::*;
 
-pub(self) mod directional;
-pub(self) mod iter;
+mod directional;
+mod iter;
 #[cfg(feature = "rayon")]
 pub(self) mod parallel;
-pub(self) mod sequential;
+mod sequential;
 
 pub(crate) mod prelude {
     #[doc(inline)]

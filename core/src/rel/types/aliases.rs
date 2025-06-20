@@ -7,7 +7,7 @@
 #[cfg(feature = "alloc")]
 pub use self::use_alloc::*;
 
-use crate::idx::{VertexArray, VertexSlice, VertexSliceRef, VertexSliceMut};
+use crate::idx::{VertexArray, VertexSlice, VertexSliceMut, VertexSliceRef};
 use crate::rel::Link;
 use crate::{Directed, Undirected, VertexId};
 

@@ -9,10 +9,10 @@
 pub use self::prelude::*;
 
 /// this module defines the [`Node`] type
-pub(self) mod hyper_node;
+mod hyper_node;
 
 mod impls {
-    pub(self) mod impl_hyper_node;
+    mod impl_hyper_node;
 }
 
 pub(crate) mod prelude {

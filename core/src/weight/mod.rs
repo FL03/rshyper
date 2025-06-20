@@ -9,24 +9,24 @@
 pub use self::{traits::*, types::*};
 
 mod impls {
-    pub(self) mod impl_weight;
-    pub(self) mod impl_weight_ops;
-    pub(self) mod impl_weight_repr;
+    mod impl_weight;
+    mod impl_weight_ops;
+    mod impl_weight_repr;
 
     #[doc(hidden)]
     #[allow(deprecated)]
     pub mod impl_weight_deprecated;
 }
 
-pub(self) mod traits {
+mod traits {
     //! this module defines various traits related to weights
     #[doc(inline)]
     pub use self::prelude::*;
     /// this module provides the [`AsWeight`] and [`IntoWeight`] traits for converting types to
     /// [`Weight`]
-    pub(self) mod convert;
+    mod convert;
     /// this module implements the [`Weighted`] trait for types that have an associated weight
-    pub(self) mod weighted;
+    mod weighted;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -36,14 +36,14 @@ pub(self) mod traits {
     }
 }
 
-pub(self) mod types {
+mod types {
     //! this implements addtional types related to weights
     #[doc(inline)]
     pub use self::prelude::*;
     /// this module provides two distinct marker types for indicating the state of a weight
-    pub(self) mod kinds;
+    mod kinds;
     /// this module implements the [`UnWeight`] marker type
-    pub(self) mod unweighted;
+    mod unweighted;
 
     pub(crate) mod prelude {
         #[doc(inline)]

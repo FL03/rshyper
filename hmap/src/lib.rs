@@ -139,7 +139,7 @@ mod types {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    pub(self) mod aliases;
+    mod aliases;
 
     pub(crate) mod prelude {
         #[doc(inline)]

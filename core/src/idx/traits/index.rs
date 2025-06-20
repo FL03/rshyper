@@ -135,7 +135,7 @@ impl RawIndex for alloc::boxed::Box<dyn RawIndex> {
 }
 
 #[cfg(feature = "alloc")]
-impl RawIndex for alloc::boxed::Box<dyn RawIndex + Send + Sync + 'static> {
+impl<'a> RawIndex for alloc::boxed::Box<dyn RawIndex + Send + Sync + 'a> {
     seal!();
 }
 
