@@ -18,7 +18,7 @@ author: FL03
 ## Table of Contents
 
 - [Background](#background)
-- [Usage](https://fl03.github.io/rshyper/2025-06-20-USAGE-GUIDE#usage)
+- [Usage](https://fl03.github.io/rshyper/usage)
 
 ## Background
 
