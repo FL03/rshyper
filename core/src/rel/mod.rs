@@ -10,7 +10,7 @@ pub use self::{link::Link, traits::*, types::*};
 
 /// here, a [`link`] essentially represents an _unweighted_ hyperedge, consisting of an
 /// identifier, a domain (i.e. a collection of vertices), and a graph type.
-pub mod link;
+pub(self) mod link;
 
 mod impls {
     pub(self) mod impl_link;

@@ -10,21 +10,21 @@
 #[cfg(feature = "alloc")]
 pub use self::{error::*, tracker::IndexTracker};
 #[doc(inline)]
-pub use self::{index::*, iter::*, position::*, traits::prelude::*, types::prelude::*};
+pub use self::{frame::*, index::*, iter::*, traits::*, types::*};
 
 #[cfg(feature = "alloc")]
 /// this module defines the [`IndexError`] type, establishing the various errors encountered by
 /// indices in a hypergraph.
-pub(self) mod error;
+pub mod error;
+/// this module implements the [`IndexFrame`] type, which is used to track the current edge
+/// and vertex indices in a hypergraph.
+pub mod frame;
 /// this module provides the [`IndexBase`] type, which is a generic index type used to
 /// represent various kinds of indices in a hypergraph.
 pub(self) mod index;
-/// this module implements the [`IndexCursor`] type, which is used to track the current edge
-/// and vertex indices in a hypergraph.
-pub(self) mod position;
 #[cfg(feature = "alloc")]
 /// this module provides the [`IndexTracker`] for retaining a history of created indices
-pub(self) mod tracker;
+pub mod tracker;
 
 #[doc(hidden)]
 mod impls {
@@ -36,8 +36,8 @@ mod impls {
 }
 
 pub mod iter {
-    //! this module provides various iterators for indices, such as [`IndexIter`], which
-    //! iterates over the indices in a hypergraph.
+    //! this module provides various iterators for indices, such as [`Counter`] and
+    //! [`Stepper`].
     #[doc(inline)]
     pub use self::prelude::*;
 
@@ -52,7 +52,7 @@ pub mod iter {
     }
 }
 
-pub mod traits {
+pub(self) mod traits {
     //! this module defines the [`RawIndex`] trait along with its related traits and
     //! implementations.
     #[doc(inline)]
@@ -76,7 +76,7 @@ pub mod traits {
     }
 }
 
-pub mod types {
+pub(self) mod types {
     //! this module provides various types in support of the [`IndexBase`](super::IndexBase)
     //! type
     //!
@@ -95,8 +95,8 @@ pub mod types {
 }
 
 pub(crate) mod prelude {
+    pub use super::frame::*;
     pub use super::index::IndexBase;
-    pub use super::position::*;
-    pub use super::traits::prelude::*;
-    pub use super::types::prelude::*;
+    pub use super::traits::*;
+    pub use super::types::*;
 }

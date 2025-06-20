@@ -89,8 +89,10 @@ pub(crate) mod macros {
     #[macro_use]
     pub mod seal;
 }
-#[cfg(feature = "algo")]
-extern crate rshyper_algo as algo;
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 extern crate rshyper_core as rshyper;
 
 #[doc(inline)]
