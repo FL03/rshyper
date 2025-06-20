@@ -131,13 +131,13 @@ pub mod iter {
     }
 }
 
-pub(self) mod types {
+mod types {
     //! this module defines various types and type aliases in support of the [`HyperMap`](super::HyperMap)
     //! implementation
     #[doc(inline)]
     pub use self::prelude::*;
 
-    mod aliases;
+    pub(self) mod aliases;
 
     pub(crate) mod prelude {
         #[doc(inline)]
