@@ -12,11 +12,6 @@ _**Warning: The library is still in development so prepare for a shifting api...
 
 ## Table of Contents
 
-- [Background](#background)
-  - [Terminology](#terminology)
-  - [Hypergraphs](#hypergraphs)
-    - [Definition](#definition)
-    - [Properties](#properties)
 - [Usage](#usage)
   - [Features](#features)
   - [Examples](#examples)
@@ -24,44 +19,6 @@ _**Warning: The library is still in development so prepare for a shifting api...
 - [Contributing](#contributing)
 - [License](#license)
 - [Security](#security)
-
-## Background
-
-Hypergraphs are generalizations of traditional graphs that allow edges to connect any number of vertices, rather than just two. This flexibility makes hypergraphs suitable for modeling complex relationships in various domains, such as social networks, biological systems, and data analysis.
-
-- [Terminology](#terminology)
-- [Hypergraphs](#hypergraphs)
-  - [Definition](#definition)
-  - [Properties](#properties)
-
-### Terminology
-
-Before diving in to the technical side of things, let's start by defining several terms commonly used in the definition and implementation of hypergraphs.
-
-- **edge**: here, we consider a hyperedge to specifically define
-- **facet**: a facet materializes a hyperedge by associating some weight with the edge.
-- **node**: a node is a complete _vertex_ in that it is considered to be weighted.
-- **surface**: here, the terms surface and facet are used interchangeably, and they refer to the same concept of a hyperedge with an associated weight.
-- **vertex**: a vertex can be understood as a _point_ in space that is used to define edges within a hypergraph.
-
-### Hypergraphs
-
-A hypergraph is an abstract data-structure that generalizes the concept of a graph (and even that of the simplicial complex). In a hypergraph, edges (called hyperedges) can connect any number of vertices, allowing for more complex relationships than traditional graphs.
-
-#### Definition
-
-Formally, a hypergraph is defined as a pair $H = (V, E)$ where:
-
-- $V$ is a set of vertices (or nodes).
-- $E$ is a set of hyperedges, where each hyperedge is a subset of $V$ that can contain one or more vertices such that $E \subseteq 2^V$.
-
-#### Properties
-
-Listed below are some intrinsic properties of hypergraphs:
-
-- **domain:** the domain of a hypergraph `H` is the set of vertices `V` within the edge set `E`.
-- **order:** The order of a hypergraph `H` is the number of vertices in `V`.
-- **size:** The size of a hypergraph `H` is the number of hyperedges in `E`.
 
 ## Usage
 

@@ -29,9 +29,9 @@ Hypergraphs are generalizations of traditional graphs that allow edges to connec
 Before diving in to the technical side of things, let's start by defining several terms commonly used in the definition and implementation of hypergraphs.
 
 - **edge**: here, we consider a hyperedge to specifically define
-- **facet**: a facet materializes a hyperedge by associating some weight with the edge.
+- **link**: a link is used to define the _layout_ of a hyperedge, providing the basic structure of an edge.
 - **node**: a node is a complete _vertex_ in that it is considered to be weighted.
-- **surface**: here, the terms surface and facet are used interchangeably, and they refer to the same concept of a hyperedge with an associated weight.
+- **surface**: a facet, or surface, represents a complete hyperedge equipped with a weight.
 - **vertex**: a vertex can be understood as a _point_ in space that is used to define edges within a hypergraph.
 
 ### Hypergraphs
@@ -49,6 +49,7 @@ Formally, a hypergraph is defined as a pair $H = (V, E)$ where:
 
 Listed below are some intrinsic properties of hypergraphs:
 
+- **domain:** the domain of a hypergraph `H` is the set of vertices `V` within the edge set `E`.
 - **order:** The order of a hypergraph `H` is the number of vertices in `V`.
 - **size:** The size of a hypergraph `H` is the number of hyperedges in `E`.
 
