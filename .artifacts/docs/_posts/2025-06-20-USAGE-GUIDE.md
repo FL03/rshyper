@@ -5,6 +5,14 @@ author: FL03
 permalink: /usage/
 ---
 
+## Table of Contents
+
+- [Background](https://fl03.github.io/rshyper/#background)
+- [Usage](https://fl03.github.io/rshyper/usage)
+  - [Getting Started](#getting-started)
+  - [Features](#features)
+  - [Examples](#examples)
+
 ## Getting Started
 
 Add this to your `Cargo.toml`:
