@@ -7,15 +7,14 @@
 #[cfg(feature = "alloc")]
 pub use self::use_alloc::*;
 
+use crate::idx::{VertexArray, VertexSlice, VertexSliceMut, VertexSliceRef};
 use crate::rel::Link;
 use crate::{Directed, Undirected, VertexId};
 
 #[cfg(feature = "hashbrown")]
 use hashbrown::{DefaultHashBuilder, HashSet};
 #[cfg(all(feature = "std", not(feature = "hashbrown")))]
-use std::collections::HashSet;
-#[cfg(all(feature = "std", not(feature = "hashbrown")))]
-use std::hash::RandomState as DefaultHashBuilder;
+use std::{collections::HashSet, hash::RandomState as DefaultHashBuilder};
 
 /// a type alias for a [`HashSet`] of [`VertexId`] that is generic over the index type `I`
 pub type VertexSet<I, S = DefaultHashBuilder> = HashSet<VertexId<I>, S>;
@@ -30,40 +29,36 @@ pub type HashLink<K, I, S> = Link<VertexSet<I, S>, K, I>;
 
 /// a type alias for a [`Link`] whose _vertices_ are stored in an array of fixed
 /// size with the size defined by the generic parameter `N`.
-pub type LinkArray<const N: usize, K, Ix> = Link<[VertexId<Ix>; N], K, Ix>;
+pub type LinkArray<K, Ix, const N: usize> = Link<VertexArray<Ix, N>, K, Ix>;
 /// a type alias for a [`Link`] whose _vertices_ are stored in a slice
-pub type LinkSlice<K, Ix> = Link<[VertexId<Ix>], K, Ix>;
-/// a type alias for a [`Link`] whose _vertices_ are stored in an owned slice
-pub type LinkSliceRef<'a, K, Ix> = Link<&'a [VertexId<Ix>], K, Ix>;
-/// a type alias for a [`Link`] whose _vertices_ are stored in a mutable slice
-pub type LinkSliceMut<'a, K, Ix> = Link<&'a mut [VertexId<Ix>], K, Ix>;
+pub type LinkSlice<K, Ix> = Link<VertexSlice<Ix>, K, Ix>;
+/// a type alias for a [`Link`] with a reference domain representation of [`VertexSliceRef`]
+pub type LinkSliceRef<'a, K, Ix> = Link<VertexSliceRef<'a, Ix>, K, Ix>;
+/// a type alias for a [`Link`] with a mutable domain representation of [`VertexSliceMut`]
+pub type LinkSliceMut<'a, K, Ix> = Link<VertexSliceMut<'a, Ix>, K, Ix>;
 
 #[cfg(all(feature = "alloc", not(feature = "nightly")))]
 mod use_alloc {
-    use crate::{Edge, Link, VertexId};
-
-    use alloc::collections::{BTreeSet, VecDeque};
-    use alloc::vec::Vec;
+    use crate::idx::{VertexBSet, VertexDeque, VertexVec};
+    use crate::rel::Link;
 
     /// a type alias for an [`Link`] whose _vertices_ are stored in a [`Vec`]
     pub type LinkVec<K, Ix> = Link<VertexVec<Ix>, K, Ix>;
     /// a type alias for an [`Link`] whose _vertices_ are stored in a [`VecDeque`]
-    pub type LinkDeque<K, Ix> = Link<VertexVecDeque<Ix>, K, Ix>;
+    pub type LinkDeque<K, Ix> = Link<VertexDeque<Ix>, K, Ix>;
     /// a type alias for an [`Link`] whose _vertices_ are stored in a [`BTreeSet`]
     pub type LinkBSet<K, Ix> = Link<VertexBSet<Ix>, K, Ix>;
 }
 
 #[cfg(all(feature = "alloc", feature = "nightly"))]
 mod use_alloc {
-    use crate::{Edge, Link, VertexId};
-
-    use alloc::collections::{BTreeSet, VecDeque};
-    use alloc::vec::Vec;
+    use crate::idx::{VertexBSet, VertexDeque, VertexVec};
+    use crate::rel::Link;
 
     /// a type alias for an [`Link`] whose _vertices_ are stored in a [`Vec`]
     pub type LinkVec<K, Ix, A> = Link<VertexVec<Ix, A>, K, Ix>;
-    /// a type alias for an [`Link`] whose _vertices_ are stored in a [`VertexVecDeque`]
-    pub type LinkDeque<K, Ix, A> = Link<VertexVecDeque<Ix, A>, K, Ix>;
+    /// a type alias for an [`Link`] whose _vertices_ are stored in a [`VertexDeque`]
+    pub type LinkDeque<K, Ix, A> = Link<VertexDeque<Ix, A>, K, Ix>;
     /// a type alias for an [`Link`] whose _vertices_ are stored in a [`VertexBSet`]
     pub type LinkBSet<K, Ix, A> = Link<VertexBSet<Ix, A>, K, Ix>;
 }

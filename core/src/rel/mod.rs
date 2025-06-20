@@ -6,20 +6,20 @@
 //! hypergraph.
 //!
 #[doc(inline)]
-pub use self::{link::Link, traits::prelude::*};
+pub use self::{link::Link, traits::*, types::*};
 
 /// here, a [`link`] essentially represents an _unweighted_ hyperedge, consisting of an
 /// identifier, a domain (i.e. a collection of vertices), and a graph type.
-pub mod link;
+mod link;
 
 mod impls {
-    pub mod impl_link;
+    mod impl_link;
     #[doc(hidden)]
-    pub mod impl_link_deprecated;
-    pub mod impl_link_ext;
+    mod impl_link_deprecated;
+    mod impl_link_ext;
 }
 
-pub mod traits {
+mod traits {
     //! this module contains the traits that define the interface for edges and facets in a
     //! hypergraph
     //!
@@ -32,6 +32,18 @@ pub mod traits {
     pub(crate) mod prelude {
         #[doc(inline)]
         pub use super::layout::*;
+    }
+}
+
+mod types {
+    #[doc(inline)]
+    pub use self::prelude::*;
+
+    mod aliases;
+
+    pub(crate) mod prelude {
+        #[doc(inline)]
+        pub use super::aliases::*;
     }
 }
 

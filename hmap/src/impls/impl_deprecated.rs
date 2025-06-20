@@ -7,8 +7,7 @@ use crate::types::{EdgeEntry, EdgeMap};
 use core::borrow::Borrow;
 use core::hash::{BuildHasher, Hash};
 use rshyper::error::Result;
-use rshyper::idx::{EdgeId, HashIndex, VertexId};
-use rshyper::prelude::{AddStep, GraphProps, GraphType, HashEdge, Node, VertexSet, Weight};
+use rshyper::prelude::*;
 
 #[doc(hidden)]
 impl<N, E, A, S, Ix, K> HyperMap<N, E, A, S>
@@ -18,6 +17,13 @@ where
     Ix: HashIndex,
     K: GraphType,
 {
+    #[deprecated(
+        note = "use `set_edges` instead; this method will be removed in the next major release",
+        since = "0.1.8"
+    )]
+    pub fn set_surfaces(&mut self, edges: EdgeMap<E, K, Ix, S>) -> &mut Self {
+        self.set_edges(edges)
+    }
     #[deprecated(
         note = "use `load_edge_nodes` instead; this method will be removed in the next major release",
         since = "0.1.7"

@@ -4,6 +4,7 @@
 */
 use super::{EdgeId, RawIndex, VertexId};
 
+#[cfg(feature = "alloc")]
 use alloc::boxed::Box;
 
 /// A type alias for a [`Result`] with an error type of [`IndexError`]
@@ -14,28 +15,41 @@ pub type IndexResult<T = ()> = core::result::Result<T, IndexError>;
 pub enum IndexError {
     #[error("Duplicate index")]
     DuplicateIndex,
-    #[error("Index is out of bounds")]
+    #[error("the index is out of bounds")]
     IndexOutOfBounds,
-    #[error("The index ({0}) is invalid")]
+    #[cfg(feature = "alloc")]
+    #[error("invalid index: {0}")]
     InvalidIndex(Box<dyn RawIndex>),
-    #[error("The index {0} does not exist")]
+    #[cfg(feature = "alloc")]
+    #[error("No index found for {0}")]
     IndexNotFound(Box<dyn RawIndex>),
-    #[error("No path found between {from} and {to}")]
+    #[cfg(feature = "alloc")]
+    #[error("No path found from {from} to {to}")]
     NoPathFoundBetween {
         from: Box<dyn RawIndex>,
         to: Box<dyn RawIndex>,
     },
+    #[cfg(feature = "alloc")]
     #[error("Hyperedge {0} does not exist")]
-    HyperedgeDoesNotExist(Box<dyn RawIndex>),
+    EdgeDoesNotExist(Box<dyn RawIndex>),
+    #[cfg(feature = "alloc")]
     #[error("Vertex {0} does not exist")]
-    VertexDoesNotExist(Box<dyn RawIndex>),
+    NodeDoesNotExist(Box<dyn RawIndex>),
 }
 
 impl IndexError {
+    /// initialize a new [`DuplicateIndex`](IndexError::DuplicateIndex) error variant
+    pub fn duplicate_index() -> Self {
+        IndexError::DuplicateIndex
+    }
     /// initialize a new [`IndexOutOfBounds`](IndexError::IndexOutOfBounds) error variant
     pub fn index_out_of_bounds() -> Self {
         IndexError::IndexOutOfBounds
     }
+}
+
+#[cfg(feature = "alloc")]
+impl IndexError {
     /// initialize a new [`InvalidIndex`](IndexError::InvalidIndex) error variant
     pub fn invalid_index<Ix: RawIndex>(value: Ix) -> Self {
         IndexError::InvalidIndex(Box::new(value))
@@ -55,10 +69,10 @@ impl IndexError {
     /// initialize a new [`HyperedgeDoesNotExist`](IndexError::HyperedgeDoesNotExist) error
     /// variant
     pub fn hyperedge_does_not_exist<Idx: RawIndex>(index: EdgeId<Idx>) -> Self {
-        IndexError::HyperedgeDoesNotExist(Box::new(index.value()))
+        IndexError::EdgeDoesNotExist(Box::new(index.value()))
     }
     /// initialize a new [`VertexDoesNotExist`](IndexError::VertexDoesNotExist) error variant
     pub fn vertex_does_not_exist<Idx: RawIndex>(index: VertexId<Idx>) -> Self {
-        IndexError::VertexDoesNotExist(index.into_raw_box())
+        IndexError::NodeDoesNotExist(index.into_raw_box())
     }
 }

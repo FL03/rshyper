@@ -3,7 +3,7 @@
     Contrib: @FL03
 */
 use crate::Weight;
-use crate::idx::{RawIndex, VertexId};
+use crate::idx::{RawIndex, Udx, VertexId};
 
 /// The [`Node`] implementation generically associates a [`VertexId`] with a [`Weight`].
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -13,27 +13,24 @@ use crate::idx::{RawIndex, VertexId};
     serde(rename_all = "snake_case")
 )]
 #[repr(C)]
-pub struct Node<T, Idx>
-where
-    Idx: RawIndex,
-{
-    pub(crate) id: VertexId<Idx>,
+pub struct Node<T, Ix = Udx> {
+    pub(crate) id: VertexId<Ix>,
     pub(crate) weight: Weight<T>,
 }
 
-impl<T, Idx> Node<T, Idx>
+impl<T, Ix> Node<T, Ix>
 where
-    Idx: RawIndex,
+    Ix: RawIndex,
 {
     /// initialize a new instance with the given index and weight
-    pub const fn new(id: VertexId<Idx>, weight: T) -> Self {
+    pub const fn new(id: VertexId<Ix>, weight: T) -> Self {
         Self {
             id,
             weight: Weight(weight),
         }
     }
     /// returns a new weighted node using the given value and the logical default for the index
-    pub fn from_id(index: VertexId<Idx>) -> Self
+    pub fn from_id(index: VertexId<Ix>) -> Self
     where
         T: Default,
     {
@@ -42,7 +39,7 @@ where
     /// creates a new node with the given index using the logical default for the weight.
     pub fn from_weight(Weight(weight): Weight<T>) -> Self
     where
-        Idx: Default,
+        Ix: Default,
     {
         Self::new(Default::default(), weight)
     }
@@ -54,7 +51,7 @@ where
         }
     }
     /// consumes the current instance to create another with the given weight.
-    pub fn with_weight<U>(self, weight: Weight<U>) -> Node<U, Idx> {
+    pub fn with_weight<U>(self, weight: Weight<U>) -> Node<U, Ix> {
         Node {
             id: self.id,
             weight,
@@ -64,12 +61,12 @@ where
     ///
     /// - `0`: a reference to the node index
     /// - `1`: a reference to the node weight
-    pub const fn as_tuple(&self) -> (&VertexId<Idx>, &Weight<T>) {
+    pub const fn as_tuple(&self) -> (&VertexId<Ix>, &Weight<T>) {
         (self.id(), self.weight())
     }
     /// consumes the node to convert it into a 2-tuple consisting of the node index and the
     /// weight
-    pub fn into_tuple(self) -> (VertexId<Idx>, Weight<T>) {
+    pub fn into_tuple(self) -> (VertexId<Ix>, Weight<T>) {
         (self.id, self.weight)
     }
     /// returns the node as a tuple with a mutable reference to the weight such that:
@@ -79,11 +76,11 @@ where
     ///
     /// this method is useful for converting the node into a standard item produced by mutable
     /// key-value iterators where `Item = (&'a K, &'a mut V)`
-    pub fn as_tuple_mut(&mut self) -> (&VertexId<Idx>, &mut Weight<T>) {
+    pub fn as_tuple_mut(&mut self) -> (&VertexId<Ix>, &mut Weight<T>) {
         (&self.id, &mut self.weight)
     }
     /// returns an immutable reference to the node index
-    pub const fn id(&self) -> &VertexId<Idx> {
+    pub const fn id(&self) -> &VertexId<Ix> {
         &self.id
     }
     /// returns an immutable reference to the node weight
@@ -112,7 +109,7 @@ where
     }
     /// consumes the current instance and applies the given function onto the weight,
     /// returning a new instance with the same index and the resulting weight.
-    pub fn map<U, F>(self, f: F) -> Node<U, Idx>
+    pub fn map<U, F>(self, f: F) -> Node<U, Ix>
     where
         F: FnOnce(T) -> U,
     {

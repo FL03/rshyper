@@ -6,19 +6,19 @@
 //! entries within the hypergraph. Additionally, the module provides the [`Weightless`] type
 //! alias for cases where there is no associated weight.
 #[doc(inline)]
-pub use self::{traits::prelude::*, types::prelude::*};
+pub use self::{traits::*, types::*};
 
 mod impls {
-    pub mod impl_weight;
-    pub mod impl_weight_ops;
-    pub mod impl_weight_repr;
+    mod impl_weight;
+    mod impl_weight_ops;
+    mod impl_weight_repr;
 
     #[doc(hidden)]
     #[allow(deprecated)]
     pub mod impl_weight_deprecated;
 }
 
-pub mod traits {
+mod traits {
     //! this module defines various traits related to weights
     #[doc(inline)]
     pub use self::prelude::*;
@@ -36,14 +36,14 @@ pub mod traits {
     }
 }
 
-pub mod types {
+mod types {
     //! this implements addtional types related to weights
     #[doc(inline)]
     pub use self::prelude::*;
     /// this module provides two distinct marker types for indicating the state of a weight
-    pub mod kinds;
-    /// this module implements the [`Weighted`] trait for types that have an associated weight
-    pub mod unweighted;
+    mod kinds;
+    /// this module implements the [`UnWeight`] marker type
+    mod unweighted;
 
     pub(crate) mod prelude {
         #[doc(inline)]

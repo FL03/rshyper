@@ -44,7 +44,7 @@ pub use self::{
     node::Node,
     rel::{Link, RawLayout},
     traits::prelude::*,
-    types::prelude::*,
+    types::*,
     weight::prelude::*,
 };
 
@@ -62,21 +62,21 @@ pub mod traits {
     #[doc(inline)]
     pub use self::prelude::*;
     /// the [`Contains`] trait provides a way to check if a graph contains a specific component
-    pub mod contains;
+    mod contains;
     /// this module implements the [`RawDomain`] trait for defining the type of collection used
     /// to compose the hyperedge
-    pub mod domain;
+    mod domain;
     /// the [`HyperGraph`] trait defines the core interface for hypergraphs, enabling the
     /// generalization of algorithms constructors, and graphical operators.
     #[cfg(feature = "alloc")]
-    pub mod hyper_graph;
+    mod hyper_graph;
     /// the [`Merge`] trait provides a way to combine two graphs into one
-    pub mod merge;
+    mod merge;
     /// this module defines sequential step generators
-    pub mod step;
+    mod step;
     /// traits for transformative operations on hypergraphs, such as mapping, are implemented
     /// within this module
-    pub mod transform;
+    mod transform;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -100,7 +100,7 @@ pub mod types {
     #[doc(inline)]
     pub use self::prelude::*;
     /// this module defines the two types of graph kinds: [`Directed`] and [`Undirected`]
-    pub mod graph_kind;
+    mod graph_kind;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -109,7 +109,7 @@ pub mod types {
 }
 
 pub mod prelude {
-    pub use crate::error::*;
+    // pub use crate::error::*;
 
     pub use crate::attrs::prelude::*;
     pub use crate::edge::prelude::*;

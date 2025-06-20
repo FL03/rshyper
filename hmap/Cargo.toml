@@ -16,7 +16,7 @@ version.workspace = true
 
 [package.metadata.docs.rs]
 all-features = false
-features = ["full"]
+features = ["full", "rayon"]
 rustc-args = ["--cfg", "docsrs" ]
 version = "v{{version}}"
 
@@ -201,6 +201,15 @@ wasm-bindgen = [
 ]
 
 # ************* [Benchmarks] *************
+[[bench]]
+harness = false
+name ="algo"
+required-features = [
+    "algo",
+    "rand",
+    "std",
+]
+
 [[bench]]
 harness = false
 name ="hyper_map"

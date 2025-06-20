@@ -3,9 +3,9 @@
     Contrib: @FL03
 */
 use super::RawSurface;
-use crate::idx::{EdgeId, RawIndex, VertexId};
+use crate::idx::{EdgeId, RawIndex, Udx, VertexId};
 use crate::rel::{Link, RawLayout};
-use crate::{Domain, GraphType, Weight};
+use crate::{Domain, GraphType, RawDomain, Weight};
 
 /// The [`Edge`] implementation essentially wraps the [`Link`] type with a [`Weight`]
 #[derive(Clone, Copy, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -15,11 +15,9 @@ use crate::{Domain, GraphType, Weight};
     serde(rename_all = "snake_case")
 )]
 #[repr(C)]
-pub struct Edge<T, S, K, Idx = usize>
+pub struct Edge<T, S, K, Idx = Udx>
 where
-    Idx: RawIndex,
-    K: GraphType,
-    S: Domain<Idx>,
+    S: RawDomain<Key = VertexId<Idx>>,
 {
     pub(crate) link: Link<S, K, Idx>,
     pub(crate) weight: Weight<T>,

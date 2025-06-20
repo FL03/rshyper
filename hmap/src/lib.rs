@@ -28,8 +28,8 @@
 //! available within the crate versus the standard [`HashMap`](std::collections::HashMap)
 //! implementation. That being said, it is important to note that for any applications where
 //! security it a concerin it is highly recommended to use the [`RandomState`](std::hash::RandomState)
-//! as the default hasher in lieu of the [`DefaultHashBuilder`] from [`foldhash`](https://crates.io/crates/foldhash
-//! as it faily to prevent against attacks such as `Hash-DoS`. See the [`hashbrown`](https://crates.io/crates/hashbrown)
+//! as the default hasher in lieu of the [`DefaultHashBuilder`] from [`foldhash`](https://crates.io/crates/foldhash)
+//! as it fails to prevent against attacks such as `Hash-DoS`. See the [`hashbrown`](https://crates.io/crates/hashbrown)
 //! for more information on the security implications of using a custom hasher.
 //!
 //! ## Features
@@ -89,8 +89,10 @@ pub(crate) mod macros {
     #[macro_use]
     pub mod seal;
 }
-#[cfg(feature = "algo")]
-extern crate rshyper_algo as algo;
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
 extern crate rshyper_core as rshyper;
 
 #[doc(inline)]
@@ -131,7 +133,7 @@ pub mod iter {
     }
 }
 
-pub mod types {
+mod types {
     //! this module defines various types and type aliases in support of the [`HyperMap`](super::HyperMap)
     //! implementation
     #[doc(inline)]
@@ -148,12 +150,7 @@ pub mod types {
 #[doc(hidden)]
 #[allow(missing_docs)]
 pub mod prelude {
-    #[doc(inline)]
     pub use super::graph::*;
-    #[doc(inline)]
     pub use super::iter::prelude::*;
-
-    #[allow(deprecated)]
-    #[deprecated(since = "0.1.3", note = "use `HyperMap` instead")]
-    pub use super::{DiHashGraph, HashGraph, UnHashGraph};
+    pub use super::types::prelude::*;
 }

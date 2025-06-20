@@ -142,7 +142,7 @@ where
         // iterate through all the connections
         self.facets().for_each(|edge| {
             if edge.contains(index) {
-                neighbors.extend(edge.domain().iter().cloned().filter(|v| v != index));
+                neighbors.extend(edge.domain().iter().filter(|&v| v != index).cloned());
             }
         });
         Ok(neighbors)

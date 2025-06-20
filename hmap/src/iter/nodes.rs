@@ -10,10 +10,10 @@ pub use self::prelude::*;
 mod directional;
 mod iter;
 #[cfg(feature = "rayon")]
-mod parallel;
+pub(self) mod parallel;
 mod sequential;
 
-mod prelude {
+pub(crate) mod prelude {
     #[doc(inline)]
     #[allow(unused_imports)]
     pub use super::directional::*;

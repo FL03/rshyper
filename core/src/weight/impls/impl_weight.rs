@@ -25,6 +25,20 @@ impl<T> Weight<T> {
     {
         Self::new_with(Default::default)
     }
+    /// returns a new instance of the [`Weight`] with the inner value set to `1`
+    pub fn one() -> Self
+    where
+        T: num_traits::One,
+    {
+        Self::new_with(T::one)
+    }
+    /// returns a new instance of the [`Weight`] with a value of `0`
+    pub fn zero() -> Self
+    where
+        T: num_traits::Zero,
+    {
+        Self::new_with(T::zero)
+    }
     /// returns an immutable reference to the inner value.
     pub const fn get(&self) -> &T {
         &self.0

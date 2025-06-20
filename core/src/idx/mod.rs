@@ -8,36 +8,35 @@
 //! specify the index type when working with hypergraphs.
 #[doc(inline)]
 #[cfg(feature = "alloc")]
-pub use self::{error::*, tracker::IndexTracker};
+pub use self::tracker::IndexTracker;
 #[doc(inline)]
-pub use self::{index::*, iter::*, position::*, traits::prelude::*, types::prelude::*};
+pub use self::{error::*, frame::*, index::*, iter::*, traits::*, types::*};
 
-#[cfg(feature = "alloc")]
 /// this module defines the [`IndexError`] type, establishing the various errors encountered by
 /// indices in a hypergraph.
 pub mod error;
+/// this module implements the [`IndexFrame`] type, which is used to track the current edge
+/// and vertex indices in a hypergraph.
+pub mod frame;
 /// this module provides the [`IndexBase`] type, which is a generic index type used to
 /// represent various kinds of indices in a hypergraph.
-pub mod index;
-/// this module implements the [`IndexCursor`] type, which is used to track the current edge
-/// and vertex indices in a hypergraph.
-pub mod position;
+mod index;
 #[cfg(feature = "alloc")]
 /// this module provides the [`IndexTracker`] for retaining a history of created indices
 pub mod tracker;
 
 #[doc(hidden)]
 mod impls {
-    pub mod impl_index;
-    pub mod impl_ops;
+    mod impl_index;
+    mod impl_ops;
     #[cfg(feature = "rand")]
-    pub mod impl_rand;
-    pub mod impl_repr;
+    pub(self) mod impl_rand;
+    mod impl_repr;
 }
 
 pub mod iter {
-    //! this module provides various iterators for indices, such as [`IndexIter`], which
-    //! iterates over the indices in a hypergraph.
+    //! this module provides various iterators for indices, such as [`Counter`] and
+    //! [`Stepper`].
     #[doc(inline)]
     pub use self::prelude::*;
 
@@ -52,19 +51,19 @@ pub mod iter {
     }
 }
 
-pub mod traits {
+mod traits {
     //! this module defines the [`RawIndex`] trait along with its related traits and
     //! implementations.
     #[doc(inline)]
     pub use self::prelude::*;
 
     /// this module defines various conversion routines for converting types into valid indices
-    pub mod convert;
+    mod convert;
     /// this module provides the [`RawIndex`] trait
-    pub mod index;
+    mod index;
     /// this module provides the [`Indexed`] trait for defining various representations of a
     /// type that has knowledge of its index.
-    pub mod indexed;
+    mod indexed;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -76,7 +75,7 @@ pub mod traits {
     }
 }
 
-pub mod types {
+mod types {
     //! this module provides various types in support of the [`IndexBase`](super::IndexBase)
     //! type
     //!
@@ -84,7 +83,7 @@ pub mod types {
     pub use self::prelude::*;
 
     mod aliases;
-    pub mod kinds;
+    mod kinds;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -95,12 +94,8 @@ pub mod types {
 }
 
 pub(crate) mod prelude {
-    #[doc(inline)]
+    pub use super::frame::*;
     pub use super::index::IndexBase;
-    #[doc(inline)]
-    pub use super::position::*;
-    #[doc(inline)]
-    pub use super::traits::prelude::*;
-    #[doc(inline)]
-    pub use super::types::prelude::*;
+    pub use super::traits::*;
+    pub use super::types::*;
 }
