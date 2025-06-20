@@ -15,24 +15,24 @@ pub use self::{index::*, iter::*, position::*, traits::prelude::*, types::prelud
 #[cfg(feature = "alloc")]
 /// this module defines the [`IndexError`] type, establishing the various errors encountered by
 /// indices in a hypergraph.
-pub mod error;
+pub(self) mod error;
 /// this module provides the [`IndexBase`] type, which is a generic index type used to
 /// represent various kinds of indices in a hypergraph.
-pub mod index;
+pub(self) mod index;
 /// this module implements the [`IndexCursor`] type, which is used to track the current edge
 /// and vertex indices in a hypergraph.
-pub mod position;
+pub(self) mod position;
 #[cfg(feature = "alloc")]
 /// this module provides the [`IndexTracker`] for retaining a history of created indices
-pub mod tracker;
+pub(self) mod tracker;
 
 #[doc(hidden)]
 mod impls {
-    pub mod impl_index;
-    pub mod impl_ops;
+    pub(self) mod impl_index;
+    pub(self) mod impl_ops;
     #[cfg(feature = "rand")]
-    pub mod impl_rand;
-    pub mod impl_repr;
+    pub(self) mod impl_rand;
+    pub(self) mod impl_repr;
 }
 
 pub mod iter {
@@ -41,8 +41,8 @@ pub mod iter {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    mod counter;
-    mod stepper;
+    pub(self) mod counter;
+    pub(self) mod stepper;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -59,12 +59,12 @@ pub mod traits {
     pub use self::prelude::*;
 
     /// this module defines various conversion routines for converting types into valid indices
-    pub mod convert;
+    pub(self) mod convert;
     /// this module provides the [`RawIndex`] trait
-    pub mod index;
+    pub(self) mod index;
     /// this module provides the [`Indexed`] trait for defining various representations of a
     /// type that has knowledge of its index.
-    pub mod indexed;
+    pub(self) mod indexed;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -83,8 +83,8 @@ pub mod types {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    mod aliases;
-    pub mod kinds;
+    pub(self) mod aliases;
+    pub(self) mod kinds;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -95,12 +95,8 @@ pub mod types {
 }
 
 pub(crate) mod prelude {
-    #[doc(inline)]
     pub use super::index::IndexBase;
-    #[doc(inline)]
     pub use super::position::*;
-    #[doc(inline)]
     pub use super::traits::prelude::*;
-    #[doc(inline)]
     pub use super::types::prelude::*;
 }

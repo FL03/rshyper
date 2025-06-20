@@ -95,9 +95,7 @@ pub mod traits {
 }
 
 #[doc(hidden)]
-#[allow(missing_docs)]
 pub mod prelude {
-    #[doc(inline)]
     pub use crate::traits::prelude::*;
 
     #[cfg(feature = "alloc")]

@@ -131,7 +131,7 @@ pub mod iter {
     }
 }
 
-pub(crate) mod types {
+pub(self) mod types {
     //! this module defines various types and type aliases in support of the [`HyperMap`](super::HyperMap)
     //! implementation
     #[doc(inline)]
@@ -148,12 +148,7 @@ pub(crate) mod types {
 #[doc(hidden)]
 #[allow(missing_docs)]
 pub mod prelude {
-    #[doc(inline)]
     pub use super::graph::*;
-    #[doc(inline)]
     pub use super::iter::prelude::*;
-
-    #[allow(deprecated)]
-    #[deprecated(since = "0.1.3", note = "use `HyperMap` instead")]
-    pub use super::{DiHashGraph, HashGraph, UnHashGraph};
+    pub use super::types::prelude::*;
 }

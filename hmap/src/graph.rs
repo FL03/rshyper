@@ -6,8 +6,9 @@ use crate::types::prelude::*;
 
 use core::borrow::Borrow;
 use core::hash::{BuildHasher, Hash};
+use hashbrown::DefaultHashBuilder;
 use rshyper::attrs::{DiAttrs, GraphProps, UnAttrs};
-use rshyper::idx::{EdgeId, IndexFrame, IndexTracker, RawIndex, Udx, VertexId};
+use rshyper::idx::{self, EdgeId, HashIndex, IndexTracker, RawIndex, Udx, VertexId};
 use rshyper::{AddStep, GraphType, Mode};
 
 /// a type alias for a [directed](rshyper::Directed) [`HyperMap`]
@@ -63,7 +64,7 @@ where
             edges: EdgeMap::default(),
             nodes: NodeMap::default(),
             attrs: A::new(),
-            history: IndexTracker::new(),
+            history: Default::default(),
         }
     }
     /// creates a new instance of the hypergraph with the given capacity for edges and nodes
@@ -75,8 +76,8 @@ where
         Self {
             edges: EdgeMap::with_capacity_and_hasher(edges, Default::default()),
             nodes: NodeMap::with_capacity_and_hasher(nodes, Default::default()),
-            history: IndexTracker::new(),
             attrs: A::new(),
+            history: Default::default(),
         }
     }
     #[doc(hidden)]
@@ -90,8 +91,8 @@ where
         HyperMap {
             edges: EdgeMap::with_capacity_and_hasher(edges, hash_builder.clone()),
             nodes: NodeMap::with_capacity_and_hasher(nodes, hash_builder),
-            history: IndexTracker::new(),
             attrs: A::new(),
+            history: Default::default(),
         }
     }
     #[doc(hidden)]
@@ -102,10 +103,10 @@ where
         S: Clone,
     {
         HyperMap {
-            attrs: A::new(),
-            history: IndexTracker::new(),
             edges: EdgeMap::with_hasher(hash_builder.clone()),
             nodes: NodeMap::with_hasher(hash_builder),
+            attrs: A::new(),
+            history: Default::default(),
         }
     }
     #[doc(hidden)]
@@ -139,11 +140,11 @@ where
     /// returns a copy of the position of the hypergraph; here, the [`position`](Position) is
     /// used to track the indices (edge & vertex) and define which ones are next to be used
     /// when inserting new hyperedges or vertices
-    pub const fn position(&self) -> &IndexFrame<Ix> {
+    pub const fn position(&self) -> &idx::IndexFrame<Ix> {
         self.history().cursor()
     }
     /// returns a mutable reference to the current position of the hypergraph;
-    pub const fn position_mut(&mut self) -> &mut IndexFrame<Ix> {
+    pub const fn position_mut(&mut self) -> &mut idx::IndexFrame<Ix> {
         self.history_mut().cursor_mut()
     }
     /// returns an immutable reference to the surfaces of the hypergraph
@@ -153,6 +154,12 @@ where
     /// returns a mutable reference to the surfaces of the hypergraph
     pub const fn edges_mut(&mut self) -> &mut EdgeMap<E, K, Ix, S> {
         &mut self.edges
+    }
+    #[inline]
+    /// overrides the current surfaces and returns a mutable reference to the hypergraph
+    pub fn set_edges(&mut self, edges: EdgeMap<E, K, Ix, S>) -> &mut Self {
+        self.edges = edges;
+        self
     }
     /// overrides the current nodes and returns a mutable reference to the hypergraph
     #[inline]
@@ -174,26 +181,17 @@ where
     }
     /// overrides the current position and returns a mutable reference to the hypergraph
     #[inline]
-    pub fn set_position(&mut self, position: IndexFrame<Ix>) -> &mut Self
+    pub fn set_position(&mut self, cursor: idx::IndexFrame<Ix>) -> &mut Self
     where
         Ix: Default,
     {
-        self.history_mut().set_cursor(position);
-        self
-    }
-    #[inline]
-    /// overrides the current surfaces and returns a mutable reference to the hypergraph
-    pub fn set_surfaces(&mut self, surfaces: EdgeMap<E, K, Ix, S>) -> &mut Self
-    where
-        Ix: Default,
-    {
-        self.edges = surfaces;
+        self.history_mut().set_cursor(cursor);
         self
     }
     /// returns true if the hypergraph contains an edge with the given index;
     pub fn contains_edge<Q>(&self, index: &Q) -> bool
     where
-        Ix: Eq + Hash,
+        Ix: HashIndex,
         Q: ?Sized + Eq + Hash,
         EdgeId<Ix>: Borrow<Q>,
     {
@@ -202,7 +200,7 @@ where
     /// check if a vertex with the given id exists
     pub fn contains_node<Q>(&self, index: &Q) -> bool
     where
-        Ix: Eq + Hash,
+        Ix: HashIndex,
         Q: ?Sized + Eq + Hash,
         VertexId<Ix>: Borrow<Q>,
     {
@@ -211,7 +209,7 @@ where
     /// returns true if the vertex is contained in the hyperedge with the given id
     pub fn is_node_in_domain<Q, Q2>(&self, index: &Q, vertex: &Q2) -> bool
     where
-        Ix: Eq + Hash,
+        Ix: HashIndex,
         Q: ?Sized + Eq + Hash,
         Q2: Eq + Hash,
         EdgeId<Ix>: Borrow<Q>,
@@ -238,7 +236,7 @@ where
     /// in-place modifications or insertions to the mapping
     pub fn edge(&mut self, index: EdgeId<Ix>) -> EdgeEntry<'_, E, K, Ix, S>
     where
-        Ix: Eq + Hash,
+        Ix: HashIndex,
     {
         self.edges_mut().entry(index)
     }
@@ -246,7 +244,7 @@ where
     /// index, allowing for modifications or insertions to the mapping
     pub fn node(&mut self, index: VertexId<Ix>) -> NodeEntry<'_, N, Ix, S>
     where
-        Ix: Eq + Hash,
+        Ix: HashIndex,
     {
         self.nodes_mut().entry(index)
     }

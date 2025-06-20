@@ -13,9 +13,7 @@ use crate::{Directed, Undirected, VertexId};
 #[cfg(feature = "hashbrown")]
 use hashbrown::{DefaultHashBuilder, HashSet};
 #[cfg(all(feature = "std", not(feature = "hashbrown")))]
-use std::collections::HashSet;
-#[cfg(all(feature = "std", not(feature = "hashbrown")))]
-use std::hash::RandomState as DefaultHashBuilder;
+use std::{collections::HashSet, hash::RandomState as DefaultHashBuilder};
 
 /// a type alias for a [`HashSet`] of [`VertexId`] that is generic over the index type `I`
 pub type VertexSet<I, S = DefaultHashBuilder> = HashSet<VertexId<I>, S>;
@@ -40,30 +38,25 @@ pub type LinkSliceMut<'a, K, Ix> = Link<&'a mut [VertexId<Ix>], K, Ix>;
 
 #[cfg(all(feature = "alloc", not(feature = "nightly")))]
 mod use_alloc {
-    use crate::{Edge, Link, VertexId};
-
-    use alloc::collections::{BTreeSet, VecDeque};
-    use alloc::vec::Vec;
+    use crate::idx::{VertexBSet, VertexDeque, VertexVec};
+    use crate::rel::Link;
 
     /// a type alias for an [`Link`] whose _vertices_ are stored in a [`Vec`]
     pub type LinkVec<K, Ix> = Link<VertexVec<Ix>, K, Ix>;
     /// a type alias for an [`Link`] whose _vertices_ are stored in a [`VecDeque`]
-    pub type LinkDeque<K, Ix> = Link<VertexVecDeque<Ix>, K, Ix>;
+    pub type LinkDeque<K, Ix> = Link<VertexDeque<Ix>, K, Ix>;
     /// a type alias for an [`Link`] whose _vertices_ are stored in a [`BTreeSet`]
     pub type LinkBSet<K, Ix> = Link<VertexBSet<Ix>, K, Ix>;
 }
 
 #[cfg(all(feature = "alloc", feature = "nightly"))]
 mod use_alloc {
-    use crate::{Edge, Link, VertexId};
-
-    use alloc::collections::{BTreeSet, VecDeque};
-    use alloc::vec::Vec;
+    use crate::idx::{VertexBSet, VertexDeque, VertexVec};
 
     /// a type alias for an [`Link`] whose _vertices_ are stored in a [`Vec`]
     pub type LinkVec<K, Ix, A> = Link<VertexVec<Ix, A>, K, Ix>;
-    /// a type alias for an [`Link`] whose _vertices_ are stored in a [`VertexVecDeque`]
-    pub type LinkDeque<K, Ix, A> = Link<VertexVecDeque<Ix, A>, K, Ix>;
+    /// a type alias for an [`Link`] whose _vertices_ are stored in a [`VertexDeque`]
+    pub type LinkDeque<K, Ix, A> = Link<VertexDeque<Ix, A>, K, Ix>;
     /// a type alias for an [`Link`] whose _vertices_ are stored in a [`VertexBSet`]
     pub type LinkBSet<K, Ix, A> = Link<VertexBSet<Ix, A>, K, Ix>;
 }

@@ -11,7 +11,7 @@ pub use self::{hyper_edge::Edge, traits::prelude::*, types::prelude::*, utils::p
 pub mod hyper_edge;
 
 mod impls {
-    pub mod impl_edge;
+    pub(self) mod impl_edge;
 }
 
 pub mod traits {
@@ -21,7 +21,7 @@ pub mod traits {
     #[doc(inline)]
     pub use self::prelude::*;
     /// this module defines the [`RawSurface`] trait
-    mod surface;
+    pub(self) mod surface;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -35,7 +35,7 @@ pub mod types {
     #[doc(inline)]
     pub use self::prelude::*;
 
-    mod aliases;
+    pub(self) mod aliases;
 
     pub(crate) mod prelude {
         #[doc(inline)]
@@ -49,9 +49,9 @@ pub mod utils {
     #[allow(unused_imports)]
     pub use self::prelude::*;
 
-    mod base;
+    pub(self) mod base;
     #[cfg(all(feature = "alloc", feature = "rand"))]
-    mod rand;
+    pub(self) mod rand;
 
     pub(crate) mod prelude {
         #[doc(inline)]

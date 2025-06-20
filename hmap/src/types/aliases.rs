@@ -6,17 +6,16 @@
 #[allow(deprecated, unused_imports)]
 pub use self::impl_deprecated::*;
 
-use hashbrown::HashSet;
 use hashbrown::hash_map::{Entry, HashMap};
+use rshyper::Node;
 use rshyper::idx::{EdgeId, VertexId};
-use rshyper::{Edge, Node};
 
-pub(crate) use hashbrown::DefaultHashBuilder;
+pub(crate) use rshyper::prelude::{HashEdge, VertexSet};
 
-/// a type alias for a [`HashSet`]
-pub type VertexSet<Ix, S> = HashSet<VertexId<Ix>, S>;
-/// a type alias for a [`Edge`] with [`VertexSet`] as its vertices
-pub type HashEdge<E, K, Ix, S> = Edge<E, VertexSet<Ix, S>, K, Ix>;
+// /// a type alias for a [`HashSet`]
+// pub type VertexSet<Ix, S> = HashSet<VertexId<Ix>, S>;
+// /// a type alias for a [`Edge`] with [`VertexSet`] as its vertices
+// pub type HashEdge<E, K, Ix, S> = Edge<E, VertexSet<Ix, S>, K, Ix>;
 
 /// a type alias for a [`Entry`] that whose key is a [`VertexId`] and value is a [`Node`]
 pub type NodeEntry<'a, N, Ix, S> = Entry<'a, VertexId<Ix>, Node<N, Ix>, S>;

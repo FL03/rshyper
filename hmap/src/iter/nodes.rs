@@ -7,13 +7,13 @@
 #[doc(inline)]
 pub use self::prelude::*;
 
-mod directional;
-mod iter;
+pub(self) mod directional;
+pub(self) mod iter;
 #[cfg(feature = "rayon")]
-mod parallel;
-mod sequential;
+pub(self) mod parallel;
+pub(self) mod sequential;
 
-mod prelude {
+pub(crate) mod prelude {
     #[doc(inline)]
     #[allow(unused_imports)]
     pub use super::directional::*;

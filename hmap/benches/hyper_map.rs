@@ -12,7 +12,7 @@ use rshyper::prelude::{VertexId, Weight, generate_random_edge};
 use core::hint::black_box;
 use criterion::{BatchSize, Criterion};
 
-/// benchmark various iterators provided by the [`HyperMap`] implementation.
+/// benchmark various iterators provided by the `HyperMap` implementation.
 fn bench_hypermap(c: &mut Criterion) {
     let mut group = c.benchmark_group("HyperMap::iter");
     // set the sample size for the group
@@ -77,7 +77,7 @@ fn bench_hypermap(c: &mut Criterion) {
     group.finish();
 }
 
-/// benchmark various edge operations on the [`HyperMap`] implementation.
+/// benchmark various edge operations on the `HyperMap` implementation.
 fn bench_hypermap_edges(c: &mut Criterion) {
     let mut group = c.benchmark_group("HyperMap::edges");
     // set the sample size for the group
@@ -141,7 +141,7 @@ fn bench_hypermap_edges(c: &mut Criterion) {
     group.finish();
 }
 
-/// benchmark for the [`HyperMap`] implementation.
+/// benchmark for the `HyperMap` implementation.
 fn bench_hypermap_nodes(c: &mut Criterion) {
     let mut group = c.benchmark_group("HyperMap::nodes");
     // set the sample size for the group
@@ -195,7 +195,7 @@ fn bench_hypermap_nodes(c: &mut Criterion) {
             BatchSize::SmallInput,
         )
     });
-    // benchmark the `remove_node` function
+    // benchmark the `add_node` function
     group.bench_with_input("add_node", &rand::random::<Wt>(), |b, &w| {
         b.iter_batched(
             setup,
@@ -204,6 +204,17 @@ fn bench_hypermap_nodes(c: &mut Criterion) {
                 graph
                     .add_node(black_box(Weight(w)))
                     .expect("failed to add node");
+            },
+            BatchSize::SmallInput,
+        )
+    });
+    // benchmark the `get_node` function
+    group.bench_with_input("get_node", &rand::random_range(0..N), |b, idx| {
+        b.iter_batched(
+            setup,
+            |graph| {
+                // add the node with the weight
+                graph.get_node(black_box(idx)).expect("failed to add node");
             },
             BatchSize::SmallInput,
         )
@@ -247,10 +258,10 @@ mod ext {
     pub const SAMPLES: usize = 50;
     /// the number of initialized nodes setup by the [`setup`] method
     pub const N: usize = 100;
-    /// a type alias for the type of weight used to benchmark the [`HyperMap`]
+    /// a type alias for the type of weight used to benchmark the `HyperMap`
     pub type Wt = i128;
 
-    /// initialize a new [`HyperMap`] with a predefined structure
+    /// initialize a new `HyperMap` with a predefined structure
     pub fn setup() -> HyperMap<Wt, Wt> {
         // initialize a new undirected hash graph
         let mut graph = HyperMap::<Wt, Wt>::undirected();
