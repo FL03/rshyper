@@ -6,8 +6,6 @@
 
 ***
 
-_**Warning: The library is currently in the early stages of development and is not yet ready for production use.**_
-
 `rshyper` is a Rust library designed to provide a hypergraph implementation with a focus on performance and flexibility. It is built to handle complex relationships between data points efficiently, making it suitable for various applications in graph theory, data analysis, and more.
 
 ## Table of Contents
