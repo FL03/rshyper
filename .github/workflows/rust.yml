@@ -11,11 +11,14 @@ env:
 on:
   pull_request:
     branches: [ main, master ]
-    types: [ opened, synchronize, reopened ]
+    types: [ opened, reopened, synchronize ]
     paths:
-      - ".github/workflows/rust.yml"
-      - "**/*.rs"
-      - "**/Cargo.*"
+      - .github/workflows/rust.yml
+      - algo/**
+      - core/**
+      - hmap/**
+      - rshyper/**
+      - Cargo.*
   push:
     branches: [ main, master ]
     tags: [ latest, v*, "*-nightly" ]

@@ -10,8 +10,11 @@ on:
     types: [ opened, reopened, synchronize ]
     paths:
       - .github/workflows/clippy.yml
-      - ./**/*.rs
-      - ./**/Cargo.*
+      - algo/**
+      - core/**
+      - hmap/**
+      - rshyper/**
+      - Cargo.*
   push:
     branches: [ main, master ]
     tags: [ latest, v*.*.*, "*-nightly" ]
