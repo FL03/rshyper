@@ -1,7 +1,7 @@
 ---
 description: A map-based implementation of a hypergraph
 title: HyperMap
-permalink: /hypermap/
+permalink: /docs/hypermap/
 ---
 
 ## Table of Contents

@@ -10,17 +10,6 @@ title: Home
 
 `rshyper` is a Rust library designed to provide a hypergraph implementation with a focus on performance and flexibility. It is built to handle complex relationships between data points efficiently, making it suitable for various applications in graph theory, data analysis, and more.
 
-## Table of Contents
-
-- [Background](#background)
-- [Usage](https://fl03.github.io/rshyper/usage)
-  - [Getting Started](https://fl03.github.io/rshyper/usage/#getting-started)
-  - [Features](https://fl03.github.io/rshyper/usage/#features)
-- [`HyperMap`](https://fl03.github.io/rshyper/hypermap)
-  - [Overview](https://fl03.github.io/rshyper/hypermap/#overview)
-  - [Backend](https://fl03.github.io/rshyper/hypermap/#backend)
-  - [Examples](https://fl03.github.io/rshyper/hypermap/#examples)
-
 ## Background
 
 Hypergraphs are generalizations of traditional graphs that allow edges to connect any number of vertices, rather than just two. This flexibility makes hypergraphs suitable for modeling complex relationships in various domains, such as social networks, biological systems, and data analysis.
