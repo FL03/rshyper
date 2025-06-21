@@ -14,8 +14,8 @@ on:
     types: [ opened, synchronize, reopened ]
     paths:
       - ".github/workflows/rust.yml"
-      - "./**/*.rs"
-      - "./**/Cargo.*"
+      - "**.rs"
+      - "Cargo.*"
   push:
     branches: [ main, master ]
     tags: [ latest, v*, "*-nightly" ]
