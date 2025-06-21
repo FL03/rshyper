@@ -1,10 +1,6 @@
 ---
-description: A hypergraph framework for Rust
-keywords: [hypergraph, rust, graph theory, data analysis]
-author: FL03
+title: Home
 ---
-
-# rshyper
 
 [![crates.io](https://img.shields.io/crates/v/rshyper?style=for-the-badge&logo=rust)](https://crates.io/crates/rshyper)
 [![docs.rs](https://img.shields.io/docsrs/rshyper?style=for-the-badge&logo=docs.rs)](https://docs.rs/rshyper)
