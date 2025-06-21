@@ -1,7 +1,7 @@
 ---
-title: rshyper
-description: Usage
 author: FL03
+description: Usage guide for the `rshyper` library, including features and examples.
+title: Usage Guide
 permalink: /usage/
 ---
 
