@@ -7,11 +7,9 @@ permalink: /usage/
 
 ## Table of Contents
 
-- [Background](https://fl03.github.io/rshyper/#background)
-- [Usage](https://fl03.github.io/rshyper/usage)
-  - [Getting Started](#getting-started)
-  - [Features](#features)
-  - [Examples](#examples)
+- [Getting Started](#getting-started)
+- [Features](#features)
+- [Examples](#examples)
 
 ## Getting Started
 
@@ -49,9 +47,11 @@ For more detailed examples, please refer to the [examples directory](https://git
 ```rust
 extern crate rshyper;
 
+use rshyper::UnHyperMap;
+
 fn main() -> rshyper::Result<()> {
     // initialize a new instance of a hypergraph
-    let mut graph: HashGraph<usize, usize> = HashGraph::new();
+    let mut graph = UnHyperMap::<usize, usize>::undirected();
     // use the macro to insert nodes into the graph
     rshyper::hypergraph! {
         graph {
@@ -68,6 +68,10 @@ fn main() -> rshyper::Result<()> {
             };
         }
     }
+    // verify the order (no. of nodes) within the graph
+    assert_eq!(graph.order(), 4);
+    // verify the size (no. of edges) within the graph
+    assert_eq!(graph.size(), 3);
 
     // Get neighbors of vertex v1
     let neighbors = graph.neighbors(&v1)?;
