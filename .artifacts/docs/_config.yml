@@ -13,11 +13,10 @@ url: https://fl03.github.io/rshyper
 collections:
   docs:
     output: true
-    permalink: /docs/:path/
-    sort_by: date
+    permalink: /:collection/:path/
   posts:
     output: true
-    permalink: /blog/:path/
+    permalink: /:collection/:path/
     sort_by: date
 
 just_the_docs:
