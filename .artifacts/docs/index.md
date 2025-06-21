@@ -14,11 +14,6 @@ title: Home
 
 Hypergraphs are generalizations of traditional graphs that allow edges to connect any number of vertices, rather than just two. This flexibility makes hypergraphs suitable for modeling complex relationships in various domains, such as social networks, biological systems, and data analysis.
 
-- [Terminology](#terminology)
-- [Hypergraphs](#hypergraphs)
-  - [Definition](#definition)
-  - [Properties](#properties)
-
 ### Terminology
 
 Before diving in to the technical side of things, let's start by defining several terms commonly used in the definition and implementation of hypergraphs.
