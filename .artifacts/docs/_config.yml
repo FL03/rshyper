@@ -12,6 +12,7 @@ baseurl: /rshyper
 domain: fl03.github.io
 url: https://fl03.github.io/rshyper
 
+back_to_top: true
 collections:
   guides:
     output: true
