@@ -8,17 +8,9 @@ on:
   pull_request:
     branches: [ main, master ]
     types: [ opened, reopened, synchronize ]
-    paths:
-      - "**/clippy.yml"
-      - "**/*.rs"
-      - "**/Cargo.*"
   push:
     branches: [ main, master ]
     tags: [ latest, v*.*.*, "*-nightly" ]
-    paths:
-      - "**/clippy.yml"
-      - "**/*.rs"
-      - "**/Cargo.*"
   release:
     types: [ created, edited ]
   repository_dispatch:
