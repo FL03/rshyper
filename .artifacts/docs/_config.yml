@@ -1,7 +1,10 @@
 title: rshyper
 description: A hypergraph framework for Rust
-author: FL03
-keywords: [hypergraph, rust, graph theory, data analysis]
-theme: just-the-docs
 
+author: FL03
+email: support@scsys.io
+domain: fl03.github.io
+keywords: [hypergraph, rust, graph theory, data analysis]
+remote_theme: just-the-docs@v0.10.1
+theme: just-the-docs
 url: https://fl03.github.io/rshyper
