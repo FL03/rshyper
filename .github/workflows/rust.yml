@@ -11,7 +11,7 @@ env:
 on:
   pull_request:
     branches: [ main, master ]
-    types: [ opened, reopened, synchronize ]
+    types: [ opened, reopened ]
     paths:
       - .github/workflows/rust.yml
       - algo/**
