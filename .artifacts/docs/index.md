@@ -8,6 +8,15 @@ title: Home
 
 ***
 
+{: .no_toc }
+
+## Table of Contents
+
+{: .no_toc .text-delta }
+
+1. TOC
+{:toc}
+
 `rshyper` is a Rust library designed to provide a hypergraph implementation with a focus on performance and flexibility. It is built to handle complex relationships between data points efficiently, making it suitable for various applications in graph theory, data analysis, and more.
 
 ## Background

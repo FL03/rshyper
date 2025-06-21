@@ -26,3 +26,15 @@ just_the_docs:
       name: Documentation
     posts:
       name: Blog
+
+# External navigation links
+nav_external_links:
+  - title: Repository
+    url: https://github.com/fl03/rshyper
+    opens_in_new_tab: true
+  - title: crates.io
+    url: https://crates.io/crates/rshyper
+    opens_in_new_tab: true
+  - title: docs.rs
+    url: https://docs.rs/rshyper
+    opens_in_new_tab: true
