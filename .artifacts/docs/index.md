@@ -18,6 +18,12 @@ author: FL03
 
 - [Background](#background)
 - [Usage](https://fl03.github.io/rshyper/usage)
+  - [Getting Started](https://fl03.github.io/rshyper/usage/#getting-started)
+  - [Features](https://fl03.github.io/rshyper/usage/#features)
+- [`HyperMap`](https://fl03.github.io/rshyper/hypermap)
+  - [Overview](https://fl03.github.io/rshyper/hypermap/#overview)
+  - [Backend](https://fl03.github.io/rshyper/hypermap/#backend)
+  - [Examples](https://fl03.github.io/rshyper/hypermap/#examples)
 
 ## Background
 

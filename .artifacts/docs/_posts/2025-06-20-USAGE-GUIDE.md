@@ -47,41 +47,41 @@ For more detailed examples, please refer to the [examples directory](https://git
 ### _Example #1: Basic Usage_
 
 ```rust
-    extern crate rshyper;
+extern crate rshyper;
 
-    fn main() -> rshyper::Result<()> {
-        // initialize a new instance of a hypergraph
-        let mut graph: HashGraph<usize, usize> = HashGraph::new();
-        // use the macro to insert nodes into the graph
-        rshyper::hypernode! {
-            graph {
+fn main() -> rshyper::Result<()> {
+    // initialize a new instance of a hypergraph
+    let mut graph: HashGraph<usize, usize> = HashGraph::new();
+    // use the macro to insert nodes into the graph
+    rshyper::hypergraph! {
+        graph {
+            nodes: {
                 let v0;
                 let v1 = 2;
                 let v2 = 3;
                 let v3 = 4;
-            }
+            };
+            edges: {
+                let e0 = [v0, v1];
+                let e1 = [v0, v2];
+                let e2 = [v1, v2, v3];
+            };
         }
-        // Add some hyperedges
-        let e1 = graph.insert_edge(vec![v0, v1, v2])?;
-        println!("Added hyperedge {e1}: {:?}", [v0, v1, v2]);
-
-        let e2 = graph.insert_edge(vec![v1, v2, v3])?;
-        println!("Added hyperedge {e2}: {:?}", [v1, v2, v3]);
-
-        // Get neighbors of vertex v1
-        let neighbors = graph.neighbors(&v1)?;
-        println!("Neighbors of {}: {:?}", v1, neighbors);
-
-        // Get degree of vertex v1
-        let degree = graph.get_degree_of_node(&v1);
-        println!("Degree of {v1}: {degree}");
-
-        // Remove a vertex
-        graph.remove_vertex(&v2)?;
-        println!("Removed vertex {v2}");
-
-        println!("---------\nFinal graph state: {:?}", graph);
-        Ok(())
     }
 
+    // Get neighbors of vertex v1
+    let neighbors = graph.neighbors(&v1)?;
+    println!("Neighbors of {}: {:?}", v1, neighbors);
+
+    // Get degree of vertex v1
+    let degree = graph.get_degree_of_node(&v1);
+    println!("Degree of {v1}: {degree}");
+
+    // Remove a vertex
+    graph.remove_vertex(&v2)?;
+    println!("Removed vertex {v2}");
+
+    println!("---------\nFinal graph state: {:?}", graph);
+    Ok(())
+}
 ```
