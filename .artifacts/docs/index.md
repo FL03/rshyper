@@ -1,11 +1,10 @@
 ---
-title: rshyper
 description: A hypergraph framework for Rust
 keywords: [hypergraph, rust, graph theory, data analysis]
 author: FL03
 ---
 
-## rshyper
+# rshyper
 
 [![crates.io](https://img.shields.io/crates/v/rshyper?style=for-the-badge&logo=rust)](https://crates.io/crates/rshyper)
 [![docs.rs](https://img.shields.io/docsrs/rshyper?style=for-the-badge&logo=docs.rs)](https://docs.rs/rshyper)
@@ -33,7 +32,7 @@ Hypergraphs are generalizations of traditional graphs that allow edges to connec
 
 Before diving in to the technical side of things, let's start by defining several terms commonly used in the definition and implementation of hypergraphs.
 
-- **edge**: here, we consider a hyperedge to specifically define
+- **edge**: here, we consider a hyperedge to be the generalization of an edge in a traditional graph, allowing it to connect $n$ vertices.
 - **link**: a link is used to define the _layout_ of a hyperedge, providing the basic structure of an edge.
 - **node**: a node is a complete _vertex_ in that it is considered to be weighted.
 - **surface**: a facet, or surface, represents a complete hyperedge equipped with a weight.
