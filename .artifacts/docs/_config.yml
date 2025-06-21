@@ -14,17 +14,11 @@ collections:
   guides:
     output: true
     permalink: /:collection/:path/
-  posts:
-    output: true
-    permalink: /:collection/:path/
-    sort_by: date
 
 just_the_docs:
   collections:
     guides:
       name: Guides
-    posts:
-      name: Blog
 
 aux_links:
   GitHub:

@@ -1,7 +1,7 @@
 ---
 description: Usage guide for the `rshyper` library, including features and examples.
 title: Usage Guide
-permalink: /blog/usage/
+permalink: /guides/usage/
 ---
 
 ## Table of Contents
