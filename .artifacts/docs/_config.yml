@@ -11,7 +11,7 @@ theme: just-the-docs
 url: https://fl03.github.io/rshyper
 
 collections:
-  docs:
+  guides:
     output: true
     permalink: /:collection/:path/
   posts:
@@ -21,8 +21,8 @@ collections:
 
 just_the_docs:
   collections:
-    docs:
-      name: Documentation
+    guides:
+      name: Guides
     posts:
       name: Blog
 
