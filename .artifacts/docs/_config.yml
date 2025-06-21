@@ -1,5 +1,6 @@
 title: rshyper
-description: A hypergraph framework for Rust
+description: rshyper is a performant framework for hypergraphs in Rust.
+tagline: A hypergraph framework for Rust
 
 author: FL03
 email: support@scsys.io
@@ -8,3 +9,13 @@ keywords: [hypergraph, rust, graph theory, data analysis]
 remote_theme: just-the-docs@v0.10.1
 theme: just-the-docs
 url: https://fl03.github.io/rshyper
+
+collections:
+  docs:
+    output: true
+    permalink: /docs/:path/
+    sort_by: date
+  posts:
+    output: true
+    permalink: /blog/:path/
+    sort_by: date
