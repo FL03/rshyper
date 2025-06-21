@@ -6,10 +6,10 @@ layout: default
 ---
 
 ## Table of Contents
+{: .no_toc .text-delta }
 
-- [Getting Started](#getting-started)
-- [Features](#features)
-- [Examples](#examples)
+1. TOC
+{:toc}
 
 ## Getting Started
 

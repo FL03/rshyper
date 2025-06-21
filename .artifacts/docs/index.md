@@ -2,16 +2,7 @@
 title: Home
 ---
 
-[![crates.io](https://img.shields.io/crates/v/rshyper?style=for-the-badge&logo=rust)](https://crates.io/crates/rshyper)
-[![docs.rs](https://img.shields.io/docsrs/rshyper?style=for-the-badge&logo=docs.rs)](https://docs.rs/rshyper)
-[![GitHub License](https://img.shields.io/github/license/FL03/rshyper?style=for-the-badge&logo=github)](https://github.com/FL03/rshyper/blob/main/LICENSE)
-
-***
-
-{: .no_toc }
-
 ## Table of Contents
-
 {: .no_toc .text-delta }
 
 1. TOC
