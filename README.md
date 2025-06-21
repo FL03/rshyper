@@ -8,21 +8,11 @@
 
 _**Warning: The library is still in development so prepare for a shifting api...**_
 
-`rshyper` is a Rust library designed to provide a hypergraph implementation with a focus on performance and flexibility. It is built to handle complex relationships between data points efficiently, making it suitable for various applications in graph theory, data analysis, and more.
-
-## Table of Contents
-
-- [Usage](#usage)
-  - [Features](#features)
-  - [Examples](#examples)
-- [Getting Started](#getting-started)
-- [Contributing](#contributing)
-- [License](#license)
-- [Security](#security)
+`rshyper` is designed to be a complete framework for hypergraphs in Rust. Currently, it provides a map-based hypergraph implementation with a focus on performance and usability. The library is built to be extensible, allowing for future enhancements and features.
 
 ## Usage
 
-Add this to your `Cargo.toml`:
+To get started with the crate, begin by adding the following to your `Cargo.toml`:
 
 ```toml
 [dependencies.rshyper]

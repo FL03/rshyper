@@ -18,7 +18,7 @@ Add this to your `Cargo.toml`:
 ```toml
 [dependencies.rshyper]
 features = [
-    "hash_graph",
+    "hyper_map",
     "macros",
 ]
 version = "0.1.x"
@@ -28,7 +28,7 @@ version = "0.1.x"
 
 The `rshyper` library provides several features to enhance and isolate its functionality:
 
-- `hash_graph` - A hash-based hypergraph implementation.
+- `hyper_map` - A map-based hypergraph implementation.
 - `macros` - A set of macros to simplify hypergraph creation and manipulation.
 
 ### _Dependency related features_
