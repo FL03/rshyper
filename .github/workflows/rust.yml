@@ -51,6 +51,9 @@ jobs:
       digest: ${{ steps.cargo-bench.outputs.digest }}
       id: ${{ steps.cargo-bench.outputs.id }}
       url: ${{ steps.cargo-bench.outputs.url }}
+    permissions:
+      actions: read
+      contents: write
     steps:
       -
         name: Checkout
