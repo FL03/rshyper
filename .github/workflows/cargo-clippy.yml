@@ -1,4 +1,4 @@
-name: clippy
+name: Clippy
 
 concurrency:
   cancel-in-progress: false

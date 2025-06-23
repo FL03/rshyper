@@ -1,4 +1,4 @@
-name: cleanup
+name: Cleanup
 
 concurrency:
   cancel-in-progress: false

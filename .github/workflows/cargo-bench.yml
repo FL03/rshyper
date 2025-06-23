@@ -1,0 +1,59 @@
+name: Benchmark (rust)
+
+concurrency:
+  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: full
+
+on:
+  push:
+    branches:
+      - main
+      - $default-branch
+    tags:
+      - v*.*.*
+      - "*-nightly"
+  repository_dispatch:
+    types: [ cargo-bench, benchmark ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  checks: write
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.artifacts.outputs.artifact-digest }}
+      id: ${{ steps.artifacts.outputs.artifact-id }}
+      url: ${{ steps.artifacts.outputs.artifact-url }}
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [ x86_64-unknown-linux-gnu ]
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          target: ${{ matrix.target }}
+      -
+        name: Benchmark the workspace
+        run: cargo bench --locked --verbose --workspace --target ${{ matrix.target }} --features full --
+      -
+        name: Upload the benchmarks
+        id: artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Benchmark Report (${{ github.event.repository.name }})
+          if-no-files-found: error
+          overwrite: true
+          path: target/criterion/
