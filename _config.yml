@@ -1,0 +1,41 @@
+title: rshyper
+description: rshyper is a performant framework for hypergraphs in Rust.
+tagline: A hypergraph framework for Rust
+# build settings
+destination: ./_site
+source: docs
+
+author: FL03
+email: support@scsys.io
+# website metadata
+keywords: [hypergraph, rust, graph theory, data analysis]
+
+baseurl: /rshyper
+domain: fl03.github.io
+url: https://fl03.github.io/rshyper
+
+
+# collections
+collections:
+  guides:
+    output: true
+    permalink: /:collection/:path/
+
+aux_links:
+  GitHub:
+    - https://github.com/fl03/rshyper
+  crates.io:
+    - https://crates.io/crates/rshyper
+  docs.rs:
+    - https://docs.rs/rshyper
+
+
+# theme settings
+theme: just-the-docs
+back_to_top: true
+back_to_top_label: Back to top
+
+just_the_docs:
+  collections:
+    guides:
+      name: Guides
