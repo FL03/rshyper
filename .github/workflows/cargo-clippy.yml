@@ -1,4 +1,4 @@
-name: clippy
+name: Clippy
 
 concurrency:
   cancel-in-progress: false
@@ -6,23 +6,24 @@ concurrency:
 
 on:
   pull_request:
-    branches: [ main, master ]
-    types: [ opened, reopened, synchronize ]
-    paths:
-      - "**/clippy.yml"
-      - "**/*.rs"
-      - "**/Cargo.*"
+    branches:
+      - main
+      - $default-branch
+    types:
+      - opened
+      - reopened
+      - synchronize
   push:
-    branches: [ main, master ]
-    tags: [ latest, v*.*.*, "*-nightly" ]
-    paths:
-      - "**/clippy.yml"
-      - "**/*.rs"
-      - "**/Cargo.*"
+    branches:
+      - main
+      - $default-branch
+    tags:
+      - v*.*.*
+      - "*-nightly"
   release:
     types: [ created, edited ]
   repository_dispatch:
-    types: [ clippy ]
+    types: [ clippy, cargo-clippy ]
   workflow_dispatch:
 
 jobs:

@@ -1,4 +1,8 @@
-name: cleanup
+name: Cleanup
+
+concurrency:
+  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
 
 on:
   pull_request:
@@ -11,7 +15,7 @@ jobs:
     permissions:
       actions: write
     steps:
-      - 
+      -
         name: Cleanup
         run: |
           echo "Fetching list of cache keys"
