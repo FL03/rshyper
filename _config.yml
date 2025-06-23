@@ -1,6 +1,6 @@
 # build settings
 destination: ./_site
-source: docs
+source: ./src
 theme: just-the-docs
 # author metadata
 author: FL03
@@ -31,11 +31,19 @@ mermaid:
 
 # collections
 collections:
+  docs:
+    output: true
+    permalink: /:collection/:path/
+    sort_by: order
   guides:
     output: true
     permalink: /:collection/:path/
     sort_by: order
-
+  posts:
+    output: true
+    permalink: /:collection/:path/
+    sort_by: date
+  
 defaults:
   - scope:
       path: "" # an empty string here means all files in the project

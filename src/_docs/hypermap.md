@@ -1,9 +1,8 @@
 ---
 description: A map-based implementation of a hypergraph
 title: HyperMap
-permalink: /guides/hypermap/
 layout: default
-order: 2
+order: 1
 ---
 
 ## Table of Contents
