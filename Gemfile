@@ -6,6 +6,7 @@ group :jekyll_plugins do
   gem "jekyll-remote-theme"
   gem "jekyll-sitemap"
   gem "jekyll-seo-tag"
+  gem "jekyll-spaceship"
   gem "jekyll-feed"
   gem "jekyll-timeago"
 end

@@ -1,25 +1,105 @@
-title: rshyper
-description: rshyper is a performant framework for hypergraphs in Rust.
-tagline: A hypergraph framework for Rust
 # build settings
 destination: ./_site
 source: docs
-
+theme: just-the-docs
+# author metadata
 author: FL03
 email: support@scsys.io
 # website metadata
+description: rshyper is a performant framework for hypergraphs in Rust.
 keywords: [hypergraph, rust, graph theory, data analysis]
-
+repository: FL03/rshyper
+title: rshyper
+tagline: A hypergraph framework for Rust
+# domain settings
 baseurl: /rshyper
 domain: fl03.github.io
 url: https://fl03.github.io/rshyper
 
+# plugins
+jekyll-spaceship:
+  mermaid-processor:
+    config:
+      background: black
+      theme: neo-dark
+      look: neo
+      layout: fixed
+
+mermaid:
+  # Pick an available version from https://cdn.jsdelivr.net/npm/mermaid/
+  version: "11.7.0"
 
 # collections
 collections:
   guides:
     output: true
     permalink: /:collection/:path/
+    sort_by: order
+
+defaults:
+  - scope:
+      path: "" # an empty string here means all files in the project
+      type: "pages"
+    values:
+      layout: "default"
+
+# directory settings
+compress_html:
+  clippings: all
+  comments: all
+  endings: all
+  startings: []
+  blanklines: false
+  profile: false
+
+exclude:
+  # from https://github.com/jekyll/jekyll/blob/master/lib/site_template/_config.yml:
+  - .sass-cache/
+  - .jekyll-cache/
+  - gemfiles/
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+  # specific to the theme website:
+  - bin/
+  - lib/
+  - "*.gemspec"
+  - "*.gem"
+  - LICENSE.txt
+  - package.json
+  - package-lock.json
+  - Rakefile
+  - README.md
+  - CODE_OF_CONDUCT.md
+  - docker-compose.yml
+  - Dockerfile
+  # theme test code
+  - fixtures/
+
+# theme settings
+just_the_docs:
+  collections:
+    guides:
+      name: Guides
+## Back to top link
+back_to_top: true
+back_to_top_text: "Back to top"
+## footer
+footer_content: 'Copyright &copy; 2024-2025 Joe McCain III. Distributed by an <a href="https://github.com/FL03/rshyper/blob/main/LICENSE">Apache-2.0 license.</a> Hosted on <a href="https://pages.github.com/">GitHub Pages</a>.'
+last_edit_timestamp: true # show or hide edit time - page must have `last_modified_date` defined in the frontmatter
+last_edit_time_format: "%b %e %Y at %I:%M %p" # uses ruby's time format: https://ruby-doc.org/stdlib-2.7.0/libdoc/time/rdoc/Time.html
+
+# Footer "Edit this page on GitHub" link text
+gh_edit_link: true # show or hide edit this page link
+gh_edit_link_text: "Edit this page on GitHub"
+gh_edit_repository: "https://github.com/FL03/rshyper" # the github URL for your repo
+gh_edit_branch: "pages" # the branch that your docs is served from
+# gh_edit_source: docs # the source that your files originate from
+gh_edit_view_mode: "tree" # "tree" or "edit" if you want the user to jump into the editor immediately
 
 aux_links:
   GitHub:
@@ -28,14 +108,3 @@ aux_links:
     - https://crates.io/crates/rshyper
   docs.rs:
     - https://docs.rs/rshyper
-
-
-# theme settings
-theme: just-the-docs
-back_to_top: true
-back_to_top_label: Back to top
-
-just_the_docs:
-  collections:
-    guides:
-      name: Guides
