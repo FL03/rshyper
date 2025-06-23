@@ -46,6 +46,7 @@ jobs:
         name: Build the workspace
         run: cargo build --release --locked --workspace --features full --target ${{ matrix.target }}
   benchmark:
+    if: ${{ inputs.benchmark || github.event_name == 'push' }}
     runs-on: ubuntu-latest
     outputs:
       digest: ${{ steps.cargo-bench.outputs.digest }}

@@ -6,15 +6,24 @@ concurrency:
 
 on:
   pull_request:
-    branches: [ main, master ]
-    types: [ opened, reopened, synchronize ]
+    branches:
+      - main
+      - $default-branch
+    types:
+      - opened
+      - reopened
+      - synchronize
   push:
-    branches: [ main, master ]
-    tags: [ latest, v*.*.*, "*-nightly" ]
+    branches:
+      - main
+      - $default-branch
+    tags:
+      - v*.*.*
+      - "*-nightly"
   release:
     types: [ created, edited ]
   repository_dispatch:
-    types: [ clippy ]
+    types: [ clippy, cargo-clippy ]
   workflow_dispatch:
 
 jobs:

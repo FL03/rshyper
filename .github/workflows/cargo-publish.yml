@@ -1,4 +1,4 @@
-name: Publish
+name: crates-io
 
 concurrency:
   cancel-in-progress: false
@@ -6,7 +6,7 @@ concurrency:
 
 on:
   repository_dispatch:
-    types: [ crates-io ]
+    types: [ cargo-publish, crates-io ]
   workflow_dispatch:
     inputs:
       publish:

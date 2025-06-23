@@ -9,13 +9,6 @@ env:
   RUST_BACKTRACE: full
 
 on:
-  push:
-    branches:
-      - main
-      - $default-branch
-    tags:
-      - v*.*.*
-      - "*-nightly"
   repository_dispatch:
     types: [ cargo-bench, benchmark ]
   workflow_dispatch:
