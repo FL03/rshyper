@@ -1,28 +1,16 @@
 /*
-    Appellation: bft <module>
+    Appellation: impl_breadth_first <module>
+    Created At: 2026.01.06:19:19:55
     Contrib: @FL03
 */
-//! this module implements the breadth-first search algorithm as an operator on the hypergraph.
+use crate::search::breadth_first::BreadthFirstTraversal;
+
 use crate::error::{Error, Result};
-use crate::traits::{Search, Traversal};
+use crate::search::Search;
 use alloc::collections::VecDeque;
 use core::hash::{BuildHasher, Hash};
-use hashbrown::{DefaultHashBuilder, HashSet};
 use rshyper::idx::{HyperIndex, VertexId, VertexSet};
-use rshyper::rel::RawLayout;
-use rshyper::{GraphProps, HyperGraph};
-
-/// Breadth-First Traversal algorithm for hypergraphs
-pub struct BreadthFirstTraversal<'a, N, E, A, H, S = DefaultHashBuilder>
-where
-    A: GraphProps,
-    H: HyperGraph<N, E, A>,
-{
-    pub(crate) graph: &'a H,
-    pub(crate) queue: VecDeque<VertexId<A::Ix>>,
-    pub(crate) visited: VertexSet<A::Ix, S>,
-    _marker: core::marker::PhantomData<(N, E)>,
-}
+use rshyper::{GraphProps, HyperGraph, RawLayout};
 
 impl<'a, N, E, A, H, S> BreadthFirstTraversal<'a, N, E, A, H, S>
 where
@@ -133,23 +121,5 @@ where
         }
 
         Ok(path)
-    }
-}
-
-impl<'a, N, E, A, H, S> Traversal<VertexId<A::Ix>> for BreadthFirstTraversal<'a, N, E, A, H, S>
-where
-    A: GraphProps,
-    H: HyperGraph<N, E, A>,
-    S: BuildHasher,
-    A::Ix: HyperIndex,
-{
-    type Store<I2> = HashSet<I2, S>;
-
-    fn has_visited(&self, vertex: &VertexId<A::Ix>) -> bool {
-        self.visited().contains(vertex)
-    }
-
-    fn visited(&self) -> &Self::Store<VertexId<A::Ix>> {
-        self.visited()
     }
 }

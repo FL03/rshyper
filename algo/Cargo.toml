@@ -17,7 +17,7 @@ version.workspace = true
 [package.metadata.docs.rs]
 all-features = false
 features = ["full"]
-rustc-args = ["--cfg", "docsrs" ]
+rustc-args = ["--cfg", "docsrs"]
 version = "v{{version}}"
 
 [package.metadata.release]
@@ -25,21 +25,16 @@ no-dev-version = true
 tag-name = "{{version}}"
 
 [lib]
-crate-type = [
-    "cdylib",
-    "rlib",
-]
 bench = false
+crate-type = ["lib"]
 doc = true
 doctest = true
 test = true
 
 [dependencies]
 rshyper-core = { features = ["hashbrown"], workspace = true }
-# custom
-scsys = { workspace = true }
 # concurrency & parallelism
-rayon-core = { optional = true, workspace = true }
+rayon = { optional = true, workspace = true }
 #  data structures
 hashbrown = { workspace = true }
 # error handling
@@ -52,101 +47,87 @@ ordered-float = { optional = true, workspace = true }
 # macros & utilities
 strum = { features = ["derive"], workspace = true }
 # serialization
-serde = { features = ["derive"], optional = true, workspace = true }
+serde = { optional = true, workspace = true }
 serde_derive = { optional = true, workspace = true }
+# WebAssembly
+wasm-bindgen = { optional = true, workspace = true }
 
 [features]
 default = [
-    "std",
+  "std",
 ]
 
 full = [
-    "default",
-    "anyhow",
-    "serde",
-    "tracing",
+  "default",
+  "ordered-float",
+  "serde",
+  "tracing",
 ]
+
+# ********* [FF] Features *********
 
 nightly = [
-    "hashbrown/nightly",
-    "rshyper-core/nightly",
+  "hashbrown/nightly",
+  "rshyper-core/nightly",
 ]
 
-# ************* [FF:Features] *************
+# ********* [FF] Environments *********
 
-# ************* [FF:Environments] *************
 std = [
-    "alloc",
-    "hashbrown/default",
-    "num-traits/std",
-    "ordered-float?/std",
-    "rshyper-core/std",
-    "scsys/std",
-    "serde?/std",
-    "strum/std",
-    "tracing?/std",
-    "thiserror/std",
+  "alloc",
+  "hashbrown/default",
+  "num-traits/std",
+  "ordered-float?/std",
+  "rshyper-core/std",
+  "serde?/std",
+  "strum/std",
+  "tracing?/std",
+  "thiserror/std",
 ]
 
 wasi = [
-    "alloc",
-    "rshyper-core/wasi",
-    "scsys/wasi",
+  "alloc",
+  "rshyper-core/wasi",
 ]
 
 wasm = [
-    "alloc",
-    "rayon-core?/web_spin_lock",
-    "rshyper-core/wasm",
-    "scsys/wasm",
-    "wasm-bindgen",
+  "alloc",
+  "rayon?/web_spin_lock",
+  "rshyper-core/wasm",
+  "wasm_bindgen",
 ]
 
-# ************* [FF:Dependencies] *************
+# ********* [FF] Dependencies *********
+
 alloc = [
-    "hashbrown/alloc",
-    "rshyper-core/alloc",
-    "scsys/alloc",
-    "serde?/alloc",
+  "hashbrown/alloc",
+  "rshyper-core/alloc",
+  "serde?/alloc",
 ]
-
-anyhow = [
-    "rshyper-core/anyhow",
-    "scsys/anyhow",
-]
-
-# hashbrown = [
-#     "dep:hashbrown",
-#     "rshyper-core/hashbrown",
-# ]
 
 ordered-float = ["dep:ordered-float"]
 
 rayon = [
-    "dep:rayon-core",
-    "hashbrown/rayon",
-    "rshyper-core/rayon",
+  "dep:rayon",
+  "hashbrown/rayon",
+  "rshyper-core/rayon",
 ]
 
 serde = [
-    "dep:serde",
-    "dep:serde_derive",
-    "hashbrown/serde",
-    "ordered-float?/serde",
-    "rshyper-core/serde",
-    "scsys/serde",
+  "dep:serde",
+  "dep:serde_derive",
+  "serde?/derive",
+  "hashbrown/serde",
+  "ordered-float?/serde",
+  "rshyper-core/serde",
 ]
 
 tracing = [
-    "dep:tracing",
-    "rshyper-core/tracing",
-    "scsys/tracing",
+  "dep:tracing",
+  "rshyper-core/tracing",
 ]
 
-wasm-bindgen = [
-    "rshyper-core/wasm-bindgen",
+wasm_bindgen = [
+  "dep:wasm-bindgen",
+  "rshyper-core/wasm_bindgen",
 ]
-
-# ************* [Tests] *************
-[[test]]
-name = "default"

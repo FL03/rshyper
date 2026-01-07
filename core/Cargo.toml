@@ -17,7 +17,7 @@ version.workspace = true
 [package.metadata.docs.rs]
 all-features = false
 features = ["full"]
-rustc-args = ["--cfg", "docsrs" ]
+rustc-args = ["--cfg", "docsrs"]
 version = "v{{version}}"
 
 [package.metadata.release]
@@ -25,28 +25,31 @@ no-dev-version = true
 tag-name = "{{version}}"
 
 [lib]
-crate-type = [
-    "cdylib",
-    "rlib"
-]
 bench = false
+crate-type = ["lib"]
 doc = true
 doctest = false
 test = true
 
+[[test]]
+name = "index"
+required-features = ["std"]
+
 [dependencies]
 # custom
-scsys = { workspace = true }
+contained = { workspace = true }
+variants = { workspace = true }
 # concurrency & parallelism
-rayon-core = { optional = true, workspace = true }
+rayon = { optional = true, workspace = true }
 # data structures
 hashbrown = { optional = true, workspace = true }
 # error handling
-anyhow = { optional = true, workspace = true }
+anyhow = { workspace = true }
 thiserror = { workspace = true }
 # math
 num-traits = { workspace = true }
 # random
+getrandom = { optional = true, workspace = true }
 rand = { optional = true, workspace = true }
 rand_distr = { optional = true, workspace = true }
 # serialization
@@ -62,107 +65,87 @@ tracing = { features = ["attributes"], optional = true, workspace = true }
 # wasm
 wasm-bindgen = { optional = true, workspace = true }
 
-[dev-dependencies]
-lazy_static = { workspace = true }
-
 [features]
 default = [
-    "std",
+  "std",
 ]
 
 full = [
-    "default",
-    "anyhow",
-    "json",
-    "rand",
-    "serde",
-    "tracing",
+  "default",
+  "json",
+  "rand",
+  "serde",
+  "tracing",
 ]
 
 # ************* [FF:Environments] *************
 nightly = []
 
 std = [
-    "alloc",
-    "anyhow?/std",
-    "hashbrown?/default",
-    "num-traits/std",
-    "rand?/std",
-    "scsys/std",
-    "serde?/std",
-    "strum/std",
-    "tracing?/std",
-    "thiserror/std",
+  "alloc",
+  "anyhow/std",
+  "contained/std",
+  "hashbrown?/default",
+  "num-traits/std",
+  "rand?/std",
+  "rand?/std_rng",
+  "rand?/thread_rng",
+  "serde?/std",
+  "strum/std",
+  "tracing?/std",
+  "thiserror/std",
+  "variants/std",
 ]
 
 wasi = [
-    "alloc",
-    "scsys/wasi",
+  "alloc",
 ]
 
 wasm = [
-    "alloc",
-    "rayon-core?/web_spin_lock",
-    "scsys/wasm",
-    "wasm-bindgen",
-]
-# ************* [FF:Dependencies] *************
-alloc = [
-    "hashbrown?/alloc",
-    "scsys/alloc",
-    "serde?/alloc",
-    "serde_json?/alloc",
+  "alloc",
+  "rayon?/web_spin_lock",
+  "wasm_bindgen",
 ]
 
-anyhow = [
-    "dep:anyhow",
+# ********* [FF] Dependencies *********
+
+alloc = [
+  "hashbrown?/alloc",
+  "variants/alloc",
+  "serde?/alloc",
+  "serde_json?/alloc",
 ]
 
 hashbrown = ["dep:hashbrown"]
 
 json = [
-    "alloc",
-    "serde",
-    "serde_json",
-    "scsys/json",
+  "alloc",
+  "serde",
+  "serde_json",
 ]
 
 rand = [
-    "dep:rand",
-    "dep:rand_distr",
-    "rng",
-    "scsys/rand",
+  "dep:rand",
+  "dep:rand_distr",
+  "rng",
 ]
 
-rayon = ["dep:rayon-core"]
+rayon = ["dep:rayon"]
 
 rng = [
-    "rand?/small_rng",
-    "rand?/thread_rng",
-    "scsys/rng",
+  "dep:getrandom",
+  "rand?/small_rng",
 ]
 
 serde = [
-    "dep:serde",
-    "dep:serde_derive",
-    "rand?/serde",
-    "scsys/serde",
+  "dep:serde",
+  "dep:serde_derive",
+  "rand?/serde",
+  "rand_distr?/serde",
 ]
 
 serde_json = ["dep:serde_json"]
 
-tracing = [
-    "dep:tracing",
-    "scsys/tracing",
-]
+tracing = ["dep:tracing"]
 
-wasm-bindgen = ["dep:wasm-bindgen"]
-
-# ************* [Tests] *************
-[[test]]
-name = "default"
-required-features = []
-
-[[test]]
-name = "index"
-required-features = ["std"]
+wasm_bindgen = ["dep:wasm-bindgen"]

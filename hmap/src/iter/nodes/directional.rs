@@ -4,8 +4,8 @@
 */
 use core::hash::Hash;
 use hashbrown::hash_map;
-use rshyper::idx::{RawIndex, VertexId};
-use rshyper::node::Node;
+use rshyper_core::idx::{RawIndex, VertexId};
+use rshyper_core::node::Node;
 
 #[doc(hidden)]
 /// returns an iterator that starts at the "first" vertex and follows the path until the end

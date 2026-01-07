@@ -2,13 +2,12 @@
     appellation: impl_graph <module>
     authors: @FL03
 */
-use crate::{HashEdge, HyperMap, VertexSet};
+use crate::graph::HyperMap;
 use core::borrow::Borrow;
 use core::hash::{BuildHasher, Hash};
-use rshyper::error::{Error, Result};
-use rshyper::idx::{EdgeId, HashIndex, VertexId};
-use rshyper::{AddStep, GraphProps, GraphType};
-use rshyper::{Edge, Node, Weight};
+use rshyper_core::edge::{Edge, HashEdge};
+use rshyper_core::idx::{EdgeId, HashIndex, VertexId};
+use rshyper_core::{AddStep, Error, GraphProps, GraphType, Node, Result, VertexSet, Weight};
 
 /// this implementation of the [`HyperMap`] works to provide fundamental manipulation methods
 /// alongside additional functional accessors, validators, and more.

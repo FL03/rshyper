@@ -1,10 +1,4 @@
-/*
-    Appellation: algo <library>
-    Contrib: @FL03
-*/
-//! # rshyper-algo
-//!
-//! this crate provides algorithms and operators for hypergraphs.
+//! Algorithms and operators for hypergraphs designed to work with the `rshyper` framewor.
 //!
 //! ## Features
 //!
@@ -13,97 +7,71 @@
 //! - [`depth_first`]: the depth-first search algorithm for hypergraphs
 //! - [`dijkstra`]: Dijkstra's algorithm for finding the shortest path in hypergraphs
 //!
+#![crate_name = "rshyper_algo"]
 #![crate_type = "lib"]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
 )]
 #![allow(
+    clippy::missing_errors_doc,
+    clippy::missing_panics_doc,
     clippy::missing_safety_doc,
     clippy::module_inception,
-    clippy::needless_doctest_main,
     clippy::non_canonical_clone_impl,
     clippy::non_canonical_partial_ord_impl,
-    clippy::should_implement_trait
+    clippy::should_implement_trait,
+    clippy::upper_case_acronyms
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(feature = "nightly", feature(allocator_api))]
-
+// compile check
+#[cfg(not(any(feature = "alloc", feature = "std")))]
+compile_error! { "either the `alloc` or `std` feature must be enabled for the rshyper crate" }
+// extenral crates
 #[cfg(feature = "alloc")]
 extern crate alloc;
-
 extern crate rshyper_core as rshyper;
-
+// macros
 #[macro_use]
-pub(crate) mod macros {
+mod macros {
     #[macro_use]
-    pub mod seal;
+    pub(crate) mod seal;
 }
-
-#[doc(inline)]
-pub use self::traits::prelude::*;
-#[cfg(feature = "std")]
-pub use self::{
-    astar::AStarSearch, breadth_first::BreadthFirstTraversal, depth_first::DepthFirstTraversal,
-    dijkstra::Dijkstra,
-};
-
-#[cfg(feature = "std")]
-pub mod astar;
-#[cfg(feature = "std")]
-/// this module implements the breadth-first search algorithm
-pub mod breadth_first;
-#[cfg(feature = "std")]
-/// this module implements the depth-first search algorithm
-pub mod depth_first;
-#[cfg(feature = "std")]
-/// this module implements the Dijkstra's algorithm for finding the shortest path in a hypergraph
-pub mod dijkstra;
-
+// modules
 pub mod error;
+#[cfg(feature = "alloc")]
+pub mod search;
 
-pub mod traits {
-    //! this module implements additional traits for defining algorithmic operators on
-    //! hypergraphs.
+mod traits {
     #[doc(inline)]
-    pub use self::prelude::*;
-    /// this module defines the [`Heuristic`] trait for heuristic functions
-    mod heuristic;
-    /// this module defines the [`Operator`] trait for establishing a common interface for all
-    /// algorithmic operators on a hypergraph.
-    mod operators;
-    /// this module defines the interface for path-finding algorithms on hypergraphs, [`PathFinder`].
-    mod path;
-    /// this module defines the [`Search`] trait for all implemented search algorithms on a
-    /// hypergraph.
-    mod search;
-    /// this module defines the [`Traversal`] trait for traversing hypergraphs.
-    mod traverse;
+    pub use self::{operators::*, path::*, traverse::*};
 
-    pub(crate) mod prelude {
-        #[doc(inline)]
-        pub use super::heuristic::*;
-        #[doc(inline)]
-        pub use super::operators::*;
-        #[doc(inline)]
-        pub use super::path::*;
-        #[doc(inline)]
-        pub use super::search::*;
-        #[doc(inline)]
-        pub use super::traverse::*;
-    }
+    mod operators;
+    mod path;
+    mod traverse;
 }
 
+mod types {
+    #[doc(inline)]
+    pub use self::{priority_node::*, queue_node::*};
+
+    mod priority_node;
+    mod queue_node;
+}
+// re-exports
+#[cfg(feature = "alloc")]
+pub use self::search::{
+    AStarSearch, BreadthFirstTraversal, DepthFirstTraversal, Dijkstra, Heuristic, Search,
+};
+#[doc(inline)]
+pub use self::{error::*, traits::*, types::*};
+// prelude
 #[doc(hidden)]
 pub mod prelude {
-    pub use crate::traits::prelude::*;
+    pub use crate::traits::*;
+    pub use crate::types::*;
 
     #[cfg(feature = "alloc")]
-    pub use crate::astar::AStarSearch;
-    #[cfg(feature = "alloc")]
-    pub use crate::breadth_first::BreadthFirstTraversal;
-    #[cfg(feature = "alloc")]
-    pub use crate::depth_first::DepthFirstTraversal;
-    #[cfg(feature = "alloc")]
-    pub use crate::dijkstra::Dijkstra;
+    pub use crate::search::prelude::*;
 }

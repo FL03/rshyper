@@ -1,0 +1,50 @@
+name: clippy
+
+concurrency:
+  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+on:
+  pull_request:
+    types: [auto_merge_enabled, opened, ready_for_review, reopened]
+  push:
+    branches: [main, master]
+    tags: [latest, v*.*.*, "*-nightly"]
+  repository_dispatch:
+    types: [clippy, cargo-clippy]
+  workflow_dispatch:
+
+permissions:
+  actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+  contents: read
+  security-events: write
+  statuses: write
+
+jobs:
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          repository: ${{ github.repository }}
+          ref: ${{ github.event.client_payload.ref || github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          components: clippy,rustfmt
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: clippy-sarif sarif-fmt
+      - name: Run Clippy
+        run: |
+          cargo clippy \
+            --features full \
+            --message-format=json | clippy-sarif | tee rust-clippy-results.sarif | sarif-fmt
+      - name: Upload analysis
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: rust-clippy-results.sarif
+          wait-for-processing: true

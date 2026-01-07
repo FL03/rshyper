@@ -1,0 +1,64 @@
+# This workflow is used to benchmark a Rust project
+name: cargo-bench
+# The workflow may be manually triggered and is run automatically when:
+# - a pull request is closed on the default branch (main/master)
+# - a release is published
+# - a repository_dispatch event with the type "cargo-bench" is received
+
+concurrency:
+  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+on:
+  pull_request:
+    branches: [main, master]
+    types: [closed]
+  release:
+    types: [published]
+  repository_dispatch:
+    types: [cargo-bench]
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    env:
+      CARGO_TERM_COLOR: always
+      RUST_BACKTRACE: full
+    outputs:
+      id: ${{ steps.artifacts.outputs.artifact-id }}
+      digest: ${{ steps.artifacts.outputs.artifact-digest }}
+      url: ${{ steps.artifacts.outputs.artifact-url }}
+    permissions:
+      contents: write
+      checks: write
+    strategy:
+      fail-fast: false
+      matrix:
+        features: [full]
+        target: [x86_64-unknown-linux-gnu]
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.client_payload.ref }}
+          repository: ${{ github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Setup Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}      
+      - name: Install criterion
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-criterion
+      - name: Benchmark (${{ matrix.target }})
+        run: cargo criterion --benches --locked --verbose --workspace --features ${{ matrix.features }} --target ${{ matrix.target }}
+      - name: Upload the benchmarks
+        id: artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: Benchmark Report (${{ github.run_id }})
+          if-no-files-found: error
+          overwrite: true
+          path: target/criterion/

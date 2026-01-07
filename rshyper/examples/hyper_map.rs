@@ -1,5 +1,6 @@
 /*
-    Appellation: graph <module>
+    Appellation: hyper_map <example>
+    Created At: 2026.01.06:19:35:38
     Contrib: @FL03
 */
 use rshyper::{UnHyperMap, hypergraph};
@@ -8,11 +9,10 @@ fn main() -> rshyper::Result<()> {
     tracing_subscriber::fmt()
         .with_line_number(false)
         .with_file(false)
-        .with_thread_ids(false)
-        .with_thread_names(false)
         .with_target(true)
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .with_max_level(tracing::Level::TRACE)
+        .with_timer(tracing_subscriber::fmt::time::uptime())
         .init();
     // use the macro to insert nodes into the graph
     hypergraph! {

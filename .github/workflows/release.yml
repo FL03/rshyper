@@ -2,19 +2,19 @@ name: release
 
 on:
   release:
-    types: [ published ]
+    types: [published]
   repository_dispatch:
-    types: [ release ]
+    types: [release]
   workflow_dispatch:
     inputs:
       draft:
         default: false
-        description: 'Create a draft release'
+        description: "Create a draft release"
         required: true
         type: boolean
       prerelease:
         default: false
-        description: 'Create a prerelease'
+        description: "Create a prerelease"
         required: true
         type: boolean
 
@@ -25,32 +25,34 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
-    environment:
-      name: crates-io
-      url: ${{ steps.crates-io.outputs.url }}
     steps:
-      -
-        name: Publish to crates.io
-        id: crates-io
-        uses: peter-evans/repository-dispatch@v3
+      - uses: actions/checkout@v6
         with:
-          event-type: crates-io
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+          repository: ${{ github.repository }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish to Crates.io
+        uses: peter-evans/repository-dispatch@v4
+        with:
+          event-type: cargo-publish
           client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
           token: ${{ github.token }}
   release:
-    continue-on-error: true
     needs: publish
     env:
       IS_PRERELEASE: ${{ github.event.inputs.prerelease || false }}
       IS_DRAFT: ${{ github.event.inputs.draft || false }}
     runs-on: ubuntu-latest
     steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v4
-      -
-        name: Create release
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.ref }}
+      - name: Create release
         uses: softprops/action-gh-release@v2
+        continue-on-error: true
         with:
           append_body: false
           draft: ${{ env.IS_DRAFT }}
@@ -58,3 +60,8 @@ jobs:
           tag_name: ${{ github.event.release.tag_name }}
           body: |
             ${{ github.event.release.body }}
+
+            ## Links
+
+              - [Crates.io](https://crates.io/crates/${{ github.event.repository.name }})
+              - [Documentation](https://docs.rs/${{ github.event.repository.name }})

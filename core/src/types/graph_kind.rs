@@ -20,7 +20,7 @@ pub trait GraphType: 'static + Send + Sync + core::fmt::Debug + core::fmt::Displ
     PartialEq,
     Ord,
     PartialOrd,
-    scsys::VariantConstructors,
+    variants::VariantConstructors,
     strum::AsRefStr,
     strum::Display,
     strum::EnumCount,

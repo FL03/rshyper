@@ -1,7 +1,3 @@
-/*
-    appellation: rshyper <library>
-    authors: @FL03
-*/
 //! # rshyper
 //!
 //! [![crates.io](https://img.shields.io/crates/v/rshyper?style=for-the-badge&logo=rust)](https://crates.io/crates/rshyper)
@@ -86,49 +82,31 @@
     html_favicon_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
 )]
 #![allow(
-    clippy::should_implement_trait,
-    clippy::module_inception,
+    clippy::missing_errors_doc,
+    clippy::missing_panics_doc,
     clippy::missing_safety_doc,
+    clippy::module_inception,
     clippy::non_canonical_clone_impl,
-    clippy::non_canonical_partial_ord_impl
+    clippy::non_canonical_partial_ord_impl,
+    clippy::should_implement_trait,
+    clippy::upper_case_acronyms
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
-
-/*
- ************* ROOT *************
-*/
-
+#![cfg_attr(feature = "nightly", feature(allocator_api))]
+// compile check
+#[cfg(not(any(feature = "alloc", feature = "std")))]
+compile_error! { "either the `alloc` or `std` feature must be enabled for the rshyper crate" }
+// external crates
 #[cfg(feature = "alloc")]
 extern crate alloc;
-
+// macros
 #[macro_use]
 #[cfg(feature = "macros")]
 pub(crate) mod macros {
-    //! this module defines the various macros used throughout the crate to streamline the
-    //! creation and maniuplation of hypergraphs and their constituent components.
     #[macro_use]
     pub mod hypergraph;
 }
-
-/*
- ************* REIMPORTS *************
-*/
-
-#[doc(inline)]
-#[cfg(feature = "hyper_map")]
-pub use self::hyper_map::{DiHyperMap, HyperMap, UnHyperMap};
-#[doc(inline)]
-pub use rshyper_core::*;
-
-#[allow(deprecated)]
-#[cfg(feature = "hyper_map")]
-#[deprecated(since = "0.1.3", note = "use `HyperMap` instead")]
-pub use self::hyper_map::{DiHashGraph, HashGraph, UnHashGraph};
-
-/*
- ************* FEATURE-GATED MODULES *************
-*/
-
+// external modules
 #[doc(inline)]
 #[cfg(feature = "algo")]
 /// the `algo` module focuses on implementing algorithms and operators for hypergraphs
@@ -138,11 +116,13 @@ pub use rshyper_algo as algo;
 /// this module contains the [`HyperMap`](rshyper_hmap::HyperMap), a hash-based hypergraph
 /// implementation
 pub use rshyper_hmap as hyper_map;
-
-/*
- ************* PRELUDE *************
-*/
-
+// re-exports
+#[doc(inline)]
+#[cfg(feature = "hyper_map")]
+pub use self::hyper_map::{DiHyperMap, HyperMap, UnHyperMap};
+#[doc(inline)]
+pub use rshyper_core::*;
+// prelude
 #[doc(hidden)]
 #[allow(missing_docs)]
 pub mod prelude {

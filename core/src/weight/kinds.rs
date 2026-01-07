@@ -53,7 +53,7 @@ macro_rules! impl_weight_mode {
 
         unsafe impl ::core::marker::Sync for $kind {}
 
-        impl $crate::weight::types::kinds::WeightMode for $kind {
+        impl $crate::weight::WeightMode for $kind {
             seal!();
         }
     };

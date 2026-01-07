@@ -3,7 +3,7 @@
     authors: @FL03
 */
 use hashbrown::hash_map;
-use rshyper::prelude::{HashIndex, Node, VertexId};
+use rshyper_core::prelude::{HashIndex, Node, VertexId};
 
 /// [`NodeIter`] is an iterator over the node entries within the `HyperMap`, yielding a 2-tuple
 /// consisting of references to both each component of the entry, namely:

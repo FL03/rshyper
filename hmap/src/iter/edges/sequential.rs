@@ -3,12 +3,13 @@
     authors: @FL03
 */
 //! this module implements sequential iterator over the edges of a [`HyperMap`](crate::HyperMap)
-use crate::{HashEdge, iter};
+use crate::iter;
 
 use core::hash::BuildHasher;
 use core::slice;
-use rshyper::idx::{EdgeId, HashIndex, RawIndex};
-use rshyper::prelude::GraphType;
+use rshyper_core::GraphType;
+use rshyper_core::edge::HashEdge;
+use rshyper_core::idx::{EdgeId, HashIndex, RawIndex};
 
 /// [`SeqEdgeIter`] is an iterator producing references to the edge entries w.r.t. the order
 /// in-which they were inserted.

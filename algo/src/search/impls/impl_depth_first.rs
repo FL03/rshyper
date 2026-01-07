@@ -1,27 +1,16 @@
 /*
-    Appellation: dft <module>
+    Appellation: impl_depth_first <module>
+    Created At: 2026.01.06:19:19:58
     Contrib: @FL03
 */
-//! this module implements a Depth-First Traversal algorithm for hypergraphs
-use crate::error::Result;
-use crate::traits::{Search, Traversal};
-use core::hash::{BuildHasher, Hash};
-use hashbrown::{DefaultHashBuilder, HashSet};
-use rshyper::idx::{HashIndex, HyperIndex, VertexId, VertexSet};
-use rshyper::rel::RawLayout;
-use rshyper::{GraphProps, HyperGraph};
+use crate::search::depth_first::DepthFirstTraversal;
 
-/// Depth-First Traversal algorithm for hypergraphs
-pub struct DepthFirstTraversal<'a, N, E, A, H, S = DefaultHashBuilder>
-where
-    A: GraphProps,
-    H: HyperGraph<N, E, A>,
-{
-    pub(crate) graph: &'a H,
-    pub(crate) stack: Vec<VertexId<A::Ix>>,
-    pub(crate) visited: VertexSet<A::Ix, S>,
-    _marker: core::marker::PhantomData<(N, E)>,
-}
+use crate::error::Result;
+use crate::{Search, Traversal};
+use core::hash::{BuildHasher, Hash};
+use hashbrown::HashSet;
+use rshyper_core::idx::{HashIndex, HyperIndex, VertexId, VertexSet};
+use rshyper_core::{GraphProps, HyperGraph, RawLayout};
 
 impl<'a, N, E, H, A, S> DepthFirstTraversal<'a, N, E, A, H, S>
 where
