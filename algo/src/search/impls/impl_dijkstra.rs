@@ -1,42 +1,22 @@
 /*
-    appellation: dijkstra <module>
-    authors: @FL03
+    Appellation: impl_dijkstra <module>
+    Created At: 2026.01.06:19:15:42
+    Contrib: @FL03
 */
-//! this module implements Dijkstra's shortest-path algorithm for hypergraphs
-#[doc(inline)]
-pub use self::queue_node::QueueNode;
-
-mod queue_node;
+use crate::search::dijkstra::{Dijkstra, Distances, PreviousHistory};
 
 use crate::error::{Error, Result};
-use crate::traits::{PathFinder, Search, Traversal};
-
+use crate::search::Search;
+use crate::traits::{PathFinder, Traversal};
+use crate::types::QueueNode;
 use alloc::collections::BinaryHeap;
 use core::hash::{BuildHasher, Hash};
-use hashbrown::{DefaultHashBuilder, HashMap, HashSet};
+use hashbrown::HashSet;
 use num_traits::bounds::UpperBounded;
 use num_traits::{FromPrimitive, Num};
 use rshyper::idx::{HyperIndex, RawIndex, VertexId, VertexSet};
 use rshyper::rel::RawLayout;
 use rshyper::{GraphProps, HyperGraph, HyperGraphIter};
-
-/// a type alias for a map of distances for vertices in the graph
-pub(crate) type Distances<K, V = f64, S = DefaultHashBuilder> = HashMap<VertexId<K>, V, S>;
-/// a type alias for the history of previous vertices in the graph, maps vertices to vertices
-pub(crate) type PreviousHistory<K, S = DefaultHashBuilder> = HashMap<VertexId<K>, VertexId<K>, S>;
-
-/// Dijkstra's shortest path algorithm for hypergraphs
-pub struct Dijkstra<'a, N, E, A, H, S = DefaultHashBuilder>
-where
-    A: GraphProps,
-    H: HyperGraph<N, E, A>,
-{
-    pub(crate) graph: &'a H,
-    pub(crate) distances: Distances<A::Ix, E, S>,
-    pub(crate) previous: PreviousHistory<A::Ix, S>,
-    pub(crate) visited: VertexSet<A::Ix, S>,
-    _marker: core::marker::PhantomData<(N, E)>,
-}
 
 impl<'a, N, E, A, H, S> Dijkstra<'a, N, E, A, H, S>
 where

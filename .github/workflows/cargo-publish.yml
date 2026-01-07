@@ -1,34 +1,28 @@
-name: crates-io
+name: cargo-publish
 
 concurrency:
   cancel-in-progress: false
   group: ${{ github.workflow }}-${{ github.ref }}
 
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: full
+
 on:
   repository_dispatch:
-    types: [ cargo-publish, crates-io ]
+    types: [crates-io, cargo-publish]
   workflow_dispatch:
-    inputs:
-      publish:
-        default: true
-        description: 'Publish the crate(s) to crates.io?'
-        type: boolean
 
 jobs:
   crates-io:
     runs-on: ubuntu-latest
-    env:
-      CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-      CARGO_TERM_COLOR: always
-      RUST_BACKTRACE: full
     environment:
       name: crates-io
-    outputs:
-      url:  ${{ steps.results.outputs.url }}
+    env:
+      CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
     permissions:
       contents: read
       deployments: write
-      packages: write
     strategy:
       fail-fast: false
       max-parallel: 1
@@ -39,20 +33,11 @@ jobs:
           - rshyper-hmap
           - rshyper
     steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v4
-      -
-        name: Setup Rust
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache-key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      -
-        name: Publish (${{ matrix.package }})
-        id: publish
+      - name: Publish (${{ matrix.package }})
         run: cargo publish --locked --package ${{ matrix.package }}
-      -
-        name: Set output(s)
-        id: results
-        run:
-          echo "url=https://crates.io/crates/${{ matrix.package }}" >> "$GITHUB_OUTPUT"

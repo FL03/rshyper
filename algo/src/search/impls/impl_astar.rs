@@ -1,42 +1,19 @@
 /*
-    Appellation: impl_astar <module>
+    Appellation: impl_search_a_star <module>
+    Created At: 2026.01.06:18:59:39
     Contrib: @FL03
 */
-//! this module implements the A* search algorithm
-#[doc(inline)]
-pub use self::priority_node::PriorityNode;
-
-mod priority_node;
+use crate::search::astar::{AStarSearch, ScoreMap, SourceMap};
 
 use crate::error::{Error, Result};
-use crate::traits::{Heuristic, PathFinder, Search, Traversal};
+use crate::types::PriorityNode;
+use crate::{Heuristic, PathFinder, Search, Traversal};
 use alloc::collections::BinaryHeap;
 use core::hash::{BuildHasher, Hash};
-use hashbrown::{DefaultHashBuilder, HashMap, HashSet};
+use hashbrown::HashSet;
 use rshyper::idx::{HyperIndex, RawIndex, VertexId, VertexSet};
 use rshyper::rel::RawLayout;
 use rshyper::{GraphProps, GraphType, HyperGraph, HyperGraphIter};
-
-type SourceMap<Ix, S = DefaultHashBuilder> = HashMap<VertexId<Ix>, VertexId<Ix>, S>;
-
-type ScoreMap<K, V, S = DefaultHashBuilder> = HashMap<VertexId<K>, V, S>;
-
-/// An A* Search algorithm implementation for hypergraphs
-pub struct AStarSearch<'a, N, E, A, F, H, S = DefaultHashBuilder>
-where
-    A: GraphProps,
-    H: HyperGraph<N, E, A>,
-    F: Heuristic<A::Ix>,
-{
-    pub(crate) graph: &'a H,
-    pub(crate) open_set: VertexSet<A::Ix, S>,
-    pub(crate) closed_set: VertexSet<A::Ix, S>,
-    pub(crate) came_from: SourceMap<A::Ix, S>,
-    pub(crate) g_score: ScoreMap<A::Ix, F::Output, S>,
-    pub(crate) f_score: ScoreMap<A::Ix, F::Output, S>,
-    pub(crate) heuristic: F,
-    _marker: core::marker::PhantomData<(N, E)>,
-}
 
 impl<'a, N, E, A, F, H, S, K, Idx> AStarSearch<'a, N, E, A, F, H, S>
 where

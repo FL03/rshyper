@@ -2,12 +2,12 @@
     appellation: impl_weight_repr <module>
     authors: @FL03
 */
-use crate::weight::{UnWeight, Weight, Weightless};
+use crate::weight::{Weight, Weightless};
 
 impl<T> Weightless<T> {
-    /// returns a new [`Unweighted`] instance with the inner value of type `T`.
-    pub const fn unweighted() -> Self {
-        Weight::new(UnWeight::new())
+    /// initializes a new instance of the [`Weight`] containing a [`PhantomData`](core::marker::PhantomData) marker.
+    pub const fn weightless() -> Self {
+        Weight::new(core::marker::PhantomData::<T>)
     }
     /// returns a new [`Weight`] of type `T` initialized using the provided closure `f`
     pub fn init_with<F>(self, f: F) -> Weight<T>

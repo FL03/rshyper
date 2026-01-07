@@ -16,8 +16,8 @@ version.workspace = true
 
 [package.metadata.docs.rs]
 all-features = false
-features = ["full", "rayon"]
-rustc-args = ["--cfg", "docsrs" ]
+features = ["full"]
+rustc-args = ["--cfg", "docsrs"]
 version = "v{{version}}"
 
 [package.metadata.release]
@@ -25,21 +25,53 @@ no-dev-version = true
 tag-name = "{{version}}"
 
 [lib]
-crate-type = [
-    "cdylib",
-    "rlib",
-]
 bench = true
+crate-type = ["lib"]
 doc = true
 doctest = true
 test = true
 
+
+[[bench]]
+harness = false
+name = "algo"
+required-features = [
+  "algo",
+  "rand",
+  "std",
+]
+
+[[bench]]
+harness = false
+name = "hyper_map"
+required-features = [
+  "rand",
+  "std",
+]
+
+[[test]]
+name = "astar"
+required-features = ["algo", "std"]
+
+[[test]]
+name = "bft"
+required-features = ["algo", "std"]
+
+[[test]]
+name = "dft"
+required-features = ["algo", "std"]
+
+[[test]]
+name = "dijkstra"
+required-features = ["algo", "std"]
+
+[[test]]
+name = "hyper_map"
+required-features = ["std"]
+
 [dependencies]
-# sdk
 rshyper-algo = { optional = true, workspace = true }
 rshyper-core = { features = ["hashbrown"], workspace = true }
-# custom
-scsys = { workspace = true }
 # concurrency & parallelism
 rayon = { optional = true, workspace = true }
 #  data structures
@@ -64,180 +96,120 @@ serde_json = { optional = true, workspace = true }
 
 [dev-dependencies]
 criterion = { features = ["plotters"], workspace = true }
-lazy_static = { workspace = true }
 
 [features]
 default = [
-    "algo",
-    "std",
+  "algo",
+  "std",
 ]
 
 full = [
-    "default",
-    "anyhow",
-    "json",
-    "rand",
-    "serde",
-    "tracing",
+  "default",
+  "json",
+  "rand",
+  "serde",
+  "tracing",
 ]
 
 nightly = [
-    "hashbrown/nightly",
-    "rshyper-algo?/nightly",
-    "rshyper-core/nightly",
+  "hashbrown/nightly",
+  "rshyper-algo?/nightly",
+  "rshyper-core/nightly",
 ]
 
-# ************* [FF:Flags] *************
+# ********* [FF] Features *********
 
 algo = ["dep:rshyper-algo"]
 
-# ************* [FF:Environments] *************
+# ********* [FF] Dependencies *********
 # std is required, this is more symbolic then anything
 std = [
-    "alloc",
-    "hashbrown/default",
-    "num-traits/std",
-    "rand?/std",
-    "rshyper-algo?/std",
-    "rshyper-core/std",
-    "scsys/std",
-    "serde?/std",
-    "strum/std",
-    "tracing?/std",
-    "thiserror/std",
+  "alloc",
+  "hashbrown/default",
+  "num-traits/std",
+  "rand?/std",
+  "rand_distr?/std",
+  "rshyper-algo?/std",
+  "rshyper-core/std",
+  "serde?/std",
+  "strum/std",
+  "tracing?/std",
+  "thiserror/std",
 ]
 
 wasi = [
-    "alloc",
-    "rshyper-algo?/wasi",
-    "rshyper-core/wasi",
-    "scsys/wasi",
+  "alloc",
+  "rshyper-algo?/wasi",
+  "rshyper-core/wasi",
 ]
 
 wasm = [
-    "alloc",
-    "rayon?/web_spin_lock",
-    "rshyper-algo?/wasm",
-    "rshyper-core/wasm",
-    "scsys/wasm",
+  "alloc",
+  "rayon?/web_spin_lock",
+  "rshyper-algo?/wasm",
+  "rshyper-core/wasm",
 ]
 
-# ************* [FF:Dependencies] *************
+# ********* [FF] Dependencies *********
+
 alloc = [
-    "hashbrown/alloc",
-    "rshyper-algo?/alloc",
-    "rshyper-core/alloc",
-    "scsys/alloc",
-    "serde?/alloc",
-    "serde_json?/alloc",
+  "hashbrown/alloc",
+  "rand?/alloc",
+  "rand_distr?/alloc",
+  "rshyper-algo?/alloc",
+  "rshyper-core/alloc",
+  "serde?/alloc",
+  "serde_json?/alloc",
 ]
-
-anyhow = [
-    "rshyper-algo?/anyhow",
-    "rshyper-core/anyhow",
-    "scsys/anyhow",
-]
-
-# hashbrown = [
-#     "dep:hashbrown",
-#     "rshyper-core/hashbrown",
-# ]
 
 json = [
-    "alloc",
-    "serde",
-    "serde_json",
-    "rshyper-core/json",
-    "scsys/json",
+  "alloc",
+  "serde",
+  "serde_json",
+  "rshyper-core/json",
 ]
 
 rand = [
-    "dep:rand",
-    "dep:rand_distr",
-    "rng",
-    "rshyper-core/rand",
-    "scsys/rand",
+  "dep:rand",
+  "dep:rand_distr",
+  "rng",
+  "rshyper-core/rand",
 ]
 
 rayon = [
-    "dep:rayon",
-    "hashbrown/rayon",
-    "rshyper-algo?/rayon",
-    "rshyper-core/rayon",
+  "dep:rayon",
+  "hashbrown/rayon",
+  "rshyper-algo?/rayon",
+  "rshyper-core/rayon",
 ]
 
 rng = [
-    "rand?/small_rng",
-    "rand?/thread_rng",
-    "rshyper-core/rng",
-    "scsys/rng",
+  "rand?/small_rng",
+  "rand?/thread_rng",
+  "rshyper-core/rng",
 ]
 
 serde = [
-    "dep:serde",
-    "dep:serde_derive",
-    "hashbrown/serde",
-    "rand?/serde",
-    "rshyper-algo?/serde",
-    "rshyper-core/serde",
-    "scsys/serde",
+  "dep:serde",
+  "dep:serde_derive",
+  "hashbrown/serde",
+  "rand?/serde",
+  "rshyper-algo?/serde",
+  "rshyper-core/serde",
 ]
 
 serde_json = [
-    "dep:serde_json",
-    "rshyper-core/serde_json",
+  "dep:serde_json",
+  "rshyper-core/serde_json",
 ]
 
 tracing = [
-    "dep:tracing",
-    "rshyper-algo?/tracing",
-    "rshyper-core/tracing",
-    "scsys/tracing",
+  "dep:tracing",
+  "rshyper-algo?/tracing",
+  "rshyper-core/tracing",
 ]
 
-wasm-bindgen = [
-    "rshyper-algo?/wasm-bindgen",
-    "rshyper-core/wasm-bindgen",
+wasm_bindgen = [
+  "rshyper-algo?/wasm_bindgen",
+  "rshyper-core/wasm_bindgen",
 ]
-
-# ************* [Benchmarks] *************
-[[bench]]
-harness = false
-name ="algo"
-required-features = [
-    "algo",
-    "rand",
-    "std",
-]
-
-[[bench]]
-harness = false
-name ="hyper_map"
-required-features = [
-    "rand",
-    "std",
-]
-
-# ************* [Tests] *************
-[[test]]
-name = "default"
-
-[[test]]
-name = "astar"
-required-features = ["algo", "std"]
-
-[[test]]
-name = "bft"
-required-features = ["algo", "std"]
-
-[[test]]
-name = "dft"
-required-features = ["algo", "std"]
-
-[[test]]
-name = "dijkstra"
-required-features = ["algo", "std"]
-
-[[test]]
-name ="hyper_map"
-required-features = ["std"]

@@ -1,39 +1,41 @@
 {
-  description = "A flake for the proton server";
+  description = "A developmental environment for a Rust project using Nix flakes with direnv";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    rust-overlay = {
+      url = "github:oxalica/rust-overlay";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
-  outputs = { self, nixpkgs, flake-utils, ... }:
+  outputs = { self, nixpkgs, flake-utils, rust-overlay, ... }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = import nixpkgs { inherit system; };
-        rustPlatform = pkgs.rustPlatform;
-      in
-      {
-        packages.default = rustPlatform.buildRustPackage {
-          pname = "pzzld-cli";
-          version = "0.0.0";
-          src = "./.";
-          # If Cargo.lock doesn't exist yet, remove or comment out this block:
+        overlays = [ (import rust-overlay) ];
+        pkgs = import nixpkgs { inherit system overlays; };
+        rustToolchain = pkgs.rust-bin.stable.latest.default;
+      in rec {
+        packages.default = pkgs.rustPlatform.buildRustPackage {
+          pname = "rspace";
+          version = "0.0.8";
+          src = self; # ./.;
           cargoLock = {
             lockFile = ./Cargo.lock;
           };
-          doCheck = true;
         };
 
         devShells.default = pkgs.mkShell {
-          nativeBuildInputs = [
-            pkgs.cargo-watch
-            pkgs.cargo-nextest
-            pkgs.clippy
-            pkgs.rustfmt
+          buildInputs = [
+            rustToolchain
+            pkgs.cargo
+            pkgs.rust-analyzer
+            pkgs.pkg-config
+            pkgs.openssl
           ];
           shellHook = ''
-            echo "Welcome to the proton dev shell!"
-            # Add any additional environment setup here
+            export CARGO_HOME=$PWD/.cargo
           '';
         };
       }

@@ -4,15 +4,15 @@
 */
 use crate::idx::{RawIndex, VertexId};
 use crate::node::Node;
-use crate::weight::{UnWeight, Weight};
+use crate::weight::Weight;
 
-impl<T, Idx> Node<UnWeight<T>, Idx>
+impl<T, Idx> Node<core::marker::PhantomData<T>, Idx>
 where
     Idx: RawIndex,
 {
     /// returns a new, weightless node with the given index
     pub const fn weightless(id: VertexId<Idx>) -> Self {
-        Self::new(id, UnWeight::new())
+        Self::new(id, core::marker::PhantomData::<T>)
     }
     /// initialize the weight of the node with the given value
     pub fn init_weight<F>(self, init: F) -> Node<T, Idx>

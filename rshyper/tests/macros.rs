@@ -27,13 +27,13 @@ fn test_hypergraph_on_eg() -> rshyper::Result<()> {
         }
     }
     // verify the nodes
-    assert_eq!(graph.get_node_weight(&v0)?, &<usize>::default());
-    assert_eq!(graph.get_node_weight(&v1)?, &10);
-    assert_eq!(graph.get_node_weight(&v2)?, &20);
-    assert_eq!(graph.get_node_weight(&v3)?, &30);
+    assert_eq! { graph.get_node_weight(&v0)?, &<usize>::default() }
+    assert_eq! { graph.get_node_weight(&v1)?, &10 }
+    assert_eq! { graph.get_node_weight(&v2)?, &20 }
+    assert_eq! { graph.get_node_weight(&v3)?, &30 }
     // verify the edges
-    assert_eq!(graph.get_edge_order(&e1)?, 3);
-    assert_eq!(graph.get_edge_order(&e2)?, 3);
+    assert_eq! { graph.get_edge_order(&e1)?, 3 }
+    assert_eq! { graph.get_edge_order(&e2)?, 3 }
     // finish
     Ok(())
 }

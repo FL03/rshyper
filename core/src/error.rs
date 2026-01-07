@@ -32,7 +32,6 @@ pub enum Error {
     EmptyHyperedge,
     #[error(transparent)]
     IndexError(#[from] crate::idx::IndexError),
-    #[cfg(feature = "anyhow")]
     #[error(transparent)]
     AnyError(#[from] anyhow::Error),
     #[cfg(feature = "alloc")]

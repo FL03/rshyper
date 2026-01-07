@@ -1,7 +1,3 @@
-/*
-    appellation: rshyper-hmap <library>
-    authors: @FL03
-*/
 //! A map-based implementation of a hypergraph providing efficient storage and manipulation of
 //! hypernodes and hyperedges.
 //!
@@ -63,41 +59,37 @@
 //! assert_eq!(graph.order(), 3);
 //! ```
 //!
+#![crate_name = "rshyper_hmap"]
 #![crate_type = "lib"]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg",
     html_favicon_url = "https://raw.githubusercontent.com/FL03/rshyper/main/.artifacts/assets/logo.svg"
 )]
 #![allow(
+    clippy::missing_errors_doc,
+    clippy::missing_panics_doc,
     clippy::missing_safety_doc,
     clippy::module_inception,
-    clippy::needless_doctest_main,
+    clippy::non_canonical_clone_impl,
+    clippy::non_canonical_partial_ord_impl,
     clippy::should_implement_trait
 )]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(feature = "nightly", feature(allocator_api))]
-// **** WARNING ****
-// the `std` feature is required by the crate, only declared for concistency w.r.t. the
-// available features and for ensuring that all the depencies actually implement the `std`
-// feature since the workspace naturally imports them with the `default-features = false`
-// flag toggled
-// **** WARNING ****
-#![cfg(feature = "std")]
-/// declare the macros module for use throughout the crate
-#[macro_use]
-pub(crate) mod macros {
-    #[macro_use]
-    pub mod seal;
-}
-
+// compile check
+#[cfg(not(any(feature = "alloc", feature = "std")))]
+compile_error! { "either the `alloc` or `std` feature must be enabled for the rshyper crate" }
+// extenral crates
 #[cfg(feature = "alloc")]
 extern crate alloc;
-
 extern crate rshyper_core as rshyper;
-
-#[doc(inline)]
-pub use self::{graph::*, types::prelude::*};
-
+// macros
+#[macro_use]
+mod macros {
+    #[macro_use]
+    pub(crate) mod seal;
+}
+// modules
 mod graph;
 
 mod impls {
@@ -146,7 +138,10 @@ mod types {
         pub use super::aliases::*;
     }
 }
-
+// re-exports
+#[doc(inline)]
+pub use self::{graph::*, types::prelude::*};
+// prelude
 #[doc(hidden)]
 #[allow(missing_docs)]
 pub mod prelude {

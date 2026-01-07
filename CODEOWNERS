@@ -1,3 +1,3 @@
-# The default codeowners for any source files within the repository 
-# that are otherwise not matched by a following rule.
-*       @FL03 @Scattered-Systems
+# the default owners of all files and directories within the repository
+# except those that are explicitly assigned to other owners.
+*       @FL03

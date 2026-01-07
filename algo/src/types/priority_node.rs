@@ -12,16 +12,17 @@ pub struct PriorityNode<P = i64, Idx = usize>
 where
     Idx: RawIndex,
 {
-    pub(crate) vertex: VertexId<Idx>,
-    pub(crate) priority: P, // Negative f_score for min-heap behavior
+    /// Negative f_score for min-heap behavior
+    pub priority: P,
+    pub vertex: VertexId<Idx>,
 }
 
 impl<P, Idx> PriorityNode<P, Idx>
 where
     Idx: RawIndex,
 {
-    /// Create a new priority node with the given vertex and priority
-    pub fn new(vertex: VertexId<Idx>, priority: P) -> Self {
+    /// initialize a new instance of [`PriorityNode`] using the given vertex and priority
+    pub const fn new(vertex: VertexId<Idx>, priority: P) -> Self {
         Self { vertex, priority }
     }
     /// returns an immutable reference to the priority of the node
