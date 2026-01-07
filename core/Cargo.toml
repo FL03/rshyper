@@ -38,7 +38,6 @@ required-features = ["std"]
 [dependencies]
 # custom
 contained = { workspace = true }
-variants = { workspace = true }
 # concurrency & parallelism
 rayon = { optional = true, workspace = true }
 # data structures
@@ -94,7 +93,6 @@ std = [
   "strum/std",
   "tracing?/std",
   "thiserror/std",
-  "variants/std",
 ]
 
 wasi = [
@@ -111,7 +109,6 @@ wasm = [
 
 alloc = [
   "hashbrown?/alloc",
-  "variants/alloc",
   "serde?/alloc",
   "serde_json?/alloc",
 ]

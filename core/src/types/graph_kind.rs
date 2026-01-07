@@ -20,7 +20,6 @@ pub trait GraphType: 'static + Send + Sync + core::fmt::Debug + core::fmt::Displ
     PartialEq,
     Ord,
     PartialOrd,
-    variants::VariantConstructors,
     strum::AsRefStr,
     strum::Display,
     strum::EnumCount,
@@ -42,6 +41,14 @@ pub enum Mode {
 }
 
 impl Mode {
+    /// a functional constructor for the [`Directed`](Mode::Directed) mode.
+    pub const fn directed() -> Self {
+        Mode::Directed
+    }
+    /// a functional constructor for the [`Undirected`](Mode::Undirected) mode.
+    pub const fn undirected() -> Self {
+        Mode::Undirected
+    }
     /// returns the [`Mode`] corresponding to the given [`GraphType`].
     pub fn from_type<T: GraphType>() -> Self {
         use core::any::TypeId;
