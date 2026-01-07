@@ -90,6 +90,8 @@ mod macros {
     pub(crate) mod seal;
 }
 // modules
+pub mod iter;
+
 mod graph;
 
 mod impls {
@@ -109,22 +111,6 @@ mod impls {
     pub mod impl_deprecated;
 }
 
-pub mod iter {
-    //! this module defines various iterators for the [`HyperMap`](super::HyperMap)
-    #[doc(inline)]
-    pub use self::prelude::*;
-
-    pub mod edges;
-    pub mod nodes;
-
-    pub(crate) mod prelude {
-        #[doc(inline)]
-        pub use super::edges::*;
-        #[doc(inline)]
-        pub use super::nodes::*;
-    }
-}
-
 mod types {
     //! this module defines various types and type aliases in support of the [`HyperMap`](super::HyperMap)
     //! implementation
@@ -142,8 +128,6 @@ mod types {
 #[doc(inline)]
 pub use self::{graph::*, types::prelude::*};
 // prelude
-#[doc(hidden)]
-#[allow(missing_docs)]
 pub mod prelude {
     pub use super::graph::*;
     pub use super::iter::prelude::*;

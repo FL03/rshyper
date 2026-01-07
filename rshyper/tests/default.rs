@@ -13,6 +13,6 @@ where
 
 #[test]
 fn compiles() {
-    assert_eq! { add(10, 10), 20 } 
+    assert_eq! { add(10, 10), 20 }
     assert_ne! { add(1f64, 1f64), 3f64 }
 }

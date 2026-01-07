@@ -4,9 +4,9 @@
 */
 use core::hash::BuildHasher;
 use hashbrown::hash_map;
-use rshyper_core::idx::{EdgeId, HashIndex, RawIndex};
-use rshyper_core::edge::HashEdge;
 use rshyper_core::GraphType;
+use rshyper_core::edge::HashEdge;
+use rshyper_core::idx::{EdgeId, HashIndex, RawIndex};
 
 /// [`EdgeIter`] is an iterator over the edge entries within the `HyperMap`, yielding a 2-tuple
 /// consisting of:
