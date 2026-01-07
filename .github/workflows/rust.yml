@@ -95,12 +95,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        target: [x86_64-unknown-linux-gnu]
         features:
           - all
           - no_std
           - "alloc,nightly"
-        package:
-          - rspace-traits
     steps:
       - uses: actions/checkout@v6
         with:
@@ -116,16 +115,16 @@ jobs:
           override: true
       - name: Test (all-features)
         if: matrix.features == 'all'
-        run: cargo test -r --locked --all-features --package ${{ matrix.package }}
+        run: cargo test -r --locked --all-features --workspace  --target ${{ matrix.target }}
       - name: Test (no_std)
         continue-on-error: true
         if: matrix.features == 'no_std'
-        run: cargo test -r --locked --no-default-features --package ${{ matrix.package }}
+        run: cargo test -r --locked --no-default-features --workspace --target ${{ matrix.target }}
         env:
           RUSTFLAGS: "-C panic=abort -Z panic_abort_tests"
       - name: Test (${{ matrix.features }})
         continue-on-error: true
         if: matrix.features != 'all' && matrix.features != 'no_std'
-        run: cargo test -r --locked --no-default-features --features ${{ matrix.features }} --package ${{ matrix.package }}
+        run: cargo test -r --locked --no-default-features --workspace --features ${{ matrix.features }} --target ${{ matrix.target }}
         env:
           RUSTFLAGS: "-C panic=abort -Z panic_abort_tests"
