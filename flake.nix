@@ -18,8 +18,8 @@
         rustToolchain = pkgs.rust-bin.stable.latest.default;
       in rec {
         packages.default = pkgs.rustPlatform.buildRustPackage {
-          pname = "rspace";
-          version = "0.0.8";
+          pname = "rshyper";
+          version = "0.1.9";
           src = self; # ./.;
           cargoLock = {
             lockFile = ./Cargo.lock;
