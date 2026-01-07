@@ -47,7 +47,7 @@ ordered-float = { optional = true, workspace = true }
 # macros & utilities
 strum = { features = ["derive"], workspace = true }
 # serialization
-serde = { features = ["derive"], optional = true, workspace = true }
+serde = { optional = true, workspace = true }
 serde_derive = { optional = true, workspace = true }
 # WebAssembly
 wasm-bindgen = { optional = true, workspace = true }
@@ -59,6 +59,7 @@ default = [
 
 full = [
   "default",
+  "ordered-float",
   "serde",
   "tracing",
 ]
@@ -115,6 +116,7 @@ rayon = [
 serde = [
   "dep:serde",
   "dep:serde_derive",
+  "serde?/derive",
   "hashbrown/serde",
   "ordered-float?/serde",
   "rshyper-core/serde",
