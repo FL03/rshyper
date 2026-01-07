@@ -88,7 +88,7 @@ pub use self::{
     error::{Error, Result},
     idx::prelude::*,
     node::Node,
-    rel::{Link, RawLayout},
+    rel::{Link, RawEdge},
     traits::*,
     types::*,
     weight::{IntoWeight, Weight, Weightless},

@@ -12,7 +12,7 @@ use alloc::collections::BinaryHeap;
 use core::hash::{BuildHasher, Hash};
 use hashbrown::HashSet;
 use rshyper::idx::{HyperIndex, RawIndex, VertexId, VertexSet};
-use rshyper::rel::RawLayout;
+use rshyper::rel::RawEdge;
 use rshyper::{GraphProps, GraphType, HyperGraph, HyperGraphIter};
 
 impl<'a, N, E, A, F, H, S, K, Idx> AStarSearch<'a, N, E, A, F, H, S>
@@ -185,7 +185,7 @@ where
     F: Heuristic<A::Ix, Output = f64>,
     S: BuildHasher,
     A::Ix: HyperIndex,
-    for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
+    for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
     type Path = Vec<VertexId<A::Ix>>;
     /// Find the shortest path between start and goal vertices
@@ -332,7 +332,7 @@ where
     H: HyperGraphIter<N, E, A>,
     S: BuildHasher,
     A::Ix: HyperIndex,
-    for<'b> &'b <H::Edge<E> as RawLayout>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
+    for<'b> &'b <H::Edge<E> as RawEdge>::Store: IntoIterator<Item = &'b VertexId<A::Ix>>,
 {
     type Output = Vec<VertexId<A::Ix>>;
 

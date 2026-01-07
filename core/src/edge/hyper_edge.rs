@@ -4,7 +4,7 @@
 */
 use super::RawSurface;
 use crate::idx::{EdgeId, RawIndex, Udx, VertexId};
-use crate::rel::{Link, RawLayout};
+use crate::rel::{Link, RawEdge};
 use crate::{Domain, GraphType, RawDomain, Weight};
 
 /// The [`Edge`] implementation essentially wraps the [`Link`] type with a [`Weight`]
@@ -188,7 +188,7 @@ where
     }
 }
 
-impl<T, S, Idx, K> RawLayout for Edge<T, S, K, Idx>
+impl<T, S, Idx, K> RawEdge for Edge<T, S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,

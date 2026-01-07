@@ -104,10 +104,10 @@ macro_rules! impl_type_kind {
     };
     (@impl $(#[$meta:meta])* $vis:vis $i:ident $kind:ident) => {
         // create the implementation for the kind
-        impl_type_kind! { @def $(#[$meta])*             
+        impl_type_kind! { @def $(#[$meta])*
             #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Ord, PartialOrd)]
             #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
-            #[repr(transparent)]            
+            #[repr(transparent)]
             $vis $i $kind
         }
 
@@ -117,7 +117,7 @@ macro_rules! impl_type_kind {
                 stringify!($kind)
             }
         }
-        // implement the necessary traits for the kind        
+        // implement the necessary traits for the kind
         unsafe impl ::core::marker::Send for $kind {}
 
         unsafe impl ::core::marker::Sync for $kind {}

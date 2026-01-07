@@ -3,10 +3,10 @@
     authors: @FL03
 */
 use crate::idx::{EdgeId, RawIndex};
-use crate::rel::{Layout, Link, RawLayout};
+use crate::rel::{HyperEdge, Link, RawEdge};
 use crate::{Domain, GraphType};
 
-impl<S, K, Idx> RawLayout for Link<S, K, Idx>
+impl<S, K, Idx> RawEdge for Link<S, K, Idx>
 where
     Idx: RawIndex,
     K: GraphType,
@@ -31,7 +31,7 @@ where
     }
 }
 
-impl<S, K, Idx> Layout for Link<S, K, Idx>
+impl<S, K, Idx> HyperEdge for Link<S, K, Idx>
 where
     S: Domain<Idx>,
     Idx: RawIndex,
