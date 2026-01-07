@@ -32,26 +32,12 @@ doctest = true
 test = true
 
 [[example]]
-name = "basic_usage"
-required-features = [
-  "hyper_map",
-  "macros",
-]
-
-[[example]]
 name = "hyper_map"
-required-features = [
-  "hyper_map",
-  "macros",
-  "tracing",
-]
+required-features = ["hyper_map", "macros", "tracing"]
 
 [[test]]
 name = "macros"
-required-features = [
-  "hyper_map",
-  "macros",
-]
+required-features = ["hyper_map", "macros"]
 
 [dependencies]
 # core modules
@@ -63,12 +49,7 @@ rshyper-hmap = { optional = true, workspace = true }
 [dev-dependencies]
 rand = { features = ["std"], workspace = true }
 tracing = { features = ["std"], workspace = true }
-tracing-subscriber = { features = [
-  "ansi",
-  "chrono",
-  "serde",
-  "std",
-], workspace = true }
+tracing-subscriber = { features = ["chrono", "serde", "std"], workspace = true }
 
 [features]
 default = [

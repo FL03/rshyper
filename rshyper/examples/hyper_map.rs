@@ -13,6 +13,7 @@ fn main() -> rshyper::Result<()> {
         .with_target(true)
         .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .with_max_level(tracing::Level::TRACE)
+        .with_timer(tracing_subscriber::fmt::time::uptime)
         .init();
     // use the macro to insert nodes into the graph
     hypergraph! {
