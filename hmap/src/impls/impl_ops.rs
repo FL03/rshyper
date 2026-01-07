@@ -2,20 +2,20 @@
     appellation: impl_ops <module>
     authors: @FL03
 */
-use crate::{HashEdge, HyperMap};
+use crate::graph::HyperMap;
+
 use core::hash::BuildHasher;
-use core::ops;
-use rshyper::error::Result;
-use rshyper::idx::{EdgeId, HashIndex, HyperIndex, VertexId};
-use rshyper::node::Node;
-use rshyper::{Combine, GraphProps};
+use core::ops::{Add, Index, IndexMut};
+use rshyper_core::edge::HashEdge;
+use rshyper_core::idx::{EdgeId, HashIndex, HyperIndex, VertexId};
+use rshyper_core::{Combine, GraphProps, Node, Result};
 
 impl<N, E, A, S, Ix> Combine<EdgeId<Ix>, EdgeId<Ix>> for HyperMap<N, E, A, S>
 where
     A: GraphProps<Ix = Ix>,
     S: BuildHasher + Default,
     Ix: HyperIndex,
-    for<'a> &'a E: ops::Add<Output = E>,
+    for<'a> &'a E: Add<Output = E>,
 {
     type Output = EdgeId<Ix>;
 
@@ -29,7 +29,7 @@ where
     A: GraphProps<Ix = Ix>,
     S: BuildHasher + Default,
     Ix: HyperIndex,
-    for<'b> &'b E: ops::Add<Output = E>,
+    for<'b> &'b E: Add<Output = E>,
 {
     type Output = EdgeId<Ix>;
 
@@ -38,7 +38,7 @@ where
     }
 }
 
-impl<N, E, A, S, Ix> ops::Index<&EdgeId<Ix>> for HyperMap<N, E, A, S>
+impl<N, E, A, S, Ix> Index<&EdgeId<Ix>> for HyperMap<N, E, A, S>
 where
     A: GraphProps<Ix = Ix>,
     S: BuildHasher,
@@ -51,7 +51,7 @@ where
     }
 }
 
-impl<N, E, A, S, Ix> ops::IndexMut<&EdgeId<Ix>> for HyperMap<N, E, A, S>
+impl<N, E, A, S, Ix> IndexMut<&EdgeId<Ix>> for HyperMap<N, E, A, S>
 where
     A: GraphProps<Ix = Ix>,
     S: BuildHasher,
@@ -62,7 +62,7 @@ where
     }
 }
 
-impl<N, E, A, S, Ix> ops::Index<&VertexId<Ix>> for HyperMap<N, E, A, S>
+impl<N, E, A, S, Ix> Index<&VertexId<Ix>> for HyperMap<N, E, A, S>
 where
     A: GraphProps<Ix = Ix>,
     S: BuildHasher,
@@ -75,7 +75,7 @@ where
     }
 }
 
-impl<N, E, A, S, Ix> ops::IndexMut<&VertexId<Ix>> for HyperMap<N, E, A, S>
+impl<N, E, A, S, Ix> IndexMut<&VertexId<Ix>> for HyperMap<N, E, A, S>
 where
     A: GraphProps<Ix = Ix>,
     S: BuildHasher,

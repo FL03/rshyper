@@ -7,13 +7,13 @@ use crate::types::prelude::*;
 use core::borrow::Borrow;
 use core::hash::{BuildHasher, Hash};
 use hashbrown::DefaultHashBuilder;
-use rshyper::attrs::{DiAttrs, GraphProps, UnAttrs};
-use rshyper::idx::{self, EdgeId, HashIndex, IndexTracker, RawIndex, Udx, VertexId};
-use rshyper::{AddStep, GraphType, Mode};
+use rshyper_core::attrs::{DiAttrs, GraphProps, UnAttrs};
+use rshyper_core::idx::{self, EdgeId, HashIndex, IndexTracker, RawIndex, Udx, VertexId};
+use rshyper_core::{AddStep, GraphType, Mode};
 
-/// a type alias for a [directed](rshyper::Directed) [`HyperMap`]
+/// a type alias for a [directed](rshyper_core::Directed) [`HyperMap`]
 pub type DiHyperMap<N, E, Idx = Udx, S = DefaultHashBuilder> = HyperMap<N, E, DiAttrs<Idx>, S>;
-/// a type alias for an [undirected](rshyper::Undirected) [`HyperMap`]
+/// a type alias for an [undirected](rshyper_core::Undirected) [`HyperMap`]
 pub type UnHyperMap<N, E, Idx = Udx, S = DefaultHashBuilder> = HyperMap<N, E, UnAttrs<Idx>, S>;
 
 /// The [`HyperMap`] is a map-based implementation of a hypergraph that provides a flexible and

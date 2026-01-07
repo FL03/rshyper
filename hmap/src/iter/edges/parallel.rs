@@ -2,13 +2,13 @@
     appellation: surface <module>
     authors: @FL03
 */
-use crate::types::HashEdge;
 use core::hash::{BuildHasher, Hash};
 use hashbrown::hash_map::rayon as hash_map;
 use rayon::iter::ParallelIterator;
 use rayon::iter::plumbing::UnindexedConsumer;
-use rshyper::GraphType;
-use rshyper::idx::{EdgeId, RawIndex};
+use rshyper_core::edge::HashEdge;
+use rshyper_core::idx::{EdgeId, RawIndex};
+use rshyper_core::GraphType;
 
 /// [`ParEdgeValues`] is a parallel iterator over the edges of a hypergraph, yielding
 /// references to the edges as [`HashEdge`]s.

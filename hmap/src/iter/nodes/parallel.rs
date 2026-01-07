@@ -6,8 +6,8 @@ use core::hash::Hash;
 use hashbrown::hash_map::rayon as hash_map;
 use rayon::iter::ParallelIterator;
 use rayon::iter::plumbing::UnindexedConsumer;
-use rshyper::idx::{RawIndex, VertexId};
-use rshyper::node::Node;
+use rshyper_core::idx::{RawIndex, VertexId};
+use rshyper_core::node::Node;
 
 /// [`ParNodeValues`] is a parallel iterator over the nodes of a hypergraph, yielding pairs of
 /// [`VertexId`] and the corresponding [`Node`].

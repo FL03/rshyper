@@ -6,8 +6,8 @@
 //! which iterates over the nodes in the hypergraph in an ordered, sequential manner.
 use crate::iter;
 use core::slice;
-use rshyper::idx::{HashIndex, VertexId};
-use rshyper::node::Node;
+use rshyper_core::idx::{HashIndex, VertexId};
+use rshyper_core::node::Node;
 
 /// [`SeqNodeIter`] is an iterator producing references to the node entries w.r.t. the order
 /// in-which they were inserted.
