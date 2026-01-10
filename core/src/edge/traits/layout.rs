@@ -47,7 +47,7 @@ pub trait BinaryEdge: RawEdge {
 */
 use crate::BinaryDomain;
 
-impl<S, I, K> BinaryEdge for crate::rel::Link<S, K, I>
+impl<S, I, K> BinaryEdge for crate::Link<S, K, I>
 where
     S: BinaryDomain<I>,
     I: RawIndex,
@@ -62,7 +62,7 @@ where
     }
 }
 
-impl<E, S, I, K> BinaryEdge for crate::edge::Edge<E, S, K, I>
+impl<E, S, I, K> BinaryEdge for crate::Edge<E, S, K, I>
 where
     E: BinaryEdge,
     S: BinaryDomain<I>,

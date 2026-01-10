@@ -2,11 +2,10 @@
     Appellation: hgraph <module>
     Contrib: @FL03
 */
-use crate::edge::RawSurface;
+use crate::edge::{BinaryEdge, RawEdge, RawSurface};
 use crate::error::Result;
 use crate::idx::{EdgeId, VertexId};
 use crate::node::RawNode;
-use crate::rel::{BinaryEdge, RawEdge};
 use crate::{GraphProps, Weight};
 
 /// [`RawHyperGraph`] is a trait that defines the basic operations for a hypergraph data

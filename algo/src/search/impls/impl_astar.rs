@@ -11,9 +11,9 @@ use crate::{Heuristic, PathFinder, Search, Traversal};
 use alloc::collections::BinaryHeap;
 use core::hash::{BuildHasher, Hash};
 use hashbrown::HashSet;
-use rshyper::idx::{HyperIndex, RawIndex, VertexId, VertexSet};
-use rshyper::rel::RawEdge;
-use rshyper::{GraphProps, GraphType, HyperGraph, HyperGraphIter};
+use rshyper_core::edge::RawEdge;
+use rshyper_core::idx::{HyperIndex, RawIndex, VertexId, VertexSet};
+use rshyper_core::{GraphProps, GraphType, HyperGraph, HyperGraphIter};
 
 impl<'a, N, E, A, F, H, S, K, Idx> AStarSearch<'a, N, E, A, F, H, S>
 where

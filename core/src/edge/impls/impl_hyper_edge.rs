@@ -1,10 +1,10 @@
 /*
-    appellation: impl_hyper_facet <module>
-    authors: @FL03
+    Appellation: impl_edge <module>
+    Created At: 2026.01.10:10:43:36
+    Contrib: @FL03
 */
-use crate::edge::Edge;
+use crate::edge::{Edge, Link};
 use crate::idx::{EdgeId, RawIndex};
-use crate::rel::Link;
 use crate::{Directed, Domain, GraphType, Undirected, Weight};
 
 impl<T, S, Idx> Edge<T, S, Directed, Idx>

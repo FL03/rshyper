@@ -2,8 +2,8 @@
     appellation: surface <module>
     authors: @FL03
 */
+use crate::edge::RawEdge;
 use crate::idx::EdgeId;
-use crate::rel::RawEdge;
 use crate::weight::Weight;
 
 /// [`RawSurface`] extends the behaviour of a [`RawEdge`] to include a weight

@@ -16,7 +16,7 @@ version.workspace = true
 
 [package.metadata.docs.rs]
 all-features = false
-features = ["full"]
+features = ["default"]
 rustc-args = ["--cfg", "docsrs"]
 version = "v{{version}}"
 
@@ -30,10 +30,6 @@ crate-type = ["lib"]
 doc = true
 doctest = false
 test = true
-
-[[test]]
-name = "index"
-required-features = ["std"]
 
 [dependencies]
 # custom
@@ -65,9 +61,7 @@ tracing = { features = ["attributes"], optional = true, workspace = true }
 wasm-bindgen = { optional = true, workspace = true }
 
 [features]
-default = [
-  "std",
-]
+default = ["macros", "std"]
 
 full = [
   "default",
@@ -77,8 +71,16 @@ full = [
   "tracing",
 ]
 
-# ************* [FF:Environments] *************
-nightly = []
+# ********* [FF] Features *********
+
+macros = []
+
+# ********* [FF] Environments *********
+
+nightly = [
+  "contained/nightly",
+  "hashbrown?/nightly",
+]
 
 std = [
   "alloc",
@@ -89,6 +91,7 @@ std = [
   "rand?/std",
   "rand?/std_rng",
   "rand?/thread_rng",
+  "rand_distr?/std",
   "serde?/std",
   "strum/std",
   "tracing?/std",
@@ -101,8 +104,9 @@ wasi = [
 
 wasm = [
   "alloc",
-  "rayon?/web_spin_lock",
   "wasm_bindgen",
+  "getrandom?/wasm_js",
+  "rayon?/web_spin_lock",
 ]
 
 # ********* [FF] Dependencies *********

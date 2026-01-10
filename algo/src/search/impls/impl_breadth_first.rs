@@ -9,8 +9,8 @@ use crate::error::{Error, Result};
 use crate::search::Search;
 use alloc::collections::VecDeque;
 use core::hash::{BuildHasher, Hash};
-use rshyper::idx::{HyperIndex, VertexId, VertexSet};
-use rshyper::{GraphProps, HyperGraph, RawEdge};
+use rshyper_core::idx::{HyperIndex, VertexId, VertexSet};
+use rshyper_core::{GraphProps, HyperGraph, RawEdge};
 
 impl<'a, N, E, A, H, S> BreadthFirstTraversal<'a, N, E, A, H, S>
 where

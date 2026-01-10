@@ -14,9 +14,9 @@ use core::hash::{BuildHasher, Hash};
 use hashbrown::HashSet;
 use num_traits::bounds::UpperBounded;
 use num_traits::{FromPrimitive, Num};
-use rshyper::idx::{HyperIndex, RawIndex, VertexId, VertexSet};
-use rshyper::rel::RawEdge;
-use rshyper::{GraphProps, HyperGraph, HyperGraphIter};
+use rshyper_core::edge::RawEdge;
+use rshyper_core::idx::{HyperIndex, RawIndex, VertexId, VertexSet};
+use rshyper_core::{GraphProps, HyperGraph, HyperGraphIter};
 
 impl<'a, N, E, A, H, S> Dijkstra<'a, N, E, A, H, S>
 where

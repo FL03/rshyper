@@ -2,9 +2,9 @@
     Appellation: edge <module>
     Contrib: @FL03
 */
-use super::RawSurface;
+use crate::edge::Link;
+use crate::edge::traits::{RawEdge, RawSurface};
 use crate::idx::{EdgeId, RawIndex, Udx, VertexId};
-use crate::rel::{Link, RawEdge};
 use crate::{Domain, GraphType, RawDomain, Weight};
 
 /// The [`Edge`] implementation essentially wraps the [`Link`] type with a [`Weight`]

@@ -2,8 +2,7 @@
     appellation: base <module>
     authors: @FL03
 */
-use crate::edge::Edge;
-use crate::rel::Link;
+use crate::edge::{Edge, Link};
 use crate::{GraphType, RawDomain, RawIndex, VertexId};
 
 /// returns a new [`Edge`] from the given iterator of vertex ids
