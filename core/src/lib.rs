@@ -35,6 +35,8 @@ extern crate alloc;
 #[macro_use]
 mod macros {
     #[macro_use]
+    pub(crate) mod index;
+    #[macro_use]
     pub(crate) mod hypergraph;
     #[macro_use]
     pub(crate) mod seal;
@@ -85,7 +87,7 @@ pub mod types {
 #[doc(inline)]
 pub use self::{
     attrs::{Attrs, GraphProps},
-    edge::{Edge, Link, RawEdge},
+    edge::{HyperEdge, Link, RawEdge},
     error::{Error, Result},
     idx::prelude::*,
     node::Node,

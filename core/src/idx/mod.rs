@@ -28,10 +28,10 @@ pub mod tracker;
 #[doc(hidden)]
 mod impls {
     mod impl_index;
-    mod impl_ops;
-    #[cfg(feature = "rand")]
-    pub(self) mod impl_rand;
-    mod impl_repr;
+    mod impl_index_ext;
+    mod impl_index_ops;
+    pub(self) mod impl_index_rand;
+    mod impl_index_repr;
 }
 
 pub mod iter {
@@ -59,19 +59,19 @@ mod traits {
 
     /// this module defines various conversion routines for converting types into valid indices
     mod convert;
-    /// this module provides the [`RawIndex`] trait
-    mod index;
     /// this module provides the [`Indexed`] trait for defining various representations of a
     /// type that has knowledge of its index.
-    mod indexed;
+    mod graph_index;
+    /// this module provides the [`RawIndex`] trait
+    mod raw_index;
 
     pub(crate) mod prelude {
         #[doc(inline)]
         pub use super::convert::*;
         #[doc(inline)]
-        pub use super::index::*;
+        pub use super::graph_index::*;
         #[doc(inline)]
-        pub use super::indexed::*;
+        pub use super::raw_index::*;
     }
 }
 

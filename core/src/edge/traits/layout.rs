@@ -30,9 +30,16 @@ pub trait RawEdge {
         TypeId::of::<crate::Undirected>() == TypeId::of::<Self::Kind>()
     }
 }
-/// [`HyperEdge`] extends the behaviour of a [`RawEdge`] to include various constructors
+
+pub trait RawEdgeMut: RawEdge {
+    /// sets the edge id to the given value
+    fn set_index(&mut self, id: EdgeId<Self::Index>);
+    /// sets the domain of the edge to the given value
+    fn set_domain(&mut self, domain: Self::Store);
+}
+/// [`HyperEdgeRepr`] extends the behaviour of a [`RawEdge`] to include various constructors
 /// and other utilitarian methods.
-pub trait HyperEdge: RawEdge {
+pub trait HyperEdgeRepr: RawEdge {
     fn new(id: EdgeId<Self::Index>, vertices: Self::Store) -> Self;
 }
 /// A [`BinaryEdge`] represents a specific type of edge that essentially defines the standard
@@ -62,7 +69,7 @@ where
     }
 }
 
-impl<E, S, I, K> BinaryEdge for crate::Edge<E, S, K, I>
+impl<E, S, I, K> BinaryEdge for crate::HyperEdge<E, S, K, I>
 where
     E: BinaryEdge,
     S: BinaryDomain<I>,

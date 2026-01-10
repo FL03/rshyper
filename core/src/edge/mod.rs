@@ -5,7 +5,7 @@
 //! this module focuses on the [`Edge`] implementation, providing additional types, traits, and
 //! representations for edges in a hypergraph.
 #[doc(inline)]
-pub use self::{hyper_edge::Edge, link::Link, traits::*, types::*, utils::*};
+pub use self::{hyper_edge::HyperEdge, link::Link, traits::*, types::*, utils::*};
 
 /// the [`hyper_edge`] is responsible for defining the [`Edge`] struct
 pub mod hyper_edge;

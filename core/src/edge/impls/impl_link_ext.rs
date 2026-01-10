@@ -2,7 +2,7 @@
     appellation: impl_link_ext <module>
     authors: @FL03
 */
-use crate::edge::{HyperEdge, Link, RawEdge};
+use crate::edge::{HyperEdgeRepr, Link, RawEdge};
 use crate::idx::{EdgeId, RawIndex, VertexId};
 use crate::{Domain, GraphType};
 
@@ -31,7 +31,7 @@ where
     }
 }
 
-impl<S, K, Idx> HyperEdge for Link<S, K, Idx>
+impl<S, K, Idx> HyperEdgeRepr for Link<S, K, Idx>
 where
     S: Domain<Idx>,
     Idx: RawIndex,

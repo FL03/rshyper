@@ -15,7 +15,7 @@ use crate::idx::{IndexBase, RawIndex};
 
 /// This trait is used to define various _kinds_ of indices that are used to compose graphical
 /// structures.
-pub trait GraphIndex
+pub trait IndexType
 where
     Self: Clone
         + Copy
@@ -102,7 +102,7 @@ macro_rules! impl_type_kind {
         #[derive(Default)]
         $vis struct $kind;
     };
-    (@impl $(#[$meta:meta])* $vis:vis $i:ident $kind:ident) => {
+    (@impl $(#[$meta:meta])* $vis:vis $i:ident $kind:ident($name:ident)) => {
         // create the implementation for the kind
         impl_type_kind! { @def $(#[$meta])*
             #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Ord, PartialOrd)]
@@ -114,7 +114,7 @@ macro_rules! impl_type_kind {
         impl $kind {
             /// get the name of the kind as a string slice
             pub fn name(&self) -> &str {
-                stringify!($kind)
+                stringify!($name)
             }
         }
         // implement the necessary traits for the kind
@@ -122,9 +122,7 @@ macro_rules! impl_type_kind {
 
         unsafe impl ::core::marker::Sync for $kind {}
 
-        impl GraphIndex for $kind {
-            seal! {}
-        }
+        impl IndexType for $kind { seal! {} }
 
         impl AsRef<str> for $kind {
             fn as_ref(&self) -> &str {
@@ -138,18 +136,18 @@ macro_rules! impl_type_kind {
             }
         }
     };
-    ($($(#[$meta:meta])* $vis:vis $i:ident $kind:ident);* $(;)?) => {
-        $(impl_type_kind! { @impl $(#[$meta])* $vis $i $kind })*
+    ($($(#[$meta:meta])* $vis:vis $i:ident $kind:ident($name:ident));* $(;)?) => {
+        $(impl_type_kind! { @impl $(#[$meta])* $vis $i $kind($name) })*
     };
 }
 
 impl_type_kind! {
     #[doc = "A kind of index for edges in a graph"]
-    pub struct EdgeIndex;
+    pub struct EdgeIndex(edge);
     #[doc = "A kind of index for vertices in a graph"]
-    pub struct VertexIndex;
+    pub struct VertexIndex(vertex);
 }
 
-impl GraphIndex for IndexKind {
+impl IndexType for IndexKind {
     seal! {}
 }

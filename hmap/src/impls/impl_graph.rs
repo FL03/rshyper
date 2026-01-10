@@ -5,7 +5,7 @@
 use crate::graph::HyperMap;
 use core::borrow::Borrow;
 use core::hash::{BuildHasher, Hash};
-use rshyper_core::edge::{Edge, HashEdge};
+use rshyper_core::edge::{HashEdge, HyperEdge};
 use rshyper_core::idx::{EdgeId, HashIndex, VertexId};
 use rshyper_core::{AddStep, Error, GraphProps, GraphType, Node, Result, VertexSet, Weight};
 
@@ -51,7 +51,7 @@ where
         // fetch the next edge index
         let id = self.next_edge_id();
         // create a new surface
-        let surface = Edge::from_parts(id.clone(), verts, weight);
+        let surface = HyperEdge::from_parts(id.clone(), verts, weight);
         // add the hyperedge to the graph
         self.insert_edge_unchecked(surface)
     }
@@ -302,7 +302,7 @@ where
         // generate a new edge index
         let edge_id = self.next_edge_id();
         // initialize a new facet using the merged vertices, new index, and source weight
-        let surface = Edge::from_parts(edge_id, vertices, Weight(weight));
+        let surface = HyperEdge::from_parts(edge_id, vertices, Weight(weight));
         // insert the new hyperedge into the surfaces map
         self.edges_mut().insert(edge_id, surface);
         // return the new edge ID
