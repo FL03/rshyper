@@ -86,6 +86,7 @@ std = [
   "alloc",
   "anyhow/std",
   "contained/std",
+  "getrandom?/std",
   "hashbrown?/default",
   "num-traits/std",
   "rand?/std",

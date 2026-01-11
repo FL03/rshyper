@@ -845,6 +845,7 @@ name = "rshyper-hmap"
 version = "0.1.10"
 dependencies = [
  "criterion",
+ "getrandom",
  "hashbrown 0.16.1",
  "num-traits",
  "paste",

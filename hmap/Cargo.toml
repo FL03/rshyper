@@ -43,30 +43,7 @@ required-features = [
 [[bench]]
 harness = false
 name = "hyper_map"
-required-features = [
-  "rand",
-  "std",
-]
-
-[[test]]
-name = "astar"
-required-features = ["algo", "std"]
-
-[[test]]
-name = "bft"
-required-features = ["algo", "std"]
-
-[[test]]
-name = "dft"
-required-features = ["algo", "std"]
-
-[[test]]
-name = "dijkstra"
-required-features = ["algo", "std"]
-
-[[test]]
-name = "hyper_map"
-required-features = ["std"]
+required-features = ["rand", "std"]
 
 [dependencies]
 rshyper-algo = { optional = true, workspace = true }
@@ -86,6 +63,7 @@ strum = { workspace = true }
 # math
 num-traits = { workspace = true }
 # random
+getrandom = { optional = true, workspace = true }
 rand = { optional = true, workspace = true }
 rand_distr = { optional = true, workspace = true }
 # serialization
@@ -121,9 +99,9 @@ nightly = [
 algo = ["dep:rshyper-algo"]
 
 # ********* [FF] Dependencies *********
-# std is required, this is more symbolic then anything
 std = [
   "alloc",
+  "getrandom?/std",
   "hashbrown/default",
   "num-traits/std",
   "rand?/std",
@@ -144,6 +122,7 @@ wasi = [
 
 wasm = [
   "alloc",
+  "getrandom?/wasm_js",
   "rayon?/web_spin_lock",
   "rshyper-algo?/wasm",
   "rshyper-core/wasm",
@@ -183,6 +162,7 @@ rayon = [
 ]
 
 rng = [
+  "dep:getrandom",
   "rand?/small_rng",
   "rand?/thread_rng",
   "rshyper-core/rng",
