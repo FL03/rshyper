@@ -55,7 +55,7 @@ thiserror = { default-features = false, version = "2" }
 num-traits = { default-features = false, version = "0.2" }
 ordered-float = { default-features = false, version = "5" }
 # randomization
-getrandom = { default-features = false, version = "0.3" }
+getrandom = { default-features = false, version = "0.4" }
 rand = { default-features = false, version = "0.9" }
 rand_distr = { default-features = false, version = "0.5" }
 # serialization
