@@ -66,7 +66,7 @@ serde_json = { default-features = false, version = "1" }
 itertools = { default-features = false, features = ["macros"], version = "0.14" }
 paste = { version = "1" }
 smart-default = { version = "0.7" }
-strum = { default-features = false, features = ["derive"], version = "0.27" }
+strum = { default-features = false, features = ["derive"], version = "0.28" }
 # logging
 tracing = { default-features = false, features = ["attributes"], version = "0.1" }
 tracing-subscriber = { default-features = false, features = [
